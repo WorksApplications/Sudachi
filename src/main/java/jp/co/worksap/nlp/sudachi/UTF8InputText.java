@@ -1,10 +1,7 @@
 package jp.co.worksap.nlp.sudachi;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 class UTF8InputText implements InputText<byte[]> {
 

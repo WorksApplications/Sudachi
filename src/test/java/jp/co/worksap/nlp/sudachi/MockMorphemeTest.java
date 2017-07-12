@@ -2,8 +2,6 @@ package jp.co.worksap.nlp.sudachi;
 
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.runner.*;
-
 import java.util.List;
 
 public class MockMorphemeTest {
