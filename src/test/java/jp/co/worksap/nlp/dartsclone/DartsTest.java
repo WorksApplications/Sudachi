@@ -2,7 +2,9 @@ package jp.co.worksap.nlp.dartsclone;
 
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,12 +24,14 @@ public class DartsTest {
     static final int NUM_VALID_KEYS = 1 << 16;
     static final int NUM_INVALID_KEYS = 1 << 17;
     static final int MAX_NUM_RESULT = 16;
-    static final String testDictionary = "darts_test.dic";
 
     Random random = new Random();
     byte[][] keys;
     byte[][] invalidKeys;
     int[] values;
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() {
@@ -74,13 +78,14 @@ public class DartsTest {
         DoubleArray dic = new DoubleArray();
         dic.build(keys,  values, null);
 
-        FileOutputStream ostream = new FileOutputStream(testDictionary);
+        File dicFile = temporaryFolder.newFile();
+        FileOutputStream ostream = new FileOutputStream(dicFile);
         FileChannel outputFile = ostream.getChannel();
         dic.save(outputFile);
         ostream.close();
 
         DoubleArray dicCopy = new DoubleArray();
-        FileInputStream istream = new FileInputStream(testDictionary);
+        FileInputStream istream = new FileInputStream(dicFile);
         FileChannel inputFile = istream.getChannel();
         dicCopy.open(inputFile, 0, -1);
         istream.close();
