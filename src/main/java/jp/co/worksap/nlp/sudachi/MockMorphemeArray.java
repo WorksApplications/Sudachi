@@ -1,28 +1,91 @@
 package jp.co.worksap.nlp.sudachi;
 
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.AbstractList;
 import java.util.List;
 
-class MockMorphemeArray {
+class MockMorphemeArray extends AbstractList<Morpheme> {
 
     private String[] morphemes;
     private int offset;
+    private int listOffset;
+
+    @Override
+    public int size() { return morphemes.length; }
+
+    @Override
+    public boolean contains(Object o) {
+        return indexOf(o) >= 0;
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        if (o == null || o instanceof Morpheme) {
+            return -1;
+        } else {
+            Morpheme m = (Morpheme)o;
+            for (int i = 0; i < morphemes.length; i++) {
+                if (elementEquals(i, m)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        if (o == null || o instanceof Morpheme) {
+            return -1;
+        } else {
+            Morpheme m = (Morpheme)o;
+            for (int i = morphemes.length - 1; i >= 0; i--) {
+                if (elementEquals(i, m)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public Morpheme get(int index) throws IndexOutOfBoundsException {
+        if (index < 0 || index >= size()) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
+        return new MockMorpheme(this, index);
+    }
+
+    @Override
+    public List<Morpheme> subList(int fromIndex, int toIndex) {
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+        if (toIndex > morphemes.length)
+            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+        if (fromIndex > toIndex)
+            throw new IllegalArgumentException("fromIndex(" + fromIndex +
+                                               ") > toIndex(" + toIndex + ")");
+
+        String[] subMorphs = Arrays.copyOfRange(morphemes, fromIndex, toIndex);
+        MockMorphemeArray sublist = new MockMorphemeArray(subMorphs);
+        sublist.listOffset = listOffset + fromIndex;
+        sublist.setOffset(this.offset);
+        return sublist;
+    }
 
     MockMorphemeArray(String[] morphs) {
         morphemes = morphs;
         offset = 0;
     }
 
-    void setOffset(int offset) { this.offset = offset; }
-
-    int size() { return morphemes.length; }
-
-    Morpheme get(int index) throws IndexOutOfBoundsException {
-        if (index < 0 || index >= size()) {
-            throw new IndexOutOfBoundsException("Index: " + index);
-        }
-        return new MockMorpheme(this, index);
+    boolean elementEquals(int index, Morpheme m) {
+        return getSurface(index).equals(m.surface()) &&
+            getPartOfSpeech(index).equals(m.partOfSpeech()) &&
+            getDictionaryForm(index).equals(m.dictionaryForm());
     }
+
+    void setOffset(int offset) { this.offset = offset; }
 
     int getBegin(int index) {
         int b = offset;
@@ -50,7 +113,7 @@ class MockMorphemeArray {
             { "動詞", "一般", "*", "*", "五段-サ行", "連用形-一般", },
             { "名詞", "固有名詞", "地名", "一般", "*", "*", },
         };
-        return POSList[index % 3];
+        return POSList[(index + listOffset) % 3];
     }
 
     String getDictionaryForm(int index) {
