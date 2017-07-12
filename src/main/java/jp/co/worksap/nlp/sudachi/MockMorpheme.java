@@ -7,8 +7,8 @@ class MockMorpheme implements Morpheme {
     final int index;
     
     MockMorpheme(MockMorphemeArray array, int index) {
-	this.array = array;
-	this.index = index;
+        this.array = array;
+        this.index = index;
     }
 
     @Override
@@ -34,7 +34,7 @@ class MockMorpheme implements Morpheme {
 
     @Override
     public List<Morpheme> split(Tokenizer.SplitMode mode) {
-	return array.split(index, mode);
+        return array.split(index, mode);
     }
 
     @Override
