@@ -24,12 +24,7 @@ class MockTokenizer implements Tokenizer {
         String[] splitted = split(mode, text);
 
         MockMorphemeArray array = new MockMorphemeArray(splitted);
-        int size = array.size();
-        List<Morpheme> morphs = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            morphs.add(new MockMorpheme(array, i));
-        }
-        return morphs;
+        return array;
     }
 
     static String[] split(SplitMode mode, String text) {
