@@ -9,6 +9,6 @@ public class MockDictionary implements Dictionary {
 
     @Override
     public Tokenizer create() {
-	return new MockTokenizer(this);
+        return new MockTokenizer(this);
     }
 }
