@@ -1,6 +1,7 @@
 package jp.co.worksap.nlp.dartsclone.details;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.function.BiConsumer;
 import java.util.ArrayList;
 
@@ -44,6 +45,7 @@ public class DoubleArrayBuilder {
 
     public ByteBuffer copy() {
         ByteBuffer buffer = ByteBuffer.allocate(units.size() * 4);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
         for (DoubleArrayBuilderUnit u : units) {
             buffer.putInt(u.unit);
         }

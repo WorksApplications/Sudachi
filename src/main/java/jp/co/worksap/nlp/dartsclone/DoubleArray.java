@@ -3,6 +3,7 @@ package jp.co.worksap.nlp.dartsclone;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.function.BiConsumer;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class DoubleArray {
         }
         buffer = inputFile.map(FileChannel.MapMode.READ_ONLY,
                                position, size);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
         array = buffer.asIntBuffer();
     }
 
