@@ -59,8 +59,8 @@ public class DoubleArray {
         outputFile.write(buffer, size);
     }
 
-    public ResultPair exactMatchSearch(byte[] key) {
-        ResultPair result = new ResultPair(-1, 0);
+    public int[] exactMatchSearch(byte[] key) {
+        int[] result = new int[] { -1, 0 };
         int nodePos = 0;
         int unit = array.get(nodePos);
 
@@ -74,13 +74,14 @@ public class DoubleArray {
             return result;
         }
         unit = array.get(nodePos ^ offset(unit));
-        result.set(value(unit), key.length);
+        result[0] = value(unit);
+        result[1] = key.length;
         return result;
     }
 
-    public List<ResultPair> commonPrefixSearch(byte[] key, int offset,
+    public List<int[]> commonPrefixSearch(byte[] key, int offset,
                                                int maxNumResult) {
-        List<ResultPair> result = new ArrayList<>();
+        List<int[]> result = new ArrayList<>();
 
         int nodePos = 0;
         int unit = array.get(nodePos);
@@ -96,7 +97,8 @@ public class DoubleArray {
             nodePos ^= offset(unit);
             if (hasLeaf(unit)) {
                 if (result.size() < maxNumResult) {
-                    result.add(new ResultPair(value(array.get(nodePos)), i + 1));
+                    int[] r = new int[] { value(array.get(nodePos)), i + 1 };
+                    result.add(r);
                 }
             }
         }

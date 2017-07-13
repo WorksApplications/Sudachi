@@ -110,37 +110,37 @@ public class DartsTest {
         dic.build(keys, values, null);
 
         for (int i = 0; i < keys.length; i++) {
-            List<ResultPair> results
+            List<int[]> results
                 = dic.commonPrefixSearch(keys[i], 0, MAX_NUM_RESULT);
 
             assertTrue(results.size() >= 1);
             assertTrue(results.size() < MAX_NUM_RESULT);
 
-            assertEquals(values[i], results.get(results.size() - 1).value);
-            assertEquals(keys[i].length, results.get(results.size() - 1).length);
+            assertEquals(values[i], results.get(results.size() - 1)[0]);
+            assertEquals(keys[i].length, results.get(results.size() - 1)[1]);
         }
 
         for (byte[] key : invalidKeys) {
-            List<ResultPair> results = dic.commonPrefixSearch(key, 0, MAX_NUM_RESULT);
+            List<int[]> results = dic.commonPrefixSearch(key, 0, MAX_NUM_RESULT);
             assertTrue(results.size() < MAX_NUM_RESULT);
 
             if (!results.isEmpty()) {
                 assertNotEquals(-1, results.get(results.size() - 1));
-                assertTrue(key.length > results.get(results.size() - 1).length);
+                assertTrue(key.length > results.get(results.size() - 1)[1]);
             }
         }
     }
 
     void testDic(DoubleArray dic) {
         for (int i = 0; i < keys.length; i++) {
-            ResultPair result = dic.exactMatchSearch(keys[i]);
-            assertEquals(keys[i].length, result.length);
-            assertEquals(values[i], result.value);
+            int[] result = dic.exactMatchSearch(keys[i]);
+            assertEquals(keys[i].length, result[1]);
+            assertEquals(values[i], result[0]);
         }
         
         for (byte[] key : invalidKeys) {
-            ResultPair result = dic.exactMatchSearch(key);
-            assertEquals(-1, result.value);
+            int[] result = dic.exactMatchSearch(key);
+            assertEquals(-1, result[0]);
         }
     }
 
