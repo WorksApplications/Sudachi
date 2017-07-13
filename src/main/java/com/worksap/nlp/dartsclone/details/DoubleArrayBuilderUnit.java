@@ -1,4 +1,4 @@
-package jp.co.worksap.nlp.dartsclone.details;
+package com.worksap.nlp.dartsclone.details;
 
 class DoubleArrayBuilderUnit {
 

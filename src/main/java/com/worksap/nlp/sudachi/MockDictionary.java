@@ -1,4 +1,4 @@
-package jp.co.worksap.nlp.sudachi;
+package com.worksap.nlp.sudachi;
 
 public class MockDictionary implements Dictionary {
     public MockDictionary(String config) {

@@ -1,4 +1,4 @@
-package jp.co.worksap.nlp.dartsclone;
+package com.worksap.nlp.dartsclone;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -9,8 +9,8 @@ import java.util.function.BiConsumer;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.co.worksap.nlp.dartsclone.details.KeySet;
-import jp.co.worksap.nlp.dartsclone.details.DoubleArrayBuilder;
+import com.worksap.nlp.dartsclone.details.KeySet;
+import com.worksap.nlp.dartsclone.details.DoubleArrayBuilder;
 
 public class DoubleArray {
 
