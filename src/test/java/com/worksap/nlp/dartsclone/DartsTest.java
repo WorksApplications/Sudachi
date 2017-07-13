@@ -1,4 +1,4 @@
-package jp.co.worksap.nlp.dartsclone;
+package com.worksap.nlp.dartsclone;
 
 import static org.junit.Assert.*;
 import org.junit.*;

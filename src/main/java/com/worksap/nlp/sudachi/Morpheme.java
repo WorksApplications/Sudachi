@@ -1,4 +1,4 @@
-package jp.co.worksap.nlp.sudachi;
+package com.worksap.nlp.sudachi;
 
 import java.util.List;
 
