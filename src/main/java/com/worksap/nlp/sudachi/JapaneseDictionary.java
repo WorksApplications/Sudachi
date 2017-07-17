@@ -3,6 +3,7 @@ package com.worksap.nlp.sudachi;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
@@ -21,6 +22,7 @@ public class JapaneseDictionary implements Dictionary {
         ByteBuffer bytes
             = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
         inputFile.close();
+        bytes.order(ByteOrder.LITTLE_ENDIAN);
 
         GrammarImpl grammar = new GrammarImpl(bytes, 0);
         this.grammar = grammar;

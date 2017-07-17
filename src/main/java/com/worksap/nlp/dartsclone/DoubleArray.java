@@ -27,6 +27,10 @@ public class DoubleArray {
         return array;
     }
 
+    public ByteBuffer byteArray() {
+        return buffer;
+    }
+
     public void clear() {
         buffer = null;
     }
