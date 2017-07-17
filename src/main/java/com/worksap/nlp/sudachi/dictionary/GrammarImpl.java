@@ -2,7 +2,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
 
-class GrammarImpl implements Grammar {
+public class GrammarImpl implements Grammar {
 
     private final int POS_DEPTH = 6;
     private final short[] BOS_PARAMETER = new short[] { 0, 0, 0 }; 
@@ -16,7 +16,7 @@ class GrammarImpl implements Grammar {
 
     private int storageSize;
 
-    GrammarImpl(ByteBuffer bytes, int offset) {
+    public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;
         short posSize = bytes.getShort(offset);
@@ -38,21 +38,25 @@ class GrammarImpl implements Grammar {
         storageSize = (offset - originalOffset) + 2 * leftIdSize * rightIdSize;
     }
 
-    int storageSize() {
+    public int storageSize() {
         return storageSize;
     }
 
+    @Override
     public String[] getPartOfSpeechString(short posId) {
         return posList[posId];
     }
 
+    @Override
     public short getConnectCost(int leftId, int rightId) {
         return bytes.getShort(connectTableOffset
                               + leftId * 2 + 2 * leftIdSize * rightId);
     }
 
+    @Override
     public short[] getBOSParameter() { return BOS_PARAMETER; }
 
+    @Override
     public short[] getEOSParameter() { return EOS_PARAMETER; }
 
     private String bufferToString(int offset) {
