@@ -19,7 +19,7 @@ public class DoubleArrayLexicon implements Lexicon {
         bytes.position(offset);
         IntBuffer array = bytes.asIntBuffer();
         trie.setArray(array, size);
-        offset += 4 * size;
+        offset += trie.totalSize();
 
         wordParams = new WordParameterList(bytes, offset);
         offset += wordParams.storageSize();
