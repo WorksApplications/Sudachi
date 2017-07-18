@@ -64,6 +64,13 @@ public class DartsTest {
     }
 
     @Test
+    public void size() {
+        DoubleArray dic = new DoubleArray();
+        dic.build(keys, values, null);
+        assertEquals(dic.size() * 4, dic.totalSize());
+    }
+
+    @Test
     public void buildWithRandomValue() {
         for (int i = 0; i < values.length; i++) {
             values[i] = random.nextInt(10);
