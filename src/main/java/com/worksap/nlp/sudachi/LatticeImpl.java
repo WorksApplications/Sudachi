@@ -17,6 +17,7 @@ class LatticeImpl implements Lattice {
     private Grammar grammar;
 
     LatticeImpl(int size, Grammar grammar) {
+        this.size = size;
         this.grammar = grammar;
 
         LatticeNodeImpl bosNode = new LatticeNodeImpl();
@@ -26,6 +27,7 @@ class LatticeImpl implements Lattice {
         LatticeNodeImpl eosNode = new LatticeNodeImpl();
         short[] eosParams = grammar.getEOSParameter();
         eosNode.setParameter(eosParams[0], eosParams[1], eosParams[2]);
+        eosNode.begin = eosNode.end = size;
 
         beginLists = new ArrayList<List<LatticeNodeImpl>>(size + 1);
         for (int i = 0; i < size; i++) {
@@ -92,10 +94,11 @@ class LatticeImpl implements Lattice {
     private void viterbi() {
         for (int i = 0; i < size + 1; i++) {
             for (LatticeNodeImpl rNode : beginLists.get(i)) {
+                rNode.totalCost = Integer.MAX_VALUE;
                 for (LatticeNodeImpl lNode : endLists.get(i)) {
                     int cost = lNode.totalCost
                         + grammar.getConnectCost(lNode.rightId, rNode.leftId);
-                    if (cost > rNode.totalCost) {
+                    if (cost < rNode.totalCost) {
                         rNode.totalCost = cost;
                         rNode.bestPreviousNode = lNode;
                     }
