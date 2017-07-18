@@ -1,5 +1,6 @@
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -7,13 +8,15 @@ import org.junit.*;
 
 public class GrammarImplTest {
 
+    static final int storageSize = 2 * (56 + 11);
+
     ByteBuffer storage;
     GrammarImpl grammar;
 
     @Before
     public void setUp() {
-        storage = ByteBuffer.allocate(4 + 2 * (56 + 11));
-        storage.putInt(0);        // dummy
+        storage = ByteBuffer.allocate(4 + storageSize);
+        storage.putInt(0);      // dummy
         
         buildPartOfSpeech();    // 2 * 56 bytes
         buildConnectTable();    // 2 * 11 bytes
@@ -23,7 +26,7 @@ public class GrammarImplTest {
 
     @Test
     public void storageSize() {
-        assertEquals(2 * (56 + 11), grammar.storageSize());
+        assertEquals(storageSize, grammar.storageSize());
     }
 
     @Test
@@ -58,6 +61,26 @@ public class GrammarImplTest {
         assertEquals(0, grammar.getEOSParameter()[0]);
         assertEquals(0, grammar.getEOSParameter()[1]);
         assertEquals(0, grammar.getEOSParameter()[2]);
+    }
+
+    @Test
+    public void getStorageSize() {
+        assertEquals(2 * (56 + 11), grammar.storageSize());
+    }
+
+    @Test
+    public void readFromFile() throws IOException {
+        ByteBuffer bytes = DictionaryReader.read("/system.dic");
+        grammar = new GrammarImpl(bytes, 0);
+
+        assertEquals(6, grammar.getPartOfSpeechSize());
+
+        assertEquals(0, grammar.getConnectCost(0, 0));
+        assertEquals(-3361, grammar.getConnectCost(1, 1));
+        assertEquals(5642, grammar.getConnectCost(3, 6));
+        assertEquals(-2542, grammar.getConnectCost(7, 2));
+        assertEquals(-390, grammar.getConnectCost(5, 7));
+        assertEquals(386, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {
@@ -122,7 +145,6 @@ public class GrammarImplTest {
         storage.putChar('一');
         storage.putChar('般');
     }
-
 
     void buildConnectTable() {
         storage.putShort((short)3); // # of leftId
