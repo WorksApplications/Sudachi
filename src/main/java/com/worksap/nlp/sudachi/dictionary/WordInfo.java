@@ -1,5 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.charset.StandardCharsets;
+
 public class WordInfo {
 
     private final String surface;
@@ -37,7 +39,7 @@ public class WordInfo {
     }
 
     public int getLength() {
-        return surface.length();
+        return surface.getBytes(StandardCharsets.UTF_8).length;
     }
 
     public short getPOSId() {
