@@ -43,6 +43,11 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
+    public int getPartOfSpeechSize() {
+        return posList.length;
+    }
+
+    @Override
     public String[] getPartOfSpeechString(short posId) {
         return posList[posId];
     }
