@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
@@ -37,6 +38,35 @@ public class JapaneseTokenizer implements Tokenizer {
 
         List<LatticeNodeImpl> path = lattice.getBestPath();
         path.remove(path.size() - 1); // remove EOS
+
+        if (mode != Tokenizer.SplitMode.C) {
+            List<LatticeNodeImpl> newPath = new ArrayList<>();
+            for (LatticeNodeImpl node : path) {
+                int[] wids;
+                if (mode == Tokenizer.SplitMode.A) {
+                    wids = node.getWordInfo().getAunitSplit();
+                } else {        // Tokenizer.SplitMode.B
+                    wids = node.getWordInfo().getBunitSplit();
+                }
+                if (wids.length == 0) {
+                    newPath.add(node);
+                } else {
+                    int offset = node.begin;
+                    for (int wid : wids) {
+                        LatticeNodeImpl n
+                            = new LatticeNodeImpl(lexicon,
+                                                  (short)0, (short)0, (short)0,
+                                                  wid);
+                        n.begin = offset;
+                        offset += n.getWordInfo().getLength();
+                        n.end = offset;
+                        newPath.add(n);
+                    }
+                }
+            }
+            path = newPath;
+        }
+
         return new MorphemeList(input, grammar, lexicon, path);
     }
 }
