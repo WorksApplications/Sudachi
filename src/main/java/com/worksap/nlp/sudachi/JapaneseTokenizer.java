@@ -24,16 +24,14 @@ public class JapaneseTokenizer implements Tokenizer {
         for (int i = 0; i < bytes.length; i++) {
             for (int[] r :lexicon.lookup(bytes, i)) {
                 int wordId = r[0];
-                int length = r[1];
-
+                int end = r[1];
 
                 LatticeNode n = new LatticeNodeImpl(lexicon,
                                                     lexicon.getLeftId(wordId),
                                                     lexicon.getRightId(wordId),
                                                     lexicon.getCost(wordId),
                                                     wordId);
-
-                lattice.insert(i, i + length, n);
+                lattice.insert(i, end, n);
             }
         }
 
