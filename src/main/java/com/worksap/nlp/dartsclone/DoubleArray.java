@@ -16,7 +16,7 @@ public class DoubleArray {
 
     private IntBuffer array;
     private ByteBuffer buffer;
-    private int size;
+    private int size;           // number of elements
 
     public void setArray(IntBuffer array, int size) {
         this.array = array;
@@ -33,9 +33,12 @@ public class DoubleArray {
 
     public void clear() {
         buffer = null;
+        size = 0;
     }
 
     public int size() { return size; }
+
+    public int totalSize() { return 4 * size; }
 
     public void build(byte[][] keys, int[] values,
                       BiConsumer<Integer, Integer> progressFunction) {
@@ -44,25 +47,27 @@ public class DoubleArray {
         builder.build(keySet);
         buffer = builder.copy();
         array = buffer.asIntBuffer();
+        size = array.capacity();
     }
 
-    public void open(FileChannel inputFile, long position, long size)
+    public void open(FileChannel inputFile, long position, long totalSize)
         throws IOException {
 
         if (position < 0) {
             position = 0;
         }
-        if (size < 0) {
-            size = inputFile.size();
+        if (totalSize <= 0) {
+            totalSize = inputFile.size();
         }
         buffer = inputFile.map(FileChannel.MapMode.READ_ONLY,
-                               position, size);
+                               position, totalSize);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         array = buffer.asIntBuffer();
+        size = array.capacity();
     }
 
     public void save(FileChannel outputFile) throws IOException {
-        outputFile.write(buffer, size);
+        outputFile.write(buffer);
     }
 
     public int[] exactMatchSearch(byte[] key) {
