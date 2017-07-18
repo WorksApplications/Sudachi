@@ -100,6 +100,7 @@ public class DictionaryBuilder {
                                parseSplitInfo(cols[16]), // bUnitSplit
                                parseSplitInfo(cols[17]) // wordStructure
                                );
+            wordInfos.add(info);
         }
 
     }
@@ -169,7 +170,7 @@ public class DictionaryBuilder {
         output.write(trie.byteArray());
         trie = null;
 
-
+        buffer.putInt(params.size());
         for(Short[] param : params) {
             buffer.putShort(param[0]);
             buffer.putShort(param[1]);
