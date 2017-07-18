@@ -78,12 +78,17 @@ public class DictionaryBuilder {
                 cols[i] = decode(cols[i]);
             }
 
-            // headword
-            trieKeys.add(cols[0]);
-            // left-id, right-id, cost
-            params.add(new Short[] { Short.parseShort(cols[1]),
-                                     Short.parseShort(cols[2]),
-                                     Short.parseShort(cols[3]) });
+            if (!cols[4].equals("1")) {
+                // headword
+                trieKeys.add(cols[0]);
+                // left-id, right-id, cost
+                params.add(new Short[] { Short.parseShort(cols[1]),
+                                         Short.parseShort(cols[2]),
+                                         Short.parseShort(cols[3]) });
+            } else {
+                trieKeys.add(null);
+                params.add(new Short[] { (short)-1, (short)-1, (short)0 });
+            }
 
             short posId = posTable.getId(String.join(",",
                                                      cols[5], cols[6], cols[7],
@@ -156,6 +161,9 @@ public class DictionaryBuilder {
         byte[][] keys = new byte[trieKeys.size()][];
         int[] values = new int[trieKeys.size()];
         for (int i = 0; i < trieKeys.size(); i++) {
+            if (trieKeys.get(i) == null) {
+                continue;
+            }
             keys[i] = trieKeys.get(i).getBytes(StandardCharsets.UTF_8);
             values[i] = i;
         }
