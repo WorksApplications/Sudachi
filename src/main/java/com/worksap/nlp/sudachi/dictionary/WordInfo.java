@@ -34,6 +34,22 @@ public class WordInfo {
         this.wordStructure = wordStructure;
     }
 
+    public WordInfo(String surface,
+             short posId,
+             String normalizedForm,
+             String dictionaryForm,
+             String reading) {
+        this.surface = surface;
+        this.posId = posId;
+        this.normalizedForm = normalizedForm;
+        this.dictionaryFormWordId = -1;
+        this.dictionaryForm = dictionaryForm;
+        this.reading = reading;
+        this.aUnitSplit = new int[0];
+        this.bUnitSplit = new int[0];
+        this.wordStructure = new int[0];
+    }
+
     public String getSurface() {
         return surface;
     }
