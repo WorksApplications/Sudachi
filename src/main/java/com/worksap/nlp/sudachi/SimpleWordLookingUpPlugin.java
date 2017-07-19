@@ -3,11 +3,18 @@ package com.worksap.nlp.sudachi;
 import java.util.Collections;
 import java.util.List;
 
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
-    final short oovPOSId = 4;
+    final short oovPOSId;
+
+    SimpleWordLookingUpPlugin(Grammar grammar) {
+        oovPOSId
+            = grammar.getPartOfSpeechId(new String[] {"名詞", "普通名詞",
+                                                      "一般", "*", "*", "*"});
+    }
 
     @Override
     public List<LatticeNode> provideOOV(String text,
