@@ -97,6 +97,10 @@ class UTF8InputText implements InputText<byte[]> {
         return byteCache;
     }
 
+    public boolean isCharAlignment(int offset) {
+        return (utf8Text.get(offset) & 0xC0) != 0x80;
+    }
+
     public int getOriginalOffset(int offset)
         throws StringIndexOutOfBoundsException {
         return offsets.get(offset);

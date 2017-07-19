@@ -1,18 +1,34 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.List;
-import java.util.Collections;
+import java.util.stream.Collectors;
 
 public abstract class WordLookingUpPlugin {
 
-    public abstract void provideOOV();
+    public abstract List<LatticeNode> provideOOV(String text,
+                                                 List<Integer> otherWordsLength);
 
-    List<LatticeNode> getOOV(InputText<?> inputText, int offset,
+    List<LatticeNode> getOOV(UTF8InputText inputText, int offset,
                              List<int[]> otherWords) {
-        return Collections.emptyList();
+        byte[] bytes = inputText.getByteText();
+        String text =
+            new String(bytes, offset, bytes.length - offset);
+        List<Integer> othersLength = otherWords.stream()
+            .map(o -> new String(bytes, offset, o[1] - offset).length())
+            .collect(Collectors.toList());
+
+        List<LatticeNode> nodes = provideOOV(text, othersLength);
+        for (LatticeNode node : nodes) {
+            LatticeNodeImpl n = (LatticeNodeImpl)node;
+            n.begin = offset;
+            n.end = offset + node.getWordInfo().getLength();
+        }
+        return nodes;
     }
 
     LatticeNode createNode() {
-        return new LatticeNodeImpl();
+        LatticeNode node = new LatticeNodeImpl();
+        node.setOOV();
+        return node;
     }
 }

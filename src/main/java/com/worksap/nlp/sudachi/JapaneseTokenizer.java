@@ -1,7 +1,8 @@
 package com.worksap.nlp.sudachi;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
@@ -11,16 +12,19 @@ public class JapaneseTokenizer implements Tokenizer {
     Grammar grammar;
     Lexicon lexicon;
     List<InputTextPlugin> inputTextPlugins;
-    List<WordLookingUpPlugin> wordLookingupPlugins;
+    List<WordLookingUpPlugin> wordLookingUpPlugins;
 
     JapaneseTokenizer(Grammar grammar, Lexicon lexicon/*,
                       List<InputTextPlugin> inputTextPlugins,
-                      List<WordLookingUpPlugin> wordLookingupPlugins */) {
+                      List<WordLookingUpPlugin> wordLookingUpPlugins */) {
         this.grammar = grammar;
         this.lexicon = lexicon;
+        inputTextPlugins = Collections.emptyList();
+        wordLookingUpPlugins
+            = Collections.singletonList(new SimpleWordLookingUpPlugin());
         /*
         this.inputTextPlugins = inputTextPlugins;
-        this.wordLookingupPlugins = wordLookingupPlugins;
+        this.wordLookingupPlugins = wordLookingUpPlugins;
         */
     }
 
@@ -34,10 +38,13 @@ public class JapaneseTokenizer implements Tokenizer {
 
         LatticeImpl lattice = new LatticeImpl(bytes.length, grammar);
         for (int i = 0; i < bytes.length; i++) {
+            if (!input.isCharAlignment(i)) {
+                continue;
+            }
             List<int[]> words = lexicon.lookup(bytes, i);
             /*
             if (words.isEmpty()) {
-                for (WordLookingUpPlugin plugin : wordLookingupPlugins) {
+                for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
                     plugin.rewrite(bytes, i);
                 }
             }
@@ -55,7 +62,7 @@ public class JapaneseTokenizer implements Tokenizer {
             }
 
             // OOV
-            for (WordLookingUpPlugin plugin : wordLookingupPlugins) {
+            for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
                 for (LatticeNode node : plugin.getOOV(input, i, words)) {
                     lattice.insert(node.getBegin(), node.getEnd(), node);
                 }
