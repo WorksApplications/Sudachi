@@ -8,11 +8,11 @@ public class GrammarImpl implements Grammar {
     private final short[] BOS_PARAMETER = new short[] { 0, 0, 0 }; 
     private final short[] EOS_PARAMETER = new short[] { 0, 0, 0 }; 
 
-    private ByteBuffer bytes;
+    private final ByteBuffer bytes;
     private String[][] posList;
-    private int connectTableOffset;
-    private short leftIdSize;
-    private short rightIdSize;
+    private final int connectTableOffset;
+    private final short leftIdSize;
+    private final short rightIdSize;
 
     private int storageSize;
 

@@ -1,13 +1,16 @@
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.util.List;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 
 public class DoubleArrayLexicon implements Lexicon {
 
+    private WordIdTable wordIdTable;
     private WordParameterList wordParams;
     private WordInfoList wordInfos;
     private DoubleArray trie;
@@ -21,6 +24,9 @@ public class DoubleArrayLexicon implements Lexicon {
         trie.setArray(array, size);
         offset += trie.totalSize();
 
+        wordIdTable = new WordIdTable(bytes, offset);
+        offset += wordIdTable.storageSize();
+
         wordParams = new WordParameterList(bytes, offset);
         offset += wordParams.storageSize();
 
@@ -29,7 +35,15 @@ public class DoubleArrayLexicon implements Lexicon {
 
     @Override
     public List<int[]> lookup(byte[] text, int offset) {
-        return trie.commonPrefixSearch(text, offset, Integer.MAX_VALUE);
+        List<int[]> r
+            = trie.commonPrefixSearch(text, offset, Integer.MAX_VALUE);
+        if (r.isEmpty()) {
+            return r;
+        }
+        return r.stream()
+            .flatMap(p -> Stream.of(wordIdTable.get(p[0]))
+                     .map(i -> new int[] {i, p[1]}))
+            .collect(Collectors.toList());
     }
 
     @Override

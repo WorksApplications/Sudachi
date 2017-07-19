@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 class WordInfoList {
 
-    private ByteBuffer bytes;
-    private int offset;
-    private int infoOffset;
+    private final ByteBuffer bytes;
+    private final int offset;
+    private final int infoOffset;
 
     WordInfoList(ByteBuffer bytes, int offset, int wordSize) {
         this.bytes = bytes;
