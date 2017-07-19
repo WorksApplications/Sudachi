@@ -43,6 +43,13 @@ public class GrammarImplTest {
     }
 
     @Test
+    public void getPartOfSpeechId() {
+        assertEquals(0, grammar.getPartOfSpeechId(new String[] {"BOS/EOS",
+                                                                "*", "*", "*",
+                                                                "*", "*" }));
+    }
+
+    @Test
     public void getConnectCost() {
         assertEquals(0, grammar.getConnectCost(0, 0));
         assertEquals(-100, grammar.getConnectCost(2, 1));

@@ -1,6 +1,8 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GrammarImpl implements Grammar {
 
@@ -9,7 +11,7 @@ public class GrammarImpl implements Grammar {
     private final short[] EOS_PARAMETER = new short[] { 0, 0, 0 }; 
 
     private final ByteBuffer bytes;
-    private String[][] posList;
+    private List<String[]> posList;
     private final int connectTableOffset;
     private final short leftIdSize;
     private final short rightIdSize;
@@ -21,12 +23,31 @@ public class GrammarImpl implements Grammar {
         this.bytes = bytes;
         short posSize = bytes.getShort(offset);
         offset += 2;
-        posList = new String[posSize][];
+        posList = new ArrayList<String[]>(posSize) {
+                @Override public int indexOf(Object o) {
+                    if (!(o instanceof String[])) {
+                        return -1;
+                    }
+                    String[] s = (String[])o;
+                    search: for (int i = 0; i < this.size(); i++) {
+                        if (this.get(i).length != s.length) {
+                            continue;
+                        }
+                        for (int j = 0; j < s.length; j++) {
+                            if (!this.get(i)[j].equals(s[j])) {
+                                continue search;
+                            }
+                        }
+                        return i;
+                    }
+                    return -1;
+                }
+            };
         for (int i = 0; i < posSize; i++) {
-            posList[i] = new String[POS_DEPTH];
+            posList.add(new String[POS_DEPTH]);
             for (int j = 0; j < POS_DEPTH; j++) {
-                posList[i][j] = bufferToString(offset);
-                offset += 2 + 2 * posList[i][j].length();
+                posList.get(i)[j] = bufferToString(offset);
+                offset += 2 + 2 * posList.get(i)[j].length();
             }
         }
         leftIdSize = bytes.getShort(offset);
@@ -44,12 +65,17 @@ public class GrammarImpl implements Grammar {
 
     @Override
     public int getPartOfSpeechSize() {
-        return posList.length;
+        return posList.size();
     }
 
     @Override
     public String[] getPartOfSpeechString(short posId) {
-        return posList[posId];
+        return posList.get(posId);
+    }
+
+    @Override
+    public short getPartOfSpeechId(String[] pos) {
+        return (short)posList.indexOf(pos);
     }
 
     @Override
