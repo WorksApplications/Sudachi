@@ -21,7 +21,7 @@ public class JapaneseTokenizer implements Tokenizer {
         this.lexicon = lexicon;
         inputTextPlugins = Collections.emptyList();
         wordLookingUpPlugins
-            = Collections.singletonList(new SimpleWordLookingUpPlugin());
+            = Collections.singletonList(new SimpleWordLookingUpPlugin(grammar));
         /*
         this.inputTextPlugins = inputTextPlugins;
         this.wordLookingupPlugins = wordLookingUpPlugins;
