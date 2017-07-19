@@ -10,7 +10,8 @@ public interface InputText<E> {
         throws StringIndexOutOfBoundsException;
 
     public String getOriginalText();
-    public E getText();
+
+    public String getText();
 
     public int getOriginalOffset(int offset)
         throws StringIndexOutOfBoundsException;
