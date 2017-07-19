@@ -8,7 +8,8 @@ class UTF8InputText implements InputText<byte[]> {
     private String originalText;
     private ArrayList<Byte> utf8Text;
     private ArrayList<Integer> offsets;
-    private byte[] cache;
+    private byte[] byteCache;
+    private String modifiedTextCache;
 
     UTF8InputText(String text) {
         originalText = text;
@@ -24,7 +25,8 @@ class UTF8InputText implements InputText<byte[]> {
             }
         }
         offsets.add(originalText.length());
-        cache = bytes;
+        byteCache = bytes;
+        modifiedTextCache = text;
     }
 
     public char originalCharAt(int index)
@@ -71,20 +73,28 @@ class UTF8InputText implements InputText<byte[]> {
                 offsets.add(offsetBegin + i, begin);
             }
         }
-        cache = null;
+        byteCache = null;
+        modifiedTextCache = null;
     }
 
     public String getOriginalText() {
         return originalText;
     }
 
-    public byte[] getText() {
-        if (cache == null) {
-            cache = new byte[utf8Text.size()];
-            for (int i = 0; i < cache.length; i++)
-                cache[i] = utf8Text.get(i);
+    public String getText() {
+        if (modifiedTextCache == null) {
+            modifiedTextCache = new String(getByteText(), StandardCharsets.UTF_8);
         }
-        return cache;
+        return modifiedTextCache;
+    }
+
+    public byte[] getByteText() {
+        if (byteCache == null) {
+            byteCache = new byte[utf8Text.size()];
+            for (int i = 0; i < byteCache.length; i++)
+                byteCache[i] = utf8Text.get(i);
+        }
+        return byteCache;
     }
 
     public int getOriginalOffset(int offset)

@@ -7,7 +7,7 @@ public class UTF8InputTextTest {
 
     // \u2123d uses surrogate pair
     String originalText = "aあ漢いb字𡈽う";
-    InputText<byte[]> text;
+    UTF8InputText text;
 
     @Before
     public void setUp() {
@@ -31,8 +31,8 @@ public class UTF8InputTextTest {
     }
 
     @Test
-    public void getText() {
-        byte[] bytes = text.getText();
+    public void getByteText() {
+        byte[] bytes = text.getByteText();
         assertEquals(21, bytes.length);
         assertArrayEquals(new byte[]
             { (byte)0x61, (byte)0xe3, (byte)0x81, (byte)0x82,
@@ -54,7 +54,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithSameLength() {
         text.replace(2, 4, "ああ");
-        byte[] bytes = text.getText();
+        byte[] bytes = text.getByteText();
         assertEquals(21, bytes.length);
         assertEquals(0, text.getOriginalOffset(0));
         assertEquals(2, text.getOriginalOffset(4));
@@ -69,7 +69,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithDeletion() {
         text.replace(2, 4, "あ");
-        byte[] bytes = text.getText();
+        byte[] bytes = text.getByteText();
         assertEquals(18, bytes.length);
         assertEquals(0, text.getOriginalOffset(0));
         assertEquals(2, text.getOriginalOffset(4));
@@ -81,7 +81,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithInsertion() {
         text.replace(2, 4, "あああ");
-        byte[] bytes = text.getText();
+        byte[] bytes = text.getByteText();
         assertEquals(24, bytes.length);
         assertEquals(0, text.getOriginalOffset(0));
         assertEquals(2, text.getOriginalOffset(4));

@@ -10,20 +10,39 @@ public class JapaneseTokenizer implements Tokenizer {
 
     Grammar grammar;
     Lexicon lexicon;
+    List<InputTextPlugin> inputTextPlugins;
+    List<WordLookingUpPlugin> wordLookingupPlugins;
 
-    JapaneseTokenizer(Grammar grammar, Lexicon lexicon) {
+    JapaneseTokenizer(Grammar grammar, Lexicon lexicon/*,
+                      List<InputTextPlugin> inputTextPlugins,
+                      List<WordLookingUpPlugin> wordLookingupPlugins */) {
         this.grammar = grammar;
         this.lexicon = lexicon;
+        /*
+        this.inputTextPlugins = inputTextPlugins;
+        this.wordLookingupPlugins = wordLookingupPlugins;
+        */
     }
 
     @Override
     public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
-        InputText<byte[]> input = new UTF8InputText(text);
-        byte[] bytes = input.getText();
+        UTF8InputText input = new UTF8InputText(text);
+        for (InputTextPlugin plugin : inputTextPlugins) {
+            plugin.rewrite(input);
+        }
+        byte[] bytes = input.getByteText();
 
         LatticeImpl lattice = new LatticeImpl(bytes.length, grammar);
         for (int i = 0; i < bytes.length; i++) {
-            for (int[] r :lexicon.lookup(bytes, i)) {
+            List<int[]> words = lexicon.lookup(bytes, i);
+            /*
+            if (words.isEmpty()) {
+                for (WordLookingUpPlugin plugin : wordLookingupPlugins) {
+                    plugin.rewrite(bytes, i);
+                }
+            }
+            */
+            for (int[] r : words) {
                 int wordId = r[0];
                 int end = r[1];
 
@@ -33,6 +52,13 @@ public class JapaneseTokenizer implements Tokenizer {
                                                     lexicon.getCost(wordId),
                                                     wordId);
                 lattice.insert(i, end, n);
+            }
+
+            // OOV
+            for (WordLookingUpPlugin plugin : wordLookingupPlugins) {
+                for (LatticeNode node : plugin.getOOV(input, i, words)) {
+                    lattice.insert(node.getBegin(), node.getEnd(), node);
+                }
             }
         }
 
