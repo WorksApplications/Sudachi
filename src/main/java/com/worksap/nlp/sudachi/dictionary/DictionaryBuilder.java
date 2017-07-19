@@ -5,14 +5,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 
@@ -158,15 +161,36 @@ public class DictionaryBuilder {
 
     void writeLexicon(FileChannel output) throws IOException {
         DoubleArray trie = new DoubleArray();
-        byte[][] keys = new byte[trieKeys.size()][];
-        int[] values = new int[trieKeys.size()];
-        for (int i = 0; i < trieKeys.size(); i++) {
-            if (trieKeys.get(i) == null) {
+
+        Map<String, Long> wordCount
+            = trieKeys.stream().filter(k -> k != null)
+            .collect(Collectors.groupingBy(Function.identity(),
+                                           Collectors.counting()));
+        int size = wordCount.size();
+
+        byte[][] keys = new byte[size][];
+        int[] values = new int[size];
+        ByteBuffer wordIdTable = ByteBuffer.allocate(trieKeys.size() * (4 + 2));
+        wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
+
+        String prevKey = "";
+        int i = 0;
+        for (int wordId = 0; wordId < trieKeys.size(); wordId++) {
+            String key = trieKeys.get(wordId);
+            if (key == null) {
                 continue;
             }
-            keys[i] = trieKeys.get(i).getBytes(StandardCharsets.UTF_8);
-            values[i] = i;
+            if (!key.equals(prevKey)) {
+                keys[i] = key.getBytes(StandardCharsets.UTF_8);
+                values[i] = wordIdTable.position();
+                i++;
+                long count = wordCount.get(key);
+                wordIdTable.putShort((short)count);
+                prevKey = key;
+            }
+            wordIdTable.putInt(wordId);
         }
+
         trie.build(keys, values, null);
 
         buffer.clear();
@@ -177,6 +201,15 @@ public class DictionaryBuilder {
 
         output.write(trie.byteArray());
         trie = null;
+
+        buffer.putInt(wordIdTable.position());
+        buffer.flip();
+        output.write(buffer);
+        buffer.clear();
+
+        wordIdTable.flip();
+        output.write(wordIdTable);
+        wordIdTable = null;
 
         buffer.putInt(params.size());
         for(Short[] param : params) {

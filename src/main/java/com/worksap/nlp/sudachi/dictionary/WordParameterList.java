@@ -6,9 +6,9 @@ class WordParameterList {
 
     private final int ELEMENT_SIZE = 2 * 3;
 
-    private ByteBuffer bytes;
-    private int size;
-    private int offset;
+    private final ByteBuffer bytes;
+    private final int size;
+    private final int offset;
 
     WordParameterList(ByteBuffer bytes, int offset) {
         this.bytes = bytes;

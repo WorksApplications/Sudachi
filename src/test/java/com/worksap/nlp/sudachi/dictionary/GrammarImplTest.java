@@ -73,14 +73,14 @@ public class GrammarImplTest {
         ByteBuffer bytes = DictionaryReader.read("/system.dic");
         grammar = new GrammarImpl(bytes, 0);
 
-        assertEquals(6, grammar.getPartOfSpeechSize());
+        assertEquals(7, grammar.getPartOfSpeechSize());
 
         assertEquals(0, grammar.getConnectCost(0, 0));
         assertEquals(-3361, grammar.getConnectCost(1, 1));
-        assertEquals(5642, grammar.getConnectCost(3, 6));
-        assertEquals(-2542, grammar.getConnectCost(7, 2));
-        assertEquals(-390, grammar.getConnectCost(5, 7));
-        assertEquals(386, grammar.storageSize());
+        assertEquals(126, grammar.getConnectCost(3, 6));
+        assertEquals(1180, grammar.getConnectCost(7, 2));
+        assertEquals(3319, grammar.getConnectCost(5, 7));
+        assertEquals(452, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {
