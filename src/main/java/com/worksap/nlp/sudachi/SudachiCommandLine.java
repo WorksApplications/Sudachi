@@ -36,7 +36,8 @@ public class SudachiCommandLine {
             for (Morpheme m : tokenizer.tokenize(mode, line)) {
                 System.out.print(m.surface() + "\t");
                 System.out.print(String.join(",", m.partOfSpeech()) + "\t");
-                System.out.println(m.normalizedForm());
+                System.out.print(m.normalizedForm() + "\t");
+                System.out.println(m.isOOV() ? "*" : "");
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.worksap.nlp.sudachi;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,18 +16,14 @@ public class JapaneseTokenizer implements Tokenizer {
     List<InputTextPlugin> inputTextPlugins;
     List<WordLookingUpPlugin> wordLookingUpPlugins;
 
-    JapaneseTokenizer(Grammar grammar, Lexicon lexicon/*,
+    JapaneseTokenizer(Grammar grammar, Lexicon lexicon,
                       List<InputTextPlugin> inputTextPlugins,
-                      List<WordLookingUpPlugin> wordLookingUpPlugins */) {
+                      List<WordLookingUpPlugin> wordLookingUpPlugins) {
+
         this.grammar = grammar;
         this.lexicon = lexicon;
-        inputTextPlugins = Collections.emptyList();
-        wordLookingUpPlugins
-            = Collections.singletonList(new SimpleWordLookingUpPlugin(grammar));
-        /*
         this.inputTextPlugins = inputTextPlugins;
-        this.wordLookingupPlugins = wordLookingUpPlugins;
-        */
+        this.wordLookingUpPlugins = wordLookingUpPlugins;
     }
 
     @Override
