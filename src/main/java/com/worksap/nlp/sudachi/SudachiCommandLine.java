@@ -39,6 +39,7 @@ public class SudachiCommandLine {
                 System.out.print(m.normalizedForm() + "\t");
                 System.out.println(m.isOOV() ? "*" : "");
             }
+            System.out.println("EOS");
         }
     }
 }
