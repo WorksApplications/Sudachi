@@ -74,7 +74,7 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public short getPartOfSpeechId(String[] pos) {
+    public short getPartOfSpeechId(String... pos) {
         return (short)posList.indexOf(pos);
     }
 

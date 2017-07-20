@@ -9,11 +9,18 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
     final short oovPOSId;
+    final short leftid;
+    final short rightid;
+    final short cost;
 
-    SimpleWordLookingUpPlugin(Grammar grammar) {
+    SimpleWordLookingUpPlugin(Grammar grammar,
+                              short leftid, short rightid, short cost) {
         oovPOSId
             = grammar.getPartOfSpeechId(new String[] {"名詞", "普通名詞",
                                                       "一般", "*", "*", "*"});
+        this.leftid = leftid;
+        this.rightid = rightid;
+        this.cost = cost;
     }
 
     @Override
@@ -22,7 +29,7 @@ class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
         if (!otherWordsLength.contains(1)) {
             LatticeNode node = createNode();
-            node.setParameter((short)7, (short)7, (short)14657);
+            node.setParameter(leftid, rightid, cost);
             String s = text.substring(0, 1);
             WordInfo info
                 = new WordInfo(s, oovPOSId, s, s, "");
