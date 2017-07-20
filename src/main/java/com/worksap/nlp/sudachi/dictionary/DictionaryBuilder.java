@@ -10,8 +10,10 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.Comparator;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,11 +42,25 @@ public class DictionaryBuilder {
     }
 
     POSTable posTable = new POSTable();
-    List<String> trieKeys = new ArrayList<>();
+    SortedMap<byte[], List<Integer>> trieKeys
+        = new TreeMap<>(new Comparator<byte[]>() {
+                @Override
+                public int compare(byte[] l, byte[] r) {
+                    int llen = l.length;
+                    int rlen = r.length;
+                    for (int i = 0; i < Math.min(llen, rlen); i++) {
+                        if (l[i] != r[i]) {
+                            return (l[i] & 0xff) - (r[i] & 0xff);
+                        }
+                    }
+                    return l.length - r.length;
+                }
+            });
     List<Short[]> params = new ArrayList<>();
     List<WordInfo> wordInfos = new ArrayList<>();
 
     ByteBuffer buffer;
+    int wordSize;
 
     DictionaryBuilder() {
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -66,13 +82,14 @@ public class DictionaryBuilder {
         BufferedReader reader
             = new BufferedReader(new InputStreamReader(lexiconInput));
 
-        for (int wordId = 0; ; wordId++) {
+        int wordId = 0;
+        for (; ; wordId++) {
             String line = reader.readLine();
             if (line == null) {
                 break;
             }
 
-            String[] cols = line.split("\\s*,\\s*");
+            String[] cols = line.split(",");
             if (cols.length != NUMBER_OF_COLUMNS) {
                 System.err.println("Error: " + line);
                 continue;
@@ -81,17 +98,21 @@ public class DictionaryBuilder {
                 cols[i] = decode(cols[i]);
             }
 
-            if (!cols[4].equals("1")) {
-                // headword
-                trieKeys.add(cols[0]);
-                // left-id, right-id, cost
-                params.add(new Short[] { Short.parseShort(cols[1]),
-                                         Short.parseShort(cols[2]),
-                                         Short.parseShort(cols[3]) });
-            } else {
-                trieKeys.add(null);
-                params.add(new Short[] { (short)-1, (short)-1, (short)0 });
+            if (cols[0].length() == 0) {
+                System.err.println("Error: headword is empty at line " + (wordId + 1));
             }
+            if (!cols[1].equals("-1")) {
+                // headword
+                byte[] key = cols[0].getBytes(StandardCharsets.UTF_8);
+                if (!trieKeys.containsKey(key)) {
+                    trieKeys.put(key, new ArrayList<Integer>());
+                }
+                trieKeys.get(key).add(wordId);
+                // left-id, right-id, cost
+            }
+            params.add(new Short[] { Short.parseShort(cols[1]),
+                                     Short.parseShort(cols[2]),
+                                     Short.parseShort(cols[3]) });
 
             short posId = posTable.getId(String.join(",",
                                                      cols[5], cols[6], cols[7],
@@ -110,7 +131,7 @@ public class DictionaryBuilder {
                                );
             wordInfos.add(info);
         }
-
+        wordSize = wordId;
     }
 
     void writeGrammar(FileInputStream matrixInput,
@@ -162,33 +183,23 @@ public class DictionaryBuilder {
     void writeLexicon(FileChannel output) throws IOException {
         DoubleArray trie = new DoubleArray();
 
-        Map<String, Long> wordCount
-            = trieKeys.stream().filter(k -> k != null)
-            .collect(Collectors.groupingBy(Function.identity(),
-                                           Collectors.counting()));
-        int size = wordCount.size();
+        int size = trieKeys.size();
 
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ByteBuffer wordIdTable = ByteBuffer.allocate(trieKeys.size() * (4 + 2));
+        ByteBuffer wordIdTable = ByteBuffer.allocate(wordSize * (4 + 2));
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
-        String prevKey = "";
         int i = 0;
-        for (int wordId = 0; wordId < trieKeys.size(); wordId++) {
-            String key = trieKeys.get(wordId);
-            if (key == null) {
-                continue;
+        for (byte[] key : trieKeys.keySet()) {
+            keys[i] = key;
+            values[i] = wordIdTable.position();
+            i++;
+            List<Integer> wordIds = trieKeys.get(key);
+            wordIdTable.putShort((short)wordIds.size());
+            for (int wordId : wordIds) {
+                wordIdTable.putInt(wordId);
             }
-            if (!key.equals(prevKey)) {
-                keys[i] = key.getBytes(StandardCharsets.UTF_8);
-                values[i] = wordIdTable.position();
-                i++;
-                long count = wordCount.get(key);
-                wordIdTable.putShort((short)count);
-                prevKey = key;
-            }
-            wordIdTable.putInt(wordId);
         }
 
         trie.build(keys, values, null);
