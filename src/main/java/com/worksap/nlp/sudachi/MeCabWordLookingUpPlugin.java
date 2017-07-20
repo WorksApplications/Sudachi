@@ -159,13 +159,13 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                 info.length = Integer.parseInt(cols[3]);
                 categories.put(key, info);
             }
-            Range defaultRange = new Range();
-            defaultRange.low = 0;
-            defaultRange.high = Integer.MAX_VALUE;
-            defaultRange.categories
-                = Collections.singletonList(categories.get("DEFAULT"));
-            rangeList.add(defaultRange);
         }
+        Range defaultRange = new Range();
+        defaultRange.low = 0;
+        defaultRange.high = Integer.MAX_VALUE;
+        defaultRange.categories
+            = Collections.singletonList(categories.get("DEFAULT"));
+        rangeList.add(defaultRange);
     }
 
     void readOOV(InputStream unkDef, Grammar grammar) throws IOException {
