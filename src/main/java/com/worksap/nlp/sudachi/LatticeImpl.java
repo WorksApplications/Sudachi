@@ -79,6 +79,10 @@ class LatticeImpl implements Lattice {
         return new LatticeNodeImpl();
     }
 
+    boolean hasPreviousNode(int index) {
+        return !endLists.get(index).isEmpty();
+    }
+
     List<LatticeNodeImpl> getBestPath() {
         viterbi();
         ArrayList<LatticeNodeImpl> result = new ArrayList<>();

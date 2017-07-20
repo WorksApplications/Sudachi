@@ -28,6 +28,10 @@ public class JapaneseTokenizer implements Tokenizer {
 
     @Override
     public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         UTF8InputText input = new UTF8InputText(text);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(input);
@@ -36,7 +40,7 @@ public class JapaneseTokenizer implements Tokenizer {
 
         LatticeImpl lattice = new LatticeImpl(bytes.length, grammar);
         for (int i = 0; i < bytes.length; i++) {
-            if (!input.isCharAlignment(i)) {
+            if (!input.isCharAlignment(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
             List<int[]> words = lexicon.lookup(bytes, i);

@@ -66,7 +66,6 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
             if (length == 0) {
                 continue;
             }
-
             for (CategoryInfo cinfo : r.categories) {
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.name);
@@ -81,9 +80,11 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                 if (cinfo.length > 0) {
                     int lim = Math.min(cinfo.length, llength);
                     for (int i = 1; i <= lim; i++) {
-                        String s = text.substring(0, i);
-                        for (OOV oov : oovs) {
-                            nodes.add(getOOVNode(s, oov));
+                        if (cinfo.isInvoke || !otherWordsLength.contains(i)) {
+                            String s = text.substring(0, i);
+                            for (OOV oov : oovs) {
+                                nodes.add(getOOVNode(s, oov));
+                            }
                         }
                     }
                 }
@@ -163,6 +164,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
             defaultRange.high = Integer.MAX_VALUE;
             defaultRange.categories
                 = Collections.singletonList(categories.get("DEFAULT"));
+            rangeList.add(defaultRange);
         }
     }
 
