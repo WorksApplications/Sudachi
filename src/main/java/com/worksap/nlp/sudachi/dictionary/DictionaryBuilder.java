@@ -88,7 +88,8 @@ public class DictionaryBuilder {
 
             String[] cols = line.split(",");
             if (cols.length != NUMBER_OF_COLUMNS) {
-                System.err.println("Error: " + line);
+                System.err.println("Error: invalid format at line "
+                                   + reader.getLineNumber());
                 continue;
             }
             for (int i = 0; i < cols.length; i++) {
@@ -96,7 +97,9 @@ public class DictionaryBuilder {
             }
 
             if (cols[0].length() == 0) {
-                System.err.println("Error: headword is empty at line " + (wordId + 1));
+                System.err.println("Error: headword is empty at line "
+                                   + reader.getLineNumber());
+                continue;
             }
             if (!cols[1].equals("-1")) {
                 // headword
@@ -171,7 +174,15 @@ public class DictionaryBuilder {
             if (line == null) {
                 break;
             }
+            if (line.matchs("\\s*")) {
+                continue;
+            }
             String[] cols = line.split("\\s+");
+            if (cols.length < 3) {
+                System.err.println("invalid format at line "
+                                   + reader.getLineNumber());
+                continue;
+            }
             short left = Short.parseShort(cols[0]);
             short right = Short.parseShort(cols[1]);
             short cost = Short.parseShort(cols[2]);
