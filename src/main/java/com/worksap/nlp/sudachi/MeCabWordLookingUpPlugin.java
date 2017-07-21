@@ -1,13 +1,13 @@
 package com.worksap.nlp.sudachi;
 
-import java.io.LineNumberReader;
-import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -46,13 +46,15 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
         short posId;
     }
 
+    public String charDef;
+    public String unkDef;
+
     Map<String, CategoryInfo> categories = new HashMap<>();
     List<Range> rangeList = new ArrayList<>();
     Map<String, List<OOV>> oovList = new HashMap<>();
 
-    MeCabWordLookingUpPlugin(Grammar grammar,
-                              InputStream charDef, InputStream unkDef)
-        throws IOException {
+    @Override
+    public void setUp(Grammar grammar) throws IOException {
         readCharacterProperty(charDef);
         readOOV(unkDef, grammar);
     }
@@ -103,101 +105,105 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
         return node;
     }
 
-    void readCharacterProperty(InputStream charDef) throws IOException {
-        LineNumberReader reader
-            = new LineNumberReader(new InputStreamReader(charDef));
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            if (line.matches("\\s*") || line.startsWith("#")) {
-                continue;
-            }
-            String[] cols = line.split("\\s+");
-            if (cols.length < 2) {
-                throw new RuntimeException("invalid format at line " +
-                                           reader.getLineNumber());
-            }
-
-            if (cols[0].startsWith("0x")) {
-                Range range = new Range();
-                String[] r = cols[0].split("\\.\\.");
-                range.low = range.high = Integer.decode(r[0]);
-                if (r.length > 1) {
-                    range.high = Integer.decode(r[1]);
+    void readCharacterProperty(String charDef) throws IOException {
+        try (FileInputStream input = new FileInputStream(charDef);
+             LineNumberReader reader
+             = new LineNumberReader(new InputStreamReader(input))) {
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
                 }
-                if (range.low > range.high) {
-                    throw new RuntimeException("invalid range at line " +
-                                               reader.getLineNumber());
+                if (line.matches("\\s*") || line.startsWith("#")) {
+                    continue;
                 }
-                for (int i = 1; i < cols.length; i++) {
-                    if (cols[i].startsWith("#")) {
-                        break;
-                    }
-                    if (!categories.containsKey(cols[i])) {
-                        throw new RuntimeException(cols[i] + " is undefined at line "
-                                                   + reader.getLineNumber());
-                    }
-                    range.categories.add(categories.get(cols[i]));
-                }
-                rangeList.add(range);
-            } else {
-                if (cols.length < 4) {
+                String[] cols = line.split("\\s+");
+                if (cols.length < 2) {
                     throw new RuntimeException("invalid format at line " +
                                                reader.getLineNumber());
                 }
-                String key = cols[0];
-                if (categories.containsKey(key)) {
-                    throw new RuntimeException(cols[0] + " is already defined at line "
-                                               + reader.getLineNumber());
+
+                if (cols[0].startsWith("0x")) {
+                    Range range = new Range();
+                    String[] r = cols[0].split("\\.\\.");
+                    range.low = range.high = Integer.decode(r[0]);
+                    if (r.length > 1) {
+                        range.high = Integer.decode(r[1]);
+                    }
+                    if (range.low > range.high) {
+                        throw new RuntimeException("invalid range at line " +
+                                                   reader.getLineNumber());
+                    }
+                    for (int i = 1; i < cols.length; i++) {
+                        if (cols[i].startsWith("#")) {
+                            break;
+                        }
+                        if (!categories.containsKey(cols[i])) {
+                            throw new RuntimeException(cols[i] + " is undefined at line "
+                                                       + reader.getLineNumber());
+                        }
+                        range.categories.add(categories.get(cols[i]));
+                    }
+                    rangeList.add(range);
+                } else {
+                    if (cols.length < 4) {
+                        throw new RuntimeException("invalid format at line " +
+                                                   reader.getLineNumber());
+                    }
+                    String key = cols[0];
+                    if (categories.containsKey(key)) {
+                        throw new RuntimeException(cols[0] + " is already defined at line "
+                                                   + reader.getLineNumber());
+                    }
+                    CategoryInfo info = new CategoryInfo();
+                    info.name = key;
+                    info.isInvoke = (!cols[1].equals("0"));
+                    info.isGroup = (!cols[2].equals("0"));
+                    info.length = Integer.parseInt(cols[3]);
+                    categories.put(key, info);
                 }
-                CategoryInfo info = new CategoryInfo();
-                info.name = key;
-                info.isInvoke = (!cols[1].equals("0"));
-                info.isGroup = (!cols[2].equals("0"));
-                info.length = Integer.parseInt(cols[3]);
-                categories.put(key, info);
             }
+            Range defaultRange = new Range();
+            defaultRange.low = 0;
+            defaultRange.high = Integer.MAX_VALUE;
+            defaultRange.categories
+                = Collections.singletonList(categories.get("DEFAULT"));
+            rangeList.add(defaultRange);
         }
-        Range defaultRange = new Range();
-        defaultRange.low = 0;
-        defaultRange.high = Integer.MAX_VALUE;
-        defaultRange.categories
-            = Collections.singletonList(categories.get("DEFAULT"));
-        rangeList.add(defaultRange);
     }
 
-    void readOOV(InputStream unkDef, Grammar grammar) throws IOException {
-        LineNumberReader reader
-            = new LineNumberReader(new InputStreamReader(unkDef));
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            String[] cols = line.split(",");
-            if (cols.length < 10) {
-                throw new RuntimeException("invalid format at line " +
-                                           reader.getLineNumber());
-            }
-            if (!categories.containsKey(cols[0])) {
-                throw new RuntimeException(cols[0] + " is undefined at line "
-                                           + reader.getLineNumber());
-            }
+    void readOOV(String unkDef, Grammar grammar) throws IOException {
+        try (FileInputStream input = new FileInputStream(unkDef);
+             LineNumberReader reader
+             = new LineNumberReader(new InputStreamReader(input))) {
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                String[] cols = line.split(",");
+                if (cols.length < 10) {
+                    throw new RuntimeException("invalid format at line " +
+                                               reader.getLineNumber());
+                }
+                if (!categories.containsKey(cols[0])) {
+                    throw new RuntimeException(cols[0] + " is undefined at line "
+                                               + reader.getLineNumber());
+                }
 
-            OOV oov = new OOV();
-            oov.leftId = Short.parseShort(cols[1]);
-            oov.rightId = Short.parseShort(cols[2]);
-            oov.cost = Short.parseShort(cols[3]);
-            oov.posId
-                = grammar.getPartOfSpeechId(cols[4], cols[5], cols[6],
-                                            cols[7], cols[8], cols[9]);
+                OOV oov = new OOV();
+                oov.leftId = Short.parseShort(cols[1]);
+                oov.rightId = Short.parseShort(cols[2]);
+                oov.cost = Short.parseShort(cols[3]);
+                oov.posId
+                    = grammar.getPartOfSpeechId(cols[4], cols[5], cols[6],
+                                                cols[7], cols[8], cols[9]);
 
-            if (!oovList.containsKey(cols[0])) {
-                oovList.put(cols[0], new ArrayList<OOV>());
+                if (!oovList.containsKey(cols[0])) {
+                    oovList.put(cols[0], new ArrayList<OOV>());
+                }
+                oovList.get(cols[0]).add(oov);
             }
-            oovList.get(cols[0]).add(oov);
         }
     }
 }
