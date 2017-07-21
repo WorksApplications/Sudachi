@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.Lexicon;
 
 class LatticeImpl implements Lattice {
 

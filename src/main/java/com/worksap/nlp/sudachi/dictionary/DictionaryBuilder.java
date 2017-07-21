@@ -1,10 +1,10 @@
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -14,11 +14,8 @@ import java.util.TreeMap;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.Comparator;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.worksap.nlp.dartsclone.DoubleArray;
 
 public class DictionaryBuilder {
@@ -79,8 +76,8 @@ public class DictionaryBuilder {
     }
 
     void buildLexicon(FileInputStream lexiconInput) throws IOException {
-        BufferedReader reader
-            = new BufferedReader(new InputStreamReader(lexiconInput));
+        LineNumberReader reader
+            = new LineNumberReader(new InputStreamReader(lexiconInput));
 
         int wordId = 0;
         for (; ; wordId++) {
@@ -149,10 +146,14 @@ public class DictionaryBuilder {
         buffer.clear();
 
 
-        BufferedReader reader
-            = new BufferedReader(new InputStreamReader(matrixInput));
+        LineNumberReader reader
+            = new LineNumberReader(new InputStreamReader(matrixInput));
+        String header = reader.readLine();
+        if (header == null) {
+            throw new RuntimeException("invalid format at line " + reader.getLineNumber());
+        }
 
-        String[] lr = reader.readLine().split("\\s+");
+        String[] lr = header.split("\\s+");
         short leftSize = Short.parseShort(lr[0]);
         short rightSize = Short.parseShort(lr[1]);
 
@@ -307,11 +308,12 @@ public class DictionaryBuilder {
     }
 
     public static void main(String[] args) throws IOException {
-        FileInputStream lexiconInput = new FileInputStream(args[0]);
-        FileInputStream matrixInput = new FileInputStream(args[1]);
-        FileOutputStream output = new FileOutputStream(args[2]);
+        try (FileInputStream lexiconInput = new FileInputStream(args[0]);
+             FileInputStream matrixInput = new FileInputStream(args[1]);
+             FileOutputStream output = new FileOutputStream(args[2])) {
 
-        DictionaryBuilder builder = new DictionaryBuilder();
-        builder.build(lexiconInput, matrixInput, output);
+            DictionaryBuilder builder = new DictionaryBuilder();
+            builder.build(lexiconInput, matrixInput, output);
+        }
     }
 }

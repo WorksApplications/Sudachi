@@ -1,6 +1,5 @@
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.util.List;
 import java.nio.ByteBuffer;
 
 class WordIdTable {

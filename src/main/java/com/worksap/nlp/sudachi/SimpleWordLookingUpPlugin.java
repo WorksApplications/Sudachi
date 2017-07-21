@@ -17,7 +17,9 @@ public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
     @Override
     public void setUp(Grammar grammar) {
-        oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings.toArray(new String[0]));
+        if (oovPOSStrings != null) {
+            oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings.toArray(new String[0]));
+        }
     }
 
     @Override

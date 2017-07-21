@@ -6,12 +6,10 @@ class WordInfoList {
 
     private final ByteBuffer bytes;
     private final int offset;
-    private final int infoOffset;
 
     WordInfoList(ByteBuffer bytes, int offset, int wordSize) {
         this.bytes = bytes;
         this.offset = offset;
-        infoOffset = offset + 4 * wordSize;
     }
 
     WordInfo getWordInfo(int wordId) {
