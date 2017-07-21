@@ -18,6 +18,7 @@ public class GrammarImpl implements Grammar {
 
     private int storageSize;
 
+    @SuppressWarnings("serial")
     public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;

@@ -81,7 +81,7 @@ class MockMorphemeArray extends AbstractList<Morpheme> {
 
     boolean elementEquals(int index, Morpheme m) {
         return getSurface(index).equals(m.surface()) &&
-            getPartOfSpeech(index).equals(m.partOfSpeech()) &&
+            equals(getPartOfSpeech(index), m.partOfSpeech()) &&
             getDictionaryForm(index).equals(m.dictionaryForm());
     }
 
@@ -152,5 +152,17 @@ class MockMorphemeArray extends AbstractList<Morpheme> {
 
     boolean isOOV(int index) {
         return false;
+    }
+
+    static boolean equals(String[] s1, String[] s2) {
+        if (s1.length != s2.length) {
+            return false;
+        }
+        for (int i = 0; i < s1.length; i++) {
+            if (!s1[i].equals(s2[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 }
