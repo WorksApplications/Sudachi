@@ -1,26 +1,23 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
-class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
+public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
-    final short oovPOSId;
-    final short leftid;
-    final short rightid;
-    final short cost;
+    public ArrayList<String> oovPOSStrings;
+    short oovPOSId;
+    public short leftid;
+    public short rightid;
+    public short cost;
 
-    SimpleWordLookingUpPlugin(Grammar grammar,
-                              short leftid, short rightid, short cost) {
-        oovPOSId
-            = grammar.getPartOfSpeechId(new String[] {"名詞", "普通名詞",
-                                                      "一般", "*", "*", "*"});
-        this.leftid = leftid;
-        this.rightid = rightid;
-        this.cost = cost;
+    @Override
+    public void setUp(Grammar grammar) {
+        oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings.toArray(new String[0]));
     }
 
     @Override

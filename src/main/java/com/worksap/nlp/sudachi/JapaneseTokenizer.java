@@ -65,6 +65,7 @@ public class JapaneseTokenizer implements Tokenizer {
 
             // OOV
             for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
+                // ToDo: add other oov  to words
                 for (LatticeNode node : plugin.getOOV(input, i, words)) {
                     lattice.insert(node.getBegin(), node.getEnd(), node);
                 }

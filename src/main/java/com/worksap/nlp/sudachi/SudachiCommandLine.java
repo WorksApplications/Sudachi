@@ -2,30 +2,64 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 public class SudachiCommandLine {
 
+    static String readAll(InputStream input) throws IOException {
+        BufferedReader reader
+            = new BufferedReader(new InputStreamReader(input));
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            sb.append(line);
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        if (args.length > 0) {
-            switch (args[0]) {
-            case "A":
-                mode = Tokenizer.SplitMode.A;
-                break;
-            case "B":
-                mode = Tokenizer.SplitMode.B;
-                break;
-            default:
-                mode = Tokenizer.SplitMode.C;
-                break;
+        String settings = null;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-r") && i + 1 < args.length) {
+                try (FileInputStream input = new FileInputStream(args[++i])) {
+                    settings = readAll(input);
+                }
+            } else if (args[i].equals("-m") && i + 1 < args.length) {
+                switch (args[++i]) {
+                case "A":
+                    mode = Tokenizer.SplitMode.A;
+                    break;
+                case "B":
+                    mode = Tokenizer.SplitMode.B;
+                    break;
+                default:
+                    mode = Tokenizer.SplitMode.C;
+                    break;
+                }
+            }
+        }
+
+        if (settings == null) {
+            try (InputStream input
+                 = SudachiCommandLine.class
+                 .getResourceAsStream("/sudachi.json")) {
+                settings = readAll(input);
             }
         }
 
         BufferedReader reader
             = new BufferedReader(new InputStreamReader(System.in));
 
-        JapaneseDictionary dict = new JapaneseDictionary();
+        Dictionary dict = new DictionaryFactory().create(settings);
         Tokenizer tokenizer = dict.create();
 
         while (true) {

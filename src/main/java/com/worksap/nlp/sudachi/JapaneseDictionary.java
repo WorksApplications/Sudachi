@@ -8,6 +8,8 @@ import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
@@ -20,25 +22,35 @@ public class JapaneseDictionary implements Dictionary {
     List<InputTextPlugin> inputTextPlugins;
     List<WordLookingUpPlugin> wordLookingUpPlugins;
 
-    JapaneseDictionary() throws IOException {
-        FileInputStream istream = new FileInputStream("system.dic");
-        FileChannel inputFile = istream.getChannel();
-        ByteBuffer bytes
-            = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
-        inputFile.close();
-        bytes.order(ByteOrder.LITTLE_ENDIAN);
+    JapaneseDictionary(String jsonString) throws IOException {
+        Settings settings = parseSettings(jsonString);
+        readSystemDictionary(settings.getSystemDictPath());
+        inputTextPlugins = settings.getInputTextPlugin();
+        wordLookingUpPlugins = settings.getWordLookingUpPlugin();
+        // ToDo: set fallback OOV provider
+        for (WordLookingUpPlugin p : wordLookingUpPlugins) {
+            p.setUp(grammar);
+        }
+    }
+
+    Settings parseSettings(String settings) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+        return mapper.readValue(settings, Settings.class);
+    }
+
+    void readSystemDictionary(String filename) throws IOException {
+        ByteBuffer bytes;
+        try (FileInputStream istream = new FileInputStream(filename);
+             FileChannel inputFile = istream.getChannel()) {
+            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
+                                  inputFile.size());
+            bytes.order(ByteOrder.LITTLE_ENDIAN);
+        }
 
         GrammarImpl grammar = new GrammarImpl(bytes, 0);
         this.grammar = grammar;
         lexicon = new DoubleArrayLexicon(bytes, grammar.storageSize());
-
-        inputTextPlugins = Collections.emptyList();
-
-        WordLookingUpPlugin mecab
-            = new MeCabWordLookingUpPlugin(grammar,
-                                           new FileInputStream("char.def"),
-                                           new FileInputStream("unk.def"));
-        wordLookingUpPlugins = Collections.singletonList(mecab);
     }
 
     @Override
