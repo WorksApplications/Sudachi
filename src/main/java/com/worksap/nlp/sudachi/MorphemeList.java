@@ -9,7 +9,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
-class MorphemeList extends AbstractList<Morpheme> {
+public class MorphemeList extends AbstractList<Morpheme> {
 
     final InputText<byte[]> inputText;
     final Grammar grammar;
@@ -86,5 +86,9 @@ class MorphemeList extends AbstractList<Morpheme> {
 
     boolean isOOV(int index) {
         return path.get(index).isOOV();
+    }
+
+    public int getInternalCost() {
+        return path.get(path.size() - 1).cost - path.get(0).cost;
     }
 }
