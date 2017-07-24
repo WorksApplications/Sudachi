@@ -15,11 +15,19 @@ public class Settings {
     public ArrayList<WordLookingUpPlugin> wordLookingUpPlugin;
 
     String getSystemDictPath() {
+        if (systemDict == null) {
+            throw new RuntimeException("system dictionary is not specified");
+        }
+
         return (isAbsolutePath(systemDict) || path == null) ? systemDict
             : Paths.get(path, systemDict).toString();
     }
 
     List<String> getUserDictPath() {
+        if (userDict == null) {
+            return Collections.emptyList();
+        }
+
         return userDict.stream()
             .map(u -> (isAbsolutePath(u) || path == null) ? u
                  : Paths.get(path, u).toString())

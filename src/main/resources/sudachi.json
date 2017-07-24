@@ -1,5 +1,6 @@
 {
     "systemDict": "system.dic",
+    "userDict": [ "user.dic" ],
     "wordLookingUpPlugin": [
         [ "com.worksap.nlp.sudachi.MeCabWordLookingUpPlugin", {
             "charDef": "char.def",

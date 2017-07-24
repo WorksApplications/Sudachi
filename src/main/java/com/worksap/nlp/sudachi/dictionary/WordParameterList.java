@@ -32,6 +32,10 @@ class WordParameterList {
         return bytes.getShort(offset + ELEMENT_SIZE * wordId + 4);
     }
 
+    void setCost(int wordId, short cost) {
+        bytes.putShort(offset + ELEMENT_SIZE * wordId + 4, cost);
+    }
+
     int endOffset() {
         return offset + 4 + ELEMENT_SIZE * size;
     }

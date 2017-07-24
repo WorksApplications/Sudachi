@@ -8,7 +8,12 @@ import java.util.stream.Stream;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 
+import com.worksap.nlp.sudachi.MorphemeList;
+import com.worksap.nlp.sudachi.Tokenizer;
+
 public class DoubleArrayLexicon implements Lexicon {
+
+    static final int USER_DICT_COST_PAR_MORPH = -20;
 
     private WordIdTable wordIdTable;
     private WordParameterList wordParams;
@@ -64,5 +69,24 @@ public class DoubleArrayLexicon implements Lexicon {
     @Override
     public WordInfo getWordInfo(int wordId) {
         return wordInfos.getWordInfo(wordId);
+    }
+
+    public void calculateCost(Tokenizer tokenizer) {
+        for (int wordId = 0; wordId < wordParams.size(); wordId++) {
+            if (getCost(wordId) != Short.MIN_VALUE) {
+                continue;
+            }
+            String surface = getWordInfo(wordId).getSurface();
+            MorphemeList ms = (MorphemeList)tokenizer.tokenize(surface);
+            int cost = ms.getInternalCost()
+                + USER_DICT_COST_PAR_MORPH * ms.size();
+            System.err.println("" + cost);
+            if (cost > Short.MAX_VALUE) {
+                cost = Short.MAX_VALUE;
+            } else if (cost < Short.MIN_VALUE) {
+                cost = Short.MIN_VALUE;
+            }
+            wordParams.setCost(wordId, (short)cost);
+        }
     }
 }
