@@ -80,7 +80,6 @@ public class DoubleArrayLexicon implements Lexicon {
             MorphemeList ms = (MorphemeList)tokenizer.tokenize(surface);
             int cost = ms.getInternalCost()
                 + USER_DICT_COST_PAR_MORPH * ms.size();
-            System.err.println("" + cost);
             if (cost > Short.MAX_VALUE) {
                 cost = Short.MAX_VALUE;
             } else if (cost < Short.MIN_VALUE) {
