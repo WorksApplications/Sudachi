@@ -174,7 +174,7 @@ public class DictionaryBuilder {
             if (line == null) {
                 break;
             }
-            if (line.matchs("\\s*")) {
+            if (line.matches("\\s*")) {
                 continue;
             }
             String[] cols = line.split("\\s+");
