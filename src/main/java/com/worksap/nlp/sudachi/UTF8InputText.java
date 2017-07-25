@@ -39,15 +39,15 @@ class UTF8InputText implements InputText<byte[]> {
         throws StringIndexOutOfBoundsException {
         if (begin < 0)
             throw new StringIndexOutOfBoundsException(begin);
-        if (begin > modifiedText.length())
+        if (begin > originalText.length())
             throw new StringIndexOutOfBoundsException("begin > length()");
         if (begin > end)
             throw new StringIndexOutOfBoundsException("begin > end");
         if (begin == end)
             throw new IllegalArgumentException("begin == end");
         
-        if (end > modifiedText.length()) {
-            end = modifiedText.length();
+        if (end > originalText.length()) {
+            end = originalText.length();
         }
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         int length = bytes.length;
@@ -72,7 +72,7 @@ class UTF8InputText implements InputText<byte[]> {
                 offsets.add(offsetBegin + i, begin);
             }
         }
-        modifiedText = new String(getUTF8TextBytes(), StandardCharsets.UTF_8);
+        modifiedText = new String(getByteText(), StandardCharsets.UTF_8);
     }
     
     @Override
@@ -85,7 +85,7 @@ class UTF8InputText implements InputText<byte[]> {
         return modifiedText;
     }
     
-    public byte[] getUTF8TextBytes() {
+    public byte[] getByteText() {
         byteCache = new byte[utf8TextBytes.size()];
         for (int i = 0; i < utf8TextBytes.size(); i++) {
             byteCache[i] = utf8TextBytes.get(i);
