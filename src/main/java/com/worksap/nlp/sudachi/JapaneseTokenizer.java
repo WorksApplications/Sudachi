@@ -49,6 +49,8 @@ public class JapaneseTokenizer implements Tokenizer {
                 }
             }
             */
+            boolean hasWords = !words.isEmpty();
+
             for (int[] r : words) {
                 int wordId = r[0];
                 int end = r[1];
@@ -63,10 +65,13 @@ public class JapaneseTokenizer implements Tokenizer {
 
             // OOV
             for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
-                // ToDo: add other oov  to words
-                for (LatticeNode node : plugin.getOOV(input, i, words)) {
+                for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
+                    hasWords = true;
                     lattice.insert(node.getBegin(), node.getEnd(), node);
                 }
+            }
+            if (!hasWords) {
+                // Todo: add fallback
             }
         }
 
