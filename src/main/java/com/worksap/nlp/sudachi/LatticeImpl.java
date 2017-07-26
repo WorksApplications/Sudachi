@@ -1,11 +1,13 @@
 package com.worksap.nlp.sudachi;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class LatticeImpl implements Lattice {
 
@@ -92,6 +94,23 @@ class LatticeImpl implements Lattice {
         }
         Collections.reverse(result);
         return result;
+    }
+
+    void dump(PrintStream output) {
+        int index = 0;
+        for (int i = 0; i < size + 1; i++) {
+            for (LatticeNodeImpl rNode : beginLists.get(i)) {
+                output.print(String.format("%d: %s: ", index,
+                                           rNode.toString()));
+                index++;
+                for (LatticeNodeImpl lNode : endLists.get(i)) {
+                    int cost = lNode.totalCost
+                        + grammar.getConnectCost(lNode.rightId, rNode.leftId);
+                    output.print(String.format("%d ", cost));
+                }
+                output.println();
+            }
+        }
     }
 
     private void viterbi() {

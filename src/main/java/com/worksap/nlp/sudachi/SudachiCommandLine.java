@@ -50,6 +50,8 @@ public class SudachiCommandLine {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
         PrintStream output = System.out;
+        boolean isEnableDump = false;
+
         int i = 0;
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
@@ -70,6 +72,8 @@ public class SudachiCommandLine {
                 }
             } else if (args[i].equals("-o") && i + 1 < args.length) {
                 output = new PrintStream(args[++i]);
+            } else if (args[i].equals("-d")) {
+                isEnableDump = true;
             } else {
                 break;
             }
@@ -85,6 +89,9 @@ public class SudachiCommandLine {
 
         Dictionary dict = new DictionaryFactory().create(settings);
         Tokenizer tokenizer = dict.create();
+        if (isEnableDump) {
+            tokenizer.setDumpOutput(output);
+        }
 
         if (i < args.length) {
             for ( ; i < args.length; i++) {
