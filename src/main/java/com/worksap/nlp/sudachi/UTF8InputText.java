@@ -6,15 +6,12 @@ import java.util.ArrayList;
 class UTF8InputText implements InputText<byte[]> {
     
     private final String originalText;
-    private String modifiedText;
     private byte[] byteCache;
     private ArrayList<Byte> utf8TextBytes;
     private ArrayList<Integer> offsets;
     
     UTF8InputText(String text) {
         originalText = text;
-        modifiedText = text;
-        
         byteCache = text.getBytes(StandardCharsets.UTF_8);
         utf8TextBytes = new ArrayList<>(byteCache.length);
         for (byte b : byteCache) {
@@ -72,7 +69,6 @@ class UTF8InputText implements InputText<byte[]> {
                 offsets.add(offsetBegin + i, begin);
             }
         }
-        modifiedText = new String(getByteText(), StandardCharsets.UTF_8);
     }
     
     @Override
@@ -82,7 +78,7 @@ class UTF8InputText implements InputText<byte[]> {
     
     @Override
     public String getText() {
-        return modifiedText;
+        return new String(getByteText(), StandardCharsets.UTF_8);
     }
     
     public byte[] getByteText() {
