@@ -69,4 +69,18 @@ public class LatticeNodeImpl implements LatticeNode {
         extraWordInfo = wordInfo;
         wordId = -1;
     }
+
+    @Override
+    public String toString() {
+        String surface;
+        if (wordId < 0 && extraWordInfo == null) {
+            surface = "(null)";
+        } else {
+            surface = getWordInfo().getSurface();
+        }
+
+        return String.format("%d %d %s(%d) %d %d %d",
+                             getBegin(), getEnd(), surface, wordId,
+                             leftId, rightId, cost);
+    }
 }

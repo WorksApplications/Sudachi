@@ -1,5 +1,6 @@
 package com.worksap.nlp.sudachi;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -25,6 +26,10 @@ class MockTokenizer implements Tokenizer {
 
         MockMorphemeArray array = new MockMorphemeArray(splitted);
         return array;
+    }
+
+    @Override
+    public void setDumpOutput(PrintStream output) {
     }
 
     static String[] split(SplitMode mode, String text) {
