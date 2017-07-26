@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 
 public class SudachiCommandLine {
 
@@ -22,10 +23,35 @@ public class SudachiCommandLine {
         return sb.toString();
     }
 
+    static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
+                    InputStream input, PrintStream output)
+        throws IOException {
+
+        try (InputStreamReader inputReader = new InputStreamReader(input);
+             BufferedReader reader = new BufferedReader(inputReader)) {
+
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                for (Morpheme m : tokenizer.tokenize(mode, line)) {
+                    output.print(m.surface() + "\t");
+                    output.print(String.join(",", m.partOfSpeech()) + "\t");
+                    output.print(m.normalizedForm() + "\t");
+                    output.println(m.isOOV() ? "*" : "");
+                }
+                output.println("EOS");
+            }
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
-        for (int i = 0; i < args.length; i++) {
+        PrintStream output = System.out;
+        int i = 0;
+        for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
                 try (FileInputStream input = new FileInputStream(args[++i])) {
                     settings = readAll(input);
@@ -42,6 +68,10 @@ public class SudachiCommandLine {
                     mode = Tokenizer.SplitMode.C;
                     break;
                 }
+            } else if (args[i].equals("-o") && i + 1 < args.length) {
+                output = new PrintStream(args[++i]);
+            } else {
+                break;
             }
         }
 
@@ -53,24 +83,18 @@ public class SudachiCommandLine {
             }
         }
 
-        BufferedReader reader
-            = new BufferedReader(new InputStreamReader(System.in));
-
         Dictionary dict = new DictionaryFactory().create(settings);
         Tokenizer tokenizer = dict.create();
 
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
+        if (i < args.length) {
+            for ( ; i < args.length; i++) {
+                try (FileInputStream input = new FileInputStream(args[i])) {
+                    run(tokenizer, mode, input, output);
+                }
             }
-            for (Morpheme m : tokenizer.tokenize(mode, line)) {
-                System.out.print(m.surface() + "\t");
-                System.out.print(String.join(",", m.partOfSpeech()) + "\t");
-                System.out.print(m.normalizedForm() + "\t");
-                System.out.println(m.isOOV() ? "*" : "");
-            }
-            System.out.println("EOS");
+        } else {
+            run(tokenizer, mode, System.in, output);
         }
+        output.close();
     }
 }
