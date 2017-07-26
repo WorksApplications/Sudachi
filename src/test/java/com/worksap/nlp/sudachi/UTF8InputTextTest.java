@@ -19,6 +19,7 @@ public class UTF8InputTextTest {
     @Test
     public void getOriginalText() {
         assertThat(text.getOriginalText(), is(originalText));
+        assertThat(text.getText(), is(originalText));
     }
     
     @Test
@@ -52,6 +53,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithSameLength() {
         text.replace(2, 4, "ああ");
+        assertThat(text.getOriginalText(), is(originalText));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(24));
         assertThat(text.getOriginalOffset(0), is(0));
@@ -67,6 +69,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithDeletion() {
         text.replace(2, 4, "あ");
+        assertThat(text.getOriginalText(), is(originalText));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(21));
         assertThat(text.getOriginalOffset(0), is(0));
@@ -79,6 +82,7 @@ public class UTF8InputTextTest {
     @Test
     public void replaceWithInsertion() {
         text.replace(2, 4, "あああ");
+        assertThat(text.getOriginalText(), is(originalText));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(27));
         assertThat(text.getOriginalOffset(0), is(0));
