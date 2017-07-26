@@ -11,18 +11,15 @@ public abstract class WordLookingUpPlugin {
     public abstract void setUp(Grammar grammar) throws IOException;
 
     public abstract List<LatticeNode> provideOOV(String text,
-                                                 List<Integer> otherWordsLength);
+                                                 boolean hasOtherWords);
 
     List<LatticeNode> getOOV(UTF8InputText inputText, int offset,
-                             List<int[]> otherWords) {
+                             boolean hasOtherWords) {
         byte[] bytes = inputText.getByteText();
         String text =
             new String(bytes, offset, bytes.length - offset);
-        List<Integer> othersLength = otherWords.stream()
-            .map(o -> new String(bytes, offset, o[1] - offset).length())
-            .collect(Collectors.toList());
 
-        List<LatticeNode> nodes = provideOOV(text, othersLength);
+        List<LatticeNode> nodes = provideOOV(text, hasOtherWords);
         for (LatticeNode node : nodes) {
             LatticeNodeImpl n = (LatticeNodeImpl)node;
             n.begin = offset;

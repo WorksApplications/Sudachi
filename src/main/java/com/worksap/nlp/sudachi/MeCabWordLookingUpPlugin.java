@@ -60,8 +60,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
     }
 
     @Override
-    public List<LatticeNode> provideOOV(String text,
-                                        List<Integer> otherWordsLength) {
+    public List<LatticeNode> provideOOV(String text, boolean hasOtherWords) {
         List<LatticeNode> nodes = new ArrayList<>();
         for (Range r : rangeList) {
             int length = r.containingLength(text);
@@ -72,7 +71,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.name);
                 if (cinfo.isGroup &&
-                    (cinfo.isInvoke || otherWordsLength.isEmpty())) {
+                    (cinfo.isInvoke || !hasOtherWords)) {
                     String s = text.substring(0, length);
                     for (OOV oov : oovs) {
                         nodes.add(getOOVNode(s, oov));
@@ -82,7 +81,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                 if (cinfo.length > 0) {
                     int lim = Math.min(cinfo.length, llength);
                     for (int i = 1; i <= lim; i++) {
-                        if (cinfo.isInvoke || otherWordsLength.isEmpty()) {
+                        if (cinfo.isInvoke || !hasOtherWords) {
                             String s = text.substring(0, i);
                             for (OOV oov : oovs) {
                                 nodes.add(getOOVNode(s, oov));
