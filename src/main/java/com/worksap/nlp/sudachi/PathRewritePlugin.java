@@ -2,7 +2,13 @@ package com.worksap.nlp.sudachi;
 
 import java.util.List;
 
-public interface PathRewritePlugin {
+public abstract class PathRewritePlugin {
 
-    public void rewrite(List<LatticeNode> path);
+    public abstract void rewrite(List<LatticeNode> path);
+
+    LatticeNode createNode() {
+        LatticeNode node = new LatticeNodeImpl();
+        return node;
+    }
+
 }
