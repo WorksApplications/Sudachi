@@ -13,6 +13,7 @@ public class Settings {
     public ArrayList<String> userDict;
     public ArrayList<InputTextPlugin> inputTextPlugin;
     public ArrayList<WordLookingUpPlugin> wordLookingUpPlugin;
+    public ArrayList<PathRewritePlugin> pathRewritePlugin;
 
     String getSystemDictPath() {
         if (systemDict == null) {
@@ -41,6 +42,11 @@ public class Settings {
 
     List<WordLookingUpPlugin> getWordLookingUpPlugin() {
         return (wordLookingUpPlugin != null) ? wordLookingUpPlugin
+            : Collections.emptyList();
+    }
+
+    List<PathRewritePlugin> getPathRewritePlugin() {
+        return (pathRewritePlugin != null) ? pathRewritePlugin
             : Collections.emptyList();
     }
 
