@@ -22,6 +22,7 @@ class JapaneseDictionary implements Dictionary {
     LexiconSet lexicon;
     List<InputTextPlugin> inputTextPlugins;
     List<WordLookingUpPlugin> wordLookingUpPlugins;
+    List<PathRewritePlugin> pathRewritePlugins;
 
     JapaneseDictionary(String jsonString) throws IOException {
         Settings settings = parseSettings(jsonString);
@@ -34,6 +35,7 @@ class JapaneseDictionary implements Dictionary {
         for (WordLookingUpPlugin p : wordLookingUpPlugins) {
             p.setUp(grammar);
         }
+        pathRewritePlugins = settings.getPathRewritePlugin();
 
         for (String filename : settings.getUserDictPath()) {
             readUserDictionary(filename);
@@ -84,6 +86,7 @@ class JapaneseDictionary implements Dictionary {
     @Override
     public Tokenizer create() {
         return new JapaneseTokenizer(grammar, lexicon,
-                                     inputTextPlugins, wordLookingUpPlugins);
+                                     inputTextPlugins, wordLookingUpPlugins,
+                                     pathRewritePlugins);
     }
 }

@@ -14,12 +14,12 @@ public class MorphemeList extends AbstractList<Morpheme> {
     final InputText<byte[]> inputText;
     final Grammar grammar;
     final Lexicon lexicon;
-    final List<LatticeNodeImpl> path;
+    final List<LatticeNode> path;
 
     MorphemeList(InputText<byte[]> input,
                  Grammar grammar,
                  Lexicon lexicon,
-                 List<LatticeNodeImpl> path) {
+                 List<LatticeNode> path) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
@@ -68,17 +68,15 @@ public class MorphemeList extends AbstractList<Morpheme> {
             return Collections.singletonList(get(index));
         }
 
-        List<LatticeNodeImpl> nodes = new ArrayList<>(wordIds.length);
-        for (int wid : wordIds) {
-            nodes.add(new LatticeNodeImpl(lexicon,
-                                          (short)0, (short)0, (short)0, wid));
-        }
-
         int offset = path.get(index).getBegin();
-        for (LatticeNodeImpl n : nodes) {
+        List<LatticeNode> nodes = new ArrayList<>(wordIds.length);
+        for (int wid : wordIds) {
+            LatticeNodeImpl n
+                = new LatticeNodeImpl(lexicon, (short)0, (short)0, (short)0, wid);
             n.begin = offset;
             offset += n.getWordInfo().getLength();
             n.end = offset;
+            nodes.add(n);
         }
 
         return new MorphemeList(inputText, grammar, lexicon, nodes);
@@ -89,6 +87,6 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     public int getInternalCost() {
-        return path.get(path.size() - 1).cost - path.get(0).cost;
+        return path.get(path.size() - 1).getPathCost() - path.get(0).getPathCost();
     }
 }

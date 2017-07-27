@@ -14,16 +14,19 @@ public class JapaneseTokenizer implements Tokenizer {
     Lexicon lexicon;
     List<InputTextPlugin> inputTextPlugins;
     List<WordLookingUpPlugin> wordLookingUpPlugins;
+    List<PathRewritePlugin> pathRewritePlugins;
     PrintStream dumpOutput;
 
     JapaneseTokenizer(Grammar grammar, Lexicon lexicon,
                       List<InputTextPlugin> inputTextPlugins,
-                      List<WordLookingUpPlugin> wordLookingUpPlugins) {
+                      List<WordLookingUpPlugin> wordLookingUpPlugins,
+                      List<PathRewritePlugin> pathRewritePlugins) {
 
         this.grammar = grammar;
         this.lexicon = lexicon;
         this.inputTextPlugins = inputTextPlugins;
         this.wordLookingUpPlugins = wordLookingUpPlugins;
+        this.pathRewritePlugins = pathRewritePlugins;
     }
 
     @Override
@@ -77,16 +80,19 @@ public class JapaneseTokenizer implements Tokenizer {
             }
         }
 
-        List<LatticeNodeImpl> path = lattice.getBestPath();
+        List<LatticeNode> path = lattice.getBestPath();
         path.remove(path.size() - 1); // remove EOS
+        for (PathRewritePlugin plugin : pathRewritePlugins) {
+            plugin.rewrite(path);
+        }
 
         if (dumpOutput != null) {
             lattice.dump(dumpOutput);
         }
 
         if (mode != Tokenizer.SplitMode.C) {
-            List<LatticeNodeImpl> newPath = new ArrayList<>();
-            for (LatticeNodeImpl node : path) {
+            List<LatticeNode> newPath = new ArrayList<>();
+            for (LatticeNode node : path) {
                 int[] wids;
                 if (mode == Tokenizer.SplitMode.A) {
                     wids = node.getWordInfo().getAunitSplit();
@@ -96,7 +102,7 @@ public class JapaneseTokenizer implements Tokenizer {
                 if (wids.length == 0) {
                     newPath.add(node);
                 } else {
-                    int offset = node.begin;
+                    int offset = node.getBegin();
                     for (int wid : wids) {
                         LatticeNodeImpl n
                             = new LatticeNodeImpl(lexicon,

@@ -11,4 +11,5 @@ public interface LatticeNode {
     public void setOOV();
     public WordInfo getWordInfo();
     public void setWordInfo(WordInfo wordInfo);
+    public int getPathCost();
 }

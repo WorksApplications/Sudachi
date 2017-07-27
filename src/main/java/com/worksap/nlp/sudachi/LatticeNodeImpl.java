@@ -71,6 +71,11 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
+    public int getPathCost() {
+        return cost;
+    }
+
+    @Override
     public String toString() {
         String surface;
         if (wordId < 0 && extraWordInfo == null) {
