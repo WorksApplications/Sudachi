@@ -3,6 +3,7 @@ package com.worksap.nlp.sudachi;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -47,17 +48,17 @@ public class JapaneseTokenizer implements Tokenizer {
             if (!input.isCharAlignment(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
-            Stream<int[]> words = lexicon.lookup(bytes, i);
+            Iterator<int[]> iterator = lexicon.lookup(bytes, i);
             /*
-            if (words.isEmpty()) {
+            if (!iterator.hasNext()) {
                 for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
                     plugin.rewrite(bytes, i);
                 }
             }
             */
-            final boolean[] hasWords = { false };
-            final int index = i;
-            words.forEach(r -> {
+            boolean hasWords = iterator.hasNext();
+            while (iterator.hasNext()) {
+                int[] r = iterator.next();
                 int wordId = r[0];
                 int end = r[1];
 
@@ -66,18 +67,17 @@ public class JapaneseTokenizer implements Tokenizer {
                                                     lexicon.getRightId(wordId),
                                                     lexicon.getCost(wordId),
                                                     wordId);
-                lattice.insert(index, end, n);
-                hasWords[0] = true;
-                });
+                lattice.insert(i, end, n);
+            }
 
             // OOV
             for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
-                for (LatticeNode node : plugin.getOOV(input, i, hasWords[0])) {
-                    hasWords[0] = true;
+                for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
+                    hasWords = true;
                     lattice.insert(node.getBegin(), node.getEnd(), node);
                 }
             }
-            if (!hasWords[0]) {
+            if (!hasWords) {
                 // Todo: add fallback
             }
         }

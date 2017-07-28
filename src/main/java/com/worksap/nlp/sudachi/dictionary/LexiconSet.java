@@ -1,8 +1,9 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.NoSuchElementException;
 
 public class LexiconSet implements Lexicon {
 
@@ -18,19 +19,50 @@ public class LexiconSet implements Lexicon {
         }
     }
 
-    public Stream<int[]> lookup(byte[] text, int offset) {
+    public Iterator<int[]> lookup(byte[] text, int offset) {
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
         }
-        Stream<int[]> results = Stream.<int[]>empty();
-        for (int i = 1; i < lexicons.size(); i++) {
-            Stream<int[]> rs = lexicons.get(i).lookup(text, offset);
-            final int dictId = i;
-            rs = rs.map(r -> new int[] {buildWordId(dictId, r[0]), r[1]});
-            results = Stream.concat(results, rs);
+        return new Itr(text, offset);
+    }
+
+    private class Itr implements Iterator<int[]> {
+        byte[] text;
+        int offset;
+        int dictId;
+        Iterator<int[]> iterator;
+
+        Itr(byte[] text, int offset) {
+            this.text = text;
+            this.offset = offset;
+            dictId = 1;
+            iterator = lexicons.get(dictId).lookup(text, offset);
         }
-        results = Stream.concat(results, lexicons.get(0).lookup(text, offset));
-        return results;
+
+        @Override
+        public boolean hasNext() {
+            while (!iterator.hasNext()) {
+                if (dictId == 0) {
+                    return false;
+                }
+                dictId++;
+                if (dictId >= lexicons.size()) {
+                    dictId = 0;
+                }
+                iterator = lexicons.get(dictId).lookup(text, offset);
+            }
+            return true;
+        }
+
+        @Override
+        public int[] next() {
+            if (hasNext()) {
+                int[] r = iterator.next();
+                r[0] = buildWordId(dictId, r[0]);
+                return r;
+            }
+            throw new NoSuchElementException();
+        }
     }
 
     public short getLeftId(int wordId) {
