@@ -39,16 +39,15 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
-    public List<int[]> lookup(byte[] text, int offset) {
+    public Stream<int[]> lookup(byte[] text, int offset) {
         List<int[]> r
             = trie.commonPrefixSearch(text, offset, Integer.MAX_VALUE);
         if (r.isEmpty()) {
-            return r;
+            return r.stream();
         }
         return r.stream()
             .flatMap(p -> Stream.of(wordIdTable.get(p[0]))
-                     .map(i -> new int[] {i, p[1]}))
-            .collect(Collectors.toList());
+                     .map(i -> new int[] {i, p[1]}));
     }
 
     @Override

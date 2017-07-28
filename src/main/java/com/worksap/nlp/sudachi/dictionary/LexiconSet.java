@@ -2,6 +2,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class LexiconSet implements Lexicon {
 
@@ -17,18 +18,18 @@ public class LexiconSet implements Lexicon {
         }
     }
 
-    public List<int[]> lookup(byte[] text, int offset) {
+    public Stream<int[]> lookup(byte[] text, int offset) {
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
         }
-        List<int[]> results = new ArrayList<>();
+        Stream<int[]> results = Stream.<int[]>empty();
         for (int i = 1; i < lexicons.size(); i++) {
-            List<int[]> rs = lexicons.get(i).lookup(text, offset);
+            Stream<int[]> rs = lexicons.get(i).lookup(text, offset);
             final int dictId = i;
-            rs.forEach(r -> r[0] = buildWordId(dictId, r[0]));
-            results.addAll(rs);
+            rs = rs.map(r -> new int[] {buildWordId(dictId, r[0]), r[1]});
+            results = Stream.concat(results, rs);
         }
-        results.addAll(lexicons.get(0).lookup(text, offset));
+        results = Stream.concat(results, lexicons.get(0).lookup(text, offset));
         return results;
     }
 
