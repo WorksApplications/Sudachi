@@ -13,6 +13,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -132,8 +133,41 @@ public class DartsTest {
             assertTrue(results.size() < MAX_NUM_RESULT);
 
             if (!results.isEmpty()) {
-                assertNotEquals(-1, results.get(results.size() - 1));
+                assertNotEquals(-1, results.get(results.size() - 1)[0]);
                 assertTrue(key.length > results.get(results.size() - 1)[1]);
+            }
+        }
+    }
+
+    @Test
+    public void commonPrefixSearchWithIterator() {
+        DoubleArray dic = new DoubleArray();
+        dic.build(keys, values, null);
+
+        for (int i = 0; i < keys.length; i++) {
+            Iterator<int[]> iterator = dic.commonPrefixSearch(keys[i], 0);
+
+            assertTrue(iterator.hasNext());
+
+            int[] result = null;
+            while (iterator.hasNext()) {
+                result = iterator.next();
+            }
+            assertFalse(iterator.hasNext());
+            assertEquals(values[i], result[0]);
+            assertEquals(keys[i].length, result[1]);
+        }
+
+        for (byte[] key : invalidKeys) {
+            Iterator<int[]> iterator = dic.commonPrefixSearch(key, 0);
+
+            int[] result = null;
+            while (iterator.hasNext()) {
+                result = iterator.next();
+            }
+            if (result != null) {
+                assertNotEquals(-1, result[0]);
+                assertTrue(key.length > result[1]);
             }
         }
     }
