@@ -2,9 +2,8 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 
@@ -39,16 +38,47 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
-    public Stream<int[]> lookup(byte[] text, int offset) {
-        List<int[]> r
-            = trie.commonPrefixSearch(text, offset, Integer.MAX_VALUE);
-        if (r.isEmpty()) {
-            return r.stream();
+    public Iterator<int[]> lookup(byte[] text, int offset) {
+        Iterator<int[]> iterator
+            = trie.commonPrefixSearch(text, offset);
+        if (!iterator.hasNext()) {
+            return iterator;
         }
-        return r.stream()
-            .flatMap(p -> Stream.of(wordIdTable.get(p[0]))
-                     .map(i -> new int[] {i, p[1]}));
+        return new Itr(iterator);
     }
+
+    private class Itr implements Iterator<int[]> {
+        private final Iterator<int[]> iterator;
+        private Integer[] wordIds;
+        private int length;
+        private int index;
+
+        Itr(Iterator<int[]> iterator) {
+            this.iterator = iterator;
+            index = -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (index < 0) {
+                return iterator.hasNext();
+            } else {
+                return (index < wordIds.length) || iterator.hasNext();
+            }
+        }
+
+        @Override
+        public int[] next() {
+            if (index < 0 || index >= wordIds.length) {
+                int[] p = iterator.next();
+                wordIds = wordIdTable.get(p[0]);
+                length = p[1];
+                index = 0;
+            }
+            return new int[] { wordIds[index++], length };
+        }
+    }
+
 
     @Override
     public short getLeftId(int wordId) {
