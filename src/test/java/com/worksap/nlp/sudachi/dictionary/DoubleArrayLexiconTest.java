@@ -3,6 +3,8 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -23,19 +25,21 @@ public class DoubleArrayLexiconTest {
     @Test
     public void lookup() {
         List<int[]> results
-            = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
+            = iteratorToList(lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0));
+
         assertEquals(3, results.size());
         assertArrayEquals(new int[] { 4, 3 }, results.get(0)); // 東
         assertArrayEquals(new int[] { 5, 6 }, results.get(1)); // 東京
         assertArrayEquals(new int[] { 6, 9 }, results.get(2)); // 東京都
+
         results
-            = lexicon.lookup("東京都に".getBytes(StandardCharsets.UTF_8), 9);
+            = iteratorToList(lexicon.lookup("東京都に".getBytes(StandardCharsets.UTF_8), 9));
         assertEquals(2, results.size());
         assertArrayEquals(new int[] { 1, 12 }, results.get(0)); // に(接続助詞)
         assertArrayEquals(new int[] { 2, 12 }, results.get(1)); // に(格助詞)
 
         results
-            = lexicon.lookup("あれ".getBytes(StandardCharsets.UTF_8), 0);
+            = iteratorToList(lexicon.lookup("あれ".getBytes(StandardCharsets.UTF_8), 0));
         assertEquals(0, results.size());
     }
 
@@ -85,5 +89,13 @@ public class DoubleArrayLexiconTest {
         assertArrayEquals(new int[] { 5, 9 }, wi.getAunitSplit());
         assertArrayEquals(new int[0], wi.getBunitSplit());
         assertArrayEquals(new int[] { 5, 9 }, wi.getWordStructure());
+    }
+
+    static <E> List<E> iteratorToList(Iterator<E> iterator) {
+        List<E> result = new ArrayList<>();
+        while (iterator.hasNext()) {
+            result.add(iterator.next());
+        }
+        return result;
     }
 }
