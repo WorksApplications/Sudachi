@@ -15,6 +15,8 @@ public class GrammarImpl implements Grammar {
     private final int connectTableOffset;
     private final short leftIdSize;
     private final short rightIdSize;
+    
+    private CharacterCategory charCategory;
 
     private int storageSize;
 
@@ -98,5 +100,15 @@ public class GrammarImpl implements Grammar {
             str[i] = bytes.getChar(offset + 2 + 2 * i);
         }
         return new String(str);
+    }
+
+    @Override
+    public CharacterCategory getCharacterCategory() {
+        return charCategory;
+    }
+    
+    @Override
+    public void setCharacterCategory(CharacterCategory charCategory) {
+        this.charCategory = charCategory;
     }
 }

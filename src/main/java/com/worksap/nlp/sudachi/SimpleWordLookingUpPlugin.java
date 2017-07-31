@@ -23,11 +23,11 @@ public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
     }
 
     @Override
-    public List<LatticeNode> provideOOV(String text, boolean hasOtherWords) {
+    public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
             node.setParameter(leftid, rightid, cost);
-            String s = text.substring(0, 1);
+            String s = inputText.getOffsetText(offset).substring(0, 1);
             WordInfo info
                 = new WordInfo(s, oovPOSId, s, s, "");
             node.setWordInfo(info);

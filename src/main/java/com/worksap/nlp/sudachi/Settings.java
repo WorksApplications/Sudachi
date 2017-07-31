@@ -11,6 +11,7 @@ public class Settings {
     public String path;
     public String systemDict;
     public ArrayList<String> userDict;
+    public String charDefinitionFile;
     public ArrayList<InputTextPlugin> inputTextPlugin;
     public ArrayList<WordLookingUpPlugin> wordLookingUpPlugin;
     public ArrayList<PathRewritePlugin> pathRewritePlugin;
@@ -33,6 +34,14 @@ public class Settings {
             .map(u -> (isAbsolutePath(u) || path == null) ? u
                  : Paths.get(path, u).toString())
             .collect(Collectors.toList());
+    }
+    
+    String getCharacterDefinitionFilePath() {
+        if (charDefinitionFile == null) {
+            return Settings.class.getClassLoader().getResource("char.def").getPath();
+        }
+        return (isAbsolutePath(charDefinitionFile) || path == null) ? charDefinitionFile
+            : Paths.get(path, charDefinitionFile).toString();
     }
 
     List<InputTextPlugin> getInputTextPlugin() {

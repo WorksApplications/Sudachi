@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,23 +13,6 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
-
-    static class Range {
-        int low;
-        int high;
-        List<CategoryInfo> categories = new ArrayList<>();
-
-        int containingLength(String text) {
-            for (int i = 0; i < text.length();
-                 i = text.offsetByCodePoints(i, 1)) {
-                int c = text.codePointAt(i);
-                if (c < low || c > high) {
-                    return i;
-                }
-            }
-            return text.length();
-        }
-    }
 
     static class CategoryInfo {
         String name;
@@ -50,7 +32,6 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
     public String unkDef;
 
     Map<String, CategoryInfo> categories = new HashMap<>();
-    List<Range> rangeList = new ArrayList<>();
     Map<String, List<OOV>> oovList = new HashMap<>();
 
     @Override
@@ -60,14 +41,14 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
     }
 
     @Override
-    public List<LatticeNode> provideOOV(String text, boolean hasOtherWords) {
+    public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
         List<LatticeNode> nodes = new ArrayList<>();
-        for (Range r : rangeList) {
-            int length = r.containingLength(text);
-            if (length == 0) {
-                continue;
-            }
-            for (CategoryInfo cinfo : r.categories) {
+        String text = inputText.getOffsetText(offset);
+        
+        int length = inputText.getCharCategoryContinuousLength(offset);
+        if (length > 0) {
+            for (String categoryName : inputText.getCharCategoryNameList(offset)) {
+                CategoryInfo cinfo = categories.get(categoryName);
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.name);
                 if (cinfo.isGroup &&
@@ -90,7 +71,6 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                     }
                 }
             }
-            break;
         }
         return nodes;
     }
@@ -121,53 +101,22 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                     throw new RuntimeException("invalid format at line " +
                                                reader.getLineNumber());
                 }
-
-                if (cols[0].startsWith("0x")) {
-                    Range range = new Range();
-                    String[] r = cols[0].split("\\.\\.");
-                    range.low = range.high = Integer.decode(r[0]);
-                    if (r.length > 1) {
-                        range.high = Integer.decode(r[1]);
-                    }
-                    if (range.low > range.high) {
-                        throw new RuntimeException("invalid range at line " +
-                                                   reader.getLineNumber());
-                    }
-                    for (int i = 1; i < cols.length; i++) {
-                        if (cols[i].startsWith("#")) {
-                            break;
-                        }
-                        if (!categories.containsKey(cols[i])) {
-                            throw new RuntimeException(cols[i] + " is undefined at line "
-                                                       + reader.getLineNumber());
-                        }
-                        range.categories.add(categories.get(cols[i]));
-                    }
-                    rangeList.add(range);
-                } else {
-                    if (cols.length < 4) {
-                        throw new RuntimeException("invalid format at line " +
-                                                   reader.getLineNumber());
-                    }
-                    String key = cols[0];
-                    if (categories.containsKey(key)) {
-                        throw new RuntimeException(cols[0] + " is already defined at line "
-                                                   + reader.getLineNumber());
-                    }
-                    CategoryInfo info = new CategoryInfo();
-                    info.name = key;
-                    info.isInvoke = (!cols[1].equals("0"));
-                    info.isGroup = (!cols[2].equals("0"));
-                    info.length = Integer.parseInt(cols[3]);
-                    categories.put(key, info);
+                else if (cols.length < 4) {
+                    throw new RuntimeException("invalid format at line " +
+                                               reader.getLineNumber());
                 }
+                String key = cols[0];
+                if (categories.containsKey(key)) {
+                    throw new RuntimeException(cols[0] + " is already defined at line "
+                                               + reader.getLineNumber());
+                }
+                CategoryInfo info = new CategoryInfo();
+                info.name = key;
+                info.isInvoke = (!cols[1].equals("0"));
+                info.isGroup = (!cols[2].equals("0"));
+                info.length = Integer.parseInt(cols[3]);
+                categories.put(key, info);
             }
-            Range defaultRange = new Range();
-            defaultRange.low = 0;
-            defaultRange.high = Integer.MAX_VALUE;
-            defaultRange.categories
-                = Collections.singletonList(categories.get("DEFAULT"));
-            rangeList.add(defaultRange);
         }
     }
 

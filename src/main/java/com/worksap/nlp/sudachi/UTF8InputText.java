@@ -2,17 +2,24 @@ package com.worksap.nlp.sudachi;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
+
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputText implements InputText<byte[]> {
     
     private final String originalText;
     private String modifiedTextCache;
     private byte[] byteCache;
-    private ArrayList<Byte> utf8TextBytes;
-    private ArrayList<Integer> offsets;
+    private List<Byte> utf8TextBytes;
+    private List<Integer> offsets;
     
-    UTF8InputText(String text) {
+    private Grammar grammar;
+    
+    UTF8InputText(String text, Grammar grammar) {
+        this.grammar = grammar;
         originalText = text;
+        modifiedTextCache = text;
         byteCache = text.getBytes(StandardCharsets.UTF_8);
         utf8TextBytes = new ArrayList<>(byteCache.length);
         for (byte b : byteCache) {
@@ -81,20 +88,26 @@ class UTF8InputText implements InputText<byte[]> {
     
     @Override
     public String getText() {
-    	if (modifiedTextCache == null) {
-    		modifiedTextCache = new String(getByteText(), StandardCharsets.UTF_8); 
-    	}
+        if (modifiedTextCache == null) {
+            modifiedTextCache = new String(getByteText(), StandardCharsets.UTF_8); 
+        }
         return modifiedTextCache;
     }
     
     public byte[] getByteText() {
-    	if (byteCache == null) {
-    		byteCache = new byte[utf8TextBytes.size()];
-    		for (int i = 0; i < utf8TextBytes.size(); i++) {
-    			byteCache[i] = utf8TextBytes.get(i);
-    		}
-    	}
+        if (byteCache == null) {
+            byteCache = new byte[utf8TextBytes.size()];
+            for (int i = 0; i < utf8TextBytes.size(); i++) {
+                byteCache[i] = utf8TextBytes.get(i);
+            }
+        }
         return byteCache;
+    }
+    
+    public String getOffsetText(int offset)
+        throws StringIndexOutOfBoundsException {
+        byte[] bytes = getByteText();
+        return new String(bytes, offset, bytes.length - offset);
     }
     
     public boolean isCharAlignment(int offset) {
@@ -105,6 +118,29 @@ class UTF8InputText implements InputText<byte[]> {
     public int getOriginalOffset(int offset)
         throws StringIndexOutOfBoundsException {
         return offsets.get(offset);
+    }
+    
+    @Override
+    public List<String> getCharCategoryNameList(int offset)
+        throws StringIndexOutOfBoundsException {
+        int cp = getText().codePointAt(offset);
+        return grammar.getCharacterCategory().getCategoryNameList(cp);
+    }
+    
+    @Override
+    public int getCharCategoryContinuousLength(int offset)
+        throws StringIndexOutOfBoundsException {
+        String substr = getText().substring(offset);
+        return grammar.getCharacterCategory().getContinuousLength(substr);
+    }
+    
+    public int getUTF8BytesLengthByCodePoints(int offset, int codePointLength)
+        throws StringIndexOutOfBoundsException {
+        int length = 0;
+        for (int i = 0; i < codePointLength; i++) {
+            length += utf8ByteLength(getText().codePointAt(offset + codePointLength - 1));
+        }
+        return length;
     }
     
     private int utf8ByteLength(int cp) {
