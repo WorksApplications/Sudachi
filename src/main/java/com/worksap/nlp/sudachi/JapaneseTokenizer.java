@@ -3,7 +3,9 @@ package com.worksap.nlp.sudachi;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
@@ -46,17 +48,17 @@ public class JapaneseTokenizer implements Tokenizer {
             if (!input.isCharAlignment(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
-            List<int[]> words = lexicon.lookup(bytes, i);
+            Iterator<int[]> iterator = lexicon.lookup(bytes, i);
             /*
-            if (words.isEmpty()) {
+            if (!iterator.hasNext()) {
                 for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
                     plugin.rewrite(bytes, i);
                 }
             }
             */
-            boolean hasWords = !words.isEmpty();
-
-            for (int[] r : words) {
+            boolean hasWords = iterator.hasNext();
+            while (iterator.hasNext()) {
+                int[] r = iterator.next();
                 int wordId = r[0];
                 int end = r[1];
 

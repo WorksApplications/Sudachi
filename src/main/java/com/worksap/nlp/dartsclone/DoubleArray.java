@@ -7,7 +7,9 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.function.BiConsumer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.worksap.nlp.dartsclone.details.KeySet;
 import com.worksap.nlp.dartsclone.details.DoubleArrayBuilder;
@@ -114,6 +116,63 @@ public class DoubleArray {
             }
         }
         return result;
+    }
+
+    public Iterator<int[]> commonPrefixSearch(byte[] key, int offset) {
+        return new Itr(key, offset);
+    }
+
+    private class Itr implements Iterator<int[]> {
+        private final byte[] key;
+        private int offset;
+        private int nodePos;
+        private int[] next;
+
+        Itr(byte[] key, int offset) {
+            this.key = key;
+            this.offset = offset;
+            nodePos = 0;
+            int unit = array.get(nodePos);
+            nodePos ^= offset(unit);
+            next = null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (next == null) {
+                next = getNext();
+            }
+            return (next != null);
+        }
+
+        @Override
+        public int[] next() {
+            int[] r = (next != null) ? next : getNext();
+            next = null;
+            if (r == null) {
+                throw new NoSuchElementException();
+            }
+            return r;
+        }
+
+        int[] getNext() {
+            for ( ; offset < key.length; offset++) {
+                byte k = key[offset];
+                nodePos ^= byteToUint(k);
+                int unit = array.get(nodePos);
+                if (label(unit) != byteToUint(k)) {
+                    offset = key.length; // no more loop
+                    return null;
+                }
+
+                nodePos ^= offset(unit);
+                if (hasLeaf(unit)) {
+                    int[] r = new int[] { value(array.get(nodePos)), ++offset };
+                    return r;
+                }
+            }
+            return null;
+        }
     }
 
     private boolean hasLeaf(int unit) {
