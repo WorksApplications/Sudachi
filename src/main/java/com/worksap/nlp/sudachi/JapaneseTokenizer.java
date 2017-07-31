@@ -35,7 +35,7 @@ public class JapaneseTokenizer implements Tokenizer {
             return Collections.emptyList();
         }
 
-        UTF8InputText input = new UTF8InputText(text);
+        UTF8InputText input = new UTF8InputText(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(input);
         }

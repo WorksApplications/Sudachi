@@ -2,24 +2,20 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public abstract class WordLookingUpPlugin {
 
     public abstract void setUp(Grammar grammar) throws IOException;
 
-    public abstract List<LatticeNode> provideOOV(String text,
+    public abstract List<LatticeNode> provideOOV(InputText<?> inputText,
+                                                 int offset,
                                                  boolean hasOtherWords);
 
     List<LatticeNode> getOOV(UTF8InputText inputText, int offset,
                              boolean hasOtherWords) {
-        byte[] bytes = inputText.getByteText();
-        String text =
-            new String(bytes, offset, bytes.length - offset);
 
-        List<LatticeNode> nodes = provideOOV(text, hasOtherWords);
+        List<LatticeNode> nodes = provideOOV(inputText, offset, hasOtherWords);
         for (LatticeNode node : nodes) {
             LatticeNodeImpl n = (LatticeNodeImpl)node;
             n.begin = offset;

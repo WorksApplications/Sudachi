@@ -7,4 +7,6 @@ public interface Grammar {
     public short getConnectCost(int leftId, int rightId);
     public short[] getBOSParameter();
     public short[] getEOSParameter();
+    public CharacterCategory getCharacterCategory();
+    public void setCharacterCategory(CharacterCategory charCategory);
 }

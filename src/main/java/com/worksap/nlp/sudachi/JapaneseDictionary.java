@@ -9,11 +9,10 @@ import java.nio.channels.FileChannel;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
-import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.LexiconSet;
 
 class JapaneseDictionary implements Dictionary {
@@ -28,6 +27,8 @@ class JapaneseDictionary implements Dictionary {
         Settings settings = parseSettings(jsonString);
 
         readSystemDictionary(settings.getSystemDictPath());
+        
+        readCharacterDefinition(settings.getCharacterDefinitionFilePath());
 
         inputTextPlugins = settings.getInputTextPlugin();
         wordLookingUpPlugins = settings.getWordLookingUpPlugin();
@@ -75,6 +76,15 @@ class JapaneseDictionary implements Dictionary {
         Tokenizer tokenizer = create();
         userLexicon.calculateCost(tokenizer);
         lexicon.add(userLexicon);
+    }
+    
+    void readCharacterDefinition(String filename) throws IOException {
+        if (grammar == null) {
+            return;
+        }
+        CharacterCategory charCategory = new CharacterCategory();
+        charCategory.readCharacterDefinition(filename);
+        grammar.setCharacterCategory(charCategory);
     }
 
     @Override
