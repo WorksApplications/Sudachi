@@ -20,7 +20,7 @@ public class DefaultInputTextPlugin implements InputTextPlugin {
     
     @Override
     public void setUp() throws IOException {
-        readRewriteBounds(rewriteDef);
+        readRewriteLists(rewriteDef);
     }
     
     @Override
@@ -62,7 +62,7 @@ public class DefaultInputTextPlugin implements InputTextPlugin {
         }
     }
     
-    private void readRewriteBounds(String rewriteDef) throws IOException {
+    private void readRewriteLists(String rewriteDef) throws IOException {
         try (
             FileInputStream fin = new FileInputStream(rewriteDef);
             LineNumberReader reader
