@@ -16,7 +16,7 @@ public class DefaultInputTextPluginTest {
     
     @Before
     public void setUp() {
-        text = new UTF8InputText(originalText);
+        text = new UTF8InputText(originalText, null);
         plugin = new DefaultInputTextPlugin();
         try {
             plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
