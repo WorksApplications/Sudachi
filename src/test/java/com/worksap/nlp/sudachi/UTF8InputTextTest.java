@@ -3,28 +3,50 @@ package com.worksap.nlp.sudachi;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.*;
+
+import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class UTF8InputTextTest {
     
     // \u2123d uses surrogate pair
-    String originalText = "Aあ漢イb字ｳ𡈽ｃ";
-    UTF8InputText text;
+    String testText = "Aあ漢イb字ｳ𡈽ｃ";
+    String contText = "abc漢あ字1234イウ";
+    UTF8InputText testInput;
+    UTF8InputText contInput;
+    MockGrammar grammar;
     
     @Before
     public void setUp() {
-        text = new UTF8InputText(originalText);
+        grammar = new MockGrammar();
+        CharacterCategory charCategory = new CharacterCategory();
+        try {
+            charCategory.readCharacterDefinition(UTF8InputTextTest.class.getClassLoader()
+                .getResource("char.def").getPath());
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        grammar.setCharacterCategory(charCategory);
+        
+        testInput = new UTF8InputText(testText, grammar);
+        contInput = new UTF8InputText(contText, grammar);
     }
     
     @Test
     public void getOriginalText() {
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is(originalText));
+        assertThat(testInput.getOriginalText(), is(testText));
+        assertThat(testInput.getText(), is(testText));
+        assertThat(contInput.getOriginalText(), is(contText));
+        assertThat(contInput.getText(), is(contText));
     }
     
     @Test
     public void getByteText() {
-        byte[] bytes = text.getByteText();
+        byte[] bytes = testInput.getByteText();
         assertThat(bytes.length, is(24));
         assertArrayEquals(
             new byte[] {
@@ -40,58 +62,111 @@ public class UTF8InputTextTest {
     
     @Test
     public void getOriginalOffset() {
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(1), is(1));
-        assertThat(text.getOriginalOffset(3), is(1));
-        assertThat(text.getOriginalOffset(10), is(4));
-        assertThat(text.getOriginalOffset(17), is(7));
-        assertThat(text.getOriginalOffset(20), is(7));
-        assertThat(text.getOriginalOffset(21), is(9));
-        assertThat(text.getOriginalOffset(23), is(9));
+        assertThat(testInput.getOriginalOffset(0), is(0));
+        assertThat(testInput.getOriginalOffset(1), is(1));
+        assertThat(testInput.getOriginalOffset(3), is(1));
+        assertThat(testInput.getOriginalOffset(10), is(4));
+        assertThat(testInput.getOriginalOffset(17), is(7));
+        assertThat(testInput.getOriginalOffset(20), is(7));
+        assertThat(testInput.getOriginalOffset(21), is(9));
+        assertThat(testInput.getOriginalOffset(23), is(9));
     }
 
     @Test
     public void replaceWithSameLength() {
-        text.replace(2, 4, "ああ");
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is("Aあああb字ｳ𡈽ｃ"));
-        byte[] bytes = text.getByteText();
+        testInput.replace(2, 4, "ああ");
+        assertThat(testInput.getOriginalText(), is(testText));
+        assertThat(testInput.getText(), is("Aあああb字ｳ𡈽ｃ"));
+        byte[] bytes = testInput.getByteText();
         assertThat(bytes.length, is(24));
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(4), is(2));
-        assertThat(text.getOriginalOffset(5), is(2));
-        assertThat(text.getOriginalOffset(6), is(2));
-        assertThat(text.getOriginalOffset(7), is(2));
-        assertThat(text.getOriginalOffset(8), is(2));
-        assertThat(text.getOriginalOffset(9), is(2));
-        assertThat(text.getOriginalOffset(10), is(4));
+        assertThat(testInput.getOriginalOffset(0), is(0));
+        assertThat(testInput.getOriginalOffset(4), is(2));
+        assertThat(testInput.getOriginalOffset(5), is(2));
+        assertThat(testInput.getOriginalOffset(6), is(2));
+        assertThat(testInput.getOriginalOffset(7), is(2));
+        assertThat(testInput.getOriginalOffset(8), is(2));
+        assertThat(testInput.getOriginalOffset(9), is(2));
+        assertThat(testInput.getOriginalOffset(10), is(4));
     }
 
     @Test
     public void replaceWithDeletion() {
-        text.replace(2, 4, "あ");
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is("Aああb字ｳ𡈽ｃ"));
-        byte[] bytes = text.getByteText();
+        testInput.replace(2, 4, "あ");
+        assertThat(testInput.getOriginalText(), is(testText));
+        assertThat(testInput.getText(), is("Aああb字ｳ𡈽ｃ"));
+        byte[] bytes = testInput.getByteText();
         assertThat(bytes.length, is(21));
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(4), is(2));
-        assertThat(text.getOriginalOffset(5), is(2));
-        assertThat(text.getOriginalOffset(6), is(2));
-        assertThat(text.getOriginalOffset(7), is(4));
+        assertThat(testInput.getOriginalOffset(0), is(0));
+        assertThat(testInput.getOriginalOffset(4), is(2));
+        assertThat(testInput.getOriginalOffset(5), is(2));
+        assertThat(testInput.getOriginalOffset(6), is(2));
+        assertThat(testInput.getOriginalOffset(7), is(4));
     }
 
     @Test
     public void replaceWithInsertion() {
-        text.replace(2, 4, "あああ");
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is("Aああああb字ｳ𡈽ｃ"));
-        byte[] bytes = text.getByteText();
+        testInput.replace(2, 4, "あああ");
+        assertThat(testInput.getOriginalText(), is(testText));
+        assertThat(testInput.getText(), is("Aああああb字ｳ𡈽ｃ"));
+        byte[] bytes = testInput.getByteText();
         assertThat(bytes.length, is(27));
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(4), is(2));
-        assertThat(text.getOriginalOffset(7), is(2));
-        assertThat(text.getOriginalOffset(10), is(2));
-        assertThat(text.getOriginalOffset(13), is(4));
+        assertThat(testInput.getOriginalOffset(0), is(0));
+        assertThat(testInput.getOriginalOffset(4), is(2));
+        assertThat(testInput.getOriginalOffset(7), is(2));
+        assertThat(testInput.getOriginalOffset(10), is(2));
+        assertThat(testInput.getOriginalOffset(13), is(4));
+    }
+    
+    @Test
+    public void getCharCategoryNameList() {
+        assertThat(testInput.getCharCategoryNameList(0).get(0), is("ALPHA"));
+        assertThat(testInput.getCharCategoryNameList(1).get(0), is("HIRAGANA"));
+        assertThat(testInput.getCharCategoryNameList(2).get(0), is("KANJI"));
+        assertThat(testInput.getCharCategoryNameList(3).get(0), is("KATAKANA"));
+        assertThat(testInput.getCharCategoryNameList(6).get(0), is("KATAKANA"));
+        assertThat(testInput.getCharCategoryNameList(7).get(0), is("DEFAULT"));
+        assertThat(testInput.getCharCategoryNameList(8).get(0), is("DEFAULT"));
+        assertThat(testInput.getCharCategoryNameList(9).get(0), is("ALPHA"));
+    }
+    
+    @Test
+    public void getCharCategoryContinuousLength() {
+        assertThat(contInput.getCharCategoryContinuousLength(0), is(3));
+        assertThat(contInput.getCharCategoryContinuousLength(1), is(2));
+        assertThat(contInput.getCharCategoryContinuousLength(2), is(1));
+        assertThat(contInput.getCharCategoryContinuousLength(3), is(1));
+        assertThat(contInput.getCharCategoryContinuousLength(5), is(1));
+        assertThat(contInput.getCharCategoryContinuousLength(6), is(4));
+        assertThat(contInput.getCharCategoryContinuousLength(9), is(1));
+        assertThat(contInput.getCharCategoryContinuousLength(10), is(2));
+    }
+    
+    class MockGrammar implements Grammar {
+        private CharacterCategory charCategory; 
+        
+        public int getPartOfSpeechSize() {
+            return 0;
+        }
+        public String[] getPartOfSpeechString(short posId) {
+            return null;
+        }
+        public short getPartOfSpeechId(String... pos) {
+            return 0;
+        }
+        public short getConnectCost(int leftId, int rightId) {
+            return 0;
+        }
+        public short[] getBOSParameter() {
+            return null;
+        }
+        public short[] getEOSParameter() {
+            return null;
+        }
+        public CharacterCategory getCharacterCategory() {
+            return charCategory;
+        }
+        public void setCharacterCategory(CharacterCategory charCategory) {
+            this.charCategory = charCategory;
+        }
     }
 }
