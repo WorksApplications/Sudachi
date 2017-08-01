@@ -49,13 +49,6 @@ public class JapaneseTokenizer implements Tokenizer {
                 continue;
             }
             Iterator<int[]> iterator = lexicon.lookup(bytes, i);
-            /*
-            if (!iterator.hasNext()) {
-                for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
-                    plugin.rewrite(bytes, i);
-                }
-            }
-            */
             boolean hasWords = iterator.hasNext();
             while (iterator.hasNext()) {
                 int[] r = iterator.next();
@@ -78,7 +71,7 @@ public class JapaneseTokenizer implements Tokenizer {
                 }
             }
             if (!hasWords) {
-                // Todo: add fallback
+                throw new IllegalStateException("cannot connect path");
             }
         }
 

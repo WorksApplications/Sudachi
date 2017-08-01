@@ -4,6 +4,11 @@
         { "class" : "com.worksap.nlp.sudachi.MeCabWordLookingUpPlugin",
           "charDef" : "char.def",
           "unkDef" : "unk.def"
-        }
+        },
+        { "class" : "com.worksap.nlp.sudachi.SimpleWordLookingUpPlugin",
+          "oovPOSStrings" : [ "補助記号", "一般", "*", "*", "*", "*" ],
+          "leftId" : 5968,
+          "rightId" : 5968,
+          "cost" : 3857 }
     ]
 }

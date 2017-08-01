@@ -54,6 +54,10 @@ public class Settings {
         return result;
     }
 
+    public int getInt(String setting) {
+        return root.getInt(setting, 0);
+    }
+
     <E extends JsonValue> List<E> getList(String setting, Class<E> clazz) {
         JsonArray array = root.getJsonArray(setting);
         if (array == null) {
