@@ -43,8 +43,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
     @Override
     public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
         List<LatticeNode> nodes = new ArrayList<>();
-        String text = inputText.getOffsetText(offset);
-        
+        String text = inputText.getText().substring(offset);
         int length = inputText.getCharCategoryContinuousLength(offset);
         if (length > 0) {
             for (String categoryName : inputText.getCharCategoryNameList(offset)) {
@@ -102,7 +101,7 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                                                reader.getLineNumber());
                 }
                 if (cols[0].startsWith("0x")) {
-                	continue;
+                    continue;
                 }
                 String key = cols[0];
                 if (categories.containsKey(key)) {

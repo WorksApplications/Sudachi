@@ -94,7 +94,7 @@ class UTF8InputText implements InputText<byte[]> {
         return modifiedTextCache;
     }
     
-    public byte[] getByteText() {
+    byte[] getByteText() {
         if (byteCache == null) {
             byteCache = new byte[utf8TextBytes.size()];
             for (int i = 0; i < utf8TextBytes.size(); i++) {
@@ -104,7 +104,7 @@ class UTF8InputText implements InputText<byte[]> {
         return byteCache;
     }
     
-    public String getOffsetText(int offset)
+    String getByteOffsetText(int offset)
         throws StringIndexOutOfBoundsException {
         byte[] bytes = getByteText();
         return new String(bytes, offset, bytes.length - offset);
@@ -134,7 +134,7 @@ class UTF8InputText implements InputText<byte[]> {
         return grammar.getCharacterCategory().getContinuousLength(substr);
     }
     
-    public int getUTF8BytesLengthByCodePoints(int offset, int codePointLength)
+    int getUTF8BytesLengthByCodePoints(int offset, int codePointLength)
         throws StringIndexOutOfBoundsException {
         int length = 0;
         for (int i = 0; i < codePointLength; i++) {
