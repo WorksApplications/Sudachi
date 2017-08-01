@@ -11,7 +11,7 @@ import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultInputTextPlugin implements InputTextPlugin {
+public class DefaultInputTextPlugin extends InputTextPlugin {
     
     public String rewriteDef;
     

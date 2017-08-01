@@ -28,16 +28,13 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
         short posId;
     }
 
-    public String charDef;
-    public String unkDef;
-
     Map<String, CategoryInfo> categories = new HashMap<>();
     Map<String, List<OOV>> oovList = new HashMap<>();
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
-        readCharacterProperty(charDef);
-        readOOV(unkDef, grammar);
+        readCharacterProperty(settings.getString("charDef"));
+        readOOV(settings.getString("unkDef"), grammar);
     }
 
     @Override
