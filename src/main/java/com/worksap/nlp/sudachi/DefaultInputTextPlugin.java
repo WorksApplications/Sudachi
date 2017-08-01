@@ -20,6 +20,9 @@ public class DefaultInputTextPlugin implements InputTextPlugin {
     
     @Override
     public void setUp() throws IOException {
+        if (rewriteDef == null) {
+            rewriteDef = DefaultInputTextPlugin.class.getClassLoader().getResource("rewrite.def").getPath();
+        }
         readRewriteLists(rewriteDef);
     }
     
