@@ -14,7 +14,8 @@ public class UTF8InputTextTest {
     
     // \u2123d uses surrogate pair
     String testText = "Aあ漢イb字ｳ𡈽ｃ";
-    String contText = "abc漢あ字1234イウ";
+    // mixed full-width, half-width, w/ accent
+    String contText = "âｂC漢あ字１2３4ｲウ";
     UTF8InputText testInput;
     UTF8InputText contInput;
     MockGrammar grammar;
@@ -139,6 +140,7 @@ public class UTF8InputTextTest {
         assertThat(contInput.getCharCategoryContinuousLength(6), is(4));
         assertThat(contInput.getCharCategoryContinuousLength(9), is(1));
         assertThat(contInput.getCharCategoryContinuousLength(10), is(2));
+        assertThat(contInput.getCharCategoryContinuousLength(11), is(1));
     }
     
     class MockGrammar implements Grammar {

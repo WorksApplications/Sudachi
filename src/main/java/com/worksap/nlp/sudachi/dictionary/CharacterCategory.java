@@ -37,7 +37,7 @@ public class CharacterCategory {
     }
     
     private List<Range> rangeList = new ArrayList<>();
-    
+        
     public List<String> getCategoryNameList(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
@@ -48,14 +48,24 @@ public class CharacterCategory {
     }
     
     public int getContinuousLength(String text) {
-        for (Range range : rangeList) {
-            int length = range.containingLength(text);
-            if (length == 0) {
-                continue;
+        boolean found;
+        List<String> categoryList = getCategoryNameList(text.codePointAt(0));
+        int length;
+        for (length = 0; length < text.length(); length++) {
+            found =false;
+            List<String> nextCategoryList = getCategoryNameList(text.codePointAt(length));
+            for (int i = 0; i < categoryList.size(); i++) {
+                for (int j = 0; j < nextCategoryList.size(); j++) {
+                    if (categoryList.get(i).equals(nextCategoryList.get(j))) {
+                        found = true; 
+                    }
+                }
             }
-            return length;
+            if (!found) {
+                return length;
+            }
         }
-        return 0;
+        return length;
     }
     
     public void readCharacterDefinition(String charDef) throws IOException {
