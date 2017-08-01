@@ -51,9 +51,15 @@ public class GrammarImplTest {
 
     @Test
     public void getConnectCost() {
-        assertEquals(0, grammar.getConnectCost(0, 0));
-        assertEquals(-100, grammar.getConnectCost(2, 1));
-        assertEquals(200, grammar.getConnectCost(1, 2));
+        assertEquals(0, grammar.getConnectCost((short)0, (short)0));
+        assertEquals(-100, grammar.getConnectCost((short)2, (short)1));
+        assertEquals(200, grammar.getConnectCost((short)1, (short)2));
+    }
+
+    @Test
+    public void setConnectCost() {
+        grammar.setConnectCost((short)0, (short)0, (short)300);
+        assertEquals(300, grammar.getConnectCost((short)0, (short)0));
     }
 
     @Test
@@ -82,11 +88,11 @@ public class GrammarImplTest {
 
         assertEquals(7, grammar.getPartOfSpeechSize());
 
-        assertEquals(0, grammar.getConnectCost(0, 0));
-        assertEquals(-3361, grammar.getConnectCost(1, 1));
-        assertEquals(126, grammar.getConnectCost(3, 6));
-        assertEquals(1180, grammar.getConnectCost(7, 2));
-        assertEquals(3319, grammar.getConnectCost(5, 7));
+        assertEquals(0, grammar.getConnectCost((short)0, (short)0));
+        assertEquals(-3361, grammar.getConnectCost((short)1, (short)1));
+        assertEquals(126, grammar.getConnectCost((short)3, (short)6));
+        assertEquals(1180, grammar.getConnectCost((short)7, (short)2));
+        assertEquals(3319, grammar.getConnectCost((short)5, (short)7));
         assertEquals(452, grammar.storageSize());
     }
 

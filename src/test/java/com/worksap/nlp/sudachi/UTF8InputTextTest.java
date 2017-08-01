@@ -155,9 +155,10 @@ public class UTF8InputTextTest {
         public short getPartOfSpeechId(String... pos) {
             return 0;
         }
-        public short getConnectCost(int leftId, int rightId) {
+        public short getConnectCost(short leftId, short rightId) {
             return 0;
         }
+        public void setConnectCost(short leftId, short rightId, short cost) {}
         public short[] getBOSParameter() {
             return null;
         }

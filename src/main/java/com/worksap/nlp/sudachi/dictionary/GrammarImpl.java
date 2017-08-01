@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,9 @@ public class GrammarImpl implements Grammar {
 
     private final ByteBuffer bytes;
     private List<String[]> posList;
-    private final int connectTableOffset;
+    private ByteBuffer connectTableBytes;
+    private boolean isCopiedConnectTable;
+    private int connectTableOffset;
     private final short leftIdSize;
     private final short rightIdSize;
     
@@ -24,6 +27,8 @@ public class GrammarImpl implements Grammar {
     public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;
+        this.connectTableBytes = bytes;
+        isCopiedConnectTable = false;
         short posSize = bytes.getShort(offset);
         offset += 2;
         posList = new ArrayList<String[]>(posSize) {
@@ -82,9 +87,18 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public short getConnectCost(int leftId, int rightId) {
-        return bytes.getShort(connectTableOffset
-                              + leftId * 2 + 2 * leftIdSize * rightId);
+    public short getConnectCost(short leftId, short rightId) {
+        return connectTableBytes.getShort(connectTableOffset + leftId * 2
+                                          + 2 * leftIdSize * rightId);
+    }
+
+    @Override
+    public void setConnectCost(short leftId, short rightId, short cost) {
+        if (!isCopiedConnectTable) {
+            copyConnectTable();
+        }
+        connectTableBytes.putShort(connectTableOffset + leftId * 2
+                                   + 2 * leftIdSize * rightId, cost);
     }
 
     @Override
@@ -92,6 +106,16 @@ public class GrammarImpl implements Grammar {
 
     @Override
     public short[] getEOSParameter() { return EOS_PARAMETER; }
+
+    @Override
+    public CharacterCategory getCharacterCategory() {
+        return charCategory;
+    }
+
+    @Override
+    public void setCharacterCategory(CharacterCategory charCategory) {
+        this.charCategory = charCategory;
+    }
 
     private String bufferToString(int offset) {
         short length = bytes.getShort(offset);
@@ -102,13 +126,15 @@ public class GrammarImpl implements Grammar {
         return new String(str);
     }
 
-    @Override
-    public CharacterCategory getCharacterCategory() {
-        return charCategory;
-    }
-    
-    @Override
-    public void setCharacterCategory(CharacterCategory charCategory) {
-        this.charCategory = charCategory;
+    private synchronized void copyConnectTable() {
+        ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
+        newBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer srcBuffer = connectTableBytes.duplicate();
+        srcBuffer.position(connectTableOffset);
+        srcBuffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
+        newBuffer.put(srcBuffer);
+        connectTableBytes = newBuffer;
+        connectTableOffset = 0;
+        isCopiedConnectTable = true;
     }
 }
