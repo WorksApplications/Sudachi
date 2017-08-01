@@ -101,9 +101,8 @@ class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
                     throw new RuntimeException("invalid format at line " +
                                                reader.getLineNumber());
                 }
-                else if (cols.length < 4) {
-                    throw new RuntimeException("invalid format at line " +
-                                               reader.getLineNumber());
+                if (cols[0].startsWith("0x")) {
+                	continue;
                 }
                 String key = cols[0];
                 if (categories.containsKey(key)) {
