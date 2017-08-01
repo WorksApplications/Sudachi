@@ -8,7 +8,6 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -24,7 +23,7 @@ class JapaneseDictionary implements Dictionary {
     List<PathRewritePlugin> pathRewritePlugins;
 
     JapaneseDictionary(String jsonString) throws IOException {
-        Settings settings = parseSettings(jsonString);
+        Settings settings = Settings.parseSettings(jsonString);
 
         readSystemDictionary(settings.getSystemDictPath());
         
@@ -41,12 +40,6 @@ class JapaneseDictionary implements Dictionary {
         for (String filename : settings.getUserDictPath()) {
             readUserDictionary(filename);
         }
-    }
-
-    Settings parseSettings(String settings) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
-        return mapper.readValue(settings, Settings.class);
     }
 
     void readSystemDictionary(String filename) throws IOException {

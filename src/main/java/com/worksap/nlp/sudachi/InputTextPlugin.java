@@ -2,9 +2,9 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 
-public interface InputTextPlugin {
+public abstract class InputTextPlugin extends Plugin {
 
-    public void setUp() throws IOException;
+    public abstract void setUp() throws IOException;
 
-    public void rewrite(InputText<?> text);
+    public abstract void rewrite(InputText<?> text);
 }
