@@ -60,9 +60,9 @@ class JapaneseDictionary implements Dictionary {
 
     void readUserDictionary(String filename) throws IOException {
         ByteBuffer bytes;
-        try (RandomAccessFile input = new RandomAccessFile(filename, "rw");
+        try (FileInputStream input = new FileInputStream(filename);
              FileChannel inputFile = input.getChannel()) {
-            bytes = inputFile.map(FileChannel.MapMode.PRIVATE, 0,
+            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
                                   inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
         }
