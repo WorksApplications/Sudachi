@@ -1,9 +1,9 @@
 {
-    "systemDict": "system.dic",
-    "wordLookingUpPlugin": [
-        [ "com.worksap.nlp.sudachi.MeCabWordLookingUpPlugin", {
-            "charDef": "char.def",
-            "unkDef": "unk.def"
-        }]
+    "systemDict" : "system.dic",
+    "wordLookingUpPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.MeCabWordLookingUpPlugin",
+          "charDef" : "char.def",
+          "unkDef" : "unk.def"
+        }
     ]
 }
