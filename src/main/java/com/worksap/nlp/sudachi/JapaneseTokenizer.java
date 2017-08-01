@@ -71,7 +71,7 @@ public class JapaneseTokenizer implements Tokenizer {
                 }
             }
             if (!hasWords) {
-                throw new IllegalStateException("cannot connect path");
+                throw new IllegalStateException("there is no morpheme at " + i);
             }
         }
 
