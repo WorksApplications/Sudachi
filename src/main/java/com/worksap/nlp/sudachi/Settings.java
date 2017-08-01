@@ -20,9 +20,6 @@ public class Settings {
 
     JsonObject root;
 
-    List<WordLookingUpPlugin> wordLookingUpPlugin;
-    List<PathRewritePlugin> pathRewritePlugin;
-
     Settings(JsonObject root) {
         this.root = root;
     }
