@@ -16,6 +16,7 @@ public class LatticeNodeImpl implements LatticeNode {
 
     int totalCost;
     LatticeNodeImpl bestPreviousNode;
+    boolean isConnectedToBOS;
 
     boolean isOOV;
     WordInfo extraWordInfo;

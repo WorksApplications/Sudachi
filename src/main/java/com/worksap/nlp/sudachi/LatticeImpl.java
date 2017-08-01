@@ -24,6 +24,7 @@ class LatticeImpl implements Lattice {
         LatticeNodeImpl bosNode = new LatticeNodeImpl();
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
+        bosNode.isConnectedToBOS = true;
 
         LatticeNodeImpl eosNode = new LatticeNodeImpl();
         short[] eosParams = grammar.getEOSParameter();
@@ -86,6 +87,9 @@ class LatticeImpl implements Lattice {
 
     List<LatticeNode> getBestPath() {
         viterbi();
+        if (beginLists.get(size).get(0).isConnectedToBOS) { // EOS node
+            throw new IllegalStateException("EOS isn't connected to BOS");
+        }
         ArrayList<LatticeNode> result = new ArrayList<>();
         for (LatticeNodeImpl node = beginLists.get(size).get(0);
              node != endLists.get(0).get(0);
@@ -118,13 +122,21 @@ class LatticeImpl implements Lattice {
             for (LatticeNodeImpl rNode : beginLists.get(i)) {
                 rNode.totalCost = Integer.MAX_VALUE;
                 for (LatticeNodeImpl lNode : endLists.get(i)) {
-                    int cost = lNode.totalCost
-                        + grammar.getConnectCost(lNode.rightId, rNode.leftId);
+                    if (!lNode.isConnectedToBOS) {
+                        continue;
+                    }
+                    short connectCost
+                        = grammar.getConnectCost(lNode.rightId, rNode.leftId);
+                    if (connectCost == Short.MAX_VALUE) {
+                        continue; // this connection is not allowed
+                    }
+                    int cost = lNode.totalCost + connectCost;
                     if (cost < rNode.totalCost) {
                         rNode.totalCost = cost;
                         rNode.bestPreviousNode = lNode;
                     }
                 }
+                rNode.isConnectedToBOS = !(rNode.bestPreviousNode == null);
                 rNode.totalCost += rNode.cost;
             }
         }
