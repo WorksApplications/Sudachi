@@ -7,16 +7,21 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
-public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
+class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
 
-    public ArrayList<String> oovPOSStrings;
+    List<String> oovPOSStrings;
     short oovPOSId;
-    public short leftid;
-    public short rightid;
-    public short cost;
+    short leftId;
+    short rightId;
+    short cost;
 
     @Override
     public void setUp(Grammar grammar) {
+        oovPOSStrings = settings.getStringList("oovPOSStrings");
+        leftId = (short)settings.getInt("leftId");
+        rightId = (short)settings.getInt("rightId");
+        cost = (short)settings.getInt("cost");
+
         if (oovPOSStrings != null) {
             oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings.toArray(new String[0]));
         }
@@ -26,8 +31,9 @@ public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
     public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
-            node.setParameter(leftid, rightid, cost);
-            String s = inputText.getText().substring(offset, offset + 1);
+            node.setParameter(leftId, rightId, cost);
+            String text = inputText.getText();
+            String s = text.substring(offset, text.offsetByCodePoints(offset, 1));
             WordInfo info
                 = new WordInfo(s, oovPOSId, s, s, "");
             node.setWordInfo(info);

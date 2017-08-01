@@ -31,7 +31,9 @@ class JapaneseDictionary implements Dictionary {
 
         inputTextPlugins = settings.getInputTextPlugin();
         wordLookingUpPlugins = settings.getWordLookingUpPlugin();
-        // ToDo: set fallback OOV provider
+        if (wordLookingUpPlugins.isEmpty()) {
+            throw new IllegalArgumentException("no OOV provider");
+        }
         for (WordLookingUpPlugin p : wordLookingUpPlugins) {
             p.setUp(grammar);
         }
