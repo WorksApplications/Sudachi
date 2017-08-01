@@ -27,7 +27,7 @@ public class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
             node.setParameter(leftid, rightid, cost);
-            String s = inputText.getOffsetText(offset).substring(0, 1);
+            String s = inputText.getText().substring(offset, offset + 1);
             WordInfo info
                 = new WordInfo(s, oovPOSId, s, s, "");
             node.setWordInfo(info);

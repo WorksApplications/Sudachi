@@ -14,8 +14,8 @@ public abstract class WordLookingUpPlugin {
 
     List<LatticeNode> getOOV(UTF8InputText inputText, int offset,
                              boolean hasOtherWords) {
-
-        List<LatticeNode> nodes = provideOOV(inputText, offset, hasOtherWords);
+        int charOffset = inputText.getText().length() - inputText.getByteOffsetText(offset).length();
+        List<LatticeNode> nodes = provideOOV(inputText, charOffset, hasOtherWords);
         for (LatticeNode node : nodes) {
             LatticeNodeImpl n = (LatticeNodeImpl)node;
             n.begin = offset;

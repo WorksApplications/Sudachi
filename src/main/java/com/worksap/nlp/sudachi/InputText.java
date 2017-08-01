@@ -14,8 +14,6 @@ public interface InputText<E> {
     public int getOriginalOffset(int offset)
         throws StringIndexOutOfBoundsException;
     
-    public String getOffsetText(int offset);
-    
     public List<String> getCharCategoryNameList(int offset);
     
     public int getCharCategoryContinuousLength(int offset);
