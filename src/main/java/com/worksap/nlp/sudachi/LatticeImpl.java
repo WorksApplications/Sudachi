@@ -87,7 +87,7 @@ class LatticeImpl implements Lattice {
 
     List<LatticeNode> getBestPath() {
         viterbi();
-        if (beginLists.get(size).get(0).isConnectedToBOS) { // EOS node
+        if (!beginLists.get(size).get(0).isConnectedToBOS) { // EOS node
             throw new IllegalStateException("EOS isn't connected to BOS");
         }
         ArrayList<LatticeNode> result = new ArrayList<>();
