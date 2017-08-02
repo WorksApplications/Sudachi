@@ -25,31 +25,34 @@ class JapaneseDictionary implements Dictionary {
     JapaneseDictionary(String jsonString) throws IOException {
         Settings settings = Settings.parseSettings(jsonString);
 
-        readSystemDictionary(settings.getSystemDictPath());
+        readSystemDictionary(settings.getPath("systemDict"));
         for (EditConnectionCostPlugin p :
-                 settings.getEditConnectionCostPlugin()) {
+                 settings.<EditConnectionCostPlugin>getPluginList("editConnectionCostPlugin")) {
             p.setUp(grammar);
             p.edit(grammar);
         }
 
-        readCharacterDefinition(settings.getCharacterDefinitionFilePath());
+        readCharacterDefinition(settings.getPath("characterDefinitionFile"));
 
-        inputTextPlugins = settings.getInputTextPlugin();
-        oovProviderPlugins = settings.getOovProviderPlugin();
+        inputTextPlugins = settings.getPluginList("inputTextPlugin");
+        oovProviderPlugins = settings.getPluginList("oovProviderPlugin");
         if (oovProviderPlugins.isEmpty()) {
             throw new IllegalArgumentException("no OOV provider");
         }
         for (OovProviderPlugin p : oovProviderPlugins) {
             p.setUp(grammar);
         }
-        pathRewritePlugins = settings.getPathRewritePlugin();
+        pathRewritePlugins = settings.getPluginList("pathRewritePlugin");
 
-        for (String filename : settings.getUserDictPath()) {
+        for (String filename : settings.getPathList("userDict")) {
             readUserDictionary(filename);
         }
     }
 
     void readSystemDictionary(String filename) throws IOException {
+        if (filename == null) {
+            throw new IllegalArgumentException("system dictionary is not specified");
+        }
         ByteBuffer bytes;
         try (FileInputStream istream = new FileInputStream(filename);
              FileChannel inputFile = istream.getChannel()) {

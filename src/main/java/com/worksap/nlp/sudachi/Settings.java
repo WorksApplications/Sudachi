@@ -20,16 +20,20 @@ import javax.json.stream.JsonParsingException;
 public class Settings {
 
     JsonObject root;
+    String basePath;
 
-    Settings(JsonObject root) {
+    Settings(JsonObject root, String basePath) {
         this.root = root;
+        this.basePath = basePath;
     }
 
     static Settings parseSettings(String json) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
-            JsonStructure root = reader.read();
-            if (root instanceof JsonObject) {
-                return new Settings((JsonObject)root);
+            JsonStructure rootStr = reader.read();
+            if (rootStr instanceof JsonObject) {
+                JsonObject root = (JsonObject)rootStr;
+                String basePath = root.getString("path", null);
+                return new Settings(root, basePath);
             } else {
                 throw new IllegalArgumentException("root must be a object");
             }
@@ -74,6 +78,23 @@ public class Settings {
             .collect(Collectors.toList());
     }
 
+    public String getPath(String setting) {
+        String path = getString(setting);
+        return (path == null || isAbsolutePath(path) || basePath == null) ?
+            path : Paths.get(basePath, path).toString();
+    }
+
+    public List<String> getPathList(String setting) {
+        List<String> list = getStringList(setting);
+        if (list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list.stream()
+            .map(p -> (isAbsolutePath(p) || basePath == null) ? p
+                 : Paths.get(basePath, p).toString())
+            .collect(Collectors.toList());
+    }
+
     <E extends JsonValue> List<E> getList(String setting, Class<E> clazz) {
         JsonArray array = root.getJsonArray(setting);
         if (array == null) {
@@ -82,43 +103,7 @@ public class Settings {
         return array.getValuesAs(clazz);
     }
 
-    String getSystemDictPath() {
-        String systemDict = getString("systemDict");
-        if (systemDict == null) {
-            throw new IllegalArgumentException("system dictionary is not specified");
-        }
-
-        String path = getString("path");
-        return (isAbsolutePath(systemDict) || path == null) ? systemDict
-            : Paths.get(path, systemDict).toString();
-    }
-
-    List<String> getUserDictPath() {
-        List<String> userDict = getStringList("userDict");
-        if (userDict.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        String path = getString("path");
-        return userDict.stream()
-            .map(u -> (isAbsolutePath(u) || path == null) ? u
-                 : Paths.get(path, u).toString())
-            .collect(Collectors.toList());
-    }
-    
-    String getCharacterDefinitionFilePath() {
-        String charDefinitionFile = getString("characterDefinitionFile");
-        if (charDefinitionFile == null) {
-            return null;
-        }
-
-        String path = getString("path");
-        return (isAbsolutePath(charDefinitionFile) || path == null) ? charDefinitionFile
-            : Paths.get(path, charDefinitionFile).toString();
-    }
-
-
-    private <E extends Plugin> List<E> getPlugin(String setting) {
+    <E extends Plugin> List<E> getPluginList(String setting) {
         List<JsonObject> list = getList(setting, JsonObject.class);
         if (list.isEmpty()) {
             return Collections.emptyList();
@@ -139,26 +124,10 @@ public class Settings {
                 throw new IllegalArgumentException(classname + "is not plugin");
             }
             @SuppressWarnings("unchecked") E plugin = (E)o;
-            plugin.setSettings(new Settings(list.get(i)));
+            plugin.setSettings(new Settings(list.get(i), basePath));
             result.add(plugin);
         }
         return result;
-    }
-
-    List<EditConnectionCostPlugin> getEditConnectionCostPlugin() {
-        return getPlugin("editConnectionCostPlugin");
-    }
-
-    List<InputTextPlugin> getInputTextPlugin() {
-        return getPlugin("inputTextPlugin");
-    }
-
-    List<OovProviderPlugin> getOovProviderPlugin() {
-        return getPlugin("oovProviderPlugin");
-    }
-
-    List<PathRewritePlugin> getPathRewritePlugin() {
-        return getPlugin("pathRewritePlugin");
     }
 
     private boolean isAbsolutePath(String path) {

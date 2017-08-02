@@ -33,8 +33,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
-        readCharacterProperty(settings.getString("charDef"));
-        readOOV(settings.getString("unkDef"), grammar);
+        readCharacterProperty(settings.getPath("charDef"));
+        readOOV(settings.getPath("unkDef"), grammar);
     }
 
     @Override

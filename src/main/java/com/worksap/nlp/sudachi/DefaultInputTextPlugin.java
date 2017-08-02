@@ -14,12 +14,15 @@ import java.util.List;
 public class DefaultInputTextPlugin extends InputTextPlugin {
     
     public String rewriteDef;
-    
+
     private List<String> ignoreNormalizeList = new ArrayList<>();
     private List<String[]> replaceCharList = new ArrayList<>();
     
     @Override
     public void setUp() throws IOException {
+        if (rewriteDef == null) {
+            rewriteDef = settings.getPath("rewriteDef");
+        }
         if (rewriteDef == null) {
             rewriteDef = DefaultInputTextPlugin.class.getClassLoader().getResource("rewrite.def").getPath();
         }
