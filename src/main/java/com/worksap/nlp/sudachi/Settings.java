@@ -133,8 +133,8 @@ public class Settings {
         return getPlugin("inputTextPlugin");
     }
 
-    List<WordLookingUpPlugin> getWordLookingUpPlugin() {
-        return getPlugin("wordLookingUpPlugin");
+    List<OovProviderPlugin> getOovProviderPlugin() {
+        return getPlugin("oovProviderPlugin");
     }
 
     List<PathRewritePlugin> getPathRewritePlugin() {

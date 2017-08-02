@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-public abstract class WordLookingUpPlugin extends Plugin {
+public abstract class OovProviderPlugin extends Plugin {
 
     public abstract void setUp(Grammar grammar) throws IOException;
 

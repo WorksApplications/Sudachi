@@ -19,7 +19,7 @@ class JapaneseDictionary implements Dictionary {
     Grammar grammar;
     LexiconSet lexicon;
     List<InputTextPlugin> inputTextPlugins;
-    List<WordLookingUpPlugin> wordLookingUpPlugins;
+    List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
 
     JapaneseDictionary(String jsonString) throws IOException {
@@ -30,11 +30,11 @@ class JapaneseDictionary implements Dictionary {
         readCharacterDefinition(settings.getCharacterDefinitionFilePath());
 
         inputTextPlugins = settings.getInputTextPlugin();
-        wordLookingUpPlugins = settings.getWordLookingUpPlugin();
-        if (wordLookingUpPlugins.isEmpty()) {
+        oovProviderPlugins = settings.getOovProviderPlugin();
+        if (oovProviderPlugins.isEmpty()) {
             throw new IllegalArgumentException("no OOV provider");
         }
-        for (WordLookingUpPlugin p : wordLookingUpPlugins) {
+        for (OovProviderPlugin p : oovProviderPlugins) {
             p.setUp(grammar);
         }
         pathRewritePlugins = settings.getPathRewritePlugin();
@@ -91,7 +91,7 @@ class JapaneseDictionary implements Dictionary {
     @Override
     public Tokenizer create() {
         return new JapaneseTokenizer(grammar, lexicon,
-                                     inputTextPlugins, wordLookingUpPlugins,
+                                     inputTextPlugins, oovProviderPlugins,
                                      pathRewritePlugins);
     }
 }
