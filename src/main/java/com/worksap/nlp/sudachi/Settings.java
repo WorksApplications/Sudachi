@@ -47,6 +47,9 @@ public class Settings {
 
     public List<String> getStringList(String setting) {
         JsonArray array = root.getJsonArray(setting);
+        if (array == null) {
+            return Collections.emptyList();
+        }
         List<String> result = new ArrayList<>(array.size());
         for (int i = 0; i < array.size(); i++) {
             result.add(array.getString(i));
