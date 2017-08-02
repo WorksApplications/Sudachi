@@ -3,6 +3,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +38,7 @@ public class CharacterCategory {
     }
     
     private List<Range> rangeList = new ArrayList<>();
-        
+    
     public List<String> getCategoryNameList(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
@@ -70,9 +71,11 @@ public class CharacterCategory {
     
     public void readCharacterDefinition(String charDef) throws IOException {
         try (
-            FileInputStream fin = new FileInputStream(charDef);
+            InputStream in = (charDef != null)
+                ? new FileInputStream(charDef)
+                : CharacterCategory.class.getClassLoader().getResourceAsStream("char.def");
             LineNumberReader reader
-                = new LineNumberReader(new InputStreamReader(fin, StandardCharsets.UTF_8));
+                = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         ) {
             String line;
             while ((line = reader.readLine()) != null) {
