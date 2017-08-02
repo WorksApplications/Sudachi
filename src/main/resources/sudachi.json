@@ -1,5 +1,8 @@
 {
     "systemDict" : "system.dic",
+    "inputTextPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" }
+    ],
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
           "charDef" : "char.def",
