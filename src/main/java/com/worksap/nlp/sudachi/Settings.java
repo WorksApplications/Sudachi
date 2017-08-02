@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
@@ -56,6 +57,18 @@ public class Settings {
 
     public int getInt(String setting) {
         return root.getInt(setting, 0);
+    }
+
+    public List<Integer> getIntList(String setting) {
+        return getList(setting, JsonNumber.class).stream()
+            .map(i -> i.intValue()).collect(Collectors.toList());
+    }
+
+    public List<List<Integer>> getIntListList(String setting) {
+        return getList(setting, JsonArray.class).stream()
+            .map(a -> a.getValuesAs(JsonNumber.class).stream()
+                 .map(i -> i.intValue()).collect(Collectors.toList()))
+            .collect(Collectors.toList());
     }
 
     <E extends JsonValue> List<E> getList(String setting, Class<E> clazz) {
@@ -127,6 +140,10 @@ public class Settings {
             result.add(plugin);
         }
         return result;
+    }
+
+    List<EditConnectionCostPlugin> getEditConnectionCostPlugin() {
+        return getPlugin("editConnectionCostPlugin");
     }
 
     List<InputTextPlugin> getInputTextPlugin() {

@@ -26,7 +26,12 @@ class JapaneseDictionary implements Dictionary {
         Settings settings = Settings.parseSettings(jsonString);
 
         readSystemDictionary(settings.getSystemDictPath());
-        
+        for (EditConnectionCostPlugin p :
+                 settings.getEditConnectionCostPlugin()) {
+            p.setUp(grammar);
+            p.edit(grammar);
+        }
+
         readCharacterDefinition(settings.getCharacterDefinitionFilePath());
 
         inputTextPlugins = settings.getInputTextPlugin();

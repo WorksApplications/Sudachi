@@ -127,7 +127,7 @@ class LatticeImpl implements Lattice {
                     }
                     short connectCost
                         = grammar.getConnectCost(lNode.rightId, rNode.leftId);
-                    if (connectCost == Short.MAX_VALUE) {
+                    if (connectCost == grammar.INHIBITED_CONNECTION) {
                         continue; // this connection is not allowed
                     }
                     int cost = lNode.totalCost + connectCost;

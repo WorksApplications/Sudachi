@@ -10,4 +10,6 @@ public interface Grammar {
     public short[] getEOSParameter();
     public CharacterCategory getCharacterCategory();
     public void setCharacterCategory(CharacterCategory charCategory);
+
+    public static final short INHIBITED_CONNECTION = Short.MAX_VALUE;
 }
