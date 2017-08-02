@@ -76,62 +76,68 @@ public class DictionaryBuilder {
     }
 
     void buildLexicon(FileInputStream lexiconInput) throws IOException {
-        LineNumberReader reader
-            = new LineNumberReader(new InputStreamReader(lexiconInput));
+        int lineno = -1;
+        try (InputStreamReader isr = new InputStreamReader(lexiconInput);
+             LineNumberReader reader = new LineNumberReader(isr)) {
 
-        int wordId = 0;
-        for (; ; wordId++) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-
-            String[] cols = line.split(",");
-            if (cols.length != NUMBER_OF_COLUMNS) {
-                System.err.println("Error: invalid format at line "
-                                   + reader.getLineNumber());
-                continue;
-            }
-            for (int i = 0; i < cols.length; i++) {
-                cols[i] = decode(cols[i]);
-            }
-
-            if (cols[0].length() == 0) {
-                System.err.println("Error: headword is empty at line "
-                                   + reader.getLineNumber());
-                continue;
-            }
-            if (!cols[1].equals("-1")) {
-                // headword
-                byte[] key = cols[0].getBytes(StandardCharsets.UTF_8);
-                if (!trieKeys.containsKey(key)) {
-                    trieKeys.put(key, new ArrayList<Integer>());
+            int wordId = 0;
+            for (; ; wordId++) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
                 }
-                trieKeys.get(key).add(wordId);
-                // left-id, right-id, cost
+                lineno = reader.getLineNumber();
+
+                String[] cols = line.split(",");
+                if (cols.length != NUMBER_OF_COLUMNS) {
+                    System.err.println("Error: invalid format at line " + lineno);
+                    continue;
+                }
+                for (int i = 0; i < cols.length; i++) {
+                    cols[i] = decode(cols[i]);
+                }
+
+                if (cols[0].length() == 0) {
+                    System.err.println("Error: headword is empty at line " + lineno);
+                    continue;
+                }
+                if (!cols[1].equals("-1")) {
+                    // headword
+                    byte[] key = cols[0].getBytes(StandardCharsets.UTF_8);
+                    if (!trieKeys.containsKey(key)) {
+                        trieKeys.put(key, new ArrayList<Integer>());
+                    }
+                    trieKeys.get(key).add(wordId);
+                    // left-id, right-id, cost
+                }
+                params.add(new Short[] { Short.parseShort(cols[1]),
+                                         Short.parseShort(cols[2]),
+                                         Short.parseShort(cols[3]) });
+
+                short posId = posTable.getId(String.join(",",
+                                                         cols[5], cols[6], cols[7],
+                                                         cols[8], cols[9], cols[10]));
+
+                WordInfo info
+                    = new WordInfo(cols[4], // headword
+                                   posId,
+                                   cols[12], // normalizedForm
+                                   (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
+                                   "", // dummy
+                                   cols[11], // reading
+                                   parseSplitInfo(cols[15]), // aUnitSplit
+                                   parseSplitInfo(cols[16]), // bUnitSplit
+                                   parseSplitInfo(cols[17]) // wordStructure
+                                   );
+                wordInfos.add(info);
             }
-            params.add(new Short[] { Short.parseShort(cols[1]),
-                                     Short.parseShort(cols[2]),
-                                     Short.parseShort(cols[3]) });
-
-            short posId = posTable.getId(String.join(",",
-                                                     cols[5], cols[6], cols[7],
-                                                     cols[8], cols[9], cols[10]));
-
-            WordInfo info
-                = new WordInfo(cols[4], // headword
-                               posId,
-                               cols[12], // normalizedForm
-                               (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
-                               "", // dummy
-                               cols[11], // reading
-                               parseSplitInfo(cols[15]), // aUnitSplit
-                               parseSplitInfo(cols[16]), // bUnitSplit
-                               parseSplitInfo(cols[17]) // wordStructure
-                               );
-            wordInfos.add(info);
+            wordSize = wordId;
+        } catch (Exception e) {
+            if (lineno > 0) {
+                System.err.println("Error: at line " + lineno);
+            }
+            throw e;
         }
-        wordSize = wordId;
     }
 
     void writeGrammar(FileInputStream matrixInput,
@@ -276,7 +282,7 @@ public class DictionaryBuilder {
         output.write(offsets);
     }
 
-    static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]+)");
+    static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
     static String decode(String text) {
         Matcher m = unicodeLiteral.matcher(text);
         if (!m.find()) {
@@ -286,7 +292,11 @@ public class DictionaryBuilder {
         StringBuffer sb = new StringBuffer();
         m.reset();
         while (m.find()) {
-            m.appendReplacement(sb, new String(Character.toChars(Integer.parseInt(m.group(1), 16))));
+            String u = m.group(1);
+            if (u.startsWith("{")) {
+                u = u.substring(1, u.length() - 1);
+            }
+            m.appendReplacement(sb, new String(Character.toChars(Integer.parseInt(u, 16))));
         }
         m.appendTail(sb);
         return sb.toString();
