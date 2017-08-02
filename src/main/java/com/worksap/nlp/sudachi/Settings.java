@@ -35,7 +35,7 @@ public class Settings {
                 String basePath = root.getString("path", null);
                 return new Settings(root, basePath);
             } else {
-                throw new IllegalArgumentException("root must be a object");
+                throw new IllegalArgumentException("root must be an object");
             }
         } catch (JsonParsingException e) {
             throw new IllegalArgumentException(e);
@@ -43,7 +43,13 @@ public class Settings {
     }
 
     public String getString(String setting) {
-        return root.getString(setting, null);
+        try {
+            return root.getString(setting);
+        } catch (NullPointerException e) {
+            return null;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not a string", e);
+        }
     }
 
     public String getString(String setting, String defaultValue) {
@@ -51,31 +57,49 @@ public class Settings {
     }
 
     public List<String> getStringList(String setting) {
-        JsonArray array = root.getJsonArray(setting);
-        if (array == null) {
-            return Collections.emptyList();
+        try {
+            JsonArray array = root.getJsonArray(setting);
+            if (array == null) {
+                return Collections.emptyList();
+            }
+            List<String> result = new ArrayList<>(array.size());
+            for (int i = 0; i < array.size(); i++) {
+                result.add(array.getString(i));
+            }
+            return result;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not an array of strings", e);
         }
-        List<String> result = new ArrayList<>(array.size());
-        for (int i = 0; i < array.size(); i++) {
-            result.add(array.getString(i));
-        }
-        return result;
     }
 
     public int getInt(String setting) {
-        return root.getInt(setting, 0);
+        try {
+            return root.getInt(setting);
+        } catch (NullPointerException e) {
+            return 0;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not a number", e);
+        }
     }
 
     public List<Integer> getIntList(String setting) {
-        return getList(setting, JsonNumber.class).stream()
-            .map(i -> i.intValue()).collect(Collectors.toList());
+        try {
+            return getList(setting, JsonNumber.class).stream()
+                .map(i -> i.intValue()).collect(Collectors.toList());
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not an array of numbers", e);
+        }
     }
 
     public List<List<Integer>> getIntListList(String setting) {
-        return getList(setting, JsonArray.class).stream()
-            .map(a -> a.getValuesAs(JsonNumber.class).stream()
-                 .map(i -> i.intValue()).collect(Collectors.toList()))
-            .collect(Collectors.toList());
+        try {
+            return getList(setting, JsonArray.class).stream()
+                .map(a -> a.getValuesAs(JsonNumber.class).stream()
+                     .map(i -> i.intValue()).collect(Collectors.toList()))
+                .collect(Collectors.toList());
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not an array of arrays of numbers", e);
+        }
     }
 
     public String getPath(String setting) {
@@ -104,7 +128,12 @@ public class Settings {
     }
 
     <E extends Plugin> List<E> getPluginList(String setting) {
-        List<JsonObject> list = getList(setting, JsonObject.class);
+        List<JsonObject> list;
+        try {
+            list = getList(setting, JsonObject.class);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not a list of object", e);
+        }
         if (list.isEmpty()) {
             return Collections.emptyList();
         }
@@ -112,17 +141,28 @@ public class Settings {
         List<E> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
             Object o;
-            String classname = list.get(i).getString("class");
+            String classname;
+
+            try {
+                classname = list.get(i).getString("class");
+            } catch (NullPointerException e) {
+                throw new IllegalArgumentException(setting + " has a member without a \"class\"", e);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(setting + " has a member with invalid \"class\"", e);
+            }
+
             try {
                 o = this.getClass().getClassLoader()
                     .loadClass(classname).newInstance();
             } catch (ClassNotFoundException | InstantiationException
                      | IllegalAccessException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalArgumentException(classname + " in " + setting + " cannot be initialized", e);
             }
+
             if (!(o instanceof Plugin)) {
-                throw new IllegalArgumentException(classname + "is not plugin");
+                throw new IllegalArgumentException(classname + " in " + setting + " is not a plugin");
             }
+
             @SuppressWarnings("unchecked") E plugin = (E)o;
             plugin.setSettings(new Settings(list.get(i), basePath));
             result.add(plugin);
