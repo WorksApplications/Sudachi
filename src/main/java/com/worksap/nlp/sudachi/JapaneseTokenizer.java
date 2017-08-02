@@ -15,19 +15,19 @@ public class JapaneseTokenizer implements Tokenizer {
     Grammar grammar;
     Lexicon lexicon;
     List<InputTextPlugin> inputTextPlugins;
-    List<WordLookingUpPlugin> wordLookingUpPlugins;
+    List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
     PrintStream dumpOutput;
 
     JapaneseTokenizer(Grammar grammar, Lexicon lexicon,
                       List<InputTextPlugin> inputTextPlugins,
-                      List<WordLookingUpPlugin> wordLookingUpPlugins,
+                      List<OovProviderPlugin> oovProviderPlugins,
                       List<PathRewritePlugin> pathRewritePlugins) {
 
         this.grammar = grammar;
         this.lexicon = lexicon;
         this.inputTextPlugins = inputTextPlugins;
-        this.wordLookingUpPlugins = wordLookingUpPlugins;
+        this.oovProviderPlugins = oovProviderPlugins;
         this.pathRewritePlugins = pathRewritePlugins;
     }
 
@@ -64,7 +64,7 @@ public class JapaneseTokenizer implements Tokenizer {
             }
 
             // OOV
-            for (WordLookingUpPlugin plugin : wordLookingUpPlugins) {
+            for (OovProviderPlugin plugin : oovProviderPlugins) {
                 for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
                     hasWords = true;
                     lattice.insert(node.getBegin(), node.getEnd(), node);

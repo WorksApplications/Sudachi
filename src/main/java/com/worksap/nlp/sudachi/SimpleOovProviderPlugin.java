@@ -7,7 +7,7 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
-class SimpleWordLookingUpPlugin extends WordLookingUpPlugin {
+class SimpleOovProviderPlugin extends OovProviderPlugin {
 
     List<String> oovPOSStrings;
     short oovPOSId;

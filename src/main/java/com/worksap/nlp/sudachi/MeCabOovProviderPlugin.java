@@ -12,7 +12,7 @@ import java.util.Map;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
-class MeCabWordLookingUpPlugin extends WordLookingUpPlugin {
+class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     static class CategoryInfo {
         String name;

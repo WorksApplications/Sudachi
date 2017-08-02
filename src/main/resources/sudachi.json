@@ -1,11 +1,11 @@
 {
     "systemDict" : "system.dic",
-    "wordLookingUpPlugin" : [
-        { "class" : "com.worksap.nlp.sudachi.MeCabWordLookingUpPlugin",
+    "oovProviderPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
           "charDef" : "char.def",
           "unkDef" : "unk.def"
         },
-        { "class" : "com.worksap.nlp.sudachi.SimpleWordLookingUpPlugin",
+        { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
           "oovPOSStrings" : [ "補助記号", "一般", "*", "*", "*", "*" ],
           "leftId" : 5968,
           "rightId" : 5968,
