@@ -94,7 +94,7 @@ public class JapaneseTokenizer implements Tokenizer {
                 } else {        // Tokenizer.SplitMode.B
                     wids = node.getWordInfo().getBunitSplit();
                 }
-                if (wids.length == 0) {
+                if (wids.length == 0 || wids.length == 1) {
                     newPath.add(node);
                 } else {
                     int offset = node.getBegin();
@@ -113,10 +113,22 @@ public class JapaneseTokenizer implements Tokenizer {
             path = newPath;
         }
 
+        if (dumpOutput != null) {
+            dumpPath(path);
+        }
+
         return new MorphemeList(input, grammar, lexicon, path);
     }
 
     public void setDumpOutput(PrintStream output) {
         dumpOutput = output;
+    }
+
+    void dumpPath(List<LatticeNode> path) {
+        int i = 0;
+        for (LatticeNode node : path) {
+            dumpOutput.println(String.format("%d: %s", i, node.toString()));
+            i++;
+        }
     }
 }

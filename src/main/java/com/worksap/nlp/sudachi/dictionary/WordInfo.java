@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 public class WordInfo {
 
     private final String surface;
+    private final short headwordLength;
     private final short posId;
     private final String normalizedForm;
     private final int dictionaryFormWordId;
@@ -15,6 +16,7 @@ public class WordInfo {
     private final int[] wordStructure;
 
     WordInfo(String surface,
+             short headwordLength,
              short posId,
              String normalizedForm,
              int dictionaryFormWordId,
@@ -24,6 +26,7 @@ public class WordInfo {
              int[] bUnitSplit,
              int[] wordStructure) {
         this.surface = surface;
+        this.headwordLength = headwordLength;
         this.posId = posId;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = dictionaryFormWordId;
@@ -40,6 +43,7 @@ public class WordInfo {
              String dictionaryForm,
              String reading) {
         this.surface = surface;
+        this.headwordLength = (short)surface.getBytes(StandardCharsets.UTF_8).length;
         this.posId = posId;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = -1;
@@ -54,8 +58,8 @@ public class WordInfo {
         return surface;
     }
 
-    public int getLength() {
-        return surface.getBytes(StandardCharsets.UTF_8).length;
+    public short getLength() {
+        return headwordLength;
     }
 
     public short getPOSId() {

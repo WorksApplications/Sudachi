@@ -17,6 +17,8 @@ class WordInfoList {
         
         String surface = bufferToString(index);
         index += 2 + 2 * surface.length();
+        short headwordLength = bytes.getShort(index);
+        index += 2;
         short posId = bytes.getShort(index);
         index += 2;
         String normalizedForm = bufferToString(index);
@@ -37,7 +39,7 @@ class WordInfoList {
             dictionaryForm = wi.getSurface();
         }
 
-        return new WordInfo(surface, posId, normalizedForm,
+        return new WordInfo(surface, headwordLength, posId, normalizedForm,
                             dictionaryFormWordId, dictionaryForm, reading,
                             aUnitSplit, bUnitSplit, wordStructure);
     }
