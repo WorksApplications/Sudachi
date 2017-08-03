@@ -36,10 +36,11 @@ public class SudachiCommandLine {
                     break;
                 }
                 for (Morpheme m : tokenizer.tokenize(mode, line)) {
-                    output.print(m.surface() + "\t");
-                    output.print(String.join(",", m.partOfSpeech()) + "\t");
-                    output.print(m.normalizedForm() + "\t");
-                    output.println(m.isOOV() ? "*" : "");
+                    output.print(m.surface());
+                    output.print("\t");
+                    output.print(String.join(",", m.partOfSpeech()));
+                    output.print("\t");
+                    output.println(m.normalizedForm());
                 }
                 output.println("EOS");
             }
@@ -74,6 +75,13 @@ public class SudachiCommandLine {
                 output = new PrintStream(args[++i]);
             } else if (args[i].equals("-d")) {
                 isEnableDump = true;
+            } else if (args[i].equals("-h")) {
+                System.err.println("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]");
+                System.err.println("\t-r file\tread settings from file");
+                System.err.println("\t-m mode\tmode of splitting");
+                System.err.println("\t-o file\toutput to file");
+                System.err.println("\t-d\tdebug mode");
+                return;
             } else {
                 break;
             }
