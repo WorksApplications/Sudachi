@@ -86,6 +86,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
             WordInfo info
                 = new WordInfo(cols[4], // headword
+                               (short)cols[0].getBytes(StandardCharsets.UTF_8).length,
                                posId,
                                cols[12], // normalizedForm
                                (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
