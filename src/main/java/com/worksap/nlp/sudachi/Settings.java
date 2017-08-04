@@ -17,6 +17,40 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
 
+/**
+ * A structure of settings.
+ *
+ * This class reads a settings written in JSON.
+ *
+ * <p>The following is an example of settings.
+ * <pre>{@code
+ *   {
+ *     "path" : "/usr/local/share/sudachi",
+ *     "systemDict" : "system.dic",
+ *     "characterDefinitionFile" : "char.def",
+ *     "inputTextPlugin" : [
+ *       { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" }
+ *     ],
+ *     "oovProviderPlugin" : [
+ *       {
+ *         "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
+ *         "charDef" : "char.def",
+ *         "unkDef" : "unk.def"
+ *       },
+ *       {
+ *         "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
+ *         "oovPOSStrings" : [ "補助記号", "一般", "*", "*", "*", "*" ],
+ *         "leftId" : 5968,
+ *         "rightId" : 5968,
+ *         "cost" : 3857
+ *       }
+ *     ]
+ *   }
+ * }</pre>
+ *
+ * <p>{@code path} is a reserved key. Its value is used in {@link getPath}
+ * as the base path to make an absolute path from a relative path.
+ */
 public class Settings {
 
     JsonObject root;
@@ -27,7 +61,16 @@ public class Settings {
         this.basePath = basePath;
     }
 
-    static Settings parseSettings(String json) {
+    /**
+     * Read a settings from a JSON string.
+     *
+     * The root level of JSON must be a Object.
+     *
+     * @param json JSON string
+     * @return a structure of settings
+     * @throws IllegalArgumentException if the parsing is failed
+     */
+    public static Settings parseSettings(String json) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
             if (rootStr instanceof JsonObject) {
@@ -42,6 +85,14 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the string to which the specified key is mapped,
+     * or {@code null} if this settings contains no mapping for the key.
+     *
+     * @param setting the key
+     * @return the value or {@code null} if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not a string
+     */
     public String getString(String setting) {
         try {
             return root.getString(setting);
@@ -52,10 +103,30 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the string to which the specified key is mapped,
+     * or {@code defaultValue} if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @param defaultValue the default mapping of the key
+     * @return the value or {@code defaultValue} if this settings
+     *         has no mapping
+     * @throws IllegalArgumentException if the value is not a string
+     */
     public String getString(String setting, String defaultValue) {
         return root.getString(setting, defaultValue);
     }
 
+    /**
+     * Returns the value as the list of strings to which the specified
+     * key is mapped, or an empty list if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @return the value or a empty list if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not an array of strings
+     */
     public List<String> getStringList(String setting) {
         try {
             JsonArray array = root.getJsonArray(setting);
@@ -72,6 +143,14 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the integer to which the specified key is mapped,
+     * or 0 if this settings contains no mapping for the key.
+     *
+     * @param setting the key
+     * @return the value or 0 if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not an integer
+     */
     public int getInt(String setting) {
         try {
             return root.getInt(setting);
@@ -82,6 +161,16 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the list of integers to which the specified
+     * key is mapped, or an empty list if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @return the value or a empty list if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not an array
+     *         of integers
+     */
     public List<Integer> getIntList(String setting) {
         try {
             return getList(setting, JsonNumber.class).stream()
@@ -91,6 +180,16 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the list of lists of integers to which
+     * the specified key is mapped, or an empty list if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @return the value or an empty list if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not an array of arrays
+     *         of integers
+     */
     public List<List<Integer>> getIntListList(String setting) {
         try {
             return getList(setting, JsonArray.class).stream()
@@ -102,12 +201,39 @@ public class Settings {
         }
     }
 
+    /**
+     * Returns the value as the file path to which the specified key is mapped,
+     * or {@code null} if this settings contains no mapping for the key.
+     *
+     * <p>If {@code "path"} is specified in the root object and
+     * the value is not an absolute path, this method joins them
+     * using the {@link java.nio.file.FileSystem#getSeparator name-separator}
+     * as the separator.
+     *
+     * @param setting the key
+     * @return the value or {@code null} if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not a string
+     */
     public String getPath(String setting) {
         String path = getString(setting);
         return (path == null || isAbsolutePath(path) || basePath == null) ?
             path : Paths.get(basePath, path).toString();
     }
 
+    /**
+     * Returns the value as the list of file paths to which the specified
+     * key is mapped, or an empty list if this settings contains
+     * no mapping for the key.
+     *
+     * <p>If {@code "path"} is specified in the root object and
+     * the file path is not an absolute path, this method joins them
+     * using the {@link java.nio.file.FileSystem#getSeparator name-separator}
+     * as the separator.
+     *
+     * @param setting the key
+     * @return the value or an empty list if this settings has no mapping
+     * @throws IllegalArgumentException if the value is not an array of strings
+     */
     public List<String> getPathList(String setting) {
         List<String> list = getStringList(setting);
         if (list.isEmpty()) {
@@ -132,7 +258,7 @@ public class Settings {
         try {
             list = getList(setting, JsonObject.class);
         } catch (ClassCastException e) {
-            throw new IllegalArgumentException(setting + " is not a list of object", e);
+            throw new IllegalArgumentException(setting + " is not a array of object", e);
         }
         if (list.isEmpty()) {
             return Collections.emptyList();
