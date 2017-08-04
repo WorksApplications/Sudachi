@@ -30,7 +30,12 @@
         <version>3.0.0-M1</version>
         <configuration>
           <locale>en_US</locale>
-          <sourceFileExcludes>**/*Impl.java</sourceFileExcludes>
+          <sourceFileExcludes>
+            <exclude>**/*Impl.java</exclude>
+            <exclude>**/MorphemeList.java</exclude>
+            <exclude>**/DoubleArrayLexicon.java</exclude>
+            <exclude>**/LexiconSet.java</exclude>
+          </sourceFileExcludes>
         </configuration>
       </plugin>
     </plugins>

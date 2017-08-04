@@ -18,6 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.worksap.nlp.dartsclone.DoubleArray;
 
+/**
+ * A user dictionary building tool. This class provide the converter
+ * from the source file in the CSV format to the binary format.
+ */
 public class UserDictionaryBuilder extends DictionaryBuilder {
 
     Grammar grammar;
@@ -101,7 +105,24 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         wordSize = wordId;
     }
 
+    /**
+     * Builds the user dictionary.
+     *
+     * This tool requires three arguments.
+     * <ol start="0">
+     * <li>the path of the system dictionary</li>
+     * <li>the path of the source file in the CSV format</li>
+     * <li>the path of the output file</li>
+     * </ol>
+     * @param args the input filename, the connection matrix file,
+     * and the output filename
+     * @throws IOException if IO or parsing is failed
+     */
     public static void main(String[] args) throws IOException {
+        if (args.length != 3) {
+            System.err.println("usage: UserDictionaryBuilder system.dic input.csv output.dic");
+            return;
+        }
 
         Grammar grammar;
         try (FileInputStream istream = new FileInputStream(args[0]);

@@ -7,6 +7,8 @@ import java.util.List;
  *
  * <p>A node of the graph is a morpheme and has a position of the input text.
  * Only the adjacent nodes are connected.
+ *
+ * @see LatticeNode
  */
 public interface Lattice {
 

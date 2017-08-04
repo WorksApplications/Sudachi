@@ -2,6 +2,12 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Informations of the morpheme.
+ *
+ * <p>This class has the informations which are not used in the graph
+ * calculation.
+ */
 public class WordInfo {
 
     private final String surface;
@@ -37,6 +43,15 @@ public class WordInfo {
         this.wordStructure = wordStructure;
     }
 
+    /**
+     * Allocates informations of morpheme not in the lexicons.
+     *
+     * @param surface the text of the morpheme
+     * @param posId the ID of the part-of-speech of the morpheme
+     * @param normalizedForm the normalized form of the morpheme
+     * @param dictionaryForm the dictionary form of the morpheme
+     * @param reading the reading form of the morpheme
+     */
     public WordInfo(String surface,
              short posId,
              String normalizedForm,
@@ -54,42 +69,104 @@ public class WordInfo {
         this.wordStructure = new int[0];
     }
 
+    /**
+     * Returns the text of the morpheme.
+     *
+     * @return the text of the morpheme
+     */
     public String getSurface() {
         return surface;
     }
 
+    /**
+     * Returns the length of the text in internal use unit.
+     *
+     * <p>This length is used to place a node in the
+     * {@link com.worksap.nlp.sudachi.Lattice},
+     * does not equals {@code getSurface().length()}.
+     *
+     * @return the length of the text
+     */
     public short getLength() {
         return headwordLength;
     }
 
+    /**
+     * Returns the part-of-speech ID of the morpheme.
+     *
+     * The strings of part-of-speech name can be gotten
+     * with {@link Grammar#getPartOfSpeechString}.
+     * @return the POS ID
+     */
     public short getPOSId() {
         return posId;
     }
     
+    /**
+     * Returns the normalized form of the morpheme.
+     *
+     * @return the normalized form of the morpheme
+     */
     public String getNormalizedForm() {
         return normalizedForm;
     }
 
+    /**
+     * Returns the word ID of the dictionary form of the morpheme.
+     *
+     * The information of the dictionary form can be gotten with
+     * {@link Lexicon#getWordInfo}
+     *
+     * @return the word ID of the dictionary form of the morpheme
+     */
     public int getDictionaryFormWordId() {
         return dictionaryFormWordId;
     }
 
+    /**
+     * Returns the dictionary form of the morpheme.
+     *
+     * @return the dictionary form of the morpheme
+     */
     public String getDictionaryForm() {
         return dictionaryForm;
     }
 
+    /**
+     * Returns the reading form of the morpheme.
+     *
+     * @return the reading form of the morpheme
+     */
     public String getReading() {
         return reading;
     }
 
+    /**
+     * Returns the array of word IDs which the morpheme is
+     * compounded of in A mode.
+     *
+     * @return the word IDs of A units
+     */
     public int[] getAunitSplit() {
         return aUnitSplit;
     }
 
+    /**
+     * Returns the array of word IDs which the morpheme is
+     * compounded of in B mode.
+     *
+     * @return the word IDs of B units
+     */
     public int[] getBunitSplit() {
         return bUnitSplit;
     }
 
+    /**
+     * Returns the array of the morphemes which the morpheme is
+     * compounded of.
+     *
+     * @return the word IDs of the constituents of the morpheme
+     */
     public int[] getWordStructure() {
         return wordStructure;
     }
