@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+/**
+ * A command-line morphological analysis tool.
+ */
 public class SudachiCommandLine {
 
     static String readAll(InputStream input) throws IOException {
@@ -47,6 +50,28 @@ public class SudachiCommandLine {
         }
     }
 
+    /**
+     * Analyzes the input texts.
+     *
+     * <p>Usage: {@code SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]}
+     * <p>The following are the options.
+     * <dl>
+     * <dt>{@code -r file}</dt><dd>the settings file in JSON format</dd>
+     * <dt>{@code -m {A|B|C}}</dt><dd>the mode of splitting</dd>
+     * <dt>{@code -o file}</dt><dd>the output file</dd>
+     * <dt>{@code -d}</dt><dd>print the debug informations</dd>
+     * <dt>{@code -h}</dt><dd>show the usage</dd>
+     * </dl>
+     * <p>If the output file is not specified, this tool writes the output
+     * to the standard output.
+     * <p>The {@code file} operands are processed in command-line order.
+     * If {@code file} is absent, this tool reads from the starndard input.
+     *
+     * <p>This tool processes a line as a sentence.
+     *
+     * @param args the options and the input filenames
+     * @throws IOException if IO is failed
+     */
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;

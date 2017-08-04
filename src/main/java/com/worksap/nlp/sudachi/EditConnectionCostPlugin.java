@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 /**
- * A Plugin for editing the connection costs.
+ * A plugin for editing the connection costs.
  *
  * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
  * It can be refered as {@link Plugin#settings}.

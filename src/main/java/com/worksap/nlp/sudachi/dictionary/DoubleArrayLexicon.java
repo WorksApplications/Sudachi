@@ -37,6 +37,19 @@ public class DoubleArrayLexicon implements Lexicon {
         wordInfos = new WordInfoList(bytes, offset, wordParams.size());
     }
 
+    /**
+     * Returns the word IDs obtained by common prefix search.
+     *
+     * <p>The search begin with the position at the {@code offset}
+     * of the {@code text}.
+     *
+     * <p>The return value is consist of the word ID and the length
+     * of the matched part.
+     * 
+     * @param text the key
+     * @param offset the offset of the key
+     * @return the iterator of results
+     */
     @Override
     public Iterator<int[]> lookup(byte[] text, int offset) {
         Iterator<int[]> iterator

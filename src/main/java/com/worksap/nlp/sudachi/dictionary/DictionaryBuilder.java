@@ -18,6 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.worksap.nlp.dartsclone.DoubleArray;
 
+/**
+ * A dictionary building tool. This class provide the converter
+ * from the source file in the CSV format to the binary format.
+ */
 public class DictionaryBuilder {
 
     static final int NUMBER_OF_COLUMNS = 18;
@@ -330,7 +334,26 @@ public class DictionaryBuilder {
         }
     }
 
+    /**
+     * Builds the system dictionary.
+     *
+     * This tool requires three arguments.
+     * <ol start="0">
+     * <li>the path of the source file in the CSV format</li>
+     * <li>the path of the connection matrix file
+     *     in MeCab's matrix.def format</li>
+     * <li>the path of the output file</li>
+     * </ol>
+     * @param args the input filename, the connection matrix file,
+     * and the output filename
+     * @throws IOException if IO or parsing is failed
+     */
     public static void main(String[] args) throws IOException {
+        if (args.length != 3) {
+            System.err.println("usage: DictionaryBuilder input.csv matrix.def output.dic");
+            return;
+        }
+
         try (FileInputStream lexiconInput = new FileInputStream(args[0]);
              FileInputStream matrixInput = new FileInputStream(args[1]);
              FileOutputStream output = new FileOutputStream(args[2])) {
