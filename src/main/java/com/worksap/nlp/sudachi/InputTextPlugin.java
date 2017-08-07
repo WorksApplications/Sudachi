@@ -6,5 +6,5 @@ public abstract class InputTextPlugin extends Plugin {
 
     public abstract void setUp() throws IOException;
 
-    public abstract void rewrite(InputText<?> text);
+    public abstract void rewrite(InputTextBuilder<?> builder);
 }
