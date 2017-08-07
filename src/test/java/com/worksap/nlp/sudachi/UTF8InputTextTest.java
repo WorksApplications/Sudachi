@@ -12,12 +12,19 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class UTF8InputTextTest {
     
-    // \u2123d uses surrogate pair
-    String testText = "Aあ漢イb字ｳ𡈽ｃ";
-    // mixed full-width, half-width, w/ accent
-    String contText = "âｂC漢あ字１2３4ｲウ";
-    UTF8InputText testInput;
-    UTF8InputText contInput;
+    // mixed full-width, half-width, accented
+    // U+2123D '𡈽' uses surrogate pair
+    static final String TEXT = "âｂC1あ234漢字𡈽アｺﾞ";
+    byte[] bytes = {
+        (byte)0xC3, (byte)0xA2, (byte)0xEF, (byte)0xBD, (byte)0x82, (byte)0x43,
+        (byte)0x31, (byte)0xE3, (byte)0x81, (byte)0x82, (byte)0x32, (byte)0x33,
+        (byte)0x34, (byte)0xE6, (byte)0xBC, (byte)0xA2, (byte)0xE5, (byte)0xAD,
+        (byte)0x97, (byte)0xF0, (byte)0xA1, (byte)0x88, (byte)0xBD, (byte)0xE3,
+        (byte)0x82, (byte)0xA2, (byte)0xEF, (byte)0xBD, (byte)0xBA, (byte)0xEF,
+        (byte)0xBE, (byte)0x9E
+    };
+    UTF8InputText input;
+    UTF8InputTextBuilder builder;
     MockGrammar grammar;
     
     @Before
@@ -33,119 +40,177 @@ public class UTF8InputTextTest {
         }
         grammar.setCharacterCategory(charCategory);
         
-        testInput = new UTF8InputText(testText, grammar);
-        contInput = new UTF8InputText(contText, grammar);
+        builder = new UTF8InputTextBuilder(TEXT, grammar);
     }
     
     @Test
     public void getOriginalText() {
-        assertThat(testInput.getOriginalText(), is(testText));
-        assertThat(testInput.getText(), is(testText));
-        assertThat(contInput.getOriginalText(), is(contText));
-        assertThat(contInput.getText(), is(contText));
+        assertThat(builder.getOriginalText(), is(TEXT));
+        assertThat(builder.getText(), is(TEXT));
+        input = builder.build();
+        assertThat(input.getOriginalText(), is(TEXT));
+        assertThat(input.getText(), is(TEXT));
     }
     
     @Test
     public void getByteText() {
-        byte[] bytes = testInput.getByteText();
-        assertThat(bytes.length, is(24));
-        assertArrayEquals(
-            new byte[] {
-                (byte)0x41, (byte)0xE3, (byte)0x81, (byte)0x82,
-                (byte)0xe6, (byte)0xBC, (byte)0xA2, (byte)0xE3,
-                (byte)0x82, (byte)0xA4, (byte)0x62, (byte)0xE5,
-                (byte)0xAD, (byte)0x97, (byte)0xEF, (byte)0xBD,
-                (byte)0xB3, (byte)0xF0, (byte)0xA1, (byte)0x88,
-                (byte)0xBD, (byte)0xEF, (byte)0xBD, (byte)0x83,
-            }, bytes
-        );
+        input = builder.build();
+        assertThat(input.getByteText().length, is(32));
+        assertArrayEquals(bytes, input.getByteText());
     }
     
     @Test
     public void getOriginalOffset() {
-        assertThat(testInput.getOriginalOffset(0), is(0));
-        assertThat(testInput.getOriginalOffset(1), is(1));
-        assertThat(testInput.getOriginalOffset(3), is(1));
-        assertThat(testInput.getOriginalOffset(10), is(4));
-        assertThat(testInput.getOriginalOffset(17), is(7));
-        assertThat(testInput.getOriginalOffset(20), is(7));
-        assertThat(testInput.getOriginalOffset(21), is(9));
-        assertThat(testInput.getOriginalOffset(23), is(9));
-    }
-
-    @Test
-    public void replaceWithSameLength() {
-        testInput.replace(2, 4, "ああ");
-        assertThat(testInput.getOriginalText(), is(testText));
-        assertThat(testInput.getText(), is("Aあああb字ｳ𡈽ｃ"));
-        byte[] bytes = testInput.getByteText();
-        assertThat(bytes.length, is(24));
-        assertThat(testInput.getOriginalOffset(0), is(0));
-        assertThat(testInput.getOriginalOffset(4), is(2));
-        assertThat(testInput.getOriginalOffset(5), is(2));
-        assertThat(testInput.getOriginalOffset(6), is(2));
-        assertThat(testInput.getOriginalOffset(7), is(2));
-        assertThat(testInput.getOriginalOffset(8), is(2));
-        assertThat(testInput.getOriginalOffset(9), is(2));
-        assertThat(testInput.getOriginalOffset(10), is(4));
-    }
-
-    @Test
-    public void replaceWithDeletion() {
-        testInput.replace(2, 4, "あ");
-        assertThat(testInput.getOriginalText(), is(testText));
-        assertThat(testInput.getText(), is("Aああb字ｳ𡈽ｃ"));
-        byte[] bytes = testInput.getByteText();
-        assertThat(bytes.length, is(21));
-        assertThat(testInput.getOriginalOffset(0), is(0));
-        assertThat(testInput.getOriginalOffset(4), is(2));
-        assertThat(testInput.getOriginalOffset(5), is(2));
-        assertThat(testInput.getOriginalOffset(6), is(2));
-        assertThat(testInput.getOriginalOffset(7), is(4));
-    }
-
-    @Test
-    public void replaceWithInsertion() {
-        testInput.replace(2, 4, "あああ");
-        assertThat(testInput.getOriginalText(), is(testText));
-        assertThat(testInput.getText(), is("Aああああb字ｳ𡈽ｃ"));
-        byte[] bytes = testInput.getByteText();
-        assertThat(bytes.length, is(27));
-        assertThat(testInput.getOriginalOffset(0), is(0));
-        assertThat(testInput.getOriginalOffset(4), is(2));
-        assertThat(testInput.getOriginalOffset(7), is(2));
-        assertThat(testInput.getOriginalOffset(10), is(2));
-        assertThat(testInput.getOriginalOffset(13), is(4));
+        input = builder.build();
+        assertThat(input.getOriginalOffset(0), is(0));
+        assertThat(input.getOriginalOffset(1), is(0));
+        assertThat(input.getOriginalOffset(2), is(1));
+        assertThat(input.getOriginalOffset(4), is(1));
+        assertThat(input.getOriginalOffset(6), is(3));
+        assertThat(input.getOriginalOffset(7), is(4));
+        assertThat(input.getOriginalOffset(10), is(5));
+        assertThat(input.getOriginalOffset(18), is(9));
+        assertThat(input.getOriginalOffset(19), is(10));
+        assertThat(input.getOriginalOffset(22), is(10));
+        assertThat(input.getOriginalOffset(23), is(12));
+        assertThat(input.getOriginalOffset(28), is(13));
+        assertThat(input.getOriginalOffset(31), is(14));
     }
     
     @Test
     public void getCharCategoryNameList() {
-        assertThat(testInput.getCharCategoryNameList(0).get(0), is("ALPHA"));
-        assertThat(testInput.getCharCategoryNameList(1).get(0), is("HIRAGANA"));
-        assertThat(testInput.getCharCategoryNameList(2).get(0), is("KANJI"));
-        assertThat(testInput.getCharCategoryNameList(3).get(0), is("KATAKANA"));
-        assertThat(testInput.getCharCategoryNameList(6).get(0), is("KATAKANA"));
-        assertThat(testInput.getCharCategoryNameList(7).get(0), is("DEFAULT"));
-        assertThat(testInput.getCharCategoryNameList(8).get(0), is("DEFAULT"));
-        assertThat(testInput.getCharCategoryNameList(9).get(0), is("ALPHA"));
+        input = builder.build();
+        assertThat(input.getCharCategoryNameList(0).get(0), is("ALPHA"));
+        assertThat(input.getCharCategoryNameList(2).get(0), is("ALPHA"));
+        assertThat(input.getCharCategoryNameList(5).get(0), is("ALPHA"));
+        assertThat(input.getCharCategoryNameList(6).get(0), is("NUMERIC"));
+        assertThat(input.getCharCategoryNameList(7).get(0), is("HIRAGANA"));
+        assertThat(input.getCharCategoryNameList(9).get(0), is("HIRAGANA"));
+        assertThat(input.getCharCategoryNameList(10).get(0), is("NUMERIC"));
+        assertThat(input.getCharCategoryNameList(13).get(0), is("KANJI"));
+        assertThat(input.getCharCategoryNameList(18).get(0), is("KANJI"));
+        assertThat(input.getCharCategoryNameList(19).get(0), is("DEFAULT"));
+        assertThat(input.getCharCategoryNameList(22).get(0), is("DEFAULT"));
+        assertThat(input.getCharCategoryNameList(23).get(0), is("KATAKANA"));
+        assertThat(input.getCharCategoryNameList(26).get(0), is("KATAKANA"));
+        assertThat(input.getCharCategoryNameList(31).get(0), is("KATAKANA"));
     }
     
     @Test
     public void getCharCategoryContinuousLength() {
-        assertThat(contInput.getCharCategoryContinuousLength(0), is(3));
-        assertThat(contInput.getCharCategoryContinuousLength(1), is(2));
-        assertThat(contInput.getCharCategoryContinuousLength(2), is(1));
-        assertThat(contInput.getCharCategoryContinuousLength(3), is(1));
-        assertThat(contInput.getCharCategoryContinuousLength(5), is(1));
-        assertThat(contInput.getCharCategoryContinuousLength(6), is(4));
-        assertThat(contInput.getCharCategoryContinuousLength(9), is(1));
-        assertThat(contInput.getCharCategoryContinuousLength(10), is(2));
-        assertThat(contInput.getCharCategoryContinuousLength(11), is(1));
+        input = builder.build();
+        assertThat(input.getCharCategoryContinuousLength(0), is(6));
+        assertThat(input.getCharCategoryContinuousLength(1), is(5));
+        assertThat(input.getCharCategoryContinuousLength(2), is(4));
+        assertThat(input.getCharCategoryContinuousLength(5), is(1));
+        assertThat(input.getCharCategoryContinuousLength(6), is(1));
+        assertThat(input.getCharCategoryContinuousLength(7), is(3));
+        assertThat(input.getCharCategoryContinuousLength(10), is(3));
+        assertThat(input.getCharCategoryContinuousLength(11), is(2));
+        assertThat(input.getCharCategoryContinuousLength(12), is(1));
+        assertThat(input.getCharCategoryContinuousLength(19), is(4));
+        assertThat(input.getCharCategoryContinuousLength(22), is(1));
+        assertThat(input.getCharCategoryContinuousLength(23), is(9));
+        assertThat(input.getCharCategoryContinuousLength(26), is(6));
+        assertThat(input.getCharCategoryContinuousLength(31), is(1));
+    }
+    
+    @Test
+    public void replaceWithSameLength() {
+        builder.replace(8, 10, "ああ");
+        assertThat(builder.getOriginalText(), is(TEXT));
+        assertThat(builder.getText(), is("âｂC1あ234ああ𡈽アｺﾞ"));
+        input = builder.build();
+        assertThat(input.getOriginalText(), is(TEXT));
+        assertThat(input.getText(), is("âｂC1あ234ああ𡈽アｺﾞ"));
+        assertThat(input.getByteText().length, is(32));
+        assertThat(input.getOriginalOffset(0), is(0));
+        assertThat(input.getOriginalOffset(12), is(7));
+        assertThat(input.getOriginalOffset(13), is(8));
+        assertThat(input.getOriginalOffset(15), is(8));
+        assertThat(input.getOriginalOffset(16), is(8));
+        assertThat(input.getOriginalOffset(18), is(8));
+        assertThat(input.getOriginalOffset(19), is(10));
+        assertThat(input.getOriginalOffset(22), is(10));
+        assertThat(input.getOriginalOffset(31), is(14));
+    }
+
+    @Test
+    public void replaceWithDeletion() {
+        builder.replace(8, 10, "あ");
+        assertThat(builder.getOriginalText(), is(TEXT));
+        assertThat(builder.getText(), is("âｂC1あ234あ𡈽アｺﾞ"));
+        input = builder.build();
+        assertThat(input.getOriginalText(), is(TEXT));
+        assertThat(input.getText(), is("âｂC1あ234あ𡈽アｺﾞ"));
+        assertThat(input.getByteText().length, is(29));
+        assertThat(input.getOriginalOffset(0), is(0));
+        assertThat(input.getOriginalOffset(12), is(7));
+        assertThat(input.getOriginalOffset(13), is(8));
+        assertThat(input.getOriginalOffset(15), is(8));
+        assertThat(input.getOriginalOffset(16), is(10));
+        assertThat(input.getOriginalOffset(19), is(10));
+        assertThat(input.getOriginalOffset(28), is(14));
+    }
+
+    @Test
+    public void replaceWithInsertion() {
+        builder.replace(8, 10, "あああ");
+        assertThat(builder.getOriginalText(), is(TEXT));
+        assertThat(builder.getText(), is("âｂC1あ234あああ𡈽アｺﾞ"));
+        input = builder.build();
+        assertThat(input.getOriginalText(), is(TEXT));
+        assertThat(input.getText(), is("âｂC1あ234あああ𡈽アｺﾞ"));
+        assertThat(input.getByteText().length, is(35));
+        assertThat(input.getOriginalOffset(0), is(0));
+        assertThat(input.getOriginalOffset(12), is(7));
+        assertThat(input.getOriginalOffset(13), is(8));
+        assertThat(input.getOriginalOffset(21), is(8));
+        assertThat(input.getOriginalOffset(22), is(10));
+        assertThat(input.getOriginalOffset(25), is(10));
+        assertThat(input.getOriginalOffset(34), is(14));
+    }
+    
+    @Test
+    public void replaceMultiTimes() {
+        builder.replace(0, 1, "a");
+        builder.replace(1, 2, "b");
+        builder.replace(2, 3, "c");
+        builder.replace(10, 12, "土");
+        builder.replace(12, 14, "ゴ");
+        input = builder.build();
+        assertThat(input.getOriginalText(), is(TEXT));
+        assertThat(input.getText(), is("abc1あ234漢字土アゴ"));
+        assertThat(input.getByteText().length, is(25));
+        assertThat(input.getOriginalOffset(0), is(0));
+        assertThat(input.getOriginalOffset(1), is(1));
+        assertThat(input.getOriginalOffset(2), is(2));
+        assertThat(input.getOriginalOffset(7), is(5));
+        assertThat(input.getOriginalOffset(8), is(6));
+        assertThat(input.getOriginalOffset(9), is(7));
+        assertThat(input.getOriginalOffset(15), is(9));
+        assertThat(input.getOriginalOffset(16), is(10));
+        assertThat(input.getOriginalOffset(18), is(10));
+        assertThat(input.getOriginalOffset(19), is(12));
+        assertThat(input.getOriginalOffset(21), is(12));
+        assertThat(input.getOriginalOffset(22), is(13));
+        assertThat(input.getOriginalOffset(24), is(13));
+    }
+    
+    @Test
+    public void getByteLengthByCodePoints() {
+        input = builder.build();
+        assertThat(input.getByteLengthByCodePoints(0, 1), is(2));
+        assertThat(input.getByteLengthByCodePoints(0, 4), is(7));
+        assertThat(input.getByteLengthByCodePoints(10, 1), is(1));
+        assertThat(input.getByteLengthByCodePoints(11, 1), is(1));
+        assertThat(input.getByteLengthByCodePoints(12, 1), is(1));
+        assertThat(input.getByteLengthByCodePoints(13, 2), is(6));
+        assertThat(input.getByteLengthByCodePoints(19, 1), is(4));
+        assertThat(input.getByteLengthByCodePoints(23, 3), is(9));
     }
     
     class MockGrammar implements Grammar {
-        private CharacterCategory charCategory; 
-        
         public int getPartOfSpeechSize() {
             return 0;
         }
@@ -166,10 +231,17 @@ public class UTF8InputTextTest {
             return null;
         }
         public CharacterCategory getCharacterCategory() {
+            CharacterCategory charCategory = new CharacterCategory();
+            try {
+                charCategory.readCharacterDefinition(UTF8InputTextTest.class.getClassLoader()
+                    .getResource("char.def").getPath());
+            }
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
             return charCategory;
         }
         public void setCharacterCategory(CharacterCategory charCategory) {
-            this.charCategory = charCategory;
         }
     }
 }

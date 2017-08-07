@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 
@@ -37,10 +35,11 @@ public class JapaneseTokenizer implements Tokenizer {
             return Collections.emptyList();
         }
 
-        UTF8InputText input = new UTF8InputText(text, grammar);
+        UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
-            plugin.rewrite(input);
+            plugin.rewrite(builder);
         }
+        UTF8InputText input = builder.build();
         byte[] bytes = input.getByteText();
 
         LatticeImpl lattice = new LatticeImpl(bytes.length, grammar);
