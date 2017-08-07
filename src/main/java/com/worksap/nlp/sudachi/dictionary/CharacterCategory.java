@@ -13,6 +13,8 @@ import java.util.List;
 
 public class CharacterCategory {
     
+	private static final String DEFAULT_CATEGORY = "DEFAULT";
+	
     static class Range {
         int low;
         int high;
@@ -39,34 +41,13 @@ public class CharacterCategory {
     
     private List<Range> rangeList = new ArrayList<>();
     
-    public List<String> getCategoryNameList(int codePoint) {
+    public List<String> getCategoryNames(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
                 return range.categories;
             }
         }
-        return Collections.emptyList();
-    }
-    
-    public int getContinuousLength(String text) {
-        boolean found;
-        List<String> categoryList = getCategoryNameList(text.codePointAt(0));
-        int length;
-        for (length = 0; length < text.length(); length++) {
-            found =false;
-            List<String> nextCategoryList = getCategoryNameList(text.codePointAt(length));
-            for (int i = 0; i < categoryList.size(); i++) {
-                for (int j = 0; j < nextCategoryList.size(); j++) {
-                    if (categoryList.get(i).equals(nextCategoryList.get(j))) {
-                        found = true; 
-                    }
-                }
-            }
-            if (!found) {
-                return length;
-            }
-        }
-        return length;
+        return Collections.singletonList(DEFAULT_CATEGORY);
     }
     
     public void readCharacterDefinition(String charDef) throws IOException {
@@ -112,7 +93,7 @@ public class CharacterCategory {
             Range defaultRange = new Range();
             defaultRange.low = 0;
             defaultRange.high = Integer.MAX_VALUE;
-            defaultRange.categories.add("DEFAULT");
+            defaultRange.categories.add(DEFAULT_CATEGORY);
             rangeList.add(defaultRange);
         }
     }
