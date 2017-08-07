@@ -30,40 +30,57 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
     }
     
     @Override
-    public void rewrite(InputText<?> text) {
+    public void rewrite(InputTextBuilder<?> builder) {
         int charLength;
-        char ch;
-        String substr;
-        String originalText = text.getText();
-        for (int i = 0; i < originalText.length(); i++) {
-            substr = originalText.substring(i);
+        int offset = 0;
+        int nextOffset = 0;
+        boolean skipNormalize;
+        String text = builder.getText();
+        for (int i = 0; i < text.length(); i++) {
+            offset += nextOffset;
+            nextOffset = 0;
+            skipNormalize = false;
             // 1. replace char without normalize
             for (int j = 0; j < replaceCharList.size(); j++) {
-                if (substr.startsWith(replaceCharList.get(j)[0])) {
-                    text.replace(i, i + replaceCharList.get(j)[0].length(), replaceCharList.get(j)[1]);
+                if (text.startsWith(replaceCharList.get(j)[0], i)) {
+                    String charBefore = replaceCharList.get(j)[0];
+                    String charAfter = replaceCharList.get(j)[1];
+                    builder.replace(i + offset, i + charBefore.length() + offset, charAfter);
+                    nextOffset += charAfter.length() - charBefore.length();
+                    i += charBefore.length() - 1;
+                    skipNormalize = true;
                     break;
                 }
             }
+            if (skipNormalize) {
+                continue;
+            }
             // 2. normalize
             // 2-1. check if surrogate pair
-            ch = substr.charAt(0);
+            char ch = text.charAt(i);
             if ((ch >= Character.MIN_HIGH_SURROGATE) && (ch <= Character.MAX_HIGH_SURROGATE)) {
                 charLength = 2;
-            } else if ((ch >= Character.MIN_LOW_SURROGATE) && (ch <= Character.MAX_LOW_SURROGATE)) {
-                //    do nothing if lower surrogate
+            }
+            else if ((ch >= Character.MIN_LOW_SURROGATE) && (ch <= Character.MAX_LOW_SURROGATE)) {
+                // do nothing when lower surrogate
                 continue;
-            } else {
+            }
+            else {
                 charLength = 1;
             }
             // 2-2. capital alphabet (not only latin but greek, cyrillic, etc) -> small
-            substr = substr.substring(0, charLength).toLowerCase();
+            String substr = text.substring(i, i + charLength).toLowerCase();;
             // 2-3. normalize (except in ignoreNormalize)
             //    e.g. full-width alphabet -> half-width / ligature / etc.
             if (ignoreNormalizeList.contains(substr)) {
-                text.replace(i, i + charLength, substr);
+                builder.replace(i + offset, i + charLength + offset, substr);
+                continue;
             }
             else {
-                text.replace(i, i + charLength, Normalizer.normalize(substr, Form.NFKC));
+                int beforeLength = substr.length();
+                substr = Normalizer.normalize(substr, Form.NFKC);
+                nextOffset += substr.length() - beforeLength;
+                builder.replace(i + offset, i + charLength + offset, substr);
             }
         }
     }
@@ -73,7 +90,7 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
             FileInputStream fin = new FileInputStream(rewriteDef);
             LineNumberReader reader
                 = new LineNumberReader(new InputStreamReader(fin, StandardCharsets.UTF_8))
-        ){
+        ) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.matches("\\s*") || line.startsWith("#")) {

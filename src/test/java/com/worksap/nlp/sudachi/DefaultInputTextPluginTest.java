@@ -5,18 +5,25 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+
 import org.junit.*;
+
+import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class DefaultInputTextPluginTest {
     
-    // U+2F3C（⼼） should not be normalized as U+5FC3（心）
-    String originalText = "ÂＢΓД㈱ｶﾞウ゛⼼Ⅲ";
+    // U+2F3C '⼼' should not be normalized to U+5FC3 '心'
+    // 'Ⅲ' should not be normalized to 'III' but should be lower case 'ⅲ' 
+    static final String ORIGINAL_TEXT = "ÂＢΓД㈱ｶﾞウ゛⼼Ⅲ";
+    static final String NORMALIZED_TEXT = "âbγд(株)ガヴ⼼ⅲ";
+    UTF8InputTextBuilder builder;
     UTF8InputText text;
     DefaultInputTextPlugin plugin;
     
     @Before
     public void setUp() {
-        text = new UTF8InputText(originalText, null);
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin = new DefaultInputTextPlugin();
         try {
             plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
@@ -30,8 +37,11 @@ public class DefaultInputTextPluginTest {
     
     @Test
     public void beforeRewrite() {
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is(originalText));
+        assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(builder.getText(), is(ORIGINAL_TEXT));
+        text = builder.build();
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(ORIGINAL_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(30));
         assertArrayEquals(
@@ -58,10 +68,12 @@ public class DefaultInputTextPluginTest {
     
     @Test
     public void afterRewrite() {
-        plugin.rewrite(text);
-        
-        assertThat(text.getOriginalText(), is(originalText));
-        assertThat(text.getText(), is("âbγд(株)ガヴ⼼ⅲ"));
+        assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(builder.getText(), is(ORIGINAL_TEXT));
+        plugin.rewrite(builder);
+        text = builder.build();
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(24));
         assertArrayEquals(
@@ -82,5 +94,40 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getOriginalOffset(11), is(4));
         assertThat(text.getOriginalOffset(15), is(7));
         assertThat(text.getOriginalOffset(17), is(7));
+    }
+    
+    class MockGrammar implements Grammar {
+        public int getPartOfSpeechSize() {
+            return 0;
+        }
+        public String[] getPartOfSpeechString(short posId) {
+            return null;
+        }
+        public short getPartOfSpeechId(String... pos) {
+            return 0;
+        }
+        public short getConnectCost(short leftId, short rightId) {
+            return 0;
+        }
+        public void setConnectCost(short leftId, short rightId, short cost) {}
+        public short[] getBOSParameter() {
+            return null;
+        }
+        public short[] getEOSParameter() {
+            return null;
+        }
+        public CharacterCategory getCharacterCategory() {
+            CharacterCategory charCategory = new CharacterCategory();
+            try {
+                charCategory.readCharacterDefinition(DefaultInputTextPluginTest.class.getClassLoader()
+                    .getResource("char.def").getPath());
+            }
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return charCategory;
+        }
+        public void setCharacterCategory(CharacterCategory charCategory) {
+        }
     }
 }
