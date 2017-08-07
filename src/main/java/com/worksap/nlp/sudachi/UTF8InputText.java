@@ -72,7 +72,6 @@ class UTF8InputText implements InputText<byte[]> {
         throws IndexOutOfBoundsException {
         int length = 0;
         for (int i = offset; i < bytes.length; i++) {
-            char ch = modifiedText.charAt(byteIndexes.get(i));
             if (byteIndexes.get(i) >= (byteIndexes.get(offset) + codePointLength)) {
                 return length;
             }
