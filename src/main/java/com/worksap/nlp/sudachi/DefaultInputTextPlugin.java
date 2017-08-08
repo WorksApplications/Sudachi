@@ -58,10 +58,10 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
             // 2. normalize
             // 2-1. check if surrogate pair
             char ch = text.charAt(i);
-            if ((ch >= Character.MIN_HIGH_SURROGATE) && (ch <= Character.MAX_HIGH_SURROGATE)) {
+            if (Character.isHighSurrogate(ch)) {
                 charLength = 2;
             }
-            else if ((ch >= Character.MIN_LOW_SURROGATE) && (ch <= Character.MAX_LOW_SURROGATE)) {
+            else if (Character.isLowSurrogate(ch)) {
                 // do nothing when lower surrogate
                 continue;
             }

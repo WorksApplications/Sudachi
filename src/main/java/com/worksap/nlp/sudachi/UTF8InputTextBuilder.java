@@ -32,7 +32,7 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         textOffsets = new ArrayList<>(byteCache.length + 1);
         byteIndexes = new ArrayList<>(byteCache.length + 1);
         for (int i = 0; i < originalText.length(); i++) {
-            if (isLowSurrogateChar(originalText.charAt(i))) {
+            if (Character.isLowSurrogate(originalText.charAt(i))) {
                 continue;
             }
             for (int j = 0; j < utf8ByteLength(originalText.codePointAt(i)); j++) {
@@ -94,7 +94,7 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
     private void replaceByteIndexes() {
         byteIndexes.clear();
         for (int i = 0; i < getText().length(); i++) {
-            if (isLowSurrogateChar(getText().charAt(i))) {
+            if (Character.isLowSurrogate(getText().charAt(i))) {
                 continue;
             }
             for (int j = 0; j < utf8ByteLength(getText().codePointAt(i)); j++) {
@@ -177,15 +177,6 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
             }
         }
         return byteCache;
-    }
-    
-    private boolean isLowSurrogateChar(char ch) {
-        if (ch >= Character.MIN_LOW_SURROGATE) {
-            if (ch <= Character.MAX_LOW_SURROGATE) {
-                return true;
-            }
-        }
-        return false;
     }
     
     private int utf8ByteLength(int cp) {
