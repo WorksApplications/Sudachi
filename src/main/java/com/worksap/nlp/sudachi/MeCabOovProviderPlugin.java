@@ -40,7 +40,6 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     @Override
     public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
         List<LatticeNode> nodes = new ArrayList<>();
-        String text = inputText.getText().substring(offset);
         int length = inputText.getCharCategoryContinuousLength(offset);
         if (length > 0) {
             for (String categoryName : inputText.getCharCategoryNameList(offset)) {
@@ -49,19 +48,21 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 List<OOV> oovs = oovList.get(cinfo.name);
                 if (cinfo.isGroup &&
                     (cinfo.isInvoke || !hasOtherWords)) {
-                    String s = text.substring(0, length);
+                    String s = inputText.getSubstring(0, length);
                     for (OOV oov : oovs) {
-                        nodes.add(getOOVNode(s, oov));
+                        nodes.add(getOOVNode(s, oov, length));
                     }
                     llength -= 1;
                 }
                 if (cinfo.length > 0) {
-                    int lim = Math.min(cinfo.length, llength);
-                    for (int i = 1; i <= lim; i++) {
+                    for (int i = 1; i <= cinfo.length; i++) {
                         if (cinfo.isInvoke || !hasOtherWords) {
-                            String s = text.substring(0, i);
-                            for (OOV oov : oovs) {
-                                nodes.add(getOOVNode(s, oov));
+                            int sublength = inputText.getCodePointsOffsetLength(offset, i);
+                            if (offset + sublength <= llength) {
+                                String s = inputText.getSubstring(i, sublength);
+                                for (OOV oov : oovs) {
+                                    nodes.add(getOOVNode(s, oov, sublength));
+                                }
                             }
                         }
                     }
@@ -71,16 +72,17 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         return nodes;
     }
 
-    LatticeNode getOOVNode(String text, OOV oov) {
+    LatticeNode getOOVNode(String text, OOV oov, int length) {
         LatticeNode node = createNode();
         node.setParameter(oov.leftId, oov.rightId, oov.cost);
         WordInfo info
-            = new WordInfo(text, oov.posId, text, text, "");
+            = new WordInfo(text, (short)length, oov.posId, text, text, "");
         node.setWordInfo(info);
         return node;
     }
 
     void readCharacterProperty(String charDef) throws IOException {
+    	/**/charDef = MeCabOovProviderPlugin.class.getClassLoader().getResource("char.def").getPath();
         try (FileInputStream input = new FileInputStream(charDef);
              LineNumberReader reader
              = new LineNumberReader(new InputStreamReader(input))) {
@@ -116,6 +118,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readOOV(String unkDef, Grammar grammar) throws IOException {
+    	/**/unkDef = MeCabOovProviderPlugin.class.getClassLoader().getResource("unk.def").getPath();
         try (FileInputStream input = new FileInputStream(unkDef);
              LineNumberReader reader
              = new LineNumberReader(new InputStreamReader(input))) {

@@ -1,7 +1,5 @@
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.nio.charset.StandardCharsets;
-
 /**
  * Informations of the morpheme.
  *
@@ -53,12 +51,13 @@ public class WordInfo {
      * @param reading the reading form of the morpheme
      */
     public WordInfo(String surface,
+             short headwordLength,
              short posId,
              String normalizedForm,
              String dictionaryForm,
              String reading) {
         this.surface = surface;
-        this.headwordLength = (short)surface.getBytes(StandardCharsets.UTF_8).length;
+        this.headwordLength = headwordLength;
         this.posId = posId;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = -1;

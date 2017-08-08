@@ -1,7 +1,6 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.Collections;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -32,10 +31,10 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
             node.setParameter(leftId, rightId, cost);
-            String text = inputText.getText();
-            String s = text.substring(offset, text.offsetByCodePoints(offset, 1));
+            String s = inputText.getSubstring(offset, inputText.getCodePointsOffsetLength(offset, 1));
             WordInfo info
-                = new WordInfo(s, oovPOSId, s, s, "");
+                = new WordInfo(s, (short)inputText.getCharCategoryContinuousLength(offset),
+                               oovPOSId, s, s, "");
             node.setWordInfo(info);
             return Collections.singletonList(node);
         } else {
