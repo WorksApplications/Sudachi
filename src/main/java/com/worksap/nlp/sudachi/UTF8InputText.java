@@ -41,6 +41,11 @@ class UTF8InputText implements InputText<byte[]> {
         return bytes;
     }
     
+    @Override
+    public String getSubstring(int begin, int end) {
+        return modifiedText.substring(byteIndexes.get(begin), byteIndexes.get(end));
+    }
+    
     int getOffsetTextLength(int offset)
         throws IndexOutOfBoundsException {
         return byteIndexes.get(offset);
@@ -68,11 +73,13 @@ class UTF8InputText implements InputText<byte[]> {
         return charCategoryContinuities.get(offset);
     }
     
-    int getByteLengthByCodePoints(int offset, int codePointLength)
+    @Override
+    public int getCodePointsOffsetLength(int offset, int codePointLength)
         throws IndexOutOfBoundsException {
         int length = 0;
+        int target = byteIndexes.get(offset) + codePointLength;
         for (int i = offset; i < bytes.length; i++) {
-            if (byteIndexes.get(i) >= (byteIndexes.get(offset) + codePointLength)) {
+            if (byteIndexes.get(i) >= target) {
                 return length;
             }
             length++;

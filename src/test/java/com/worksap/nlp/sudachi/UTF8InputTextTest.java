@@ -200,14 +200,14 @@ public class UTF8InputTextTest {
     @Test
     public void getByteLengthByCodePoints() {
         input = builder.build();
-        assertThat(input.getByteLengthByCodePoints(0, 1), is(2));
-        assertThat(input.getByteLengthByCodePoints(0, 4), is(7));
-        assertThat(input.getByteLengthByCodePoints(10, 1), is(1));
-        assertThat(input.getByteLengthByCodePoints(11, 1), is(1));
-        assertThat(input.getByteLengthByCodePoints(12, 1), is(1));
-        assertThat(input.getByteLengthByCodePoints(13, 2), is(6));
-        assertThat(input.getByteLengthByCodePoints(19, 1), is(4));
-        assertThat(input.getByteLengthByCodePoints(23, 3), is(9));
+        assertThat(input.getCodePointsOffsetLength(0, 1), is(2));
+        assertThat(input.getCodePointsOffsetLength(0, 4), is(7));
+        assertThat(input.getCodePointsOffsetLength(10, 1), is(1));
+        assertThat(input.getCodePointsOffsetLength(11, 1), is(1));
+        assertThat(input.getCodePointsOffsetLength(12, 1), is(1));
+        assertThat(input.getCodePointsOffsetLength(13, 2), is(6));
+        assertThat(input.getCodePointsOffsetLength(19, 1), is(4));
+        assertThat(input.getCodePointsOffsetLength(23, 3), is(9));
     }
     
     class MockGrammar implements Grammar {
