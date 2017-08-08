@@ -31,7 +31,8 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
             node.setParameter(leftId, rightId, cost);
-            String s = inputText.getSubstring(offset, inputText.getCodePointsOffsetLength(offset, 1));
+            String s = inputText.getSubstring(offset,
+                offset + inputText.getCodePointsOffsetLength(offset, 1));
             WordInfo info
                 = new WordInfo(s, (short)inputText.getCharCategoryContinuousLength(offset),
                                oovPOSId, s, s, "");
