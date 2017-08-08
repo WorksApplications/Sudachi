@@ -14,8 +14,7 @@ public abstract class OovProviderPlugin extends Plugin {
 
     List<LatticeNode> getOOV(UTF8InputText inputText, int offset,
                              boolean hasOtherWords) {
-        int charOffset = inputText.getOffsetTextLength(offset);
-        List<LatticeNode> nodes = provideOOV(inputText, charOffset, hasOtherWords);
+        List<LatticeNode> nodes = provideOOV(inputText, offset, hasOtherWords);
         for (LatticeNode node : nodes) {
             LatticeNodeImpl n = (LatticeNodeImpl)node;
             n.begin = offset;
