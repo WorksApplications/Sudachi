@@ -13,8 +13,8 @@ import java.util.List;
 
 public class CharacterCategory {
     
-	private static final String DEFAULT_CATEGORY = "DEFAULT";
-	
+    private static final String DEFAULT_CATEGORY = "DEFAULT";
+    
     static class Range {
         int low;
         int high;

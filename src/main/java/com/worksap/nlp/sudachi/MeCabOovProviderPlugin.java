@@ -82,7 +82,6 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readCharacterProperty(String charDef) throws IOException {
-    	/**/charDef = MeCabOovProviderPlugin.class.getClassLoader().getResource("char.def").getPath();
         try (FileInputStream input = new FileInputStream(charDef);
              LineNumberReader reader
              = new LineNumberReader(new InputStreamReader(input))) {
@@ -118,7 +117,6 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readOOV(String unkDef, Grammar grammar) throws IOException {
-    	/**/unkDef = MeCabOovProviderPlugin.class.getClassLoader().getResource("unk.def").getPath();
         try (FileInputStream input = new FileInputStream(unkDef);
              LineNumberReader reader
              = new LineNumberReader(new InputStreamReader(input))) {
