@@ -35,6 +35,9 @@ class JapaneseDictionary implements Dictionary {
         readCharacterDefinition(settings.getPath("characterDefinitionFile"));
 
         inputTextPlugins = settings.getPluginList("inputTextPlugin");
+        for (InputTextPlugin p : inputTextPlugins) {
+            p.setUp();
+        }
         oovProviderPlugins = settings.getPluginList("oovProviderPlugin");
         if (oovProviderPlugins.isEmpty()) {
             throw new IllegalArgumentException("no OOV provider");
