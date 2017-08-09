@@ -9,7 +9,9 @@ import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CharacterCategory {
     
@@ -18,7 +20,7 @@ public class CharacterCategory {
     static class Range {
         int low;
         int high;
-        List<String> categories = new ArrayList<>();
+        Set<String> categories = new HashSet<>();
         
         boolean contains(int cp) {
             if (cp >= low && cp <= high) {
@@ -41,13 +43,13 @@ public class CharacterCategory {
     
     private List<Range> rangeList = new ArrayList<>();
     
-    public List<String> getCategoryNames(int codePoint) {
+    public Set<String> getCategoryNames(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
                 return range.categories;
             }
         }
-        return Collections.singletonList(DEFAULT_CATEGORY);
+        return Collections.singleton(DEFAULT_CATEGORY);
     }
     
     public void readCharacterDefinition(String charDef) throws IOException {

@@ -42,7 +42,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         List<LatticeNode> nodes = new ArrayList<>();
         int length = inputText.getCharCategoryContinuousLength(offset);
         if (length > 0) {
-            for (String categoryName : inputText.getCharCategoryNameList(offset)) {
+            for (String categoryName : inputText.getCharCategoryNames(offset)) {
                 CategoryInfo cinfo = categories.get(categoryName);
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.name);

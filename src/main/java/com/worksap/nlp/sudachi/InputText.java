@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.List;
+import java.util.Set;
 
 public interface InputText<E> {
     
@@ -13,7 +14,7 @@ public interface InputText<E> {
     public int getOriginalOffset(int offset)
         throws StringIndexOutOfBoundsException;
     
-    public List<String> getCharCategoryNameList(int offset);
+    public Set<String> getCharCategoryNames(int offset);
     
     public int getCharCategoryContinuousLength(int offset);
     
