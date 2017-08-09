@@ -3,6 +3,7 @@ package com.worksap.nlp.sudachi;
 import java.util.List;
 import java.util.Set;
 
+import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputText implements InputText<byte[]> {
@@ -12,12 +13,12 @@ class UTF8InputText implements InputText<byte[]> {
     private final byte[] bytes;
     private final int[] offsets;
     private final int[] byteIndexes;
-    private final List<Set<String>> charCategories;
+    private final List<Set<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     
     UTF8InputText(Grammar grammar, String originalText, String modifiedText,
         byte[] bytes, int[] offsets, int[] byteIndexes,
-        List<Set<String>> charCategories, List<Integer> charCategoryContinuities) {
+        List<Set<CategoryType>> charCategories, List<Integer> charCategoryContinuities) {
         
         this.originalText = originalText;
         this.modifiedText = modifiedText;
@@ -64,7 +65,7 @@ class UTF8InputText implements InputText<byte[]> {
     }
     
     @Override
-    public Set<String> getCharCategoryNames(int offset)
+    public Set<CategoryType> getCharCategoryTypes(int offset)
         throws IndexOutOfBoundsException {
         return charCategories.get(byteIndexes[offset]);
     }

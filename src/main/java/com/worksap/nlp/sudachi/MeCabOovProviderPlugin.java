@@ -9,13 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     static class CategoryInfo {
-        String name;
+        CategoryType type;
         boolean isInvoke;
         boolean isGroup;
         int length;
@@ -28,8 +29,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         short posId;
     }
 
-    Map<String, CategoryInfo> categories = new HashMap<>();
-    Map<String, List<OOV>> oovList = new HashMap<>();
+    Map<CategoryType, CategoryInfo> categories = new HashMap<>();
+    Map<CategoryType, List<OOV>> oovList = new HashMap<>();
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
@@ -42,10 +43,10 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         List<LatticeNode> nodes = new ArrayList<>();
         int length = inputText.getCharCategoryContinuousLength(offset);
         if (length > 0) {
-            for (String categoryName : inputText.getCharCategoryNames(offset)) {
-                CategoryInfo cinfo = categories.get(categoryName);
+            for (CategoryType type : inputText.getCharCategoryTypes(offset)) {
+                CategoryInfo cinfo = categories.get(type);
                 int llength = length;
-                List<OOV> oovs = oovList.get(cinfo.name);
+                List<OOV> oovs = oovList.get(cinfo.type);
                 if (cinfo.isGroup &&
                     (cinfo.isInvoke || !hasOtherWords)) {
                     String s = inputText.getSubstring(offset, offset + length);
@@ -54,16 +55,15 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                     }
                     llength -= 1;
                 }
-                if (cinfo.length > 0) {
+                if (cinfo.isInvoke || !hasOtherWords) {
                     for (int i = 1; i <= cinfo.length; i++) {
-                        if (cinfo.isInvoke || !hasOtherWords) {
-                            int sublength = inputText.getCodePointsOffsetLength(offset, i);
-                            if (offset + sublength <= llength) {
-                                String s = inputText.getSubstring(offset, offset + sublength);
-                                for (OOV oov : oovs) {
-                                    nodes.add(getOOVNode(s, oov, sublength));
-                                }
-                            }
+                        int sublength = inputText.getCodePointsOffsetLength(offset, i);
+                        if (offset + sublength > llength) {
+                            break;
+                        }
+                        String s = inputText.getSubstring(offset, offset + sublength);
+                        for (OOV oov : oovs) {
+                            nodes.add(getOOVNode(s, oov, sublength));
                         }
                     }
                 }
@@ -101,17 +101,21 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 if (cols[0].startsWith("0x")) {
                     continue;
                 }
-                String key = cols[0];
-                if (categories.containsKey(key)) {
+                CategoryType type = CategoryType.valueOf(cols[0]);
+                if (type == null) {
+                    throw new RuntimeException(cols[0] + " is invalid type at line "
+                                               + reader.getLineNumber());
+                }
+                if (categories.containsKey(type)) {
                     throw new RuntimeException(cols[0] + " is already defined at line "
                                                + reader.getLineNumber());
                 }
                 CategoryInfo info = new CategoryInfo();
-                info.name = key;
+                info.type = type;
                 info.isInvoke = (!cols[1].equals("0"));
                 info.isGroup = (!cols[2].equals("0"));
                 info.length = Integer.parseInt(cols[3]);
-                categories.put(key, info);
+                categories.put(type, info);
             }
         }
     }
@@ -130,7 +134,12 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                     throw new RuntimeException("invalid format at line " +
                                                reader.getLineNumber());
                 }
-                if (!categories.containsKey(cols[0])) {
+                CategoryType type = CategoryType.valueOf(cols[0]);
+                if (type == null) {
+                    throw new RuntimeException(cols[0] + " is invalid type at line "
+                                               + reader.getLineNumber());
+                }
+                if (!categories.containsKey(type)) {
                     throw new RuntimeException(cols[0] + " is undefined at line "
                                                + reader.getLineNumber());
                 }
@@ -143,10 +152,10 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                     = grammar.getPartOfSpeechId(cols[4], cols[5], cols[6],
                                                 cols[7], cols[8], cols[9]);
 
-                if (!oovList.containsKey(cols[0])) {
-                    oovList.put(cols[0], new ArrayList<OOV>());
+                if (!oovList.containsKey(type)) {
+                    oovList.put(type, new ArrayList<OOV>());
                 }
-                oovList.get(cols[0]).add(oov);
+                oovList.get(type).add(oov);
             }
         }
     }
