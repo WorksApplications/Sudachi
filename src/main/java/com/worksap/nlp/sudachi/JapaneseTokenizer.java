@@ -8,7 +8,7 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 
-public class JapaneseTokenizer implements Tokenizer {
+class JapaneseTokenizer implements Tokenizer {
 
     Grammar grammar;
     Lexicon lexicon;

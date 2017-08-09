@@ -45,6 +45,7 @@ public class WordInfo {
      * Allocates informations of morpheme not in the lexicons.
      *
      * @param surface the text of the morpheme
+     * @param headwordLength the length of the morpheme
      * @param posId the ID of the part-of-speech of the morpheme
      * @param normalizedForm the normalized form of the morpheme
      * @param dictionaryForm the dictionary form of the morpheme

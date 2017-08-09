@@ -12,7 +12,7 @@ import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.CategoryTypeSet;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
+class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
 
     private final String originalText;
     private StringBuilder modifiedText;
