@@ -9,15 +9,18 @@ import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer.Form;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultInputTextPlugin extends InputTextPlugin {
     
     public String rewriteDef;
 
-    private List<String> ignoreNormalizeList = new ArrayList<>();
-    private List<String[]> replaceCharList = new ArrayList<>();
+    private Set<Integer> ignoreNormalizeSet = new HashSet<>();
+    private Map<Character, Integer> keyLengths = new HashMap<>();
+    private Map<String, String> replaceCharMap = new HashMap<>();
     
     @Override
     public void setUp() throws IOException {
@@ -39,56 +42,46 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
 
     @Override
     public void rewrite(InputTextBuilder<?> builder) {
-        int charLength;
         int offset = 0;
         int nextOffset = 0;
-        boolean skipNormalize;
         String text = builder.getText();
-        for (int i = 0; i < text.length(); i++) {
+        textloop: for (int i = 0; i < text.length(); i = text.offsetByCodePoints(i, 1)) {
             offset += nextOffset;
             nextOffset = 0;
-            skipNormalize = false;
             // 1. replace char without normalize
-            for (int j = 0; j < replaceCharList.size(); j++) {
-                if (text.startsWith(replaceCharList.get(j)[0], i)) {
-                    String charBefore = replaceCharList.get(j)[0];
-                    String charAfter = replaceCharList.get(j)[1];
-                    builder.replace(i + offset, i + charBefore.length() + offset, charAfter);
-                    nextOffset += charAfter.length() - charBefore.length();
-                    i += charBefore.length() - 1;
-                    skipNormalize = true;
-                    break;
+            for (int l = Math.min(keyLengths.getOrDefault(text.charAt(i), 0), text.length() - i);
+                 l > 0; l--) {
+                String replace = replaceCharMap.get(text.substring(i, i + l));
+                if (replace != null) {
+                    builder.replace(i + offset, i + l + offset, replace);
+                    nextOffset += replace.length() - l;
+                    i += l - 1;
+                    continue textloop;
                 }
             }
-            if (skipNormalize) {
-                continue;
-            }
+
             // 2. normalize
-            // 2-1. check if surrogate pair
-            char ch = text.charAt(i);
-            if (Character.isHighSurrogate(ch)) {
-                charLength = 2;
+            int original = text.codePointAt(i);
+            int charLength = text.offsetByCodePoints(i, 1) - i;
+
+            // 2-1. capital alphabet (not only latin but greek, cyrillic, etc) -> small
+            int lower = Character.toLowerCase(original);
+            String replace;
+            if (ignoreNormalizeSet.contains(lower)) {
+                if (original == lower) {
+                    continue;
+                }
+                replace = new String(Character.toChars(lower));
+            } else {
+                // 2-2. normalize (except in ignoreNormalize)
+                //    e.g. full-width alphabet -> half-width / ligature / etc.
+                replace = Normalizer.normalize(new String(Character.toChars(lower)),
+                                               Form.NFKC);
             }
-            else if (Character.isLowSurrogate(ch)) {
-                // do nothing when lower surrogate
-                continue;
-            }
-            else {
-                charLength = 1;
-            }
-            // 2-2. capital alphabet (not only latin but greek, cyrillic, etc) -> small
-            String substr = text.substring(i, i + charLength).toLowerCase();;
-            // 2-3. normalize (except in ignoreNormalize)
-            //    e.g. full-width alphabet -> half-width / ligature / etc.
-            if (ignoreNormalizeList.contains(substr)) {
-                builder.replace(i + offset, i + charLength + offset, substr);
-                continue;
-            }
-            else {
-                int beforeLength = substr.length();
-                substr = Normalizer.normalize(substr, Form.NFKC);
-                nextOffset += substr.length() - beforeLength;
-                builder.replace(i + offset, i + charLength + offset, substr);
+            nextOffset = replace.length() - charLength;
+            if (replace.length() != charLength
+                || original != replace.codePointAt(0)) {
+                builder.replace(i + offset, i + charLength + offset, replace);
             }
         }
     }
@@ -104,23 +97,26 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
                 String[] cols = line.split("\\s+");
                 // ignored normalize list
                 if (cols.length == 1) {
-                    ignoreNormalizeList.add(cols[0]);
+                    String key = cols[0];
+                    if (key.codePointCount(0, key.length()) != 1) {
+                        throw new RuntimeException(cols[0] + " is not a character at line " + reader.getLineNumber());
+                    }
+                    ignoreNormalizeSet.add(key.codePointAt(0));
                 }
                 // replace char list
                 else if (cols.length == 2) {
-                    for (String[] definedPair : replaceCharList) {
-                        if (cols[0].equals(definedPair[0])) {
-                            throw new RuntimeException(
-                                cols[0] + " is already defined at line " + reader.getLineNumber()
-                            );
-                        }
+                    if (replaceCharMap.containsKey(cols[0])) {
+                        throw new RuntimeException(cols[0] + " is already defined at line "
+                                                   + reader.getLineNumber());
                     }
-                    replaceCharList.add(new String[]{cols[0], cols[1]});
-                }
-                else {
-                    throw new RuntimeException(
-                        "invalid format at line " + reader.getLineNumber()
-                    );
+                    if (keyLengths.getOrDefault(cols[0].charAt(0), -1) < cols[0].length()) {
+                        // store the longest key length
+                        keyLengths.put(cols[0].charAt(0), cols[0].length());
+                    }
+                    replaceCharMap.put(cols[0], cols[1]);
+                } else {
+                    throw new RuntimeException("invalid format at line "
+                                               + reader.getLineNumber());
                 }
             }
         }
