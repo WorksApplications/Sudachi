@@ -31,10 +31,12 @@
         <configuration>
           <locale>en_US</locale>
           <sourceFileExcludes>
+            <exclude>**/dartsclone/**/*.java</exclude>
             <exclude>**/*Impl.java</exclude>
             <exclude>**/MorphemeList.java</exclude>
             <exclude>**/DoubleArrayLexicon.java</exclude>
             <exclude>**/LexiconSet.java</exclude>
+            <exclude>**/CategoryTypeSet.java</exclude>
           </sourceFileExcludes>
         </configuration>
       </plugin>
