@@ -9,13 +9,13 @@ class UTF8InputText implements InputText<byte[]> {
     private final String originalText;
     private final String modifiedText;
     private final byte[] bytes;
-    private final List<Integer> offsets;
-    private final List<Integer> byteIndexes;
+    private final int[] offsets;
+    private final int[] byteIndexes;
     private final List<List<String>> charCategories;
     private final List<Integer> charCategoryContinuities;
     
     UTF8InputText(Grammar grammar, String originalText, String modifiedText,
-        byte[] bytes, List<Integer> offsets, List<Integer> byteIndexes,
+        byte[] bytes, int[] offsets, int[] byteIndexes,
         List<List<String>> charCategories, List<Integer> charCategoryContinuities) {
         
         this.originalText = originalText;
@@ -44,12 +44,12 @@ class UTF8InputText implements InputText<byte[]> {
     @Override
     public String getSubstring(int begin, int end)
         throws StringIndexOutOfBoundsException {
-        return modifiedText.substring(byteIndexes.get(begin), byteIndexes.get(end));
+        return modifiedText.substring(byteIndexes[begin], byteIndexes[end]);
     }
     
     int getOffsetTextLength(int offset)
         throws IndexOutOfBoundsException {
-        return byteIndexes.get(offset);
+        return byteIndexes[offset];
     }
     
     public boolean isCharAlignment(int offset) {
@@ -59,13 +59,13 @@ class UTF8InputText implements InputText<byte[]> {
     @Override
     public int getOriginalOffset(int offset)
         throws IndexOutOfBoundsException {
-        return offsets.get(offset);
+        return offsets[offset];
     }
     
     @Override
     public List<String> getCharCategoryNameList(int offset)
         throws IndexOutOfBoundsException {
-        return charCategories.get(byteIndexes.get(offset));
+        return charCategories.get(byteIndexes[offset]);
     }
     
     @Override
@@ -78,9 +78,9 @@ class UTF8InputText implements InputText<byte[]> {
     public int getCodePointsOffsetLength(int offset, int codePointLength)
         throws IndexOutOfBoundsException {
         int length = 0;
-        int target = byteIndexes.get(offset) + codePointLength;
+        int target = byteIndexes[offset] + codePointLength;
         for (int i = offset; i < bytes.length; i++) {
-            if (byteIndexes.get(i) >= target) {
+            if (byteIndexes[i] >= target) {
                 return length;
             }
             length++;
