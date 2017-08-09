@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class CategoryTypeSet extends AbstractSet<CategoryType> implements Cloneable {
@@ -45,6 +46,17 @@ public class CategoryTypeSet extends AbstractSet<CategoryType> implements Clonea
 
     @Override
     public void clear() { types = 0; }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        if (c instanceof CategoryTypeSet) {
+            int original = types;
+            types &= ((CategoryTypeSet)c).types;
+            return original != types;
+        } else {
+            return super.retainAll(c);
+        }
+    }
 
     class itr implements Iterator<CategoryType> {
 

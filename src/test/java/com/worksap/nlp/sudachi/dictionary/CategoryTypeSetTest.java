@@ -68,4 +68,15 @@ public class CategoryTypeSetTest {
         assertEquals(0, set.size());
         assertFalse(set.contains(CategoryType.USER4));
     }
+
+    @Test
+    public void retainAll() {
+        CategoryTypeSet other = new CategoryTypeSet();
+        other.add(CategoryType.HIRAGANA);
+        other.add(CategoryType.KATAKANA);
+
+        set.retainAll(other);
+        assertEquals(1, set.size());
+        assertTrue(set.contains(CategoryType.HIRAGANA));
+    }
 }

@@ -101,8 +101,7 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         List<Set<CategoryType>> charCategories
             = getCharCategoryTypes(modifiedStringText);
         List<Integer> charCategoryContinuities
-            = getCharCategoryContinuities(modifiedStringText, byteText,
-                                          byteIndexes, charCategories);
+            = getCharCategoryContinuities(modifiedStringText, length, charCategories);
 
         return new UTF8InputText(grammar, originalText, modifiedStringText, byteText,
                                  offsets,
@@ -112,34 +111,50 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
     }
 
     private List<Set<CategoryType>> getCharCategoryTypes(String text) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Set<CategoryType>> charCategoryTypes = new ArrayList<>(text.length());
+        Set<CategoryType> types = null;
         for (int i = 0; i < text.length(); i++) {
-            charCategoryTypes.add(grammar.getCharacterCategory().getCategoryTypes(text.codePointAt(i)));
+            if (Character.isLowSurrogate(text.charAt(i)) && types != null) {
+                charCategoryTypes.add(types);
+                continue;
+            }
+            types = grammar.getCharacterCategory()
+                .getCategoryTypes(text.codePointAt(i));
+            charCategoryTypes.add(types);
         }
         return charCategoryTypes;
     }
     
-    private List<Integer> getCharCategoryContinuities(String text, byte[] byteText, int[] byteIndexes, List<Set<CategoryType>> charCategories) {
-        if (charCategories == null || charCategories.isEmpty()) {
+    private List<Integer> getCharCategoryContinuities(String text,
+                                                      int byteLength,
+                                                      List<Set<CategoryType>> charCategories) {
+        if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Integer> charCategoryContinuities = new ArrayList<>(text.length());
-        for (int offset = 0; offset < byteText.length; offset++) {
-            charCategoryContinuities.add(getCharCategoryContinuousLength(byteText, byteIndexes, charCategories, offset));
+        List<Integer> charCategoryContinuities = new ArrayList<>(byteLength);
+        for (int i = 0; i < charCategories.size(); ) {
+            int next = i + getCharCategoryContinuousLength(charCategories, i);
+            int length = 0;
+            for (int j = i; j < next; j = text.offsetByCodePoints(j, 1)) {
+                length += utf8ByteLength(text.codePointAt(j));
+            }
+            for (int k = length; k > 0; k--) {
+                charCategoryContinuities.add(k);
+            }
+            i = next;
         }
         return charCategoryContinuities;
     }
     
-    private int getCharCategoryContinuousLength(byte[] byteText, int[] byteIndexes, List<Set<CategoryType>> charCategories, int offset) {
+    private int getCharCategoryContinuousLength(List<Set<CategoryType>> charCategories, int offset) {
         int length;
-        Set<CategoryType> continuousCategory = null;
-        for (length = 0; length < byteText.length - offset; length++) {
-            if (length == 0) {
-                continuousCategory = ((CategoryTypeSet)charCategories.get(byteIndexes[offset])).clone();
-                continue;
-            }
-            Set<CategoryType> targetCharCategory = charCategories.get(byteIndexes[offset + length]);
-            continuousCategory.retainAll(targetCharCategory);
+        Set<CategoryType> continuousCategory
+            = ((CategoryTypeSet)charCategories.get(offset)).clone();
+        for (length = 1; length < charCategories.size() - offset; length++) {
+            continuousCategory.retainAll(charCategories.get(offset + length));
             if (continuousCategory.isEmpty()) {
                 return length;
             }
