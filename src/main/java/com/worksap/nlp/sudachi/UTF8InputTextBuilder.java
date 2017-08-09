@@ -4,7 +4,9 @@ package com.worksap.nlp.sudachi;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
@@ -94,7 +96,7 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         byteIndexes[length] = modifiedStringText.length();
         offsets[length] = textOffsets.get(textOffsets.size() - 1);
 
-        List<List<String>> charCategories = getCharCategoryNames(modifiedStringText);
+        List<Set<String>> charCategories = getCharCategoryNames(modifiedStringText);
         List<Integer> charCategoryContinuities = getCharCategoryContinuities(modifiedStringText, byteText, byteIndexes, charCategories);
         return new UTF8InputText(grammar, originalText, modifiedStringText, byteText,
                                  offsets,
@@ -103,16 +105,16 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
             Collections.unmodifiableList(charCategoryContinuities));
     }
 
-    private List<List<String>> getCharCategoryNames(String text) {
-        List<List<String>> charCategoryNames = new ArrayList<>(text.length());
+    private List<Set<String>> getCharCategoryNames(String text) {
+        List<Set<String>> charCategoryNames = new ArrayList<>(text.length());
         for (int i = 0; i < text.length(); i++) {
-            charCategoryNames.add(Collections.unmodifiableList(
+            charCategoryNames.add(Collections.unmodifiableSet(
                 grammar.getCharacterCategory().getCategoryNames(text.codePointAt(i))));
         }
         return charCategoryNames;
     }
     
-    private List<Integer> getCharCategoryContinuities(String text, byte[] byteText, int[] byteIndexes, List<List<String>> charCategories) {
+    private List<Integer> getCharCategoryContinuities(String text, byte[] byteText, int[] byteIndexes, List<Set<String>> charCategories) {
         if (charCategories == null || charCategories.isEmpty()) {
             return Collections.emptyList();
         }
@@ -123,21 +125,18 @@ public class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         return charCategoryContinuities;
     }
     
-    private int getCharCategoryContinuousLength(byte[] byteText, int[] byteIndexes, List<List<String>> charCategories, int offset) {
+    private int getCharCategoryContinuousLength(byte[] byteText, int[] byteIndexes, List<Set<String>> charCategories, int offset) {
         int length;
+        Set<String> continuousCategory = null;
         for (length = 0; length < byteText.length - offset; length++) {
             boolean found = false;
-            // compare each category at offset w/ each category at target (offset + length)
-            List<String> offsetCharCategory = charCategories.get(byteIndexes[offset]);
-            List<String> targetCharCategory = charCategories.get(byteIndexes[offset + length]);
-            for (int i = 0; i < offsetCharCategory.size(); i++) {
-                for (int j = 0; j < targetCharCategory.size(); j++) {
-                    if (offsetCharCategory.get(i).equals(targetCharCategory.get(j))) {
-                        found = true; 
-                    }
-                }
+            if (length == 0) {
+                continuousCategory = new HashSet<>(charCategories.get(byteIndexes[offset]));
+                continue;
             }
-            if (!found) {
+            Set<String> targetCharCategory = charCategories.get(byteIndexes[offset + length]);
+            continuousCategory.retainAll(targetCharCategory);
+            if (continuousCategory.isEmpty()) {
                 return length;
             }
         }

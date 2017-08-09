@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -78,22 +79,22 @@ public class UTF8InputTextTest {
     }
     
     @Test
-    public void getCharCategoryNameList() {
+    public void getCharCategoryNames() {
         input = builder.build();
-        assertThat(input.getCharCategoryNameList(0).get(0), is("ALPHA"));
-        assertThat(input.getCharCategoryNameList(2).get(0), is("ALPHA"));
-        assertThat(input.getCharCategoryNameList(5).get(0), is("ALPHA"));
-        assertThat(input.getCharCategoryNameList(6).get(0), is("NUMERIC"));
-        assertThat(input.getCharCategoryNameList(7).get(0), is("HIRAGANA"));
-        assertThat(input.getCharCategoryNameList(9).get(0), is("HIRAGANA"));
-        assertThat(input.getCharCategoryNameList(10).get(0), is("NUMERIC"));
-        assertThat(input.getCharCategoryNameList(13).get(0), is("KANJI"));
-        assertThat(input.getCharCategoryNameList(18).get(0), is("KANJI"));
-        assertThat(input.getCharCategoryNameList(19).get(0), is("DEFAULT"));
-        assertThat(input.getCharCategoryNameList(22).get(0), is("DEFAULT"));
-        assertThat(input.getCharCategoryNameList(23).get(0), is("KATAKANA"));
-        assertThat(input.getCharCategoryNameList(26).get(0), is("KATAKANA"));
-        assertThat(input.getCharCategoryNameList(31).get(0), is("KATAKANA"));
+        assertThat(input.getCharCategoryNames(0), hasItem("ALPHA"));
+        assertThat(input.getCharCategoryNames(2), hasItem("ALPHA"));
+        assertThat(input.getCharCategoryNames(5), hasItem("ALPHA"));
+        assertThat(input.getCharCategoryNames(6), hasItem("NUMERIC"));
+        assertThat(input.getCharCategoryNames(7), hasItem("HIRAGANA"));
+        assertThat(input.getCharCategoryNames(9), hasItem("HIRAGANA"));
+        assertThat(input.getCharCategoryNames(10), hasItem("NUMERIC"));
+        assertThat(input.getCharCategoryNames(13), hasItem("KANJI"));
+        assertThat(input.getCharCategoryNames(18), hasItem("KANJI"));
+        assertThat(input.getCharCategoryNames(19), hasItem("DEFAULT"));
+        assertThat(input.getCharCategoryNames(22), hasItem("DEFAULT"));
+        assertThat(input.getCharCategoryNames(23), hasItem("KATAKANA"));
+        assertThat(input.getCharCategoryNames(26), hasItem("KATAKANA"));
+        assertThat(input.getCharCategoryNames(31), hasItem("KATAKANA"));
     }
     
     @Test
