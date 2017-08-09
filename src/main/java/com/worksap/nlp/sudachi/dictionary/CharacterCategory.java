@@ -20,7 +20,7 @@ public class CharacterCategory {
     static class Range {
         int low;
         int high;
-        Set<String> categories = new HashSet<>();
+        Set<CategoryType> categories = new CategoryTypeSet();
         
         boolean contains(int cp) {
             if (cp >= low && cp <= high) {
@@ -43,13 +43,13 @@ public class CharacterCategory {
     
     private List<Range> rangeList = new ArrayList<>();
     
-    public Set<String> getCategoryNames(int codePoint) {
+    public Set<CategoryType> getCategoryTypes(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
                 return range.categories;
             }
         }
-        return Collections.singleton(DEFAULT_CATEGORY);
+        return Collections.singleton(CategoryType.DEFAULT);
     }
     
     public void readCharacterDefinition(String charDef) throws IOException {
@@ -87,7 +87,12 @@ public class CharacterCategory {
                         if (cols[i].startsWith("#")) {
                             break;
                         }
-                        range.categories.add(cols[i]);
+                        CategoryType type = CategoryType.valueOf(cols[i]);
+                        if (type == null) {
+                            throw new RuntimeException(cols[i] + " is invalid type at line "
+                                                       + reader.getLineNumber());
+                        }
+                        range.categories.add(type);
                     }
                     rangeList.add(range);
                 }
@@ -95,7 +100,7 @@ public class CharacterCategory {
             Range defaultRange = new Range();
             defaultRange.low = 0;
             defaultRange.high = Integer.MAX_VALUE;
-            defaultRange.categories.add(DEFAULT_CATEGORY);
+            defaultRange.categories.add(CategoryType.DEFAULT);
             rangeList.add(defaultRange);
         }
     }

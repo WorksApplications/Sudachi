@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.junit.*;
 
+import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
@@ -79,22 +80,22 @@ public class UTF8InputTextTest {
     }
     
     @Test
-    public void getCharCategoryNames() {
+    public void getCharCategoryTypes() {
         input = builder.build();
-        assertThat(input.getCharCategoryNames(0), hasItem("ALPHA"));
-        assertThat(input.getCharCategoryNames(2), hasItem("ALPHA"));
-        assertThat(input.getCharCategoryNames(5), hasItem("ALPHA"));
-        assertThat(input.getCharCategoryNames(6), hasItem("NUMERIC"));
-        assertThat(input.getCharCategoryNames(7), hasItem("HIRAGANA"));
-        assertThat(input.getCharCategoryNames(9), hasItem("HIRAGANA"));
-        assertThat(input.getCharCategoryNames(10), hasItem("NUMERIC"));
-        assertThat(input.getCharCategoryNames(13), hasItem("KANJI"));
-        assertThat(input.getCharCategoryNames(18), hasItem("KANJI"));
-        assertThat(input.getCharCategoryNames(19), hasItem("DEFAULT"));
-        assertThat(input.getCharCategoryNames(22), hasItem("DEFAULT"));
-        assertThat(input.getCharCategoryNames(23), hasItem("KATAKANA"));
-        assertThat(input.getCharCategoryNames(26), hasItem("KATAKANA"));
-        assertThat(input.getCharCategoryNames(31), hasItem("KATAKANA"));
+        assertThat(input.getCharCategoryTypes(0), hasItem(CategoryType.ALPHA));
+        assertThat(input.getCharCategoryTypes(2), hasItem(CategoryType.ALPHA));
+        assertThat(input.getCharCategoryTypes(5), hasItem(CategoryType.ALPHA));
+        assertThat(input.getCharCategoryTypes(6), hasItem(CategoryType.NUMERIC));
+        assertThat(input.getCharCategoryTypes(7), hasItem(CategoryType.HIRAGANA));
+        assertThat(input.getCharCategoryTypes(9), hasItem(CategoryType.HIRAGANA));
+        assertThat(input.getCharCategoryTypes(10), hasItem(CategoryType.NUMERIC));
+        assertThat(input.getCharCategoryTypes(13), hasItem(CategoryType.KANJI));
+        assertThat(input.getCharCategoryTypes(18), hasItem(CategoryType.KANJI));
+        assertThat(input.getCharCategoryTypes(19), hasItem(CategoryType.DEFAULT));
+        assertThat(input.getCharCategoryTypes(22), hasItem(CategoryType.DEFAULT));
+        assertThat(input.getCharCategoryTypes(23), hasItem(CategoryType.KATAKANA));
+        assertThat(input.getCharCategoryTypes(26), hasItem(CategoryType.KATAKANA));
+        assertThat(input.getCharCategoryTypes(31), hasItem(CategoryType.KATAKANA));
     }
     
     @Test
