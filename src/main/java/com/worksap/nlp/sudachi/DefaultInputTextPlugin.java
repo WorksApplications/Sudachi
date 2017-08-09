@@ -3,11 +3,12 @@ package com.worksap.nlp.sudachi;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
-import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +24,19 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
         if (rewriteDef == null) {
             rewriteDef = settings.getPath("rewriteDef");
         }
-        if (rewriteDef == null) {
-            rewriteDef = DefaultInputTextPlugin.class.getClassLoader().getResource("rewrite.def").getPath();
+
+        InputStream is;
+        if (rewriteDef != null) {
+            is = new FileInputStream(rewriteDef);
+        } else {
+            is = DefaultInputTextPlugin.class.getClassLoader().getResourceAsStream("rewrite.def");
         }
-        readRewriteLists(rewriteDef);
+        if (is == null) {
+            throw new IOException("rewriteDef is not defined");
+        }
+        readRewriteLists(is);
     }
-    
+
     @Override
     public void rewrite(InputTextBuilder<?> builder) {
         int charLength;
@@ -85,12 +93,9 @@ public class DefaultInputTextPlugin extends InputTextPlugin {
         }
     }
     
-    private void readRewriteLists(String rewriteDef) throws IOException {
-        try (
-            FileInputStream fin = new FileInputStream(rewriteDef);
-            LineNumberReader reader
-                = new LineNumberReader(new InputStreamReader(fin, StandardCharsets.UTF_8))
-        ) {
+    private void readRewriteLists(InputStream rewriteDef) throws IOException {
+        try (InputStreamReader isr = new InputStreamReader(rewriteDef, StandardCharsets.UTF_8);
+             LineNumberReader reader = new LineNumberReader(isr)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.matches("\\s*") || line.startsWith("#")) {
