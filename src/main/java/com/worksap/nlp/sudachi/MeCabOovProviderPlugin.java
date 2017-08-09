@@ -48,7 +48,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 List<OOV> oovs = oovList.get(cinfo.name);
                 if (cinfo.isGroup &&
                     (cinfo.isInvoke || !hasOtherWords)) {
-                    String s = inputText.getSubstring(0, length);
+                    String s = inputText.getSubstring(offset, offset + length);
                     for (OOV oov : oovs) {
                         nodes.add(getOOVNode(s, oov, length));
                     }
@@ -59,7 +59,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                         if (cinfo.isInvoke || !hasOtherWords) {
                             int sublength = inputText.getCodePointsOffsetLength(offset, i);
                             if (offset + sublength <= llength) {
-                                String s = inputText.getSubstring(i, sublength);
+                                String s = inputText.getSubstring(offset, offset + sublength);
                                 for (OOV oov : oovs) {
                                     nodes.add(getOOVNode(s, oov, sublength));
                                 }
