@@ -14,5 +14,8 @@
           "leftId" : 5968,
           "rightId" : 5968,
           "cost" : 3857 }
+    ],
+    "pathRewritePlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin" }
     ]
 }

@@ -50,6 +50,12 @@ public class LatticeNodeImpl implements LatticeNode {
     public int getEnd() { return end; }
 
     @Override
+    public void setRange(int begin, int end) {
+        this.begin = begin;
+        this.end = end;
+    }
+
+    @Override
     public boolean isOOV() { return isOOV; }
 
     @Override
