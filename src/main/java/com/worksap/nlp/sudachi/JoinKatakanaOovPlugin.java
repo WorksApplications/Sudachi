@@ -6,6 +6,23 @@ import java.util.Set;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
+/**
+ * A plugin for concatenation of Katakana OOVs.
+ *
+ * This plugin concatenate the Katakana OOV and
+ * the adjacent Katakana morphemes.
+ *
+ * <p>The concatenated morpheme is OOV too, and its part of speech
+ * must be specified in the settings.
+ *
+ * <p>The following is an example of settings.
+ * <pre>{@code
+ *   {
+ *     "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
+ *     "oovPOS" : [ "POS1", "POS2", ... ]
+ *   }
+ * }</pre>
+ */
 class JoinKatakanaOovPlugin extends PathRewritePlugin {
 
     short oovPosId;
