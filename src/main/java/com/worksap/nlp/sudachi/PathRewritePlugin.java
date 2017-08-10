@@ -62,6 +62,7 @@ public abstract class PathRewritePlugin extends Plugin {
         LatticeNode node = lattice.createNode();
         node.setRange(b, e);
         node.setWordInfo(wi);
+        node.setOOV();
         path.subList(begin, end).clear();
         path.add(begin, node);
         return node;
