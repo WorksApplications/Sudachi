@@ -43,6 +43,18 @@ public interface LatticeNode {
     public int getEnd();
 
     /**
+     * Set the indexes of the node in the input text.
+     *
+     * The last position of the nodes is {@code end - 1}.
+     *
+     * @param begin the index to the first position of the node
+     *        in the input text.
+     * @param end the index to after the last position of the node
+     *        in the input text.
+     */
+    public void setRange(int begin, int end);
+
+    /**
      * Returns {@code true} if, and only if, the node is out of vocabulary.
      *
      * @return {@code true} if the node is OOV, otherwise {@code false}

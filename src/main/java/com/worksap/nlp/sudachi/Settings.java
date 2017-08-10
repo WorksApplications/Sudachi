@@ -245,6 +245,21 @@ public class Settings {
             .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the value as the boolean to which the specified key is mapped,
+     * or {@code defaultValue} if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @param defaultValue the default mapping of the key
+     * @return the value or {@code defaultValue} if this settings
+     *         has no mapping
+     * @throws IllegalArgumentException if the value is not a boolean
+     */
+    public boolean getBoolean(String setting, boolean defaultValue) {
+        return root.getBoolean(setting, defaultValue);
+    }
+
     <E extends JsonValue> List<E> getList(String setting, Class<E> clazz) {
         JsonArray array = root.getJsonArray(setting);
         if (array == null) {

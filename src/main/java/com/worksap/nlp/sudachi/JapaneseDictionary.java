@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.Collections;
 import java.util.List;
 
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
@@ -46,6 +47,9 @@ class JapaneseDictionary implements Dictionary {
             p.setUp(grammar);
         }
         pathRewritePlugins = settings.getPluginList("pathRewritePlugin");
+        for (PathRewritePlugin p : pathRewritePlugins) {
+            p.setUp(grammar);
+        }
 
         for (String filename : settings.getPathList("userDict")) {
             readUserDictionary(filename);
@@ -79,7 +83,11 @@ class JapaneseDictionary implements Dictionary {
         }
 
         DoubleArrayLexicon userLexicon = new DoubleArrayLexicon(bytes, 0);
-        Tokenizer tokenizer = create();
+        Tokenizer tokenizer
+            = new JapaneseTokenizer(grammar, lexicon,
+                                    inputTextPlugins, oovProviderPlugins,
+                                    Collections.emptyList());
+
         userLexicon.calculateCost(tokenizer);
         lexicon.add(userLexicon);
     }

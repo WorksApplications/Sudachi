@@ -17,6 +17,8 @@ public interface InputText<E> {
         throws StringIndexOutOfBoundsException;
     
     public Set<CategoryType> getCharCategoryTypes(int offset);
+
+    public Set<CategoryType> getCharCategoryTypes(int begin, int end);
     
     public int getCharCategoryContinuousLength(int offset);
     

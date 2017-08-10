@@ -101,6 +101,7 @@ public class CharacterCategory {
             defaultRange.low = 0;
             defaultRange.high = Integer.MAX_VALUE;
             defaultRange.categories.add(CategoryType.DEFAULT);
+            Collections.reverse(rangeList);
             rangeList.add(defaultRange);
         }
     }

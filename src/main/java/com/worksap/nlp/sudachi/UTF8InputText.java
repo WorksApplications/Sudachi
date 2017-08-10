@@ -1,9 +1,11 @@
 package com.worksap.nlp.sudachi;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
+import com.worksap.nlp.sudachi.dictionary.CategoryTypeSet;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputText implements InputText<byte[]> {
@@ -70,6 +72,22 @@ class UTF8InputText implements InputText<byte[]> {
         return charCategories.get(byteIndexes[offset]);
     }
     
+    @Override
+    public Set<CategoryType> getCharCategoryTypes(int begin, int end)
+        throws IndexOutOfBoundsException {
+        if (begin + getCharCategoryContinuousLength(begin) < end) {
+            return Collections.emptySet();
+        }
+        int b = byteIndexes[begin];
+        int e = byteIndexes[end];
+        Set<CategoryType> continuousCategory
+            = ((CategoryTypeSet)charCategories.get(b)).clone();
+        for (int i = b + 1; i < e; i++) {
+            continuousCategory.retainAll(charCategories.get(i));
+        }
+        return continuousCategory;
+    }
+
     @Override
     public int getCharCategoryContinuousLength(int offset)
         throws IndexOutOfBoundsException {
