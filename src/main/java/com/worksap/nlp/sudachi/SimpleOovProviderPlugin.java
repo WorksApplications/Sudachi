@@ -8,7 +8,6 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class SimpleOovProviderPlugin extends OovProviderPlugin {
 
-    List<String> oovPOSStrings;
     short oovPOSId;
     short leftId;
     short rightId;
@@ -16,7 +15,7 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
 
     @Override
     public void setUp(Grammar grammar) {
-        oovPOSStrings = settings.getStringList("oovPOSStrings");
+        List<String> oovPOSStrings = settings.getStringList("oovPOS");
         leftId = (short)settings.getInt("leftId");
         rightId = (short)settings.getInt("rightId");
         cost = (short)settings.getInt("cost");
