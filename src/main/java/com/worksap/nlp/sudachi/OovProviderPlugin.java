@@ -6,7 +6,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public abstract class OovProviderPlugin extends Plugin {
 
-    public abstract void setUp(Grammar grammar) throws IOException;
+    public void setUp(Grammar grammar) throws IOException {}
 
     public abstract List<LatticeNode> provideOOV(InputText<?> inputText,
                                                  int offset,

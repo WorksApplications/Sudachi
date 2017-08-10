@@ -6,7 +6,7 @@ import java.util.Set;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-public class JoinNumericPlugin extends PathRewritePlugin {
+class JoinNumericPlugin extends PathRewritePlugin {
 
     boolean joinKanjiNumeric;
     boolean joinAllNumeric;
@@ -23,8 +23,7 @@ public class JoinNumericPlugin extends PathRewritePlugin {
         CategoryType type = null;
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
-            Set<CategoryType> types
-                = text.getCharCategoryTypes(node.getBegin(), node.getEnd());
+            Set<CategoryType> types = getCharCategoryTypes(text, node);
             if (types.contains(CategoryType.NUMERIC)) {
                 if (type == CategoryType.NUMERIC) {
                     continue;
