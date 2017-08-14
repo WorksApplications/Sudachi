@@ -32,7 +32,9 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     if (joinAllNumeric) {
                         continue;
                     } else if (joinKanjiNumeric) {
-                        concatenate(path, beginIndex, i, lattice);
+                        if (i - beginIndex > 1) {
+                            concatenate(path, beginIndex, i, lattice);
+                        }
                         i = beginIndex + 1;
                     }
                 }
@@ -46,7 +48,9 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     if (joinAllNumeric) {
                         continue;
                     }
-                    concatenate(path, beginIndex, i, lattice);
+                    if (i - beginIndex > 1) {
+                        concatenate(path, beginIndex, i, lattice);
+                    }
                     i = beginIndex + 1;
                 }
                 if (joinKanjiNumeric) {
@@ -58,14 +62,16 @@ class JoinNumericPlugin extends PathRewritePlugin {
                 }
             } else {
                 if (beginIndex >= 0) {
-                    concatenate(path, beginIndex, i, lattice);
+                    if (i - beginIndex > 1) {
+                        concatenate(path, beginIndex, i, lattice);
+                    }
                     i = beginIndex + 1;
                 }
                 type = null;
                 beginIndex = -1;
             }
         }
-        if (beginIndex >= 0) {
+        if (beginIndex >= 0 && path.size() - beginIndex > 1) {
             concatenate(path, beginIndex, path.size(), lattice);
         }
     }
