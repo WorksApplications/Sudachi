@@ -14,14 +14,50 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A plugin that rewrites the characters of input texts.
+ *
+ * <p>This plugin rewites the characters by the user-defined rules,
+ * converts them to lower case by {@link Character#toLowerCase}
+ * and normalized by {@link java.text.Normalizer#normalize} with {@code NFKC}.
+ *
+ * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
+ * It can be refered as {@link Plugin#settings}.
+ *
+ * <p>The following is an example of settings.
+ * <pre>{@code
+ *   {
+ *     "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin",
+ *     "rewriteDef" : "rewrite.def"
+ *   }
+ * }</pre>
+ *
+ * {@code rewriteDef} is the file path of the rules of character
+ * rewriting. If {@code rewirteDef} is not defined, this plugin
+ * uses the default rules.
+ *
+ * <p>The following is an example of rewriting rules.
+ * <pre>{@code
+ * # single code point: this character is skipped in character normalization
+ * 髙
+ * # rewrite rule: <target> <replacement>
+ * A' Ā
+ * }</pre>
+ */
 public class DefaultInputTextPlugin extends InputTextPlugin {
     
+    /** the file path of the rules */
     public String rewriteDef;
 
     private Set<Integer> ignoreNormalizeSet = new HashSet<>();
     private Map<Character, Integer> keyLengths = new HashMap<>();
     private Map<String, String> replaceCharMap = new HashMap<>();
     
+    /**
+     * Reads the rewriting rules from the specified file.
+     *
+     * @throws IOException if the file is not available.
+     */
     @Override
     public void setUp() throws IOException {
         if (rewriteDef == null) {
