@@ -76,10 +76,15 @@ class JapaneseTokenizer implements Tokenizer {
 
         List<LatticeNode> path = lattice.getBestPath();
         if (dumpOutput != null) {
+            dumpOutput.println("=== Lattice dump:");
             lattice.dump(dumpOutput);
         }
 
         path.remove(path.size() - 1); // remove EOS
+        if (dumpOutput != null) {
+            dumpOutput.println("=== Before rewriting:");
+            dumpPath(path);
+        }
         for (PathRewritePlugin plugin : pathRewritePlugins) {
             plugin.rewrite(input, path, lattice);
         }
@@ -113,7 +118,9 @@ class JapaneseTokenizer implements Tokenizer {
         }
 
         if (dumpOutput != null) {
+            dumpOutput.println("=== After rewriting:");
             dumpPath(path);
+            dumpOutput.println("===");
         }
 
         return new MorphemeList(input, grammar, lexicon, path);
