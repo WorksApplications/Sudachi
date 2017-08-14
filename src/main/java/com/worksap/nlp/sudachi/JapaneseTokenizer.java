@@ -75,13 +75,13 @@ class JapaneseTokenizer implements Tokenizer {
         }
 
         List<LatticeNode> path = lattice.getBestPath();
+        if (dumpOutput != null) {
+            lattice.dump(dumpOutput);
+        }
+
         path.remove(path.size() - 1); // remove EOS
         for (PathRewritePlugin plugin : pathRewritePlugins) {
             plugin.rewrite(input, path, lattice);
-        }
-
-        if (dumpOutput != null) {
-            lattice.dump(dumpOutput);
         }
 
         if (mode != Tokenizer.SplitMode.C) {
