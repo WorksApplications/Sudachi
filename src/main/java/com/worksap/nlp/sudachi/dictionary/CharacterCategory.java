@@ -13,9 +13,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A classifier of the categories of characters.
+ */
 public class CharacterCategory {
-    
-    private static final String DEFAULT_CATEGORY = "DEFAULT";
     
     static class Range {
         int low;
@@ -43,6 +44,13 @@ public class CharacterCategory {
     
     private List<Range> rangeList = new ArrayList<>();
     
+    /**
+     * Returns the set of the category types of the character (Unicode
+     * code point).
+     *
+     * @param codePoint the code point value of the character
+     * @return the set of the category types of the character
+     */
     public Set<CategoryType> getCategoryTypes(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
@@ -52,6 +60,22 @@ public class CharacterCategory {
         return Collections.singleton(CategoryType.DEFAULT);
     }
     
+    /**
+     * Reads the definitions of the character categories from the file
+     * which is specified by {@code charDef}.
+     * If {@code charDef} is {@code null}, uses the default definitions.
+     *
+     * <p>The following is the format of definitions.
+     * <pre>{@code
+     * 0x0020 SPACE              # a white space
+     * 0x0041..0x005A ALPHA      # Latin alphabets
+     * 0x4E00 KANJINUMERIC KANJI # Kanji numeric and Kanji
+     * }</pre>
+     * Lines that do not start with "0x" are ignored.
+     *
+     * @param charDef the file of the definitions of character categories.
+     * @throws IOException if the definition file is not available.
+     */
     public void readCharacterDefinition(String charDef) throws IOException {
         try (
             InputStream in = (charDef != null)
