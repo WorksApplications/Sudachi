@@ -35,11 +35,11 @@ public class MorphemeList extends AbstractList<Morpheme> {
     public int size() { return path.size(); }
 
     int getBegin(int index) {
-        return inputText.getOriginalOffset(path.get(index).getBegin());
+        return inputText.getOriginalIndex(path.get(index).getBegin());
     }
 
     int getEnd(int index) {
-        return inputText.getOriginalOffset(path.get(index).getEnd());
+        return inputText.getOriginalIndex(path.get(index).getEnd());
     }
 
     String getSurface(int index) {

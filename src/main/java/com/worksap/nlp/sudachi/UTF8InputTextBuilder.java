@@ -36,8 +36,7 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
     }
     
     @Override
-    public void replace(int begin, int end, String str)
-        throws StringIndexOutOfBoundsException {
+    public void replace(int begin, int end, String str) {
         if (begin < 0)
             throw new StringIndexOutOfBoundsException(begin);
         if (begin > modifiedText.length())
