@@ -44,7 +44,7 @@ import java.util.Map;
  * A' Ā
  * }</pre>
  */
-public class DefaultInputTextPlugin extends InputTextPlugin {
+class DefaultInputTextPlugin extends InputTextPlugin {
     
     /** the file path of the rules */
     public String rewriteDef;
