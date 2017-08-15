@@ -62,21 +62,21 @@ public class UTF8InputTextTest {
     }
     
     @Test
-    public void getOriginalOffset() {
+    public void getOriginalIndex() {
         input = builder.build();
-        assertThat(input.getOriginalOffset(0), is(0));
-        assertThat(input.getOriginalOffset(1), is(0));
-        assertThat(input.getOriginalOffset(2), is(1));
-        assertThat(input.getOriginalOffset(4), is(1));
-        assertThat(input.getOriginalOffset(6), is(3));
-        assertThat(input.getOriginalOffset(7), is(4));
-        assertThat(input.getOriginalOffset(10), is(5));
-        assertThat(input.getOriginalOffset(18), is(9));
-        assertThat(input.getOriginalOffset(19), is(10));
-        assertThat(input.getOriginalOffset(22), is(10));
-        assertThat(input.getOriginalOffset(23), is(12));
-        assertThat(input.getOriginalOffset(28), is(13));
-        assertThat(input.getOriginalOffset(31), is(14));
+        assertThat(input.getOriginalIndex(0), is(0));
+        assertThat(input.getOriginalIndex(1), is(0));
+        assertThat(input.getOriginalIndex(2), is(1));
+        assertThat(input.getOriginalIndex(4), is(1));
+        assertThat(input.getOriginalIndex(6), is(3));
+        assertThat(input.getOriginalIndex(7), is(4));
+        assertThat(input.getOriginalIndex(10), is(5));
+        assertThat(input.getOriginalIndex(18), is(9));
+        assertThat(input.getOriginalIndex(19), is(10));
+        assertThat(input.getOriginalIndex(22), is(10));
+        assertThat(input.getOriginalIndex(23), is(12));
+        assertThat(input.getOriginalIndex(28), is(13));
+        assertThat(input.getOriginalIndex(31), is(14));
     }
     
     @Test
@@ -126,15 +126,15 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is("âｂC1あ234ああ𡈽アｺﾞ"));
         assertThat(input.getByteText().length, is(32));
-        assertThat(input.getOriginalOffset(0), is(0));
-        assertThat(input.getOriginalOffset(12), is(7));
-        assertThat(input.getOriginalOffset(13), is(8));
-        assertThat(input.getOriginalOffset(15), is(8));
-        assertThat(input.getOriginalOffset(16), is(8));
-        assertThat(input.getOriginalOffset(18), is(8));
-        assertThat(input.getOriginalOffset(19), is(10));
-        assertThat(input.getOriginalOffset(22), is(10));
-        assertThat(input.getOriginalOffset(31), is(14));
+        assertThat(input.getOriginalIndex(0), is(0));
+        assertThat(input.getOriginalIndex(12), is(7));
+        assertThat(input.getOriginalIndex(13), is(8));
+        assertThat(input.getOriginalIndex(15), is(8));
+        assertThat(input.getOriginalIndex(16), is(8));
+        assertThat(input.getOriginalIndex(18), is(8));
+        assertThat(input.getOriginalIndex(19), is(10));
+        assertThat(input.getOriginalIndex(22), is(10));
+        assertThat(input.getOriginalIndex(31), is(14));
     }
 
     @Test
@@ -146,13 +146,13 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is("âｂC1あ234あ𡈽アｺﾞ"));
         assertThat(input.getByteText().length, is(29));
-        assertThat(input.getOriginalOffset(0), is(0));
-        assertThat(input.getOriginalOffset(12), is(7));
-        assertThat(input.getOriginalOffset(13), is(8));
-        assertThat(input.getOriginalOffset(15), is(8));
-        assertThat(input.getOriginalOffset(16), is(10));
-        assertThat(input.getOriginalOffset(19), is(10));
-        assertThat(input.getOriginalOffset(28), is(14));
+        assertThat(input.getOriginalIndex(0), is(0));
+        assertThat(input.getOriginalIndex(12), is(7));
+        assertThat(input.getOriginalIndex(13), is(8));
+        assertThat(input.getOriginalIndex(15), is(8));
+        assertThat(input.getOriginalIndex(16), is(10));
+        assertThat(input.getOriginalIndex(19), is(10));
+        assertThat(input.getOriginalIndex(28), is(14));
     }
 
     @Test
@@ -164,13 +164,13 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is("âｂC1あ234あああ𡈽アｺﾞ"));
         assertThat(input.getByteText().length, is(35));
-        assertThat(input.getOriginalOffset(0), is(0));
-        assertThat(input.getOriginalOffset(12), is(7));
-        assertThat(input.getOriginalOffset(13), is(8));
-        assertThat(input.getOriginalOffset(21), is(8));
-        assertThat(input.getOriginalOffset(22), is(10));
-        assertThat(input.getOriginalOffset(25), is(10));
-        assertThat(input.getOriginalOffset(34), is(14));
+        assertThat(input.getOriginalIndex(0), is(0));
+        assertThat(input.getOriginalIndex(12), is(7));
+        assertThat(input.getOriginalIndex(13), is(8));
+        assertThat(input.getOriginalIndex(21), is(8));
+        assertThat(input.getOriginalIndex(22), is(10));
+        assertThat(input.getOriginalIndex(25), is(10));
+        assertThat(input.getOriginalIndex(34), is(14));
     }
     
     @Test
@@ -184,19 +184,19 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is("abc1あ234漢字土アゴ"));
         assertThat(input.getByteText().length, is(25));
-        assertThat(input.getOriginalOffset(0), is(0));
-        assertThat(input.getOriginalOffset(1), is(1));
-        assertThat(input.getOriginalOffset(2), is(2));
-        assertThat(input.getOriginalOffset(7), is(5));
-        assertThat(input.getOriginalOffset(8), is(6));
-        assertThat(input.getOriginalOffset(9), is(7));
-        assertThat(input.getOriginalOffset(15), is(9));
-        assertThat(input.getOriginalOffset(16), is(10));
-        assertThat(input.getOriginalOffset(18), is(10));
-        assertThat(input.getOriginalOffset(19), is(12));
-        assertThat(input.getOriginalOffset(21), is(12));
-        assertThat(input.getOriginalOffset(22), is(13));
-        assertThat(input.getOriginalOffset(24), is(13));
+        assertThat(input.getOriginalIndex(0), is(0));
+        assertThat(input.getOriginalIndex(1), is(1));
+        assertThat(input.getOriginalIndex(2), is(2));
+        assertThat(input.getOriginalIndex(7), is(5));
+        assertThat(input.getOriginalIndex(8), is(6));
+        assertThat(input.getOriginalIndex(9), is(7));
+        assertThat(input.getOriginalIndex(15), is(9));
+        assertThat(input.getOriginalIndex(16), is(10));
+        assertThat(input.getOriginalIndex(18), is(10));
+        assertThat(input.getOriginalIndex(19), is(12));
+        assertThat(input.getOriginalIndex(21), is(12));
+        assertThat(input.getOriginalIndex(22), is(13));
+        assertThat(input.getOriginalIndex(24), is(13));
     }
     
     @Test

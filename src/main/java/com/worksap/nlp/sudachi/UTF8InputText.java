@@ -48,33 +48,36 @@ class UTF8InputText implements InputText<byte[]> {
     @Override
     public String getSubstring(int begin, int end)
         throws StringIndexOutOfBoundsException {
+        if (begin < 0)
+            throw new StringIndexOutOfBoundsException(begin);
+        if (end > bytes.length)
+            throw new StringIndexOutOfBoundsException(end);
+        if (begin > end)
+            throw new StringIndexOutOfBoundsException(end - begin);
+
         return modifiedText.substring(byteIndexes[begin], byteIndexes[end]);
     }
     
-    int getOffsetTextLength(int offset)
-        throws IndexOutOfBoundsException {
-        return byteIndexes[offset];
+    int getOffsetTextLength(int index) {
+        return byteIndexes[index];
     }
     
-    public boolean isCharAlignment(int offset) {
-        return (bytes[offset] & 0xC0) != 0x80;
-    }
-    
-    @Override
-    public int getOriginalOffset(int offset)
-        throws IndexOutOfBoundsException {
-        return offsets[offset];
+    public boolean isCharAlignment(int index) {
+        return (bytes[index] & 0xC0) != 0x80;
     }
     
     @Override
-    public Set<CategoryType> getCharCategoryTypes(int offset)
-        throws IndexOutOfBoundsException {
-        return charCategories.get(byteIndexes[offset]);
+    public int getOriginalIndex(int index) {
+        return offsets[index];
     }
     
     @Override
-    public Set<CategoryType> getCharCategoryTypes(int begin, int end)
-        throws IndexOutOfBoundsException {
+    public Set<CategoryType> getCharCategoryTypes(int index) {
+        return charCategories.get(byteIndexes[index]);
+    }
+    
+    @Override
+    public Set<CategoryType> getCharCategoryTypes(int begin, int end) {
         if (begin + getCharCategoryContinuousLength(begin) < end) {
             return Collections.emptySet();
         }
@@ -89,17 +92,15 @@ class UTF8InputText implements InputText<byte[]> {
     }
 
     @Override
-    public int getCharCategoryContinuousLength(int offset)
-        throws IndexOutOfBoundsException {
-        return charCategoryContinuities.get(offset);
+    public int getCharCategoryContinuousLength(int index) {
+        return charCategoryContinuities.get(index);
     }
     
     @Override
-    public int getCodePointsOffsetLength(int offset, int codePointLength)
-        throws IndexOutOfBoundsException {
+    public int getCodePointsOffsetLength(int index, int codePointOffset) {
         int length = 0;
-        int target = byteIndexes[offset] + codePointLength;
-        for (int i = offset; i < bytes.length; i++) {
+        int target = byteIndexes[index] + codePointOffset;
+        for (int i = index; i < bytes.length; i++) {
             if (byteIndexes[i] >= target) {
                 return length;
             }
@@ -107,5 +108,4 @@ class UTF8InputText implements InputText<byte[]> {
         }
         return length;
     }
-    
 }

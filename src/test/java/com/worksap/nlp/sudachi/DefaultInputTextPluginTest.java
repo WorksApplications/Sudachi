@@ -56,14 +56,14 @@ public class DefaultInputTextPluginTest {
                 (byte)0x85, (byte)0xA2
             }, bytes
         );
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(1), is(0));
-        assertThat(text.getOriginalOffset(2), is(1));
-        assertThat(text.getOriginalOffset(4), is(1));
-        assertThat(text.getOriginalOffset(8), is(3));
-        assertThat(text.getOriginalOffset(12), is(5));
-        assertThat(text.getOriginalOffset(24), is(9));
-        assertThat(text.getOriginalOffset(26), is(9));
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(1), is(0));
+        assertThat(text.getOriginalIndex(2), is(1));
+        assertThat(text.getOriginalIndex(4), is(1));
+        assertThat(text.getOriginalIndex(8), is(3));
+        assertThat(text.getOriginalIndex(12), is(5));
+        assertThat(text.getOriginalIndex(24), is(9));
+        assertThat(text.getOriginalIndex(26), is(9));
     }
     
     @Test
@@ -86,14 +86,14 @@ public class DefaultInputTextPluginTest {
                 (byte)0xBC, (byte)0xE2, (byte)0x85, (byte)0xB2
             }, bytes
         );
-        assertThat(text.getOriginalOffset(0), is(0));
-        assertThat(text.getOriginalOffset(1), is(0));
-        assertThat(text.getOriginalOffset(2), is(1));
-        assertThat(text.getOriginalOffset(3), is(2));
-        assertThat(text.getOriginalOffset(7), is(4));
-        assertThat(text.getOriginalOffset(11), is(4));
-        assertThat(text.getOriginalOffset(15), is(7));
-        assertThat(text.getOriginalOffset(17), is(7));
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(1), is(0));
+        assertThat(text.getOriginalIndex(2), is(1));
+        assertThat(text.getOriginalIndex(3), is(2));
+        assertThat(text.getOriginalIndex(7), is(4));
+        assertThat(text.getOriginalIndex(11), is(4));
+        assertThat(text.getOriginalIndex(15), is(7));
+        assertThat(text.getOriginalIndex(17), is(7));
     }
     
     class MockGrammar implements Grammar {
