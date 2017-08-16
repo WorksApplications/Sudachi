@@ -13,6 +13,26 @@ import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
+/**
+ * Provides the OOVs in the same way as MeCab.
+ *
+ * <p>The following is an example of settings.
+ * <pre>{@code
+ *   {
+ *     "class"   : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
+ *     "charDef" : "char.def",
+ *     "unkDef"  : "unk.def"
+ *   }
+ * }</pre>
+ *
+ * {@code charDef} is the file path of the definition of OOV insertion
+ * behavior.
+ * {@code unkDef} is the file path of the definition of OOV informations.
+ *
+ * These files are compatible with MeCab. But the definitions of character
+ * categories in {@code charDef} are ignored and this plugin uses the ones
+ * {@code characterDefinitionFile} in the settings.
+ */
 class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     static class CategoryInfo {
