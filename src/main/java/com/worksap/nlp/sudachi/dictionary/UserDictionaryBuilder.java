@@ -10,13 +10,6 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.Comparator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.worksap.nlp.dartsclone.DoubleArray;
 
 /**
  * A user dictionary building tool. This class provide the converter

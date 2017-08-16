@@ -11,7 +11,7 @@ package com.worksap.nlp.sudachi.dictionary;
  * specified "characterDefinitionFile" of the settings.
  */
 public enum CategoryType {
-    /** The fallback category. */
+    /** The fall back category. */
     DEFAULT(1),
     /** White spaces. */
     SPACE(1 << 1),
@@ -59,11 +59,11 @@ public enum CategoryType {
 
     /**
      * Returns the category to which the specified ID is mapped,
-     * or {@code null} if there is no associated catogory.
+     * or {@code null} if there is no associated category.
      *
      * @param id the ID number of category
      * @return the category to which the specified ID is mapped,
-     *         or {@code null} if there is no associated catogory.
+     *         or {@code null} if there is no associated category.
      */
     public static CategoryType getType(int id)  {
         for (CategoryType type : CategoryType.values()) {

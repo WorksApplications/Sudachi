@@ -1,7 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 /**
- * The parameters and gramatical informations.
+ * The parameters and grammatical informations.
  */
 public interface Grammar {
 
@@ -54,28 +54,28 @@ public interface Grammar {
      * <p>When the Id is out of the range, the behavior is undefined.
      *
      * @param leftId the left-ID of the connection
-     * @param rightId the rigth-ID of the connection
+     * @param rightId the right-ID of the connection
      * @param cost the cost of the connection
      */
     public void setConnectCost(short leftId, short rightId, short cost);
 
     /**
-     * Returns the parameter of the beginning of setence.
+     * Returns the parameter of the beginning of sentence.
      *
      * <p>The following are the parameters.
      * <pre>{@code { left-ID, rightID, cost } }</pre>
      *
-     * @return the parameter of the beginning of setence
+     * @return the parameter of the beginning of sentence
      */
     public short[] getBOSParameter();
 
     /**
-     * Returns the parameter of the end of setence.
+     * Returns the parameter of the end of sentence.
      *
      * <p>The following are the parameters.
      * <pre>{@code { left-ID, rightID, cost } }</pre>
      *
-     * @return the parameter of the end of setence
+     * @return the parameter of the end of sentence
      */
     public short[] getEOSParameter();
 
