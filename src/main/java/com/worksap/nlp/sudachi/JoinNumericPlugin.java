@@ -6,6 +6,26 @@ import java.util.Set;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
+/**
+ * A plugin for concatenation of the numerics.
+ *
+ * This plugin concatenate the sequence of numerics.
+ * Only the sequence of digits are joined by default.
+ *
+ * <p>The following is an example of settings.
+ * <pre>{@code
+ *   {
+ *     "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
+ *     "joinKanjiNumeric" : true,
+ *     "joinAllNumeric"   : false
+ *   }
+ * }</pre>
+ *
+ * <p>If {@code joinKanjiNumeric} is {@code true}, the sequence of
+ * Kanji numerics are joined.
+ * <p>If {@code joinAllNumeric} is {@code true}, the sequence of digits
+ * and Kanji numerics are joined.
+ */
 class JoinNumericPlugin extends PathRewritePlugin {
 
     boolean joinKanjiNumeric;
