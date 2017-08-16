@@ -12,7 +12,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  * This plugin concatenate the Katakana OOV and
  * the adjacent Katakana morphemes.
  *
- * <p>The concatenated morpheme is OOV too, and its part of speech
+ * <p>The concatenated morpheme is OOV, and its part of speech
  * must be specified in the settings.
  *
  * <p>The following is an example of settings.
