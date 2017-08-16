@@ -8,7 +8,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  * A plugin that provides the nodes of out-of-vocabulary morphemes.
  *
  * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be refered as {@link Plugin#settings}.
+ * It can be referred as {@link Plugin#settings}.
  *
  * <p>The following is an example of settings.
  * <pre>{@code

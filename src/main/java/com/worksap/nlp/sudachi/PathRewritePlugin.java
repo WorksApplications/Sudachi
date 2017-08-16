@@ -12,7 +12,7 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * A plugin that rewrite the best path of the lattice.
  *
  * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be refered as {@link Plugin#settings}.
+ * It can be referred as {@link Plugin#settings}.
  *
  * <p>The following is an example of settings.
  * <pre>{@code
@@ -53,7 +53,7 @@ public abstract class PathRewritePlugin extends Plugin {
      * <p>The concatenated node has the POS ID of the head of the sequence.
      * 
      * @param path the path
-     * @param begin the begining index
+     * @param begin the beginning index
      * @param end the ending index
      * @param lattice the lattice
      * @return the concatenated node
@@ -103,7 +103,7 @@ public abstract class PathRewritePlugin extends Plugin {
      * <p>The concatenated node is marked as OOV.
      * 
      * @param path the path
-     * @param begin the begining index
+     * @param begin the beginning index
      * @param end the ending index
      * @param posId the POS ID of the concatenated node
      * @param lattice the lattice

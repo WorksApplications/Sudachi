@@ -153,30 +153,35 @@ public class SettingsTest {
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutList() {
         Settings settings = Settings.parseSettings("{\"foo\":123}");
+        @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutClass() {
         Settings settings = Settings.parseSettings("{\"foo\":[{}]}");
+        @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotStringClass() {
         Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":123}]}");
+        @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotInitializableClass() {
         Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":\"bazz\"}]}");
+        @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotPluginClass() {
         Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":\"java.lang.String\"}]}");
+        @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 }

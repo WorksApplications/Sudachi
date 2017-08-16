@@ -1,13 +1,12 @@
 package com.worksap.nlp.sudachi;
 
-import java.util.List;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 
 /**
  * An immutable sequence of characters.
- * This class has the original inpu text and the modified text
+ * This class has the original input text and the modified text
  * each character of which is mapped to the original one.
  * In the methods of this class the index is not one of characters or
  * code points. The meaning of the index is implementation dependent,

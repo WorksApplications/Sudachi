@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class LatticeImpl implements Lattice {
 
@@ -127,7 +126,7 @@ class LatticeImpl implements Lattice {
                     }
                     short connectCost
                         = grammar.getConnectCost(lNode.rightId, rNode.leftId);
-                    if (connectCost == grammar.INHIBITED_CONNECTION) {
+                    if (connectCost == Grammar.INHIBITED_CONNECTION) {
                         continue; // this connection is not allowed
                     }
                     int cost = lNode.totalCost + connectCost;
