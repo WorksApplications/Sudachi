@@ -39,10 +39,13 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
         rightId = (short)settings.getInt("rightId");
         cost = (short)settings.getInt("cost");
 
-        if (oovPOSStrings == null) {
+        if (oovPOSStrings.isEmpty()) {
             throw new IllegalArgumentException("oovPOS is not specified");
         }
         oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings.toArray(new String[0]));
+        if (oovPOSId < 0) {
+            throw new IllegalArgumentException("oovPOS is invalid:" + String.join(",", oovPOSStrings));
+        }
     }
 
     @Override
