@@ -29,7 +29,10 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     @Override
     public void setUp(Grammar grammar) {
         List<String> pos = settings.getStringList("oovPOS");
-        oovPosId = grammar.getPartOfSpeechId(pos.toArray(new String[0]));
+        if (pos.isEmpty()) {
+            throw new IllegalArgumentException("oovPOS is undefined");
+        }
+        oovPosId = grammar.getPartOfSpeechId(pos);
         if (oovPosId < 0) {
             throw new IllegalArgumentException("oovPOS is invalid");
         }

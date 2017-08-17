@@ -1,5 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.util.List;
+
 /**
  * The parameters and grammatical informations.
  */
@@ -21,21 +23,21 @@ public interface Grammar {
      * The name is divided into layers.
      *
      * @param posId the ID of the part-of-speech
-     * @return the array of strings of part-of-speech name
+     * @return the list of strings of part-of-speech name
      * @throws IndexOutOfBoundsException if {@code posId} is out of the range
      */
-    public String[] getPartOfSpeechString(short posId);
+    public List<String> getPartOfSpeechString(short posId);
 
     /**
      * Returns the the ID corresponding to the part-of-speech name.
      *
      * <p>If there is not such the part-of-speech name, -1 is returned.
      *
-     * @param pos the array of string of part-of-speech name
+     * @param pos the list of string of part-of-speech name
      * @return the ID corresponding to the part-of-speech name,
      * or -1 without corresponding one.
      */
-    public short getPartOfSpeechId(String... pos);
+    public short getPartOfSpeechId(List<String> pos);
 
     /**
      * Returns the cost of the specified connection.

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.*;
 
@@ -216,10 +217,10 @@ public class UTF8InputTextTest {
         public int getPartOfSpeechSize() {
             return 0;
         }
-        public String[] getPartOfSpeechString(short posId) {
+        public List<String> getPartOfSpeechString(short posId) {
             return null;
         }
-        public short getPartOfSpeechId(String... pos) {
+        public short getPartOfSpeechId(List<String> pos) {
             return 0;
         }
         public short getConnectCost(short leftId, short rightId) {

@@ -10,6 +10,8 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A user dictionary building tool. This class provide the converter
@@ -74,8 +76,9 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
                                      Short.parseShort(cols[2]),
                                      Short.parseShort(cols[3]) });
 
-            short posId = grammar.getPartOfSpeechId(cols[5], cols[6], cols[7],
-                                                     cols[8], cols[9], cols[10]);
+            List<String> pos = Arrays.asList(cols[5], cols[6], cols[7],
+                                             cols[8], cols[9], cols[10]);
+            short posId = grammar.getPartOfSpeechId(pos);
             if (posId < 0) {
                 System.err.println("Error: Part of speech is wrong at line  "
                                    + reader.getLineNumber());

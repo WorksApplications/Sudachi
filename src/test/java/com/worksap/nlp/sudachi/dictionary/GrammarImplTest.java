@@ -2,6 +2,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -31,22 +32,22 @@ public class GrammarImplTest {
 
     @Test
     public void getPartOfSpeechString() {
-        assertEquals(6, grammar.getPartOfSpeechString((short)0).length);
-        assertEquals("BOS/EOS", grammar.getPartOfSpeechString((short)0)[0]);
-        assertEquals("*", grammar.getPartOfSpeechString((short)0)[5]);
+        assertEquals(6, grammar.getPartOfSpeechString((short)0).size());
+        assertEquals("BOS/EOS", grammar.getPartOfSpeechString((short)0).get(0));
+        assertEquals("*", grammar.getPartOfSpeechString((short)0).get(5));
 
-        assertEquals("一般", grammar.getPartOfSpeechString((short)1)[1]);
-        assertEquals("*", grammar.getPartOfSpeechString((short)1)[5]);
+        assertEquals("一般", grammar.getPartOfSpeechString((short)1).get(1));
+        assertEquals("*", grammar.getPartOfSpeechString((short)1).get(5));
 
-        assertEquals("五段-サ行", grammar.getPartOfSpeechString((short)2)[4]);
-        assertEquals("終止形-一般", grammar.getPartOfSpeechString((short)2)[5]);
+        assertEquals("五段-サ行", grammar.getPartOfSpeechString((short)2).get(4));
+        assertEquals("終止形-一般", grammar.getPartOfSpeechString((short)2).get(5));
     }
 
     @Test
     public void getPartOfSpeechId() {
-        assertEquals(0, grammar.getPartOfSpeechId(new String[] {"BOS/EOS",
+        assertEquals(0, grammar.getPartOfSpeechId(Arrays.asList("BOS/EOS",
                                                                 "*", "*", "*",
-                                                                "*", "*" }));
+                                                                "*", "*")));
     }
 
     @Test

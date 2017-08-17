@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,9 +177,9 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 oov.leftId = Short.parseShort(cols[1]);
                 oov.rightId = Short.parseShort(cols[2]);
                 oov.cost = Short.parseShort(cols[3]);
-                oov.posId
-                    = grammar.getPartOfSpeechId(cols[4], cols[5], cols[6],
-                                                cols[7], cols[8], cols[9]);
+                List<String> pos
+                    = Arrays.asList(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
+                oov.posId = grammar.getPartOfSpeechId(pos);
 
                 if (!oovList.containsKey(type)) {
                     oovList.put(type, new ArrayList<OOV>());
