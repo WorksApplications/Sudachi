@@ -129,7 +129,7 @@ public class DictionaryBuilder {
                                    cols[12], // normalizedForm
                                    (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
                                    "", // dummy
-                                   cols[11], // reading
+                                   cols[11], // readingForm
                                    parseSplitInfo(cols[15]), // aUnitSplit
                                    parseSplitInfo(cols[16]), // bUnitSplit
                                    parseSplitInfo(cols[17]) // wordStructure
@@ -274,7 +274,7 @@ public class DictionaryBuilder {
             buffer.putShort(wi.getPOSId());
             writeString(wi.getNormalizedForm());
             buffer.putInt(wi.getDictionaryFormWordId());
-            writeString(wi.getReading());
+            writeString(wi.getReadingForm());
             writeIntArray(wi.getAunitSplit());
             writeIntArray(wi.getBunitSplit());
             writeIntArray(wi.getWordStructure());

@@ -71,7 +71,7 @@ public class DoubleArrayLexiconTest {
         assertEquals("た", wi.getNormalizedForm());
         assertEquals(-1, wi.getDictionaryFormWordId());
         assertEquals("た", wi.getDictionaryForm());
-        assertEquals("タ", wi.getReading());
+        assertEquals("タ", wi.getReadingForm());
         assertArrayEquals(new int[0], wi.getAunitSplit());
         assertArrayEquals(new int[0], wi.getBunitSplit());
         assertArrayEquals(new int[0], wi.getWordStructure());

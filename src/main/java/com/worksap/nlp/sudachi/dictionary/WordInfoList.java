@@ -25,8 +25,8 @@ class WordInfoList {
         index += 2 + 2 * normalizedForm.length();
         int dictionaryFormWordId = bytes.getInt(index);
         index += 4;
-        String reading = bufferToString(index);
-        index += 2 + 2 * reading.length();
+        String readingForm = bufferToString(index);
+        index += 2 + 2 * readingForm.length();
         int[] aUnitSplit = bufferToIntArray(index);
         index += 2 + 4 * aUnitSplit.length;
         int[] bUnitSplit = bufferToIntArray(index);
@@ -40,7 +40,7 @@ class WordInfoList {
         }
 
         return new WordInfo(surface, headwordLength, posId, normalizedForm,
-                            dictionaryFormWordId, dictionaryForm, reading,
+                            dictionaryFormWordId, dictionaryForm, readingForm,
                             aUnitSplit, bUnitSplit, wordStructure);
     }
 
