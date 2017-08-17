@@ -45,9 +45,9 @@ class MorphemeImpl implements Morpheme {
     }
 
     @Override
-    public String reading() {
+    public String readingForm() {
         WordInfo wi = getWordInfo();
-        return wi.getReading();
+        return wi.getReadingForm();
     }
 
     public List<Morpheme> split(Tokenizer.SplitMode mode) {

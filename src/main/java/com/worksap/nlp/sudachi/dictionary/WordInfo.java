@@ -14,7 +14,7 @@ public class WordInfo {
     private final String normalizedForm;
     private final int dictionaryFormWordId;
     private final String dictionaryForm;
-    private final String reading;
+    private final String readingForm;
     private final int[] aUnitSplit;
     private final int[] bUnitSplit;
     private final int[] wordStructure;
@@ -25,7 +25,7 @@ public class WordInfo {
              String normalizedForm,
              int dictionaryFormWordId,
              String dictionaryForm,
-             String reading,
+             String readingForm,
              int[] aUnitSplit,
              int[] bUnitSplit,
              int[] wordStructure) {
@@ -35,7 +35,7 @@ public class WordInfo {
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = dictionaryFormWordId;
         this.dictionaryForm = dictionaryForm;
-        this.reading = reading;
+        this.readingForm = readingForm;
         this.aUnitSplit = aUnitSplit;
         this.bUnitSplit = bUnitSplit;
         this.wordStructure = wordStructure;
@@ -49,21 +49,21 @@ public class WordInfo {
      * @param posId the ID of the part-of-speech of the morpheme
      * @param normalizedForm the normalized form of the morpheme
      * @param dictionaryForm the dictionary form of the morpheme
-     * @param reading the reading form of the morpheme
+     * @param readingForm the reading form of the morpheme
      */
     public WordInfo(String surface,
              short headwordLength,
              short posId,
              String normalizedForm,
              String dictionaryForm,
-             String reading) {
+             String readingForm) {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = -1;
         this.dictionaryForm = dictionaryForm;
-        this.reading = reading;
+        this.readingForm = readingForm;
         this.aUnitSplit = new int[0];
         this.bUnitSplit = new int[0];
         this.wordStructure = new int[0];
@@ -137,8 +137,8 @@ public class WordInfo {
      *
      * @return the reading form of the morpheme
      */
-    public String getReading() {
-        return reading;
+    public String getReadingForm() {
+        return readingForm;
     }
 
     /**

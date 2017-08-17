@@ -91,7 +91,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
                                cols[12], // normalizedForm
                                (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
                                "", // dummy
-                               cols[11], // reading
+                               cols[11], // readingForm
                                parseSplitInfo(cols[15]), // aUnitSplit
                                parseSplitInfo(cols[16]), // bUnitSplit
                                parseSplitInfo(cols[17]) // wordStructure

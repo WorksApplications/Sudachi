@@ -72,7 +72,7 @@ public interface Morpheme {
      *
      * @return the reading form of morpheme.
      */
-    public String reading();
+    public String readingForm();
 
     /**
      * Split the morpheme in another splitting mode.
