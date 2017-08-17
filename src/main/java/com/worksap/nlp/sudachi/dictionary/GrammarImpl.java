@@ -3,6 +3,7 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GrammarImpl implements Grammar {
@@ -12,7 +13,7 @@ public class GrammarImpl implements Grammar {
     private final short[] EOS_PARAMETER = new short[] { 0, 0, 0 }; 
 
     private final ByteBuffer bytes;
-    private List<String[]> posList;
+    private List<List<String>> posList;
     private ByteBuffer connectTableBytes;
     private boolean isCopiedConnectTable;
     private int connectTableOffset;
@@ -23,7 +24,6 @@ public class GrammarImpl implements Grammar {
 
     private int storageSize;
 
-    @SuppressWarnings("serial")
     public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;
@@ -31,32 +31,14 @@ public class GrammarImpl implements Grammar {
         isCopiedConnectTable = false;
         short posSize = bytes.getShort(offset);
         offset += 2;
-        posList = new ArrayList<String[]>(posSize) {
-                @Override public int indexOf(Object o) {
-                    if (!(o instanceof String[])) {
-                        return -1;
-                    }
-                    String[] s = (String[])o;
-                    search: for (int i = 0; i < this.size(); i++) {
-                        if (this.get(i).length != s.length) {
-                            continue;
-                        }
-                        for (int j = 0; j < s.length; j++) {
-                            if (!this.get(i)[j].equals(s[j])) {
-                                continue search;
-                            }
-                        }
-                        return i;
-                    }
-                    return -1;
-                }
-            };
+        posList = new ArrayList<List<String>>(posSize);
         for (int i = 0; i < posSize; i++) {
-            posList.add(new String[POS_DEPTH]);
+            ArrayList<String> pos = new ArrayList<String>(POS_DEPTH);
             for (int j = 0; j < POS_DEPTH; j++) {
-                posList.get(i)[j] = bufferToString(offset);
-                offset += 2 + 2 * posList.get(i)[j].length();
+                pos.add(bufferToString(offset));
+                offset += 2 + 2 * pos.get(j).length();
             }
+            posList.add(Collections.unmodifiableList(pos));
         }
         leftIdSize = bytes.getShort(offset);
         offset += 2;
@@ -77,12 +59,12 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public String[] getPartOfSpeechString(short posId) {
+    public List<String> getPartOfSpeechString(short posId) {
         return posList.get(posId);
     }
 
     @Override
-    public short getPartOfSpeechId(String... pos) {
+    public short getPartOfSpeechId(List<String> pos) {
         return (short)posList.indexOf(pos);
     }
 

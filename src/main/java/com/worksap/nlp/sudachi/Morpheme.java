@@ -42,7 +42,7 @@ public interface Morpheme {
      *
      * @return the part of speech of the morpheme
      */
-    public String[] partOfSpeech();
+    public List<String> partOfSpeech();
 
     /**
      * Returns the dictionary form of morpheme.

@@ -27,7 +27,7 @@ class MorphemeImpl implements Morpheme {
     }
 
     @Override
-    public String[] partOfSpeech() {
+    public List<String> partOfSpeech() {
         WordInfo wi = getWordInfo();
         return list.grammar.getPartOfSpeechString(wi.getPOSId());
     }
