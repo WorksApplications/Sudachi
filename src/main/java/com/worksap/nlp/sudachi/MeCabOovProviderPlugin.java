@@ -54,8 +54,16 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
-        readCharacterProperty(settings.getPath("charDef"));
-        readOOV(settings.getPath("unkDef"), grammar);
+        String charDef = settings.getPath("charDef");
+        if (charDef == null) {
+            throw new IllegalArgumentException("charDef is not defined");
+        }
+        readCharacterProperty(charDef);
+        String unkDef = settings.getPath("unkDef");
+        if (unkDef == null) {
+            throw new IllegalArgumentException("unkDef is not defined");
+        }
+        readOOV(unkDef, grammar);
     }
 
     @Override
