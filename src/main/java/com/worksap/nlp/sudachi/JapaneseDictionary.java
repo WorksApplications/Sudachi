@@ -23,7 +23,11 @@ class JapaneseDictionary implements Dictionary {
     List<PathRewritePlugin> pathRewritePlugins;
 
     JapaneseDictionary(String jsonString) throws IOException {
-        Settings settings = Settings.parseSettings(jsonString);
+        this(null, jsonString);
+    }
+
+    JapaneseDictionary(String path, String jsonString) throws IOException {
+        Settings settings = Settings.parseSettings(path, jsonString);
 
         readSystemDictionary(settings.getPath("systemDict"));
         for (EditConnectionCostPlugin p :
