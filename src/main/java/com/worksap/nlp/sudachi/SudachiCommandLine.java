@@ -120,20 +120,21 @@ public class SudachiCommandLine {
             }
         }
 
-        Dictionary dict = new DictionaryFactory().create(settings);
-        Tokenizer tokenizer = dict.create();
-        if (isEnableDump) {
-            tokenizer.setDumpOutput(output);
-        }
-
-        if (i < args.length) {
-            for ( ; i < args.length; i++) {
-                try (FileInputStream input = new FileInputStream(args[i])) {
-                    run(tokenizer, mode, input, output);
-                }
+        try (Dictionary dict = new DictionaryFactory().create(settings)) {
+            Tokenizer tokenizer = dict.create();
+            if (isEnableDump) {
+                tokenizer.setDumpOutput(output);
             }
-        } else {
-            run(tokenizer, mode, System.in, output);
+
+            if (i < args.length) {
+                for ( ; i < args.length; i++) {
+                    try (FileInputStream input = new FileInputStream(args[i])) {
+                        run(tokenizer, mode, input, output);
+                    }
+                }
+            } else {
+                run(tokenizer, mode, System.in, output);
+            }
         }
         output.close();
     }
