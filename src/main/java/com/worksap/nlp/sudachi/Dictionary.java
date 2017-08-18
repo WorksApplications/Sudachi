@@ -19,4 +19,7 @@ public interface Dictionary extends AutoCloseable {
      * @return a tokenizer
      */
     public Tokenizer create();
+
+    @Override
+    public void close();
 }

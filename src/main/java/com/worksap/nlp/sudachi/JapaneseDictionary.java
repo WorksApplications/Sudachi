@@ -2,9 +2,12 @@ package com.worksap.nlp.sudachi;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +24,7 @@ class JapaneseDictionary implements Dictionary {
     List<InputTextPlugin> inputTextPlugins;
     List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
+    List<MappedByteBuffer> buffers;
 
     JapaneseDictionary(String jsonString) throws IOException {
         this(null, jsonString);
@@ -28,6 +32,8 @@ class JapaneseDictionary implements Dictionary {
 
     JapaneseDictionary(String path, String jsonString) throws IOException {
         Settings settings = Settings.parseSettings(path, jsonString);
+
+        buffers = new ArrayList<>();
 
         readSystemDictionary(settings.getPath("systemDict"));
         for (EditConnectionCostPlugin p :
@@ -63,13 +69,14 @@ class JapaneseDictionary implements Dictionary {
         if (filename == null) {
             throw new IllegalArgumentException("system dictionary is not specified");
         }
-        ByteBuffer bytes;
+        MappedByteBuffer bytes;
         try (FileInputStream istream = new FileInputStream(filename);
              FileChannel inputFile = istream.getChannel()) {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
                                   inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
         }
+        buffers.add(bytes);
 
         GrammarImpl grammar = new GrammarImpl(bytes, 0);
         this.grammar = grammar;
@@ -77,13 +84,14 @@ class JapaneseDictionary implements Dictionary {
     }
 
     void readUserDictionary(String filename) throws IOException {
-        ByteBuffer bytes;
+        MappedByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename);
              FileChannel inputFile = input.getChannel()) {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
                                   inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
         }
+        buffers.add(bytes);
 
         DoubleArrayLexicon userLexicon = new DoubleArrayLexicon(bytes, 0);
         Tokenizer tokenizer
@@ -108,6 +116,9 @@ class JapaneseDictionary implements Dictionary {
     public void close() {
         grammar = null;
         lexicon = null;
+        for (MappedByteBuffer buffer : buffers) {
+            destroyByteBuffer(buffer);
+        }
     }
 
     @Override
@@ -115,5 +126,20 @@ class JapaneseDictionary implements Dictionary {
         return new JapaneseTokenizer(grammar, lexicon,
                                      inputTextPlugins, oovProviderPlugins,
                                      pathRewritePlugins);
+    }
+
+    static void destroyByteBuffer(ByteBuffer buffer) {
+        if (buffer.isDirect()) {
+            try {
+                Method cleanerMethod = buffer.getClass().getMethod("cleaner");
+                cleanerMethod.setAccessible(true);
+                Object cleaner = cleanerMethod.invoke(buffer);
+                Method cleanMethod = cleaner.getClass().getMethod("clean");
+                cleanMethod.setAccessible(true);
+                cleanMethod.invoke(cleaner);
+            } catch(Exception e) {
+                throw new RuntimeException("can not destroy direct buffer " + buffer, e);
+            }
+        }
     }
 }
