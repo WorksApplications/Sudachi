@@ -17,4 +17,16 @@ public class DictionaryFactory {
     public Dictionary create(String settings) throws IOException {
         return new JapaneseDictionary(settings);
     }
+
+    /**
+     * Creates <tt>Dictionary</tt> by read a dictionary file.
+     *
+     * @param path the base path if "path" is undefined in settings
+     * @param settings settings in JSON string
+     * @return {@link Dictionary}
+     * @throws IOException if reading a file is failed
+     */
+    public Dictionary create(String path, String settings) throws IOException {
+        return new JapaneseDictionary(path, settings);
+    }
 }

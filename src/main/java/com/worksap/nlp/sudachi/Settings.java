@@ -65,16 +65,17 @@ public class Settings {
      *
      * The root level of JSON must be a Object.
      *
+     * @param path the base path if "path" is undefined in {@code json}
      * @param json JSON string
      * @return a structure of settings
      * @throws IllegalArgumentException if the parsing is failed
      */
-    public static Settings parseSettings(String json) {
+    public static Settings parseSettings(String path, String json) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
             if (rootStr instanceof JsonObject) {
                 JsonObject root = (JsonObject)rootStr;
-                String basePath = root.getString("path", null);
+                String basePath = root.getString("path", path);
                 return new Settings(root, basePath);
             } else {
                 throw new IllegalArgumentException("root must be an object");

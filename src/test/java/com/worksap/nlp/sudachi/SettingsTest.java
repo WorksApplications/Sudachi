@@ -12,40 +12,40 @@ public class SettingsTest {
 
     @Test
     public void parseSettings() {
-        assertTrue(Settings.parseSettings("{}") instanceof Settings);
+        assertTrue(Settings.parseSettings(null, "{}") instanceof Settings);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseSettingsStartsWithArray() {
-        assertTrue(Settings.parseSettings("[]") instanceof Settings);
+        assertTrue(Settings.parseSettings(null, "[]") instanceof Settings);
     }
 
     @Test
     public void getString() {
-        Settings settings = Settings.parseSettings("{\"foo\":\"baa\"}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":\"baa\"}");
         assertEquals("baa", settings.getString("foo"));
         assertNull(settings.getString("bazz"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getStringWithError() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         settings.getString("foo");
     }
 
     @Test
     public void getStringWithDefaultValue() {
-        Settings settings = Settings.parseSettings("{\"foo\":\"baa\"}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":\"baa\"}");
         assertEquals("baa", settings.getString("foo", "nyaa"));
         assertEquals("nyaa", settings.getString("bazz", "nyaa"));
 
-        settings = Settings.parseSettings("{\"foo\":123}");
+        settings = Settings.parseSettings(null, "{\"foo\":123}");
         assertEquals("nyaa", settings.getString("foo", "nyaa"));
     }
 
     @Test
     public void getStringList() {
-        Settings settings = Settings.parseSettings("{\"foo\":[\"baa\",\"bazz\"]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getStringList("foo"),
                    allOf(hasItem("baa"), hasItem("bazz")));
         assertTrue(settings.getStringList("baa").isEmpty());
@@ -53,26 +53,26 @@ public class SettingsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getStringListWithError() {
-        Settings settings = Settings.parseSettings("{\"baa\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"baa\":123}");
         settings.getStringList("baa");
     }
 
     @Test
     public void getInt() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         assertEquals(123, settings.getInt("foo"));
         assertEquals(0, settings.getInt("baa"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getIntWithError() {
-        Settings settings = Settings.parseSettings("{\"foo\":\"baa\"}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":\"baa\"}");
         settings.getInt("foo");
     }
 
     @Test
     public void getIntList() {
-        Settings settings = Settings.parseSettings("{\"foo\":[123,456]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[123,456]}");
         assertThat(settings.getIntList("foo"),
                    allOf(hasItem(123), hasItem(456)));
         assertTrue(settings.getIntList("baa").isEmpty());
@@ -80,13 +80,13 @@ public class SettingsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getIntListWithError() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         settings.getIntList("foo");
     }
 
     @Test
     public void getIntListList() {
-        Settings settings = Settings.parseSettings("{\"foo\":[[123],[456, 789]]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[[123],[456, 789]]}");
         List<List<Integer>> list = settings.getIntListList("foo");
         assertEquals(2, list.size());
         assertThat(list.get(0), hasItem(123));
@@ -96,43 +96,62 @@ public class SettingsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getIntListListWithError() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         settings.getIntListList("foo");
     }
 
     @Test
     public void getPath() {
-        Settings settings = Settings.parseSettings("{\"foo\":\"baa\"}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":\"baa\"}");
         assertEquals("baa", settings.getPath("foo"));
         assertNull(settings.getPath("bazz"));
 
-        settings = Settings.parseSettings("{\"path\":\"bazz\",\"foo\":\"baa\"}");
+        settings = Settings.parseSettings(null, "{\"path\":\"bazz\",\"foo\":\"baa\"}");
+        assertEquals(Paths.get("bazz", "baa").toString(),
+                     settings.getPath("foo"));
+
+        settings = Settings.parseSettings("maa", "{\"foo\":\"baa\"}");
+        assertEquals(Paths.get("maa", "baa").toString(),
+                     settings.getPath("foo"));
+
+        settings = Settings.parseSettings("maa", "{\"path\":\"bazz\",\"foo\":\"baa\"}");
         assertEquals(Paths.get("bazz", "baa").toString(),
                      settings.getPath("foo"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPathWithError() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         settings.getPath("foo");
     }
 
     @Test
     public void getPathList() {
-        Settings settings = Settings.parseSettings("{\"foo\":[\"baa\",\"bazz\"]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getPathList("foo"),
                    allOf(hasItem("baa"), hasItem("bazz")));
         assertTrue(settings.getPathList("baa").isEmpty());
 
-        settings = Settings.parseSettings("{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}");
+        settings = Settings.parseSettings(null, "{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getPathList("foo"),
                    allOf(hasItem(Paths.get("bazz", "baa").toString()),
                          hasItem(Paths.get("bazz", "bazz").toString())));
+
+        settings = Settings.parseSettings("maa", "{\"foo\":[\"baa\",\"bazz\"]}");
+        assertThat(settings.getPathList("foo"),
+                   allOf(hasItem(Paths.get("maa", "baa").toString()),
+                         hasItem(Paths.get("maa", "bazz").toString())));
+
+        settings = Settings.parseSettings("maa", "{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}");
+        assertThat(settings.getPathList("foo"),
+                   allOf(hasItem(Paths.get("bazz", "baa").toString()),
+                         hasItem(Paths.get("bazz", "bazz").toString())));
+
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPathListWithError() {
-        Settings settings = Settings.parseSettings("{\"baa\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"baa\":123}");
         settings.getPathList("baa");
     }
 
@@ -141,7 +160,7 @@ public class SettingsTest {
 
     @Test
     public void getPluginList() {
-        Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"baa\":\"bazz\"}]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"baa\":\"bazz\"}]}");
         List<Plugin> list = settings.getPluginList("foo");
         assertEquals(1, list.size());
         assertThat(list.get(0), instanceOf(Foo.class));
@@ -152,35 +171,35 @@ public class SettingsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutList() {
-        Settings settings = Settings.parseSettings("{\"foo\":123}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
         @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutClass() {
-        Settings settings = Settings.parseSettings("{\"foo\":[{}]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[{}]}");
         @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotStringClass() {
-        Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":123}]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":123}]}");
         @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotInitializableClass() {
-        Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":\"bazz\"}]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"bazz\"}]}");
         @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotPluginClass() {
-        Settings settings = Settings.parseSettings("{\"foo\":[{\"class\":\"java.lang.String\"}]}");
+        Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"java.lang.String\"}]}");
         @SuppressWarnings("unused")
         List<Plugin> list = settings.getPluginList("foo");
     }
