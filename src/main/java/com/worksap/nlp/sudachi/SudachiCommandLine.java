@@ -27,7 +27,7 @@ public class SudachiCommandLine {
     }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
-                    InputStream input, PrintStream output)
+                    InputStream input, PrintStream output, boolean printAll)
         throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
@@ -43,7 +43,18 @@ public class SudachiCommandLine {
                     output.print("\t");
                     output.print(String.join(",", m.partOfSpeech()));
                     output.print("\t");
-                    output.println(m.normalizedForm());
+                    output.print(m.normalizedForm());
+                    if (printAll) {
+                        output.print("\t");
+                        output.print(m.dictionaryForm());
+                        output.print("\t");
+                        output.print(m.readingForm());
+                        if (m.isOOV()) {
+                            output.print("\t");
+                            output.print("(OOV)");
+                        }
+                    }
+                    output.println();
                 }
                 output.println("EOS");
             }
@@ -59,6 +70,7 @@ public class SudachiCommandLine {
      * <dt>{@code -r file}</dt><dd>the settings file in JSON format</dd>
      * <dt>{@code -m {A|B|C}}</dt><dd>the mode of splitting</dd>
      * <dt>{@code -o file}</dt><dd>the output file</dd>
+     * <dt>{@code -a}</dt><dd>print all of the fields</dd>
      * <dt>{@code -d}</dt><dd>print the debug informations</dd>
      * <dt>{@code -h}</dt><dd>show the usage</dd>
      * </dl>
@@ -77,6 +89,7 @@ public class SudachiCommandLine {
         String settings = null;
         PrintStream output = System.out;
         boolean isEnableDump = false;
+        boolean printAll = false;
 
         int i = 0;
         for (i = 0; i < args.length; i++) {
@@ -98,6 +111,8 @@ public class SudachiCommandLine {
                 }
             } else if (args[i].equals("-o") && i + 1 < args.length) {
                 output = new PrintStream(args[++i]);
+            } else if (args[i].equals("-a")) {
+                printAll = true;
             } else if (args[i].equals("-d")) {
                 isEnableDump = true;
             } else if (args[i].equals("-h")) {
@@ -105,6 +120,7 @@ public class SudachiCommandLine {
                 System.err.println("\t-r file\tread settings from file");
                 System.err.println("\t-m mode\tmode of splitting");
                 System.err.println("\t-o file\toutput to file");
+                System.err.println("\t-a\tprint all fields");
                 System.err.println("\t-d\tdebug mode");
                 return;
             } else {
@@ -129,11 +145,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for ( ; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output);
+                        run(tokenizer, mode, input, output, printAll);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output);
+                run(tokenizer, mode, System.in, output, printAll);
             }
         }
         output.close();
