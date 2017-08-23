@@ -17,6 +17,8 @@ class JapaneseTokenizer implements Tokenizer {
     List<PathRewritePlugin> pathRewritePlugins;
     PrintStream dumpOutput;
 
+    LatticeImpl lattice;
+
     JapaneseTokenizer(Grammar grammar, Lexicon lexicon,
                       List<InputTextPlugin> inputTextPlugins,
                       List<OovProviderPlugin> oovProviderPlugins,
@@ -27,6 +29,7 @@ class JapaneseTokenizer implements Tokenizer {
         this.inputTextPlugins = inputTextPlugins;
         this.oovProviderPlugins = oovProviderPlugins;
         this.pathRewritePlugins = pathRewritePlugins;
+        this.lattice = new LatticeImpl(grammar);
     }
 
     @Override
@@ -42,7 +45,7 @@ class JapaneseTokenizer implements Tokenizer {
         UTF8InputText input = builder.build();
         byte[] bytes = input.getByteText();
 
-        LatticeImpl lattice = new LatticeImpl(bytes.length, grammar);
+        lattice.resize(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
             if (!input.isCharAlignment(i) || !lattice.hasPreviousNode(i)) {
                 continue;
@@ -79,6 +82,7 @@ class JapaneseTokenizer implements Tokenizer {
             lattice.dump(dumpOutput);
         }
         List<LatticeNode> path = lattice.getBestPath();
+        lattice.clear();
 
         path.remove(path.size() - 1); // remove EOS
         if (dumpOutput != null) {

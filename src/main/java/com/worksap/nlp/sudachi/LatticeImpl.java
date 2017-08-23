@@ -10,31 +10,52 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class LatticeImpl implements Lattice {
 
-    private List<List<LatticeNodeImpl>> endLists;
+    private ArrayList<List<LatticeNodeImpl>> endLists;
     private int size;
+    private int capacity;
     private LatticeNodeImpl eosNode;
 
     private Grammar grammar;
+    private short[] eosParams;
 
-    LatticeImpl(int size, Grammar grammar) {
-        this.size = size;
+    LatticeImpl(Grammar grammar) {
         this.grammar = grammar;
 
+        eosParams = grammar.getEOSParameter();
+
+        endLists = new ArrayList<>();
         LatticeNodeImpl bosNode = new LatticeNodeImpl();
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
         bosNode.isConnectedToBOS = true;
+        endLists.add(Collections.singletonList(bosNode));
+    }
+
+    void resize(int size) {
+        if (size > capacity) {
+            expand(size);
+        }
+        this.size = size;
 
         eosNode = new LatticeNodeImpl();
-        short[] eosParams = grammar.getEOSParameter();
         eosNode.setParameter(eosParams[0], eosParams[1], eosParams[2]);
         eosNode.begin = eosNode.end = size;
+    }
 
-        endLists = new ArrayList<List<LatticeNodeImpl>>(size + 1);
-        endLists.add(Collections.singletonList(bosNode));
+    void clear() {
         for (int i = 1; i < size + 1; i++) {
+            endLists.get(i).clear();
+        }
+        size = 0;
+        eosNode = null;
+    }
+
+    void expand(int newSize) {
+        endLists.ensureCapacity(newSize + 1);
+        for (int i = size + 1; i < newSize + 1; i++) {
             endLists.add(new ArrayList<LatticeNodeImpl>());
         }
+        capacity = newSize;
     }
 
     @Override
