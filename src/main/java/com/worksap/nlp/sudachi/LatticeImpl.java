@@ -10,9 +10,9 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class LatticeImpl implements Lattice {
 
-    private List<List<LatticeNodeImpl>> beginLists;
     private List<List<LatticeNodeImpl>> endLists;
     private int size;
+    private LatticeNodeImpl eosNode;
 
     private Grammar grammar;
 
@@ -25,16 +25,10 @@ class LatticeImpl implements Lattice {
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
         bosNode.isConnectedToBOS = true;
 
-        LatticeNodeImpl eosNode = new LatticeNodeImpl();
+        eosNode = new LatticeNodeImpl();
         short[] eosParams = grammar.getEOSParameter();
         eosNode.setParameter(eosParams[0], eosParams[1], eosParams[2]);
         eosNode.begin = eosNode.end = size;
-
-        beginLists = new ArrayList<List<LatticeNodeImpl>>(size + 1);
-        for (int i = 0; i < size; i++) {
-            beginLists.add(new ArrayList<LatticeNodeImpl>());
-        }
-        beginLists.add(Collections.singletonList(eosNode));
 
         endLists = new ArrayList<List<LatticeNodeImpl>>(size + 1);
         endLists.add(Collections.singletonList(bosNode));
@@ -44,34 +38,29 @@ class LatticeImpl implements Lattice {
     }
 
     @Override
-    public List<LatticeNodeImpl> getNodesWithBegin(int begin) {
-        return beginLists.get(begin);
-    }
-
-    @Override
     public List<LatticeNodeImpl> getNodesWithEnd(int end) {
         return endLists.get(end);
     }
 
     @Override
     public List<LatticeNodeImpl> getNodes(int begin, int end) {
-        return beginLists.get(begin).stream()
-            .filter(n -> ((LatticeNodeImpl)n).end == end)
+        return endLists.get(end).stream()
+            .filter(n -> ((LatticeNodeImpl)n).begin == begin)
             .collect(Collectors.toList());
     }
 
     @Override
     public void insert(int begin, int end, LatticeNode node) {
         LatticeNodeImpl n = (LatticeNodeImpl)node;
-        beginLists.get(begin).add(n);
         endLists.get(end).add(n);
         n.begin = begin;
         n.end = end;
+
+        connectNode(n);
     }
 
     @Override
     public void remove(int begin, int end, LatticeNode node) {
-        beginLists.get(begin).remove(node);
         endLists.get(end).remove(node);
     }
 
@@ -84,13 +73,35 @@ class LatticeImpl implements Lattice {
         return !endLists.get(index).isEmpty();
     }
 
+    void connectNode(LatticeNodeImpl rNode) {
+        int begin = rNode.begin;
+        rNode.totalCost = Integer.MAX_VALUE;
+        for (LatticeNodeImpl lNode : endLists.get(begin)) {
+            if (!lNode.isConnectedToBOS) {
+                continue;
+            }
+            short connectCost
+                = grammar.getConnectCost(lNode.rightId, rNode.leftId);
+            if (connectCost == Grammar.INHIBITED_CONNECTION) {
+                continue; // this connection is not allowed
+            }
+            int cost = lNode.totalCost + connectCost;
+            if (cost < rNode.totalCost) {
+                rNode.totalCost = cost;
+                rNode.bestPreviousNode = lNode;
+            }
+        }
+        rNode.isConnectedToBOS = !(rNode.bestPreviousNode == null);
+        rNode.totalCost += rNode.cost;
+    }
+
     List<LatticeNode> getBestPath() {
-        viterbi();
-        if (!beginLists.get(size).get(0).isConnectedToBOS) { // EOS node
+        connectNode(eosNode);
+        if (!eosNode.isConnectedToBOS) { // EOS node
             throw new IllegalStateException("EOS isn't connected to BOS");
         }
         ArrayList<LatticeNode> result = new ArrayList<>();
-        for (LatticeNodeImpl node = beginLists.get(size).get(0);
+        for (LatticeNodeImpl node = eosNode;
              node != endLists.get(0).get(0);
              node = node.bestPreviousNode) {
             result.add(node);
@@ -101,42 +112,17 @@ class LatticeImpl implements Lattice {
 
     void dump(PrintStream output) {
         int index = 0;
-        for (int i = 0; i < size + 1; i++) {
-            for (LatticeNodeImpl rNode : beginLists.get(i)) {
+        for (int i = size; i >= 0; i--) {
+            for (LatticeNodeImpl rNode : endLists.get(i)) {
                 output.print(String.format("%d: %s: ", index,
                                            rNode.toString()));
                 index++;
-                for (LatticeNodeImpl lNode : endLists.get(i)) {
+                for (LatticeNodeImpl lNode : endLists.get(rNode.begin)) {
                     int cost = lNode.totalCost
                         + grammar.getConnectCost(lNode.rightId, rNode.leftId);
                     output.print(String.format("%d ", cost));
                 }
                 output.println();
-            }
-        }
-    }
-
-    private void viterbi() {
-        for (int i = 0; i < size + 1; i++) {
-            for (LatticeNodeImpl rNode : beginLists.get(i)) {
-                rNode.totalCost = Integer.MAX_VALUE;
-                for (LatticeNodeImpl lNode : endLists.get(i)) {
-                    if (!lNode.isConnectedToBOS) {
-                        continue;
-                    }
-                    short connectCost
-                        = grammar.getConnectCost(lNode.rightId, rNode.leftId);
-                    if (connectCost == Grammar.INHIBITED_CONNECTION) {
-                        continue; // this connection is not allowed
-                    }
-                    int cost = lNode.totalCost + connectCost;
-                    if (cost < rNode.totalCost) {
-                        rNode.totalCost = cost;
-                        rNode.bestPreviousNode = lNode;
-                    }
-                }
-                rNode.isConnectedToBOS = !(rNode.bestPreviousNode == null);
-                rNode.totalCost += rNode.cost;
             }
         }
     }

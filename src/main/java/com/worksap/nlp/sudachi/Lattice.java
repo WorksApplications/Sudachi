@@ -13,15 +13,6 @@ import java.util.List;
 public interface Lattice {
 
     /**
-     * Returns the nodes which starts at the specified index.
-     *
-     * @param begin the index to the first position in the input text
-     * @return the list of nodes which start at {@code begin}
-     *         or an empty list if there is no node
-     */
-    public List<? extends LatticeNode> getNodesWithBegin(int begin);
-
-    /**
      * Returns the nodes which ends at the specified index.
      *
      * <p>The last position of the nodes is {@code end - 1}.
