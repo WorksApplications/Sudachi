@@ -12,7 +12,7 @@ import org.junit.*;
 
 public class DoubleArrayLexiconTest {
 
-    static final int GRAMMAR_SIZE = 452;
+    static final int GRAMMAR_SIZE = 410;
 
     DoubleArrayLexicon lexicon;
 

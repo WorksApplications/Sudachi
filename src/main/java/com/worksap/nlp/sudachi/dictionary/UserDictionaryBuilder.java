@@ -63,6 +63,13 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
                                    + reader.getLineNumber());
                 continue;
             }
+            if (cols[0].length() > MAX_STRING_LENGTH
+                || cols[4].length() > MAX_STRING_LENGTH
+                || cols[11].length() > MAX_STRING_LENGTH
+                || cols[12].length() > MAX_STRING_LENGTH) {
+                System.err.println("Error: string is too long at line" + reader.getLineNumber());
+            }
+
             if (!cols[1].equals("-1")) {
                 // headword
                 byte[] key = cols[0].getBytes(StandardCharsets.UTF_8);

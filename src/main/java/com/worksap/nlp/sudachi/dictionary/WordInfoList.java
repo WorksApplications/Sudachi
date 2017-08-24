@@ -16,21 +16,27 @@ class WordInfoList {
         int index = wordIdToOffset(wordId);
         
         String surface = bufferToString(index);
-        index += 2 + 2 * surface.length();
-        short headwordLength = bytes.getShort(index);
-        index += 2;
+        index += 1 + 2 * surface.length();
+        short headwordLength = (short)Byte.toUnsignedInt(bytes.get(index));
+        index += 1;
         short posId = bytes.getShort(index);
         index += 2;
         String normalizedForm = bufferToString(index);
-        index += 2 + 2 * normalizedForm.length();
+        index += 1 + 2 * normalizedForm.length();
+        if (normalizedForm.isEmpty()) {
+            normalizedForm = surface;
+        }
         int dictionaryFormWordId = bytes.getInt(index);
         index += 4;
         String readingForm = bufferToString(index);
-        index += 2 + 2 * readingForm.length();
+        index += 1 + 2 * readingForm.length();
+        if (readingForm.isEmpty()) {
+            readingForm = surface;
+        }
         int[] aUnitSplit = bufferToIntArray(index);
-        index += 2 + 4 * aUnitSplit.length;
+        index += 1 + 4 * aUnitSplit.length;
         int[] bUnitSplit = bufferToIntArray(index);
-        index += 2 + 4 * bUnitSplit.length;
+        index += 1 + 4 * bUnitSplit.length;
         int[] wordStructure = bufferToIntArray(index);
 
         String dictionaryForm = surface;
@@ -49,19 +55,19 @@ class WordInfoList {
     }
 
     private String bufferToString(int offset) {
-        short length = bytes.getShort(offset);
+        int length = Byte.toUnsignedInt(bytes.get(offset++));
         char[] str = new char[length];
         for (int i = 0; i < length; i++) {
-            str[i] = bytes.getChar(offset + 2 + 2 * i);
+            str[i] = bytes.getChar(offset + 2 * i);
         }
         return new String(str);
     }
 
     private int[] bufferToIntArray(int offset) {
-        short length = bytes.getShort(offset);
+        int length = Byte.toUnsignedInt(bytes.get(offset++));
         int[] array = new int[length];
         for (int i = 0; i < length; i++) {
-            array[i] = bytes.getInt(offset + 2 + 4 * i);
+            array[i] = bytes.getInt(offset + 4 * i);
         }
         return array;
     }

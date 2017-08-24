@@ -9,20 +9,23 @@ import org.junit.*;
 
 public class GrammarImplTest {
 
-    static final int storageSize = 2 * (56 + 11);
+    static final int allocateSize = 4096;
 
     ByteBuffer storage;
     GrammarImpl grammar;
+    int storageSize;
 
     @Before
     public void setUp() {
-        storage = ByteBuffer.allocate(4 + storageSize);
+        storage = ByteBuffer.allocate(allocateSize);
         storage.putInt(0);      // dummy
         
-        buildPartOfSpeech();    // 2 * 56 bytes
-        buildConnectTable();    // 2 * 11 bytes
+        int base = storage.position();
+        buildPartOfSpeech();
+        buildConnectTable();
+        storageSize = storage.position() - base;
         storage.rewind();
-        grammar = new GrammarImpl(storage, 4);
+        grammar = new GrammarImpl(storage, base);
     }
 
     @Test
@@ -78,11 +81,6 @@ public class GrammarImplTest {
     }
 
     @Test
-    public void getStorageSize() {
-        assertEquals(2 * (56 + 11), grammar.storageSize());
-    }
-
-    @Test
     public void readFromFile() throws IOException {
         ByteBuffer bytes = DictionaryReader.read("/system.dic");
         grammar = new GrammarImpl(bytes, 0);
@@ -94,13 +92,13 @@ public class GrammarImplTest {
         assertEquals(126, grammar.getConnectCost((short)3, (short)6));
         assertEquals(1180, grammar.getConnectCost((short)7, (short)2));
         assertEquals(3319, grammar.getConnectCost((short)5, (short)7));
-        assertEquals(452, grammar.storageSize());
+        assertEquals(410, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {
         storage.putShort((short)3); // # of part of speech
 
-        storage.putShort((short)7);
+        storage.put((byte)7);
         storage.putChar('B');
         storage.putChar('O');
         storage.putChar('S');
@@ -108,50 +106,50 @@ public class GrammarImplTest {
         storage.putChar('E');
         storage.putChar('O');
         storage.putChar('S');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
 
-        storage.putShort((short)2);
+        storage.put((byte)2);
         storage.putChar('名');
         storage.putChar('詞');
-        storage.putShort((short)2);
+        storage.put((byte)2);
         storage.putChar('一');
         storage.putChar('般');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
 
 
-        storage.putShort((short)2);
+        storage.put((byte)2);
         storage.putChar('動');
         storage.putChar('詞');
-        storage.putShort((short)2);
+        storage.put((byte)2);
         storage.putChar('一');
         storage.putChar('般');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)1);
+        storage.put((byte)1);
         storage.putChar('*');
-        storage.putShort((short)5);
+        storage.put((byte)5);
         storage.putChar('五');
         storage.putChar('段');
         storage.putChar('-');
         storage.putChar('サ');
         storage.putChar('行');
-        storage.putShort((short)6);
+        storage.put((byte)6);
         storage.putChar('終');
         storage.putChar('止');
         storage.putChar('形');

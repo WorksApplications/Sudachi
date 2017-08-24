@@ -24,6 +24,7 @@ import com.worksap.nlp.dartsclone.DoubleArray;
  */
 public class DictionaryBuilder {
 
+    static final int MAX_STRING_LENGTH = 255;
     static final int NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
@@ -84,6 +85,7 @@ public class DictionaryBuilder {
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
              LineNumberReader reader = new LineNumberReader(isr)) {
 
+            System.err.print("reading the source file...");
             int wordId = 0;
             for (; ; wordId++) {
                 String line = reader.readLine();
@@ -99,6 +101,13 @@ public class DictionaryBuilder {
                 }
                 for (int i = 0; i < cols.length; i++) {
                     cols[i] = decode(cols[i]);
+                }
+
+                if (cols[0].length() > MAX_STRING_LENGTH
+                    || cols[4].length() > MAX_STRING_LENGTH
+                    || cols[11].length() > MAX_STRING_LENGTH
+                    || cols[12].length() > MAX_STRING_LENGTH) {
+                    System.err.println("Error: string is too long at line" + lineno);
                 }
 
                 if (cols[0].length() == 0) {
@@ -143,10 +152,14 @@ public class DictionaryBuilder {
             }
             throw e;
         }
+        System.err.println(String.format(" %,d words", wordSize));
     }
 
     void writeGrammar(FileInputStream matrixInput,
                       FileChannel output) throws IOException {
+
+        System.err.print("writing the POS table...");
+
         List<String> posList = posTable.getList();
         buffer.putShort((short)posList.size());
 
@@ -157,8 +170,8 @@ public class DictionaryBuilder {
         }
         buffer.flip();
         output.write(buffer);
+        System.err.println(String.format(" %,d bytes", buffer.limit()));
         buffer.clear();
-
 
         LineNumberReader reader
             = new LineNumberReader(new InputStreamReader(matrixInput));
@@ -166,6 +179,8 @@ public class DictionaryBuilder {
         if (header == null) {
             throw new RuntimeException("invalid format at line " + reader.getLineNumber());
         }
+
+        System.err.print("writing the connection matrix...");
 
         String[] lr = header.split("\\s+");
         short leftSize = Short.parseShort(lr[0]);
@@ -200,6 +215,7 @@ public class DictionaryBuilder {
             matrix.putShort(2 * (left + leftSize * right), cost);
         }
         output.write(matrix);
+        System.err.println(String.format(" %,d bytes", matrix.limit() + 4));
         matrix = null;
     }
 
@@ -219,14 +235,18 @@ public class DictionaryBuilder {
             values[i] = wordIdTable.position();
             i++;
             List<Integer> wordIds = trieKeys.get(key);
-            wordIdTable.putShort((short)wordIds.size());
+            wordIdTable.put((byte)wordIds.size());
             for (int wordId : wordIds) {
                 wordIdTable.putInt(wordId);
             }
         }
 
-        trie.build(keys, values, null);
+        System.err.print("building the trie");
+        trie.build(keys, values,
+                   (n, s) -> { if (n % (s / 10) == 0) System.err.print(".");});
+        System.err.println("done");
 
+        System.err.print("writing the trie...");
         buffer.clear();
         buffer.putInt(trie.size());
         buffer.flip();
@@ -234,8 +254,10 @@ public class DictionaryBuilder {
         buffer.clear();
 
         output.write(trie.byteArray());
+        System.err.println(String.format(" %,d bytes", trie.size() * 4 + 4));
         trie = null;
 
+        System.err.print("writing the word-ID table...");
         buffer.putInt(wordIdTable.position());
         buffer.flip();
         output.write(buffer);
@@ -243,8 +265,10 @@ public class DictionaryBuilder {
 
         wordIdTable.flip();
         output.write(wordIdTable);
+        System.err.println(String.format(" %,d bytes", wordIdTable.position() + 4));
         wordIdTable = null;
 
+        System.err.print("writing the word parameters...");
         buffer.putInt(params.size());
         for(Short[] param : params) {
             buffer.putShort(param[0]);
@@ -254,7 +278,7 @@ public class DictionaryBuilder {
             output.write(buffer);
             buffer.clear();
         }
-
+        System.err.println(String.format(" %,d bytes", params.size() * 6 + 4));
 
         writeWordInfo(output);
     }
@@ -266,15 +290,25 @@ public class DictionaryBuilder {
         ByteBuffer offsets = ByteBuffer.allocate(4 * wordInfos.size());
         offsets.order(ByteOrder.LITTLE_ENDIAN);
 
+        System.err.print("writing the wordInfos...");
+        long base = output.position();
         for (WordInfo wi : wordInfos) {
             offsets.putInt((int)output.position());
 
             writeString(wi.getSurface());
-            buffer.putShort(wi.getLength());
+            buffer.put((byte)wi.getLength());
             buffer.putShort(wi.getPOSId());
-            writeString(wi.getNormalizedForm());
+            if (wi.getNormalizedForm().equals(wi.getSurface())) {
+                writeString("");
+            } else {
+                writeString(wi.getNormalizedForm());
+            }
             buffer.putInt(wi.getDictionaryFormWordId());
-            writeString(wi.getReadingForm());
+            if (wi.getReadingForm().equals(wi.getSurface())) {
+                writeString("");
+            } else {
+                writeString(wi.getReadingForm());
+            }
             writeIntArray(wi.getAunitSplit());
             writeIntArray(wi.getBunitSplit());
             writeIntArray(wi.getWordStructure());
@@ -282,10 +316,13 @@ public class DictionaryBuilder {
             output.write(buffer);
             buffer.clear();
         }
+        System.err.println(String.format(" %,d bytes", output.position() - base));
 
+        System.err.print("writing wordInfo offsets...");
         output.position(mark);
         offsets.flip();
         output.write(offsets);
+        System.err.println(String.format(" %,d bytes", offsets.position() + 4));
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
@@ -321,14 +358,14 @@ public class DictionaryBuilder {
     }
 
     void writeString(String text) {
-        buffer.putShort((short)text.length());
+        buffer.put((byte)text.length());
         for (int i = 0; i < text.length(); i++) {
             buffer.putChar(text.charAt(i));
         }
     }
 
     void writeIntArray(int[] array) {
-        buffer.putShort((short)array.length);
+        buffer.put((byte)array.length);
         for (int i : array) {
             buffer.putInt(i);
         }

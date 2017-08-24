@@ -17,8 +17,7 @@ class WordIdTable {
     int storageSize() { return 4 + size; }
 
     Integer[] get(int index) {
-        int length = bytes.getShort(offset + index);
-        index += 2;
+        int length = Byte.toUnsignedInt(bytes.get(offset + index++));
         Integer[] result = new Integer[length];
         for (int i = 0; i < length; i++) {
             result[i] = bytes.getInt(offset + index);
