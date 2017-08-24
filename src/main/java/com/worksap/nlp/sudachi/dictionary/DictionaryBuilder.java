@@ -96,8 +96,7 @@ public class DictionaryBuilder {
 
                 String[] cols = line.split(",");
                 if (cols.length != NUMBER_OF_COLUMNS) {
-                    System.err.println("Error: invalid format at line " + lineno);
-                    continue;
+                    throw new IllegalArgumentException("invalid format");
                 }
                 for (int i = 0; i < cols.length; i++) {
                     cols[i] = decode(cols[i]);
@@ -107,12 +106,11 @@ public class DictionaryBuilder {
                     || cols[4].length() > MAX_LENGTH
                     || cols[11].length() > MAX_LENGTH
                     || cols[12].length() > MAX_LENGTH) {
-                    System.err.println("Error: string is too long at line" + lineno);
+                    throw new IllegalArgumentException("string is too long");
                 }
 
                 if (cols[0].length() == 0) {
-                    System.err.println("Error: headword is empty at line " + lineno);
-                    continue;
+                    throw new IllegalArgumentException("headword is empty");
                 }
                 if (!cols[1].equals("-1")) {
                     // headword
@@ -130,8 +128,7 @@ public class DictionaryBuilder {
                 short posId = getPosId(cols[5], cols[6], cols[7],
                                        cols[8], cols[9], cols[10]);
                 if (posId < 0) {
-                    System.err.println("Error: Part of speech is wrong at line  "
-                                       + lineno);
+                    throw new IllegalArgumentException("invalid part of speach");
                 }
 
                 WordInfo info
@@ -151,7 +148,7 @@ public class DictionaryBuilder {
             wordSize = wordId;
         } catch (Exception e) {
             if (lineno > 0) {
-                System.err.println("Error: at line " + lineno);
+                System.err.println("Error: " + e.getMessage() + " at line " + lineno);
             }
             throw e;
         }
