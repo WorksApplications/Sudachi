@@ -24,7 +24,7 @@ import com.worksap.nlp.dartsclone.DoubleArray;
  */
 public class DictionaryBuilder {
 
-    static final int MAX_STRING_LENGTH = 255;
+    static final int MAX_LENGTH = 255;
     static final int NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
@@ -103,10 +103,10 @@ public class DictionaryBuilder {
                     cols[i] = decode(cols[i]);
                 }
 
-                if (cols[0].length() > MAX_STRING_LENGTH
-                    || cols[4].length() > MAX_STRING_LENGTH
-                    || cols[11].length() > MAX_STRING_LENGTH
-                    || cols[12].length() > MAX_STRING_LENGTH) {
+                if (cols[0].length() > MAX_LENGTH
+                    || cols[4].length() > MAX_LENGTH
+                    || cols[11].length() > MAX_LENGTH
+                    || cols[12].length() > MAX_LENGTH) {
                     System.err.println("Error: string is too long at line" + lineno);
                 }
 
@@ -127,9 +127,12 @@ public class DictionaryBuilder {
                                          Short.parseShort(cols[2]),
                                          Short.parseShort(cols[3]) });
 
-                short posId = posTable.getId(String.join(",",
-                                                         cols[5], cols[6], cols[7],
-                                                         cols[8], cols[9], cols[10]));
+                short posId = getPosId(cols[5], cols[6], cols[7],
+                                       cols[8], cols[9], cols[10]);
+                if (posId < 0) {
+                    System.err.println("Error: Part of speech is wrong at line  "
+                                       + lineno);
+                }
 
                 WordInfo info
                     = new WordInfo(cols[4], // headword
@@ -153,6 +156,10 @@ public class DictionaryBuilder {
             throw e;
         }
         System.err.println(String.format(" %,d words", wordSize));
+    }
+
+    short getPosId(String... posStrings) {
+        return posTable.getId(String.join(",", posStrings));
     }
 
     void writeGrammar(FileInputStream matrixInput,
@@ -243,7 +250,7 @@ public class DictionaryBuilder {
 
         System.err.print("building the trie");
         trie.build(keys, values,
-                   (n, s) -> { if (n % (s / 10) == 0) System.err.print(".");});
+                   (n, s) -> { if (n % ((s / 10) + 1) == 0) System.err.print(".");});
         System.err.println("done");
 
         System.err.print("writing the trie...");
@@ -350,6 +357,9 @@ public class DictionaryBuilder {
             return new int[0];
         }
         String[] ids = info.split("/");
+        if (ids.length > MAX_LENGTH) {
+            throw new IllegalArgumentException("too many units");
+        }
         int[] ret = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = Integer.parseInt(ids[i]);
