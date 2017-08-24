@@ -29,14 +29,14 @@ public class GrammarImpl implements Grammar {
         this.bytes = bytes;
         this.connectTableBytes = bytes;
         isCopiedConnectTable = false;
-        short posSize = bytes.getShort(offset);
+        int posSize = bytes.getShort(offset);
         offset += 2;
         posList = new ArrayList<List<String>>(posSize);
         for (int i = 0; i < posSize; i++) {
             ArrayList<String> pos = new ArrayList<String>(POS_DEPTH);
             for (int j = 0; j < POS_DEPTH; j++) {
                 pos.add(bufferToString(offset));
-                offset += 2 + 2 * pos.get(j).length();
+                offset += 1 + 2 * pos.get(j).length();
             }
             posList.add(Collections.unmodifiableList(pos));
         }
@@ -100,10 +100,10 @@ public class GrammarImpl implements Grammar {
     }
 
     private String bufferToString(int offset) {
-        short length = bytes.getShort(offset);
+        int length = Byte.toUnsignedInt(bytes.get(offset++));
         char[] str = new char[length];
         for (int i = 0; i < length; i++) {
-            str[i] = bytes.getChar(offset + 2 + 2 * i);
+            str[i] = bytes.getChar(offset + 2 * i);
         }
         return new String(str);
     }
