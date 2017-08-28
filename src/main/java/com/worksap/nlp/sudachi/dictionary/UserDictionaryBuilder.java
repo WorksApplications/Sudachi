@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,14 +66,15 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
      * <li>the path of the system dictionary</li>
      * <li>the path of the source file in the CSV format</li>
      * <li>the path of the output file</li>
+     * <li>(optional) the description which is embedded in the dictionary</li>
      * </ol>
      * @param args the input filename, the connection matrix file,
      * and the output filename
      * @throws IOException if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
-        if (args.length != 3) {
-            System.err.println("usage: UserDictionaryBuilder system.dic input.csv output.dic");
+        if (args.length < 3) {
+            System.err.println("usage: UserDictionaryBuilder system.dic input.csv output.dic [description]");
             return;
         }
 
@@ -83,11 +85,24 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
                                   inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
-            grammar = new GrammarImpl(bytes, 0);
+            DictionaryHeader header = new DictionaryHeader(bytes, 0);
+            if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
+                System.err.println("Error: invalid system dictionary: " + args[0]);
+                return;
+            }
+            grammar = new GrammarImpl(bytes, header.storageSize());
         }
+
+        String description = (args.length >= 4) ? args[3] : "";
+        DictionaryHeader header
+            = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION,
+                                   Instant.now().getEpochSecond(),
+                                   description);
 
         try (FileInputStream lexiconInput = new FileInputStream(args[1]);
              FileOutputStream output = new FileOutputStream(args[2])) {
+            output.write(header.toByte());
+
             UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar);
             builder.build(lexiconInput, output);
         }
