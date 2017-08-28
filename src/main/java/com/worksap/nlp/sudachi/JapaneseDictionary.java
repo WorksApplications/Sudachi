@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
+import com.worksap.nlp.sudachi.dictionary.DictionaryHeader;
+import com.worksap.nlp.sudachi.dictionary.DictionaryVersion;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
@@ -94,9 +96,18 @@ class JapaneseDictionary implements Dictionary {
         }
         buffers.add(bytes);
 
-        GrammarImpl grammar = new GrammarImpl(bytes, 0);
+        int offset = 0;
+        DictionaryHeader header = new DictionaryHeader(bytes, offset);
+        if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
+            throw new IllegalArgumentException("invalid system dictionary");
+        }
+        offset += header.storageSize();
+
+        GrammarImpl grammar = new GrammarImpl(bytes, offset);
         this.grammar = grammar;
-        lexicon = new LexiconSet(new DoubleArrayLexicon(bytes, grammar.storageSize()));
+        offset += grammar.storageSize();
+
+        lexicon = new LexiconSet(new DoubleArrayLexicon(bytes, offset));
     }
 
     void readUserDictionary(String filename) throws IOException {
@@ -109,7 +120,15 @@ class JapaneseDictionary implements Dictionary {
         }
         buffers.add(bytes);
 
-        DoubleArrayLexicon userLexicon = new DoubleArrayLexicon(bytes, 0);
+        int offset = 0;
+        DictionaryHeader header = new DictionaryHeader(bytes, offset);
+        if (header.getVersion() != DictionaryVersion.USER_DICT_VERSION) {
+            throw new IllegalArgumentException("invalid user dictionary");
+        }
+        offset += header.storageSize();
+
+        DoubleArrayLexicon userLexicon
+            = new DoubleArrayLexicon(bytes, offset);
         Tokenizer tokenizer
             = new JapaneseTokenizer(grammar, lexicon,
                                     inputTextPlugins, oovProviderPlugins,

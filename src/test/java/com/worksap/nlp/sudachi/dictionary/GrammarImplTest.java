@@ -99,7 +99,9 @@ public class GrammarImplTest {
     @Test
     public void readFromFile() throws IOException {
         ByteBuffer bytes = DictionaryReader.read("/system.dic");
-        grammar = new GrammarImpl(bytes, 0);
+        DictionaryHeader header = new DictionaryHeader(bytes, 0);
+
+        grammar = new GrammarImpl(bytes, header.storageSize());
 
         assertEquals(7, grammar.getPartOfSpeechSize());
 

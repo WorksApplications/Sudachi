@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.List;
@@ -403,20 +404,29 @@ public class DictionaryBuilder {
      * <li>the path of the connection matrix file
      *     in MeCab's matrix.def format</li>
      * <li>the path of the output file</li>
+     * <li>(optional) the description which is embedded in the dictionary</li>
      * </ol>
      * @param args the input filename, the connection matrix file,
      * and the output filename
      * @throws IOException if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
-        if (args.length != 3) {
-            System.err.println("usage: DictionaryBuilder input.csv matrix.def output.dic");
+        if (args.length < 3) {
+            System.err.println("usage: DictionaryBuilder input.csv matrix.def output.dic [description]");
             return;
         }
+
+        String description = (args.length >= 4) ? args[3] : "";
+        DictionaryHeader header
+            = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION,
+                                   Instant.now().getEpochSecond(),
+                                   description);
 
         try (FileInputStream lexiconInput = new FileInputStream(args[0]);
              FileInputStream matrixInput = new FileInputStream(args[1]);
              FileOutputStream output = new FileOutputStream(args[2])) {
+
+            output.write(header.toByte());
 
             DictionaryBuilder builder = new DictionaryBuilder();
             builder.build(lexiconInput, matrixInput, output);

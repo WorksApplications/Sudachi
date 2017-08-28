@@ -35,7 +35,8 @@ public class DoubleArrayLexiconTest {
     @Before
     public void setUp() throws IOException {
         ByteBuffer bytes = DictionaryReader.read("/system.dic");
-        lexicon = new DoubleArrayLexicon(bytes, GRAMMAR_SIZE);
+        DictionaryHeader header = new DictionaryHeader(bytes, 0);
+        lexicon = new DoubleArrayLexicon(bytes, header.storageSize() + GRAMMAR_SIZE);
     }
 
     @Test
