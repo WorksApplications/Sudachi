@@ -146,7 +146,7 @@ Sudachi normalize the following variations.
 |Use multiple user dictionary| Yes     | Yes   | No    |
 |Saving Memory          | Good [3]| Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
-|Spped                  | Good    | Excellent | Good   |
+|Speed                  | Good    | Excellent | Good   |
 
 - [1]: approximation with n-best
 - [2]: with Lucene filters
