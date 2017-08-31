@@ -1,5 +1,168 @@
 # Sudachi
 
+Sudachi is Japanese morphological analyzer. Morphological analysis consists
+mainly of the following tasks.
+
+- Segmentation
+- Part-of-speech tagging
+- Normalization
+
+
+## Features
+
+Sudachi has the following features.
+
+- Multiple-length segmentation
+    + You can change the mode of segmentations
+    + Extract morphemes and named entities at once
+- Large lexicon
+    + Based on UniDic and NEologd
+- Plugins
+    + You can change the behavior of processings
+- Work closely with the synonym dictionary
+    + We will release the sysnonym dictionary at a later date
+
+
+## Use on the command line
+
+    $ java -jar sudachi-XX.jar [-m mode] [-a] [-d] [-o output] [file...]
+
+### Options
+
+- m [A|B|C] specifies the mode of splitting
+- a outputs the dictionary form and the reading form
+- d dump the debug outputs
+- o specifies output file (default: the standard output)
+
+### Examples
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都
+    へ      助詞,格助詞,*,*,*,*     へ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar -a
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト
+    へ      助詞,格助詞,*,*,*,*     へ      へ      エ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
+    東京    名詞,固有名詞,地名,一般,*,*     東京
+    都      名詞,普通名詞,一般,*,*,*        都
+    へ      助詞,格助詞,*,*,*,*     へ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く
+    EOS
+
+
+## How to use the API
+
+You can find details in the Javadoc.
+
+
+## The modes of splitting
+
+Sudachi provides three modes of splitting.
+In A mode, texts are divided into the shortest units equivalent
+to the UniDic short unit. In C mode, it extracts named entities.
+In B mode, into the middle units.
+
+The followings are an examples.
+
+    A：医薬/品/安全/管理/責任/者
+    B：医薬品/安全/管理/責任者
+    C：医薬品安全管理責任者
+
+    A：自転/車/安全/整備/士
+    B：自転車/安全/整備士
+    C：自転車安全整備士
+
+    A：消費/者/安全/調査/委員/会
+    B：消費者/安全/調査/委員会
+    C：消費者安全調査委員会
+
+    A：新/国立/美術/館
+    B：新/国立/美術館
+    C：新国立美術館
+
+In full-text searching, to use A and B can imrove precision and recall.
+
+
+## Plugins
+
+You can use or make plugins which modify the behavior of Sudachi.
+
+|Type of Plugins  | Example                                     |
+|:---------------:|:-------------------------------------------:|
+|Modify the Inputs| Character nomalization                      |
+|Make OOVs        | Considering script styles                   |
+|Connect Words    | Inhibition, Overwrite costs                 |
+|Modify the Path  | Fix  Person names, Equalization of splitting|
+
+### Prepared Plugins
+
+We prepared following plugins.
+
+|Type of Plugins  | Plugin                   |                                |
+|:---------------:|:------------------------:|:------------------------------:|
+|Modify the Inputs| character nomalization   |Full/half-width, Cases, Variants|
+|                 | normalization of prolong symbols*| Normalize "~", "ー"s   |
+|Make OOVs        | Make one character OOVs  | Use as the fallback            |
+|                 | MeCab compatible OOVs    |                                |
+|Connect Words    | Inhibition               | Specified by part-of-speech    |
+|Modify the Path  | Join Katakata OOVs       |                                |
+|                 | Join numerics            |                                |
+|                 | Equalization of splitting*| Smooth of OOVs and not OOVs   |
+|                 | Normalize numerics*  | Normalize Kanji numerics and scales|
+|                 | Estimate person names*   |                                |
+
+\* will be released at a later date.
+
+## Normalized Form
+
+Sudachi normalize the following variations.
+
+- Okurigana
+    + e.g. 打込む → 打ち込む
+- Script
+    + e.g. かつ丼 → カツ丼
+- Variant
+    + e.g. 附属 → 付属
+- Misspelling
+    + e.g. シュミレーション → シミュレーション
+- Contracted form
+    + e.g. ちゃあ → ては
+
+
+## Comparison with MeCab and Kuromoji
+
+|                       | Sudachi | MeCab | kuromoji   |
+|:---------------------:|:-------:|:-----:|:----------:|
+|Multiple Segmentation  | Yes     | No    | Limited[^1]|
+|Normalization          | Yes     | No    | Limited[^2]|
+|Joining, Crrection     | Yes     | No    | Limited[^2]|
+|Use multiple user dictionary| Yes     | Yes   | No    |
+|Saving Memory          | Good[^3]| Poor  | Good       |
+|Accuracy               | Good    | Good  | Good       |
+|Spped                  | Good    | Excellent | Good   |
+
+[^1]: approximation with n-best
+[^2]: with Lucene filters
+[^3]: memory sharing with multiple Java VMs
+
+
+## Future Releases
+
+- Speeding up
+- Releasing plugins
+- Improving the accuracy
+- Adding more split informations
+- Adding more normalized forms
+- Fix reading forms (pronunciation -> Furigana)
+- Coodinating segmentations with the synonym dictionary
+
+
 ## Licenses
 
 ## Sudachi
@@ -25,11 +188,14 @@ Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, V
 Port of the original Darts-clone to Java. The original one is written
 by Susumu Yata.
 
-https://github.com/s-yata/darts-clone
+- https://github.com/s-yata/darts-clone
 
 ## System dictionary
 
+This dictionary includes UniDic and a part of NEologd.
 
+- http://unidic.ninjal.ac.jp/
+- https://github.com/neologd/mecab-ipadic-neologd
 
 -----
 # Sudachi
@@ -56,9 +222,6 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 - 同義語辞書との連携
     + 後日公開予定
 
-## インストール
-
-...
 
 ## コマンドラインツール
 
@@ -166,11 +329,9 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 - 送り違い
     + 例) 打込む → 打ち込む
 - 字種
-    + 例) 玉蜀黍 → トウモロコシ
+    + 例) かつ丼 → カツ丼
 - 異体字
     + 例) 附属 → 付属
-- 連濁
-    + 例) いとごんにゃく → いとこんにゃく
 - 誤用
     + 例) シュミレーション → シミュレーション
 - 縮約
@@ -203,7 +364,3 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 - 正規化表記の拡充
 - 読み情報の整備 (発音読み → ふりがな読み)
 - 同義語辞書との連携
-
-## Licenses
-
-...
