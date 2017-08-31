@@ -139,17 +139,17 @@ Sudachi normalize the following variations.
 
 |                       | Sudachi | MeCab | kuromoji   |
 |:---------------------:|:-------:|:-----:|:----------:|
-|Multiple Segmentation  | Yes     | No    | Limited[^1]|
-|Normalization          | Yes     | No    | Limited[^2]|
-|Joining, Crrection     | Yes     | No    | Limited[^2]|
+|Multiple Segmentation  | Yes     | No    | Limited[^a]|
+|Normalization          | Yes     | No    | Limited[^b]|
+|Joining, Crrection     | Yes     | No    | Limited[^b]|
 |Use multiple user dictionary| Yes     | Yes   | No    |
-|Saving Memory          | Good[^3]| Poor  | Good       |
+|Saving Memory          | Good[^c]| Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
 |Spped                  | Good    | Excellent | Good   |
 
-[^1]: approximation with n-best
-[^2]: with Lucene filters
-[^3]: memory sharing with multiple Java VMs
+[^a]: approximation with n-best
+[^b]: with Lucene filters
+[^c]: memory sharing with multiple Java VMs
 
 
 ## Future Releases
