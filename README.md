@@ -30,7 +30,7 @@ Sudachi has the following features.
 ### Options
 
 - -r conf specifies the setting file
-- -m [A|B|C] specifies the mode of splitting
+- -m {A|B|C} specifies the mode of splitting
 - -a outputs the dictionary form and the reading form
 - -d dump the debug outputs
 - -o specifies output file (default: the standard output)
@@ -140,17 +140,17 @@ Sudachi normalize the following variations.
 
 |                       | Sudachi | MeCab | kuromoji   |
 |:----------------------|:--------|:------|:-----------|
-|Multiple Segmentation  | Yes     | No    | Limited [^1]|
-|Normalization          | Yes     | No    | Limited [^2]|
-|Joining, Crrection     | Yes     | No    | Limited [^2]|
+|Multiple Segmentation  | Yes     | No    | Limited [1]|
+|Normalization          | Yes     | No    | Limited [2]|
+|Joining, Crrection     | Yes     | No    | Limited [2]|
 |Use multiple user dictionary| Yes     | Yes   | No    |
-|Saving Memory          | Good [^3]| Poor  | Good       |
+|Saving Memory          | Good [3]| Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
 |Spped                  | Good    | Excellent | Good   |
 
-[^1]: approximation with n-best
-[^2]: with Lucene filters
-[^3]: memory sharing with multiple Java VMs
+- [1]: approximation with n-best
+- [2]: with Lucene filters
+- [3]: memory sharing with multiple Java VMs
 
 
 ## Future Releases
@@ -231,7 +231,7 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 ### オプション
 
 - -r conf 設定ファイルを指定
-- -m [A|B|C] 分割モード
+- -m {A|B|C} 分割モード
 - -a 読み、辞書形も出力
 - -d デバッグ情報の出力
 - -o 出力ファイル (指定がない場合は標準出力)
@@ -344,17 +344,17 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 
 |                       | Sudachi | MeCab | kuromoji |
 |:----------------------|:-------:|:-----:|:--------:|
-|分割単位の併用         | ○      | ×    | △[^4]   |
-|文字正規化、表記正規化 | ○      | ×    | △[^5]   |
-|まとめ上げ、補正処理   | ○      | ×    | △[^5]   |
+|分割単位の併用         | ○      | ×    | △[4]   |
+|文字正規化、表記正規化 | ○      | ×    | △[5]   |
+|まとめ上げ、補正処理   | ○      | ×    | △[5]   |
 |複数ユーザ辞書の利用   | ○      | ○    | ×       |
-|省メモリ               | ◎[^6]  | △    | ○       |
+|省メモリ               | ◎[6]  | △    | ○       |
 |解析精度               | ○      | ○    | ○       |
 |解析速度               | △      | ○    | △       |
 
-[^4]: n-best解による近似
-[^5]: Lucene フィルター併用
-[^6]: メモリマップ利用による複数 JavaVM での辞書共有
+- [4]: n-best解による近似
+- [5]: Lucene フィルター併用
+- [6]: メモリマップ利用による複数 JavaVM での辞書共有
 
 
 ## 今後のリリースでの対応予定
