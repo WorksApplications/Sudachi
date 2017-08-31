@@ -49,7 +49,7 @@ CYRILLIC        1 1 0
 0x007B..0x007E SYMBOL   #{|}~
 
 # Latin
-0x00A1..0x00BF SYMBOL # Latin 1 #¡->¿
+0x00A1..0x00BF SYMBOL # Latin 1 #¡->ß
 0x00C0..0x00FF ALPHA  # Latin 1 #À->ÿ
 0x0100..0x017F ALPHA  # Latin Extended A
 0x0180..0x0236 ALPHA  # Latin Extended B
@@ -66,7 +66,9 @@ CYRILLIC        1 1 0
 0x3041..0x309F  HIRAGANA
 
 # KATAKANA
-0x30A1..0x30FF  KATAKANA
+#0x30A1..0x30FF  KATAKANA
+0x30A1..0x30FA  KATAKANA
+0x30FC..0x30FF  KATAKANA
 0x31F0..0x31FF  KATAKANA  # Small KU .. Small RO
 # 0x30FC          KATAKANA HIRAGANA  # ー
 0x30FC          KATAKANA
@@ -76,14 +78,16 @@ CYRILLIC        1 1 0
 0xFF9E..0xFF9F  KATAKANA
 
 # KANJI
-0x2E80..0x2EF3  KANJI # CJK Radicals Supplement
+0x2E80..0x2EF3  KANJI # CJK Raidcals Supplement
 0x2F00..0x2FD5  KANJI
 0x3005          KANJI
 0x3007          KANJI
 0x3400..0x4DB5  KANJI # CJK Unified Ideographs Extention
-0x4E00..0x9FA5  KANJI
+#0x4E00..0x9FA5  KANJI
+0x4E00..0x9FFF  KANJI
 0xF900..0xFA2D  KANJI
 0xFA30..0xFA6A  KANJI
+
 
 # KANJI-NUMERIC (一 二 三 四 五 六 七 八 九 十 百 千 万 億 兆)
 0x4E00 KANJINUMERIC KANJI
