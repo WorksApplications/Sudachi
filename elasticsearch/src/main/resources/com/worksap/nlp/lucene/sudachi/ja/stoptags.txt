@@ -1,0 +1,295 @@
+#
+# This file defines a Japanese stoptag set for JapanesePartOfSpeechStopFilter.
+#
+# Any token with a part-of-speech tag that exactly matches those defined in this
+# file are removed from the token stream.
+#
+# Set your own stoptags by uncommenting the lines below.  Note that comments are
+# not allowed on the same line as a stoptag.  See LUCENE-3745 for frequency lists,
+# etc. that can be useful for building you own stoptag set.
+#
+# The entire possible tagset is provided below for convenience.
+#
+#####
+#  noun: unclassified nouns
+#名詞
+#
+#  noun-common: Common nouns where the sub-classification is undefined
+#名詞-普通名詞
+#
+#  noun-common-misc: Miscellaneous common nouns
+#名詞,普通名詞,一般
+#
+#  noun-common-verbal: Nouns that take arguments with case and can appear
+#  followed by 'suru' and related verbs (する, できる, なさる, くださる)
+#  e.g. インプット, 愛着, 悪化, 悪戦苦闘, 一安心, 下取り
+#名詞,普通名詞,サ変可能
+#
+#  noun-common-adjective: The base form of adjectives, words that appear
+#  before な ("na")
+#  e.g. 健康, 安易, 駄目, だめ
+#名詞,普通名詞,形状詞可能
+#
+#  noun-common-verbal-adjective: Nouns that can appear followed by 'suru'
+#  and 'na'
+#  e.g. 心配, 独立, オープン
+#名詞,普通名詞,サ変形状詞可能
+#
+#  noun-common-adverbial: Temporal nouns such as names of days or months
+#  that behave like adverbs. Nouns that represent amount or ratios and
+#  can be used adverbially,
+#  e.g. 金曜, 一月, 午後, 少量
+#名詞,普通名詞,副詞可能
+#
+#  noun-common-classifier: Common nouns that can be a unit,
+#  e.g. キロ, 年, 町,
+#名詞,普通名詞,助数詞可能
+#
+#  noun-proper: Proper nouns where the sub-classification is undefined 
+#名詞,固有名詞
+#
+#  noun,proper-misc: miscellaneous proper nouns
+#名詞,固有名詞,一般
+#
+#  noun-proper-person: Personal names where the sub-classification is undefined
+#名詞,固有名詞,人名
+#
+#  noun-proper-person-misc: names that cannot be divided into surname and 
+#  given name; foreign names; names where the surname or given name is unknown.
+#  e.g. お市の方
+#名詞,固有名詞,人名,一般
+#
+#  noun-proper-person-surname: Mainly Japanese surnames.
+#  e.g. 山田
+#名詞,固有名詞,人名,姓
+#
+#  noun-proper-person-given_name: Mainly Japanese given names.
+#  e.g. 太郎
+#名詞,固有名詞,人名,名
+#
+#  noun-proper-place: Place names where the sub-classification is undefined
+#名詞,固有名詞,地名
+#
+#  noun-proper-place-misc: Place names excluding countries.
+#  e.g. アジア, バルセロナ, 京都
+#名詞,固有名詞,地域,一般
+#
+#  noun-proper-place-country: Country names. 
+#  e.g. 日本, オーストラリア
+#名詞,固有名詞,地域,国
+#
+#  noun-proper-organization: Names representing organizations.
+#  e.g. 通産省, NHK
+#名詞,固有名詞,組織名
+#
+#  noun-numeric: Arabic numbers, Chinese numerals, and counters like 何 (回), 数.
+#  e.g. 0, 1, 2, 何, 数, 幾
+#名詞,数詞
+#
+#####
+#  pronoun: Pronouns
+#代名詞
+#
+#####
+#  na-adjective: Na-adjectives where the sub-classification
+#形状詞
+#
+#  na-adjective-common: Common na-adjectives,
+#  e.g. さわやか, 静か
+#形状詞,一般
+#
+#  na-adjective-tari: Na-adjectives which take 'taru' or 'to'
+#  e.g. 堂々, 静か
+#形状詞,タリ
+#
+#  na-adjective-aux: Na-adjectives treated as 助動詞 ("auxiliary verb")
+#  in school grammars 
+#  e.g. そう, よう
+#形状詞,助動詞語幹
+#
+#####
+#  adnominal: Words that only have noun-modifying forms.
+#  e.g. この, その, あの, どの, いわゆる, いろんな, こんな, そんな, あんな, どんな,
+#       大きな, 小さな, おかしな, ほんの, たいした, 
+#       「(, も) さる (ことながら)」, 単なる, いかなる, 我が, 同じ
+#連体詞
+#
+#####
+#  adverb: Adverbs
+#副詞
+#  e.g. わりと, 一躍, まだ, つやつや, キョロキョロ
+#
+#####
+#  conjunction: Conjunctions that can occur independently.
+#  e.g. が, けれど, そして, じゃあ, もしくは
+接続詞
+#
+#####
+#  interjection: unclassified interjections 
+#感動詞
+#
+#  interjection-misc: Greetings and other exclamations.
+#  e.g. おはよう, こんにちは, こんばんは, ありがとう,
+#       さよなら, さようなら, はい, いいえ, もしもし
+#感動詞,一般
+#
+#  interjection-filler: Aizuchi that occurs during a conversation or sounds inserted as filler.
+#  e.g. あの, うんと, えっと
+感動詞,フィラー
+#
+#####
+#  verb: unclassified verbs
+#動詞
+#
+#  verb-main:
+#動詞,一般
+#
+#  verb-auxiliary:
+#動詞,非自立可能
+#
+#####
+#  i-adjective: unclassified i-adjectives
+#形容詞
+#
+#  i-adjective-main:
+#形容詞,一般
+#
+#  i-adjective-auxiliary:
+#形容詞,非自立可能
+#
+#####
+#  auxiliary-verb:
+助動詞
+#
+#####
+#  particle: unclassified particles.
+助詞
+#
+#  particle-case: Case particles.
+#  e.g. から, が, で, と, に, へ, より, を, の, にて
+助詞,格助詞
+#
+#  particle-adverbial:
+#  e.g. くらい, 位, ぐらい, しも, ずつ, (私) なぞ, など, (先生) なんか (大嫌い)-口語/,
+#       (私) なんぞ, (先生) なんて (大嫌い)-口語/, のみ, だけ, ばかり, ばっか-口語/,
+#       ばっかり-口語/, ほど, 程, まで, 迄
+助詞,副助詞
+#
+#  particle-dependency:
+#  e.g. こそ, さえ, しか, すら, は, も, ぞ
+助詞,係助詞
+#
+#  particle-conjunctive:
+#  e.g. から, が, けれど, けど, し, つつ, て, で, と, とも, ながら, なり, ば,
+#       (ころん) じゃ(いけない)-口語/, (行っ) ちゃ(いけない)-口語/,
+#       (言っ) たって (しかたがない)-口語/, (それがなく)ったって (平気)-口語/
+助詞,接続助詞
+#
+#  particle-final:
+#  e.g. かしら, さ, ぜ, (だ)っけ-口語/, (とまってる) で-方言/, な, ナ, なあ-口語/, ぞ, ね, ネ, 
+#       ねぇ-口語/, ねえ-口語/, ねん-方言/, の, のう-口語/, や, よ, ヨ, よぉ-口語/, わ
+助詞,終助詞
+#
+#  particle-adnominalizer: The "no" that attaches to nouns and modifies 
+#  non-inflectional words.
+助詞,準体助詞
+#
+#####
+#  prefix: Prefixes
+#接頭辞
+#
+#####
+#
+#  suffix: suffixes where the sub-classification is undefined.
+#接尾辞
+#
+#  suffix-noun: Noun suffixes where the sub-classification is undefined.
+#接尾辞
+#
+#  suffix-noun-misc: Of the nouns or stem forms of other parts of speech that
+#  can combine into compound nouns, words that cannot be classified into
+#  any of the other categories below. In general, this category is more inclusive than 
+#  接尾語 ("suffix") and is usually the last element in a compound noun.
+#  e.g. おき, かた, 方, 甲斐 (がい), がかり, ぎみ, 気味, ぐるみ, (～した) さ, 済 (ず) み,
+#       よう, (でき)っこ, 観, 性, 学, 類, 用
+#接尾辞,名詞的,一般
+#
+#  suffix-noun-verbal: Of the suffixes that attach to nouns and form nouns, those that 
+#  can appear before スル ("suru").
+#  e.g. 化, 視, (三) 分 (する), 飼い
+#接尾辞,名詞的,サ変可能
+#
+#  suffix-noun-adjective-base: Suffixes that attach to other nouns or the conjunctive 
+#  form of inflectional words and appear before the copula だ ("da").
+#接尾辞,名詞的,形状詞可能
+#
+#  suffix-noun-adverbial: Suffixes that attach to other nouns and can behave as adverbs.
+#  e.g. 当たり, がてら, 後 (ご), 中, 末, 上
+#接尾辞,名詞的,副詞可能
+#
+#  suffix-noun-classifier: Suffixes that attach to numbers and form nouns. This category 
+#  is more inclusive than 助数詞 ("classifier") and includes common nouns that attach 
+#  to numbers.
+#  e.g. つ, 本, 歳, 匹
+#接尾辞,名詞的,助数詞
+#
+#  suffix-na-adjective: Suffixes that attach to other nouns and can behave as na-ajectives.
+#  e.g. がち, だらけ, ごかし, はずれ, 風
+#接尾辞,形状詞的
+#
+#  suffix-verb: Suffixes that attach to other nouns and can behave as verbs.
+#  e.g. めかす, かねる, じみる, ぶる
+#接尾辞,動詞的
+#
+#  suffix-i-adjective: Suffixes that attach to other nouns and can behave as i-ajectives.
+#  e.g. がたい, っこい, やすい, らしい
+#接尾辞,形容詞的
+#
+#####
+#  symbol: unclassified Symbols without punctuation marks
+記号
+#
+#  symbol-misc: A general symbol without punctuation marks, such as emoticons or emoji.
+記号,一般
+#  symbol-letters: A letter used as a symbol.
+#  e.g. A, Σ
+記号,文字
+#
+#####
+#  punctuation: unclassified Punctuation marks
+補助記号
+#
+#  punctuation-misc: A general punctuation marks
+#  e.g. #, *, ㍻
+補助記号,一般
+#
+#  punctuation-full-stop: Symbols used as a full stop.
+#  e.g. 。, ., !, ?
+補助記号,句点
+#
+#  punctuation-comma: Symbols used as a comma.
+#  e.g. 、
+補助記号,読点
+#
+#  punctuation-left-parenthesis:
+#  e.g. （, 「
+補助記号,括弧開
+#
+#  punctuation-right-parenthesis:
+#  e.g. ）, 」
+補助記号,括弧閉
+#
+#  punctuation-AA: unclassifed ASCII arts.
+#  e.g. ）, 」
+補助記号,ＡＡ
+#
+#  punctuation-AA-common: ASCII arts without emoticons.
+補助記号,ＡＡ,一般
+#
+#  punctuation-AA-emoticons: ASCII arts emoticons.
+補助記号,ＡＡ,顔文字
+#
+#####
+#  space: Whitespace.
+空白
+##### End of file

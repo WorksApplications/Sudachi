@@ -1,0 +1,23 @@
+{
+    "index": {
+        "analysis": {
+            "filter": {
+            },
+            "tokenizer": {
+                "sudachi_tokenizer": {
+                    "type": "sudachi_tokenizer",
+                    "mode": "search",
+                    "discard_punctuation": true
+                }
+            },
+            "analyzer": {
+                "sudachi_analyzer": {
+                    "filter": [
+                    ],
+                    "tokenizer": "sudachi_tokenizer",
+                    "type": "custom"
+                }
+            }
+        }
+    }
+}
