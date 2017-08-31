@@ -25,10 +25,11 @@ Sudachi has the following features.
 
 ## Use on the command line
 
-    $ java -jar sudachi-XX.jar [-m mode] [-a] [-d] [-o output] [file...]
+    $ java -jar sudachi-XX.jar [-r conf.json] [-m mode] [-a] [-d] [-o output] [file...]
 
 ### Options
 
+- r conf.json specifies the setting file
 - m [A|B|C] specifies the mode of splitting
 - a outputs the dictionary form and the reading form
 - d dump the debug outputs
@@ -225,10 +226,11 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 
 ## コマンドラインツール
 
-    $ java -jar sudachi-XX.jar [-m mode] [-a] [-d] [-o output] [file...]
+    $ java -jar sudachi-XX.jar [-r conf.json] [-m mode] [-a] [-d] [-o output] [file...]
 
 ### オプション
 
+- r conf.json 設定ファイルを指定
 - m [A|B|C] 分割モード
 - a 読み、辞書形も出力
 - d デバッグ情報の出力
