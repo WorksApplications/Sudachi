@@ -1,0 +1,1 @@
+dictionary/sudachi_lex.csv filter=lfs diff=lfs merge=lfs -text
