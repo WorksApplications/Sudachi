@@ -10,7 +10,47 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
+    <dictionary.build.directory>${project.build.directory}/dictionary</dictionary.build.directory>
+    <unidic.version>2.1.2</unidic.version>
+    <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
+    <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>get-unidic</id>
+      <activation>
+        <file>
+          <missing>${unidic.matrix}</missing>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>unpack-unidic-matrix</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <tasks>
+                    <mkdir dir="${dictionary.build.directory}" />
+                    <get src="${unidic.url}" dest="${dictionary.build.directory}/unidic-mecab-${unidic.version}_src.zip" />
+                    <unzip src="${dictionary.build.directory}/unidic-mecab-${unidic.version}_src.zip" dest="${dictionary.build.directory}" />
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
@@ -51,6 +91,28 @@
             <configuration>
               <outputDirectory>${project.build.directory}</outputDirectory>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>compile-system-dictionary</id>
+            <phase>package</phase>
+            <configuration>
+	      <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
+	      <arguments>
+                <argument>dictionary/sudachi_lex.csv</argument>
+		<argument>${unidic.matrix}</argument>
+		<argument>${project.build.directory}/system.dic</argument>
+	      </arguments>
+            </configuration>
+            <goals>
+              <goal>java</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
