@@ -22,6 +22,12 @@ Sudachi has the following features.
 - Work closely with the synonym dictionary
     + We will release the sysnonym dictionary at a later date
 
+## Build
+
+It needs large memory to build the system dictionary.
+
+    $ MAVEN_OPTS=-Xms4g mvn package
+
 
 ## Use on the command line
 
@@ -222,6 +228,13 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
     + 文字正規化や未知語処理に機能追加が可能
 - 同義語辞書との連携
     + 後日公開予定
+
+
+## ビルド
+
+辞書の構築には多少メモリが必要です。
+
+    $ MAVEN_OPTS=-Xms4g mvn package
 
 
 ## コマンドラインツール
