@@ -140,17 +140,17 @@ Sudachi normalize the following variations.
 
 |                       | Sudachi | MeCab | kuromoji   |
 |:----------------------|:--------|:------|:-----------|
-|Multiple Segmentation  | Yes     | No    | Limited [1]|
-|Normalization          | Yes     | No    | Limited [2]|
-|Joining, Crrection     | Yes     | No    | Limited [2]|
+|Multiple Segmentation  | Yes     | No    | Limited ^a |
+|Normalization          | Yes     | No    | Limited ^b |
+|Joining, Crrection     | Yes     | No    | Limited ^b |
 |Use multiple user dictionary| Yes     | Yes   | No    |
-|Saving Memory          | Good [3]| Poor  | Good       |
+|Saving Memory          | Good ^c | Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
 |Speed                  | Good    | Excellent | Good   |
 
-- [1]: approximation with n-best
-- [2]: with Lucene filters
-- [3]: memory sharing with multiple Java VMs
+- ^a: approximation with n-best
+- ^b: with Lucene filters
+- ^c: memory sharing with multiple Java VMs
 
 
 ## Future Releases
@@ -344,17 +344,17 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 
 |                       | Sudachi | MeCab | kuromoji |
 |:----------------------|:-------:|:-----:|:--------:|
-|分割単位の併用         | ○      | ×    | △[4]   |
-|文字正規化、表記正規化 | ○      | ×    | △[5]   |
-|まとめ上げ、補正処理   | ○      | ×    | △[5]   |
+|分割単位の併用         | ○      | ×    | △ ^1   |
+|文字正規化、表記正規化 | ○      | ×    | △ ^2   |
+|まとめ上げ、補正処理   | ○      | ×    | △ ^2   |
 |複数ユーザ辞書の利用   | ○      | ○    | ×       |
-|省メモリ               | ◎[6]  | △    | ○       |
+|省メモリ               | ◎ ^3  | △    | ○       |
 |解析精度               | ○      | ○    | ○       |
 |解析速度               | △      | ○    | △       |
 
-- [4]: n-best解による近似
-- [5]: Lucene フィルター併用
-- [6]: メモリマップ利用による複数 JavaVM での辞書共有
+- ^1: n-best解による近似
+- ^2: Lucene フィルター併用
+- ^3: メモリマップ利用による複数 JavaVM での辞書共有
 
 
 ## 今後のリリースでの対応予定
