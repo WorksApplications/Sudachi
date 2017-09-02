@@ -1,0 +1,15 @@
+language: java
+jdk: oraclejdk8
+sudo: false
+before_cache:
+  - rm -rf target/dictionary/*.zip
+cache:
+  directories:
+    - target/dictionary
+# Currently git-lfs has trouble, so skip downloading csv file from LFS.
+git:
+  lfs_skip_smudge: true
+# Currently `mvn package` cannot work due to git-lfs problem, see issue #1.
+# So we need to skip invoking `mvn install` for now.
+# https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
+install: true
