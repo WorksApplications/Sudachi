@@ -224,13 +224,6 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
     + 後日公開予定
 
 
-## ビルド
-
-辞書の構築には多少メモリが必要です。
-
-    $ MAVEN_OPTS=-Xms4g mvn package
-
-
 ## コマンドラインツール
 
     $ java -jar sudachi-XX.jar [-r conf] [-m mode] [-a] [-d] [-o output] [file...]
