@@ -22,12 +22,6 @@ Sudachi has the following features.
 - Work closely with the synonym dictionary
     + We will release the sysnonym dictionary at a later date
 
-## Build
-
-It needs large memory to build the system dictionary.
-
-    $ MAVEN_OPTS=-Xms4g mvn package
-
 
 ## Use on the command line
 
