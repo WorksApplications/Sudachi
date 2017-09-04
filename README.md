@@ -148,7 +148,7 @@ Sudachi normalize the following variations.
 |:----------------------|:--------|:------|:-----------|
 |Multiple Segmentation  | Yes     | No    | Limited ^a |
 |Normalization          | Yes     | No    | Limited ^b |
-|Joining, Crrection     | Yes     | No    | Limited ^b |
+|Joining, Correction    | Yes     | No    | Limited ^b |
 |Use multiple user dictionary| Yes     | Yes   | No    |
 |Saving Memory          | Good ^c | Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
