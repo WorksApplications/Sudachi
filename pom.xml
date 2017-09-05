@@ -14,6 +14,7 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
+    <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
     <sonar.language>java</sonar.language>
@@ -58,7 +59,7 @@
       </build>
     </profile>
     <profile>
-      <id>pull-request</id>
+      <id>pre-merge</id>
       <activation>
         <property>
           <name>env.TRAVIS_EVENT_TYPE</name>
@@ -66,10 +67,23 @@
         </property>
       </activation>
       <properties>
+        <sonar.skip>false</sonar.skip>
         <sonar.analysis.mode>preview</sonar.analysis.mode>
         <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
         <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
         <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
+      </properties>
+    </profile>
+    <profile>
+      <id>post-merge</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS_BRANCH</name>
+          <value>develop</value>
+        </property>
+      </activation>
+      <properties>
+        <sonar.skip>false</sonar.skip>
       </properties>
     </profile>
   </profiles>
