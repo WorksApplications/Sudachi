@@ -13,6 +13,7 @@
       <includes>
         <include>README*</include>
         <include>LICENSE*</include>
+        <include>licenses/*.txt</include>
       </includes>
     </fileSet>
     <fileSet>
@@ -22,6 +23,14 @@
         <include>sudachi*.jar</include>
         <include>javax.json*.jar</include>
         <include>system.dic</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/resources</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>char.def</include>
+        <include>unk.def</include>
       </includes>
     </fileSet>
   </fileSets>

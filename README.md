@@ -24,12 +24,6 @@ Sudachi has the following features.
 - Work closely with the synonym dictionary
     + We will release the sysnonym dictionary at a later date
 
-## Build
-
-It needs large memory to build the system dictionary.
-
-    $ MAVEN_OPTS=-Xms4g mvn package
-
 
 ## Use on the command line
 
@@ -150,7 +144,7 @@ Sudachi normalize the following variations.
 |:----------------------|:--------|:------|:-----------|
 |Multiple Segmentation  | Yes     | No    | Limited ^a |
 |Normalization          | Yes     | No    | Limited ^b |
-|Joining, Crrection     | Yes     | No    | Limited ^b |
+|Joining, Correction    | Yes     | No    | Limited ^b |
 |Use multiple user dictionary| Yes     | Yes   | No    |
 |Saving Memory          | Good ^c | Poor  | Good       |
 |Accuracy               | Good    | Good  | Good       |
@@ -230,13 +224,6 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
     + 文字正規化や未知語処理に機能追加が可能
 - 同義語辞書との連携
     + 後日公開予定
-
-
-## ビルド
-
-辞書の構築には多少メモリが必要です。
-
-    $ MAVEN_OPTS=-Xms4g mvn package
 
 
 ## コマンドラインツール
