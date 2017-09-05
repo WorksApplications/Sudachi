@@ -1,6 +1,9 @@
 # Sudachi
 
 [![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=use-large-java-heap-by-default)](https://travis-ci.org/WorksApplications/Sudachi)
+[![Bugs](https://sonarcloud.io/api/badges/measure?key=com.worksap.nlp.sudachi&metric=bugs)](https://sonarcloud.io/project/issues?id=com.worksap.nlp.sudachi&resolved=false&types=BUG)
+[![Debt](https://sonarcloud.io/api/badges/measure?key=com.worksap.nlp.sudachi&metric=sqale_debt_ratio)](https://sonarcloud.io/component_measures/domain/Maintainability?id=com.worksap.nlp.sudachi)
+
 
 Sudachi is Japanese morphological analyzer. Morphological analysis consists
 mainly of the following tasks.
