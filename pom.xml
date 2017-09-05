@@ -14,6 +14,7 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
+    <jacoco.skip>true</jacoco.skip>
     <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
@@ -72,6 +73,7 @@
         <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
         <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
         <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
+        <jacoco.skip>false</jacoco.skip>
       </properties>
     </profile>
     <profile>
@@ -84,6 +86,7 @@
       </activation>
       <properties>
         <sonar.skip>false</sonar.skip>
+        <jacoco.skip>false</jacoco.skip>
       </properties>
     </profile>
   </profiles>
@@ -188,6 +191,11 @@
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>3.3.0.603</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.9</version>
       </plugin>
     </plugins>
   </build>

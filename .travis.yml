@@ -19,5 +19,7 @@ git:
 # So we need to skip invoking `mvn install` for now.
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
+script:
+  - mvn jacoco:prepare-agent test -B
 after_success:
   - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN
