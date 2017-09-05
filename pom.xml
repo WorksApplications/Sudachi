@@ -14,6 +14,12 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
+    <sonar.language>java</sonar.language>
+    <sonar.links.homepage>https://github.com/WorksApplications/Sudachi</sonar.links.homepage>
+    <sonar.links.ci>https://travis-ci.org/WorksApplications/Sudachi</sonar.links.ci>
+    <sonar.links.issue>https://github.com/WorksApplications/Sudachi/issues</sonar.links.issue>
   </properties>
 
   <profiles>
@@ -152,14 +158,6 @@
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>3.3.0.603</version>
-        <configuration>
-          <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-          <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
-          <sonar.language>java</sonar.language>
-          <sonar.links.homepage>https://github.com/WorksApplications/Sudachi</sonar.links.homepage>
-          <sonar.links.ci>https://travis-ci.org/WorksApplications/Sudachi</sonar.links.ci>
-          <sonar.links.issue>https://github.com/WorksApplications/Sudachi/issues</sonar.links.issue>
-        </configuration>
       </plugin>
     </plugins>
   </build>
