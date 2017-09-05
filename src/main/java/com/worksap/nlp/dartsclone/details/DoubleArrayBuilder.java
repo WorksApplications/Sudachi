@@ -147,7 +147,7 @@ public class DoubleArrayBuilder {
 
         do {
             byte childLabel = dawg.label(dawgChildId);
-            int dicChildId = offset ^ byteToUint(childLabel);
+            int dicChildId = offset ^ Byte.toUnsignedInt(childLabel);
             if (childLabel != 0) {
                 buildFromDAWG(dawg, dawgChildId, dicChildId);
             }
@@ -169,7 +169,7 @@ public class DoubleArrayBuilder {
 
         dawgChildId = dawg.child(dawgId);
         for (byte l : labels) {
-            int dicChildId = offset ^ byteToUint(l);
+            int dicChildId = offset ^ Byte.toUnsignedInt(l);
             reserveId(dicChildId);
 
             if (dawg.isLeaf(dawgChildId)) {
@@ -233,13 +233,13 @@ public class DoubleArrayBuilder {
             byte label = keySet.getKeyByte(begin, depth);
             if (label != lastLabel) {
                 buildFromKeySet(keySet, lastBegin, begin, depth + 1,
-                                offset ^ byteToUint(lastLabel));
+                                offset ^ Byte.toUnsignedInt(lastLabel));
                 lastBegin = begin;
                 lastLabel = keySet.getKeyByte(begin, depth);
             }
         }
         buildFromKeySet(keySet, lastBegin, end, depth + 1,
-                        offset ^ byteToUint(lastLabel));
+                        offset ^ Byte.toUnsignedInt(lastLabel));
     }
 
     int arrangeFromKeySet(KeySet keySet, int begin, int end, int depth,
@@ -279,7 +279,7 @@ public class DoubleArrayBuilder {
         units.get(dicId).setOffset(dicId ^ offset);
 
         for (byte l : labels) {
-            int dicChildId = offset ^ byteToUint(l);
+            int dicChildId = offset ^ Byte.toUnsignedInt(l);
             reserveId(dicChildId);
             if (l == 0) {
                 units.get(dicId).setHasLeaf(true);
@@ -300,7 +300,7 @@ public class DoubleArrayBuilder {
 
         int unfixedId = extrasHead;
         do {
-            int offset = unfixedId ^ byteToUint(labels.get(0));
+            int offset = unfixedId ^ Byte.toUnsignedInt(labels.get(0));
             if (isValidOffset(id, offset)) {
                 return offset;
             }
@@ -321,7 +321,7 @@ public class DoubleArrayBuilder {
         }
 
         for (int i = 1; i < labels.size(); i++) {
-            if (extras(offset ^ byteToUint(labels.get(i))).isFixed) {
+            if (extras(offset ^ Byte.toUnsignedInt(labels.get(i))).isFixed) {
                 return false;
             }
         }
@@ -412,9 +412,5 @@ public class DoubleArrayBuilder {
                 units.get(id).setLabel((byte)(id ^ unusedOffset));
             }
         }
-    }
-
-    static int byteToUint(byte b) {
-        return b & 0xFF;
     }
 }

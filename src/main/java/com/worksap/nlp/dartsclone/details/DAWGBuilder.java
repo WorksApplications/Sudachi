@@ -140,9 +140,9 @@ class DAWGBuilder {
             }
 
             byte unitLabel = nodes.get(childId).label;
-            if (byteToUint(keyLabel) < byteToUint(unitLabel)) {
+            if (Byte.toUnsignedInt(keyLabel) < Byte.toUnsignedInt(unitLabel)) {
                 throw new IllegalArgumentException("wrong key order");
-            } else if (byteToUint(keyLabel) > byteToUint(unitLabel)) {
+            } else if (Byte.toUnsignedInt(keyLabel) > Byte.toUnsignedInt(unitLabel)) {
                 nodes.get(childId).hasSibling = true;
                 flush(childId);
                 break;
@@ -300,7 +300,7 @@ class DAWGBuilder {
         for (; id != 0; id++) {
             int unit = units.get(id).unit;
             byte label = labels.get(id);
-            hashValue ^= hash((byteToUint(label) << 24) ^ unit);
+            hashValue ^= hash((Byte.toUnsignedInt(label) << 24) ^ unit);
 
             if (!units.get(id).hasSibling()) {
                 break;
@@ -314,7 +314,7 @@ class DAWGBuilder {
         for (; id != 0; id = nodes.get(id).sibling) {
             int unit = nodes.get(id).unit();
             byte label = nodes.get(id).label;
-            hashValue ^= hash(((label & 0xFF) << 24) ^ unit);
+            hashValue ^= hash((Byte.toUnsignedInt(label) << 24) ^ unit);
         }
         return hashValue;
     }
@@ -360,9 +360,5 @@ class DAWGBuilder {
 
     private static <E> void stackPop(List<E> stack) {
         stack.remove(stack.size() - 1);
-    }
-
-    private static int byteToUint(byte b) {
-      return b & 0xFF; 
     }
 }
