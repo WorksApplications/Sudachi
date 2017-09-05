@@ -103,7 +103,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 if (cinfo.isInvoke || !hasOtherWords) {
                     for (int i = 1; i <= cinfo.length; i++) {
                         int sublength = inputText.getCodePointsOffsetLength(offset, i);
-                        if (offset + sublength > llength) {
+                        if (sublength > llength) {
                             break;
                         }
                         String s = inputText.getSubstring(offset, offset + sublength);
