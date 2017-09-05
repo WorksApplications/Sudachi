@@ -25,5 +25,13 @@
         <include>system.dic</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>src/main/resources</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>char.def</include>
+        <include>unk.def</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>
