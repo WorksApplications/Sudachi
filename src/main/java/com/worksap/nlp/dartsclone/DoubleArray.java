@@ -94,9 +94,9 @@ public class DoubleArray {
         int unit = array.get(nodePos);
 
         for (byte k : key) {
-            nodePos ^= offset(unit) ^ byteToUint(k);
+            nodePos ^= offset(unit) ^ Byte.toUnsignedInt(k);
             unit = array.get(nodePos);
-            if (label(unit) != k)
+            if (label(unit) != Byte.toUnsignedInt(k))
                 return result;
         }
         if (!hasLeaf(unit)) {
@@ -117,9 +117,9 @@ public class DoubleArray {
         nodePos ^= offset(unit);
         for (int i = offset; i < key.length; i++) {
             byte k = key[i];
-            nodePos ^= byteToUint(k);
+            nodePos ^= Byte.toUnsignedInt(k);
             unit = array.get(nodePos);
-            if (label(unit) != byteToUint(k)) {
+            if (label(unit) != Byte.toUnsignedInt(k)) {
                 return result;
             }
             
@@ -174,9 +174,9 @@ public class DoubleArray {
         int[] getNext() {
             for ( ; offset < key.length; offset++) {
                 byte k = key[offset];
-                nodePos ^= byteToUint(k);
+                nodePos ^= Byte.toUnsignedInt(k);
                 int unit = array.get(nodePos);
-                if (label(unit) != byteToUint(k)) {
+                if (label(unit) != Byte.toUnsignedInt(k)) {
                     offset = key.length; // no more loop
                     return null;
                 }
@@ -205,9 +205,5 @@ public class DoubleArray {
 
     private int offset(int unit) {
         return ((unit >>> 10) << ((unit & (1 << 9)) >>> 6));
-    }
-
-    private int byteToUint(byte b) {
-        return b & 0xFF;
     }
 }

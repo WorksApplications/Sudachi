@@ -33,7 +33,7 @@ class DoubleArrayBuilderUnit {
     }
 
     void setLabel(byte label) {
-        unit = (unit & ~0xFF) | (label & 0xFF);
+        unit = (unit & ~0xFF) | Byte.toUnsignedInt(label);
     }
 
     void setOffset(int offset) {
