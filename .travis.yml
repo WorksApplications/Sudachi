@@ -20,4 +20,4 @@ git:
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
 after_success:
-  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview -Dsonar.github.oauth=$GITHUB_TOKEN -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST -Dsonar.github.repository=$TRAVIS_REPO_SLUG
+  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN

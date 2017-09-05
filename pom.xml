@@ -57,6 +57,21 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>pull-request</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS_EVENT_TYPE</name>
+          <value>pull_request</value>
+        </property>
+      </activation>
+      <properties>
+        <sonar.analysis.mode>preview</sonar.analysis.mode>
+        <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
+        <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
+        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
+      </properties>
+    </profile>
   </profiles>
 
   <build>
