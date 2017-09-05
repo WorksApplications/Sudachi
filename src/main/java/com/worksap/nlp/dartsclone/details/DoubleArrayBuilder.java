@@ -267,7 +267,8 @@ public class DoubleArrayBuilder {
             if (labels.isEmpty()) {
                 labels.add(label);
             } else if (label != labels.get(labels.size() - 1)) {
-                if (label < labels.get(labels.size() - 1)) {
+                if (Byte.toUnsignedInt(label)
+                    < Byte.toUnsignedInt(labels.get(labels.size() - 1))) {
                     throw new IllegalArgumentException("wrong key order");
                 }
                 labels.add(label);

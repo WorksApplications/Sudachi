@@ -224,7 +224,7 @@ public class DartsTest {
             key.setLength(0);
             int length = random.nextInt(8) + 1;
             for (int i = 0; i < length; i++) {
-                key.append((char)('A' + random.nextInt(26)));
+                key.append((char)(1 + random.nextInt(65535)));
             }
             keys.add(key.toString().getBytes(StandardCharsets.UTF_8));
         }
@@ -238,7 +238,7 @@ public class DartsTest {
             key.setLength(0);
             int length = random.nextInt(8) + 1;
             for (int i = 0; i < length; i++) {
-                key.append((char)('A' + random.nextInt(26)));
+                key.append((char)(1 + random.nextInt(65535)));
             }
             byte[] k = key.toString().getBytes(StandardCharsets.UTF_8);
             if (!validKeys.contains(k)) {
