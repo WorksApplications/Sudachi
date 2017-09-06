@@ -24,9 +24,9 @@ public class CategoryTypeSet extends AbstractSet<CategoryType> implements Clonea
 
     private int types;
 
-    CategoryTypeSet() { types = 0; }
+    public CategoryTypeSet() { types = 0; }
 
-    protected CategoryTypeSet(int types) { this.types = types; }
+    public CategoryTypeSet(int types) { this.types = types; }
 
     @Override
     public CategoryTypeSet clone() {

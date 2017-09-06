@@ -90,8 +90,14 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         if (length > 0) {
             for (CategoryType type : inputText.getCharCategoryTypes(offset)) {
                 CategoryInfo cinfo = categories.get(type);
+                if (cinfo == null) {
+                    continue;
+                }
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.type);
+                if (oovs == null) {
+                    continue;
+                }
                 if (cinfo.isGroup &&
                     (cinfo.isInvoke || !hasOtherWords)) {
                     String s = inputText.getSubstring(offset, offset + length);
@@ -103,7 +109,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 if (cinfo.isInvoke || !hasOtherWords) {
                     for (int i = 1; i <= cinfo.length; i++) {
                         int sublength = inputText.getCodePointsOffsetLength(offset, i);
-                        if (offset + sublength > llength) {
+                        if (sublength > llength) {
                             break;
                         }
                         String s = inputText.getSubstring(offset, offset + sublength);
