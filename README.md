@@ -1,6 +1,6 @@
 # Sudachi
 
-[![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=use-large-java-heap-by-default)](https://travis-ci.org/WorksApplications/Sudachi)
+[![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop)](https://travis-ci.org/WorksApplications/Sudachi)
 
 Sudachi is Japanese morphological analyzer. Morphological analysis consists
 mainly of the following tasks.
