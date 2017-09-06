@@ -90,8 +90,14 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         if (length > 0) {
             for (CategoryType type : inputText.getCharCategoryTypes(offset)) {
                 CategoryInfo cinfo = categories.get(type);
+                if (cinfo == null) {
+                    continue;
+                }
                 int llength = length;
                 List<OOV> oovs = oovList.get(cinfo.type);
+                if (oovs == null) {
+                    continue;
+                }
                 if (cinfo.isGroup &&
                     (cinfo.isInvoke || !hasOtherWords)) {
                     String s = inputText.getSubstring(offset, offset + length);
