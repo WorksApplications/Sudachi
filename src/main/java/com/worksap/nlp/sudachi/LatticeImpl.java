@@ -149,8 +149,10 @@ class LatticeImpl implements Lattice {
 
     void dump(PrintStream output) {
         int index = 0;
-        for (int i = size; i >= 0; i--) {
-            for (LatticeNodeImpl rNode : endLists.get(i)) {
+        for (int i = size + 1; i >= 0; i--) {
+            List<LatticeNodeImpl> rNodes
+                = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
+            for (LatticeNodeImpl rNode : rNodes) {
                 output.print(String.format("%d: %s: ", index,
                                            rNode.toString()));
                 index++;
