@@ -124,11 +124,9 @@ public class DoubleArray {
             }
             
             nodePos ^= offset(unit);
-            if (hasLeaf(unit)) {
-                if (result.size() < maxNumResult) {
-                    int[] r = new int[] { value(array.get(nodePos)), i + 1 };
-                    result.add(r);
-                }
+            if (hasLeaf(unit) && result.size() < maxNumResult) {
+                int[] r = new int[] { value(array.get(nodePos)), i + 1 };
+                result.add(r);
             }
         }
         return result;
