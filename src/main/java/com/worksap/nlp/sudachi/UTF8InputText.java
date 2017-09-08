@@ -33,10 +33,12 @@ class UTF8InputText implements InputText<byte[]> {
     private final int[] byteIndexes;
     private final List<Set<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
+    private final List<Boolean> canBowList;
     
     UTF8InputText(Grammar grammar, String originalText, String modifiedText,
         byte[] bytes, int[] offsets, int[] byteIndexes,
-        List<Set<CategoryType>> charCategories, List<Integer> charCategoryContinuities) {
+        List<Set<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
+        List<Boolean> canBowList) {
         
         this.originalText = originalText;
         this.modifiedText = modifiedText;
@@ -45,6 +47,7 @@ class UTF8InputText implements InputText<byte[]> {
         this.byteIndexes = byteIndexes;
         this.charCategories = charCategories;
         this.charCategoryContinuities = charCategoryContinuities;
+        this.canBowList = canBowList;
     }
     
     @Override
@@ -76,10 +79,6 @@ class UTF8InputText implements InputText<byte[]> {
     
     int getOffsetTextLength(int index) {
         return byteIndexes[index];
-    }
-    
-    public boolean isCharAlignment(int index) {
-        return (bytes[index] & 0xC0) != 0x80;
     }
     
     @Override
@@ -123,5 +122,14 @@ class UTF8InputText implements InputText<byte[]> {
             length++;
         }
         return length;
+    }
+
+    @Override
+    public boolean canBow(int index) {
+        return isCharAlignment(index) && canBowList.get(byteIndexes[index]);
+    }
+
+    private boolean isCharAlignment(int index) {
+        return (bytes[index] & 0xC0) != 0x80;
     }
 }

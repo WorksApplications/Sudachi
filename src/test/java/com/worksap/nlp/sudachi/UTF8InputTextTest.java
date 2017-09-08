@@ -229,6 +229,25 @@ public class UTF8InputTextTest {
         assertThat(input.getCodePointsOffsetLength(23, 3), is(9));
     }
     
+    @Test
+    public void canBow() {
+        input = builder.build();
+        assertTrue(input.canBow(0)); // â
+        assertFalse(input.canBow(1));
+        assertFalse(input.canBow(2)); // ｂ
+        assertFalse(input.canBow(3));
+        assertFalse(input.canBow(4));
+        assertFalse(input.canBow(5)); // C
+        assertTrue(input.canBow(6));  // 1
+        assertTrue(input.canBow(7));  // あ
+
+        assertTrue(input.canBow(19)); // 𡈽
+        assertFalse(input.canBow(20));
+        assertFalse(input.canBow(21));
+        assertFalse(input.canBow(22));
+        assertTrue(input.canBow(23)); // ア
+    }
+
     class MockGrammar implements Grammar {
         public int getPartOfSpeechSize() {
             return 0;

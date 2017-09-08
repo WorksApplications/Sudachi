@@ -130,4 +130,6 @@ public interface InputText<E> {
      *   {@code codePointOffset} code points.
      */
     public int getCodePointsOffsetLength(int index, int codePointOffset);
+
+    public boolean canBow(int index);
 }

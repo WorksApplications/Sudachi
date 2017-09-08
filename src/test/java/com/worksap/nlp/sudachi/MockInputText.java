@@ -86,4 +86,7 @@ class MockInputText implements InputText<String> {
     public int getCodePointsOffsetLength(int index, int codePointOffset) {
         return text.offsetByCodePoints(index, codePointOffset) - index;
     }
+
+    @Override
+    public boolean canBow(int index) { return true; }
 }

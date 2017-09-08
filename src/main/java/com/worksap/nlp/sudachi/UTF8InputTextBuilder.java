@@ -115,12 +115,14 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
             = getCharCategoryTypes(modifiedStringText);
         List<Integer> charCategoryContinuities
             = getCharCategoryContinuities(modifiedStringText, length, charCategories);
+        List<Boolean> canBowList = buildCanBowList(modifiedStringText, charCategories);
 
         return new UTF8InputText(grammar, originalText, modifiedStringText, byteText,
                                  offsets,
                                  byteIndexes,
             Collections.unmodifiableList(charCategories),
-            Collections.unmodifiableList(charCategoryContinuities));
+            Collections.unmodifiableList(charCategoryContinuities),
+            Collections.unmodifiableList(canBowList));
     }
 
     private List<Set<CategoryType>> getCharCategoryTypes(String text) {
@@ -175,6 +177,38 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         return length;
     }
     
+    private List<Boolean> buildCanBowList(String text,
+                                          List<Set<CategoryType>> charCategories) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Boolean> canBowList = new ArrayList<>(text.length());
+        for (int i = 0; i < charCategories.size(); i++) {
+            if (i == 0) {
+                canBowList.add(true);
+                continue;
+            }
+
+            if (Character.isLowSurrogate(text.charAt(i))) {
+                canBowList.add(false);
+                continue;
+            }
+
+            Set<CategoryType> types = ((CategoryTypeSet)charCategories.get(i)).clone();
+            if (types.contains(CategoryType.ALPHA) ||
+                types.contains(CategoryType.GREEK) ||
+                types.contains(CategoryType.CYRILLIC)) {
+                types.retainAll(charCategories.get(i - 1));
+                canBowList.add(types.isEmpty());
+                continue;
+            }
+
+            canBowList.add(true);
+        }
+
+        return canBowList;
+    }
+
     private int utf8ByteLength(int cp) {
         if (cp < 0) {
             return 0;

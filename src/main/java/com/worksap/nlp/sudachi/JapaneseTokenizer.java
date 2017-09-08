@@ -63,7 +63,7 @@ class JapaneseTokenizer implements Tokenizer {
 
         lattice.resize(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
-            if (!input.isCharAlignment(i) || !lattice.hasPreviousNode(i)) {
+            if (!input.canBow(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
             Iterator<int[]> iterator = lexicon.lookup(bytes, i);
