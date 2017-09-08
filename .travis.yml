@@ -20,6 +20,6 @@ git:
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
 script:
-  - mvn jacoco:prepare-agent test -B --debug
+  - mvn jacoco:prepare-agent test -B
 after_success:
-  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN --debug
+  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN

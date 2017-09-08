@@ -23,7 +23,8 @@
     <sonar.links.homepage>https://github.com/WorksApplications/Sudachi</sonar.links.homepage>
     <sonar.links.ci>https://travis-ci.org/WorksApplications/Sudachi</sonar.links.ci>
     <sonar.links.issue>https://github.com/WorksApplications/Sudachi/issues</sonar.links.issue>
-    <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
+    <sonar.junit.reportsPath/>
+    <sonar.junit.reportPaths>${project.build.directory}/surefire-reports</sonar.junit.reportPaths>
   </properties>
 
   <profiles>
@@ -69,11 +70,11 @@
         </property>
       </activation>
       <properties>
-        <sonar.skip>false</sonar.skip><!--
+        <sonar.skip>false</sonar.skip>
         <sonar.analysis.mode>preview</sonar.analysis.mode>
         <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
         <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
-        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>-->
+        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
         <jacoco.skip>false</jacoco.skip>
       </properties>
     </profile>
