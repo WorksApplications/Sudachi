@@ -16,21 +16,22 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
-import com.worksap.nlp.sudachi.dictionary.CategoryTypeSet;
 
 class MockInputText implements InputText<String> {
 
     String text;
-    CategoryTypeSet[] types;
+    EnumSet<CategoryType>[] types;
 
+    @SuppressWarnings("unchecked")
     MockInputText(String text) {
         this.text = text;
-        types = new CategoryTypeSet[text.length()];
+        types = new EnumSet[text.length()];
         for (int i = 0; i < text.length(); i++) {
-            types[i] = new CategoryTypeSet();
+            types[i] = EnumSet.noneOf(CategoryType.class);
         }
     }
 

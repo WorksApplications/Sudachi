@@ -24,8 +24,8 @@ import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A classifier of the categories of characters.
@@ -35,7 +35,7 @@ public class CharacterCategory {
     static class Range {
         int low;
         int high;
-        Set<CategoryType> categories = new CategoryTypeSet();
+        EnumSet<CategoryType> categories = EnumSet.noneOf(CategoryType.class);
         
         boolean contains(int cp) {
             if (cp >= low && cp <= high) {
@@ -65,13 +65,13 @@ public class CharacterCategory {
      * @param codePoint the code point value of the character
      * @return the set of the category types of the character
      */
-    public Set<CategoryType> getCategoryTypes(int codePoint) {
+    public EnumSet<CategoryType> getCategoryTypes(int codePoint) {
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
                 return range.categories;
             }
         }
-        return Collections.singleton(CategoryType.DEFAULT);
+        return EnumSet.of(CategoryType.DEFAULT);
     }
     
     /**

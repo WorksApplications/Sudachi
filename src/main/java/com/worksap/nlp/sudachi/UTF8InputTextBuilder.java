@@ -19,11 +19,11 @@ package com.worksap.nlp.sudachi;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
-import com.worksap.nlp.sudachi.dictionary.CategoryTypeSet;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
@@ -111,7 +111,7 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         byteIndexes[length] = modifiedStringText.length();
         offsets[length] = textOffsets.get(textOffsets.size() - 1);
 
-        List<Set<CategoryType>> charCategories
+        List<EnumSet<CategoryType>> charCategories
             = getCharCategoryTypes(modifiedStringText);
         List<Integer> charCategoryContinuities
             = getCharCategoryContinuities(modifiedStringText, length, charCategories);
@@ -123,12 +123,12 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
             Collections.unmodifiableList(charCategoryContinuities));
     }
 
-    private List<Set<CategoryType>> getCharCategoryTypes(String text) {
+    private List<EnumSet<CategoryType>> getCharCategoryTypes(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Set<CategoryType>> charCategoryTypes = new ArrayList<>(text.length());
-        Set<CategoryType> types = null;
+        List<EnumSet<CategoryType>> charCategoryTypes = new ArrayList<>(text.length());
+        EnumSet<CategoryType> types = null;
         for (int i = 0; i < text.length(); i++) {
             if (Character.isLowSurrogate(text.charAt(i)) && types != null) {
                 charCategoryTypes.add(types);
@@ -143,7 +143,7 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
     
     private List<Integer> getCharCategoryContinuities(String text,
                                                       int byteLength,
-                                                      List<Set<CategoryType>> charCategories) {
+                                                      List<EnumSet<CategoryType>> charCategories) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
@@ -162,10 +162,10 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
         return charCategoryContinuities;
     }
     
-    private int getCharCategoryContinuousLength(List<Set<CategoryType>> charCategories, int offset) {
+    private int getCharCategoryContinuousLength(List<EnumSet<CategoryType>> charCategories, int offset) {
         int length;
         Set<CategoryType> continuousCategory
-            = ((CategoryTypeSet)charCategories.get(offset)).clone();
+            = charCategories.get(offset).clone();
         for (length = 1; length < charCategories.size() - offset; length++) {
             continuousCategory.retainAll(charCategories.get(offset + length));
             if (continuousCategory.isEmpty()) {
