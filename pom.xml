@@ -14,6 +14,17 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
+    <jacoco.skip>true</jacoco.skip>
+    <sonar.skip>true</sonar.skip>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
+    <sonar.language>java</sonar.language>
+    <sonar.organization>worksapplications</sonar.organization>
+    <sonar.links.homepage>https://github.com/WorksApplications/Sudachi</sonar.links.homepage>
+    <sonar.links.ci>https://travis-ci.org/WorksApplications/Sudachi</sonar.links.ci>
+    <sonar.links.issue>https://github.com/WorksApplications/Sudachi/issues</sonar.links.issue>
+    <sonar.junit.reportsPath/>
+    <sonar.junit.reportPaths>${project.build.directory}/surefire-reports</sonar.junit.reportPaths>
   </properties>
 
   <profiles>
@@ -49,6 +60,36 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>pre-merge</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS_EVENT_TYPE</name>
+          <value>pull_request</value>
+        </property>
+      </activation>
+      <properties>
+        <sonar.skip>false</sonar.skip>
+        <sonar.analysis.mode>preview</sonar.analysis.mode>
+        <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
+        <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
+        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
+        <jacoco.skip>false</jacoco.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>post-merge</id>
+      <activation>
+        <property>
+          <name>env.TRAVIS_BRANCH</name>
+          <value>develop</value>
+        </property>
+      </activation>
+      <properties>
+        <sonar.skip>false</sonar.skip>
+        <jacoco.skip>false</jacoco.skip>
+      </properties>
     </profile>
   </profiles>
 
@@ -147,6 +188,16 @@
             <exclude>**/CategoryTypeSet.java</exclude>
           </sourceFileExcludes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.3.0.603</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.9</version>
       </plugin>
     </plugins>
   </build>
