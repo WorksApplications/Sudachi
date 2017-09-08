@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -248,11 +249,11 @@ public class DictionaryBuilder {
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
         int i = 0;
-        for (byte[] key : trieKeys.keySet()) {
-            keys[i] = key;
+        for (Entry<byte[], List<Integer>> entry : trieKeys.entrySet()) {
+            keys[i] = entry.getKey();
             values[i] = wordIdTable.position();
             i++;
-            List<Integer> wordIds = trieKeys.get(key);
+            List<Integer> wordIds = entry.getValue();
             wordIdTable.put((byte)wordIds.size());
             for (int wordId : wordIds) {
                 wordIdTable.putInt(wordId);
