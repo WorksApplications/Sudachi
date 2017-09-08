@@ -69,11 +69,11 @@
         </property>
       </activation>
       <properties>
-        <sonar.skip>false</sonar.skip>
+        <sonar.skip>false</sonar.skip><!--
         <sonar.analysis.mode>preview</sonar.analysis.mode>
         <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
         <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
-        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
+        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>-->
         <jacoco.skip>false</jacoco.skip>
       </properties>
     </profile>

@@ -22,4 +22,4 @@ install: true
 script:
   - mvn jacoco:prepare-agent test -B --debug
 after_success:
-  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN
+  - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN --debug
