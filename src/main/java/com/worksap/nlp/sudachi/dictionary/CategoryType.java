@@ -56,7 +56,9 @@ public enum CategoryType {
     /** User defined category. */
     USER3(1 << 13),
     /** User defined category. */
-    USER4(1 << 14);
+    USER4(1 << 14),
+    /** Characters that cannot be the beginning of word */
+    NOOOVBOW(1 << 15);
 
     private final int id;
 

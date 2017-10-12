@@ -58,7 +58,8 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
-            if ((node.isOOV() || isOneChar(text, node))
+            if ((node.isOOV() ||
+                 (isOneChar(text, node) && canOovBowNode(text, node)))
                 && isKatakanaNode(text, node)) {
                 int begin = i - 1;
                 for ( ; begin >= 0; begin--) {
@@ -69,6 +70,9 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
                 }
                 if (begin < 0) {
                     begin = 0;
+                }
+                while (begin != i && !canOovBowNode(text, path.get(begin))) {
+                    begin++;
                 }
                 int end = i + 1;
                 for ( ; end < path.size(); end++) {
@@ -91,5 +95,9 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     boolean isOneChar(InputText<?> text, LatticeNode node) {
         int b = node.getBegin();
         return  b + text.getCodePointsOffsetLength(b, 1) == node.getEnd();
+    }
+
+    boolean canOovBowNode(InputText<?> text, LatticeNode node) {
+        return !text.getCharCategoryTypes(node.getBegin()).contains(CategoryType.NOOOVBOW);
     }
 }

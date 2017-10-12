@@ -66,12 +66,17 @@ public class CharacterCategory {
      * @return the set of the category types of the character
      */
     public Set<CategoryType> getCategoryTypes(int codePoint) {
+        Set<CategoryType> categories = new CategoryTypeSet();
         for (Range range: rangeList) {
             if (range.contains(codePoint)) {
-                return range.categories;
+                categories.addAll(range.categories);
             }
         }
-        return Collections.singleton(CategoryType.DEFAULT);
+
+        if (categories.isEmpty()) {
+            categories.add(CategoryType.DEFAULT);
+        }
+        return categories;
     }
     
     /**
@@ -135,12 +140,6 @@ public class CharacterCategory {
                     rangeList.add(range);
                 }
             }
-            Range defaultRange = new Range();
-            defaultRange.low = 0;
-            defaultRange.high = Integer.MAX_VALUE;
-            defaultRange.categories.add(CategoryType.DEFAULT);
-            Collections.reverse(rangeList);
-            rangeList.add(defaultRange);
         }
     }
 }
