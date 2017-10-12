@@ -27,12 +27,13 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
-import java.util.Comparator;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import com.worksap.nlp.dartsclone.DoubleArray;
 
 /**
@@ -62,18 +63,15 @@ public class DictionaryBuilder {
 
     POSTable posTable = new POSTable();
     SortedMap<byte[], List<Integer>> trieKeys
-        = new TreeMap<>(new Comparator<byte[]>() {
-                @Override
-                public int compare(byte[] l, byte[] r) {
-                    int llen = l.length;
-                    int rlen = r.length;
-                    for (int i = 0; i < Math.min(llen, rlen); i++) {
-                        if (l[i] != r[i]) {
-                            return (l[i] & 0xff) - (r[i] & 0xff);
-                        }
+        = new TreeMap<>((byte[] l, byte[] r) -> {
+                int llen = l.length;
+                int rlen = r.length;
+                for (int i = 0; i < Math.min(llen, rlen); i++) {
+                    if (l[i] != r[i]) {
+                        return (l[i] & 0xff) - (r[i] & 0xff);
                     }
-                    return l.length - r.length;
                 }
+                return l.length - r.length;
             });
     List<Short[]> params = new ArrayList<>();
     List<WordInfo> wordInfos = new ArrayList<>();
@@ -251,11 +249,11 @@ public class DictionaryBuilder {
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
         int i = 0;
-        for (byte[] key : trieKeys.keySet()) {
-            keys[i] = key;
+        for (Entry<byte[], List<Integer>> entry : trieKeys.entrySet()) {
+            keys[i] = entry.getKey();
             values[i] = wordIdTable.position();
             i++;
-            List<Integer> wordIds = trieKeys.get(key);
+            List<Integer> wordIds = entry.getValue();
             wordIdTable.put((byte)wordIds.size());
             for (int wordId : wordIds) {
                 wordIdTable.putInt(wordId);

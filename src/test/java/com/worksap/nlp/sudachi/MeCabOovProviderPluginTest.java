@@ -16,15 +16,15 @@
 
 package com.worksap.nlp.sudachi;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 

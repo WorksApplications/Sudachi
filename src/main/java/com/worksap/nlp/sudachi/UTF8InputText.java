@@ -17,11 +17,11 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
-import com.worksap.nlp.sudachi.dictionary.CategoryTypeSet;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputText implements InputText<byte[]> {
@@ -31,13 +31,13 @@ class UTF8InputText implements InputText<byte[]> {
     private final byte[] bytes;
     private final int[] offsets;
     private final int[] byteIndexes;
-    private final List<Set<CategoryType>> charCategories;
+    private final List<EnumSet<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     private final List<Boolean> canBowList;
     
     UTF8InputText(Grammar grammar, String originalText, String modifiedText,
         byte[] bytes, int[] offsets, int[] byteIndexes,
-        List<Set<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
+        List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
         List<Boolean> canBowList) {
         
         this.originalText = originalText;
@@ -99,7 +99,7 @@ class UTF8InputText implements InputText<byte[]> {
         int b = byteIndexes[begin];
         int e = byteIndexes[end];
         Set<CategoryType> continuousCategory
-            = ((CategoryTypeSet)charCategories.get(b)).clone();
+            = charCategories.get(b).clone();
         for (int i = b + 1; i < e; i++) {
             continuousCategory.retainAll(charCategories.get(i));
         }
