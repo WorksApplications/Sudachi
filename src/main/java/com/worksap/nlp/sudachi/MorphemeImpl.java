@@ -78,8 +78,9 @@ class MorphemeImpl implements Morpheme {
     }
     
     WordInfo getWordInfo() {
-        if (wordInfo == null)
+        if (wordInfo == null) {
             wordInfo = list.getWordInfo(index);
+        }
         return wordInfo;
     }
 

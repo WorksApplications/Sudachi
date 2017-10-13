@@ -96,8 +96,9 @@ public class DoubleArray {
         for (byte k : key) {
             nodePos ^= offset(unit) ^ Byte.toUnsignedInt(k);
             unit = array.get(nodePos);
-            if (label(unit) != Byte.toUnsignedInt(k))
+            if (label(unit) != Byte.toUnsignedInt(k)) {
                 return result;
+            }
         }
         if (!hasLeaf(unit)) {
             return result;

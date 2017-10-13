@@ -31,8 +31,9 @@ public class KeySet {
     byte[] getKey(int id) { return keys[id]; }
     
     byte getKeyByte(int keyId, int byteId) {
-        if (byteId >= keys[keyId].length)
+        if (byteId >= keys[keyId].length) {
             return 0;
+        }
         return keys[keyId][byteId];
     }
 

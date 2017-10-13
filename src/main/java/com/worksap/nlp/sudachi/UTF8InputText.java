@@ -67,12 +67,15 @@ class UTF8InputText implements InputText<byte[]> {
     @Override
     public String getSubstring(int begin, int end)
         throws StringIndexOutOfBoundsException {
-        if (begin < 0)
+        if (begin < 0) {
             throw new StringIndexOutOfBoundsException(begin);
-        if (end > bytes.length)
+        }
+        if (end > bytes.length) {
             throw new StringIndexOutOfBoundsException(end);
-        if (begin > end)
+        }
+        if (begin > end) {
             throw new StringIndexOutOfBoundsException(end - begin);
+        }
 
         return modifiedText.substring(byteIndexes[begin], byteIndexes[end]);
     }
