@@ -150,6 +150,7 @@ class JapaneseTokenizer implements Tokenizer {
         return new MorphemeList(input, grammar, lexicon, path);
     }
 
+    @Override
     public void setDumpOutput(PrintStream output) {
         dumpOutput = output;
     }

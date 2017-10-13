@@ -35,6 +35,7 @@ public class LexiconSet implements Lexicon {
         }
     }
 
+    @Override
     public Iterator<int[]> lookup(byte[] text, int offset) {
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
@@ -81,18 +82,22 @@ public class LexiconSet implements Lexicon {
         }
     }
 
+    @Override
     public short getLeftId(int wordId) {
         return lexicons.get(getDictionaryId(wordId)).getLeftId(getWordId(wordId));
     }
 
+    @Override
     public short getRightId(int wordId) {
         return lexicons.get(getDictionaryId(wordId)).getRightId(getWordId(wordId));
     }
 
+    @Override
     public short getCost(int wordId) {
         return lexicons.get(getDictionaryId(wordId)).getCost(getWordId(wordId));
     }
 
+    @Override
     public WordInfo getWordInfo(int wordId) {
         return lexicons.get(getDictionaryId(wordId)).getWordInfo(getWordId(wordId));
     }

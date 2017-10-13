@@ -66,11 +66,13 @@ class MorphemeImpl implements Morpheme {
         return wi.getReadingForm();
     }
 
+    @Override
     public List<Morpheme> split(Tokenizer.SplitMode mode) {
         WordInfo wi = getWordInfo();
         return list.split(mode, index, wi);
     }
 
+    @Override
     public boolean isOOV() {
         return list.isOOV(index);
     }
