@@ -22,12 +22,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
-import java.text.Normalizer.Form;
 import java.text.Normalizer;
-import java.util.Set;
-import java.util.HashSet;
+import java.text.Normalizer.Form;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A plugin that rewrites the characters of input texts.

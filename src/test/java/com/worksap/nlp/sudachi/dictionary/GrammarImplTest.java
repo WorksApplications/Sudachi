@@ -16,12 +16,14 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 public class GrammarImplTest {
 

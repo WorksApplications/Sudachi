@@ -16,11 +16,14 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.nio.ByteBuffer;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
-import org.junit.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class DictionaryHeaderTest {
 
