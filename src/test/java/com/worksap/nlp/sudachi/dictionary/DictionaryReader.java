@@ -16,8 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;

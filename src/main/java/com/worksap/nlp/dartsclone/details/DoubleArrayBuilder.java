@@ -18,8 +18,8 @@ package com.worksap.nlp.dartsclone.details;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.function.BiConsumer;
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 public class DoubleArrayBuilder {
 

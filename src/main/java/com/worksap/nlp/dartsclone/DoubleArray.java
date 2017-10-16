@@ -17,18 +17,18 @@
 package com.worksap.nlp.dartsclone;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.util.function.BiConsumer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.BiConsumer;
 
-import com.worksap.nlp.dartsclone.details.KeySet;
 import com.worksap.nlp.dartsclone.details.DoubleArrayBuilder;
+import com.worksap.nlp.dartsclone.details.KeySet;
 
 public class DoubleArray {
 
@@ -96,8 +96,9 @@ public class DoubleArray {
         for (byte k : key) {
             nodePos ^= offset(unit) ^ Byte.toUnsignedInt(k);
             unit = array.get(nodePos);
-            if (label(unit) != Byte.toUnsignedInt(k))
+            if (label(unit) != Byte.toUnsignedInt(k)) {
                 return result;
+            }
         }
         if (!hasLeaf(unit)) {
             return result;

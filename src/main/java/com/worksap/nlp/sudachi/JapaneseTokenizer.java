@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
@@ -150,6 +151,7 @@ class JapaneseTokenizer implements Tokenizer {
         return new MorphemeList(input, grammar, lexicon, path);
     }
 
+    @Override
     public void setDumpOutput(PrintStream output) {
         dumpOutput = output;
     }

@@ -262,7 +262,9 @@ public class DictionaryBuilder {
 
         System.err.print("building the trie");
         trie.build(keys, values,
-                   (n, s) -> { if (n % ((s / 10) + 1) == 0) System.err.print(".");});
+                   (n, s) -> { if (n % ((s / 10) + 1) == 0) {
+                       System.err.print(".");
+                   }});
         System.err.println("done");
 
         System.err.print("writing the trie...");

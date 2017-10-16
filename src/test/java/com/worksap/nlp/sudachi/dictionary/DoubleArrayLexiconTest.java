@@ -16,6 +16,9 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 public class DoubleArrayLexiconTest {
 

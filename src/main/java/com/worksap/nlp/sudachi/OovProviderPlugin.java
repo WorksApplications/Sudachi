@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
+
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 /**

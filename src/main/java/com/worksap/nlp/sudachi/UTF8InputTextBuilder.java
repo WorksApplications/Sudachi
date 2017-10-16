@@ -51,14 +51,18 @@ class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
     
     @Override
     public void replace(int begin, int end, String str) {
-        if (begin < 0)
+        if (begin < 0) {
             throw new StringIndexOutOfBoundsException(begin);
-        if (begin > modifiedText.length())
+        }
+        if (begin > modifiedText.length()) {
             throw new StringIndexOutOfBoundsException("begin > length()");
-        if (begin > end)
+        }
+        if (begin > end) {
             throw new StringIndexOutOfBoundsException("begin > end");
-        if (begin == end)
+        }
+        if (begin == end) {
             throw new IllegalArgumentException("begin == end");
+        }
         
         if (end > modifiedText.length()) {
             end = modifiedText.length();
