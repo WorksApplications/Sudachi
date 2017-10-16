@@ -12,11 +12,10 @@ before_cache:
 cache:
   directories:
     - target/dictionary
-# Currently git-lfs has trouble, so skip downloading csv file from LFS.
+# Disable git-lfs to skip downloading large data
 git:
   lfs_skip_smudge: true
-# Currently `mvn package` cannot work due to git-lfs problem, see issue #1.
-# So we need to skip invoking `mvn install` for now.
+# `mvn package` needs file managed by git-lfs, so we need to skip invoking `mvn install`
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
 script:
