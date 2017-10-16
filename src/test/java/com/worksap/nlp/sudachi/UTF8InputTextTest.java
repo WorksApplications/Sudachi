@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -27,14 +28,18 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class UTF8InputTextTest {
-    
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
+
     // mixed full-width, half-width, accented
     // U+2123D '𡈽' uses surrogate pair
     static final String TEXT = "âｂC1あ234漢字𡈽アｺﾞ";
@@ -250,6 +255,52 @@ public class UTF8InputTextTest {
         assertFalse(input.canBow(21));
         assertFalse(input.canBow(22));
         assertTrue(input.canBow(23)); // ア
+    }
+
+    @Test
+    public void testGetCharCategoryContinuousLengthWithNegativeIndex() {
+        input = builder.build();
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Index should be zero or positive value less than 32, but was -1");
+        input.getCharCategoryContinuousLength(-1);
+    }
+
+    @Test
+    public void testGetCharCategoryContinuousLengthWithTooLargeIndex() {
+        input = builder.build();
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Index should be zero or positive value less than 32, but was 32");
+        input.getCharCategoryContinuousLength(32);
+    }
+
+    @Test
+    public void testGetCharCategoryTypesWithNegativeIndex() {
+        input = builder.build();
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Index should be zero or positive value less than 33, but was -1");
+        input.getCharCategoryTypes(-1);
+    }
+
+    @Test
+    public void testGetCharCategoryTypesWithTooLargeIndex() {
+        input = builder.build();
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Index should be zero or positive value less than 33, but was 33");
+        input.getCharCategoryTypes(33);
+    }
+
+    @Test
+    public void testGetCharCategoryTypesWithNegativeIndex2() {
+        input = builder.build();
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Index should be zero or positive value less than 32, but was -1");
+        input.getCharCategoryTypes(-1, 1);
+    }
+
+    @Test
+    public void testGetCharCategoryTypesWithTooLargeIndex2() {
+        input = builder.build();
+        assertThat(input.getCharCategoryTypes(0, 32), is(empty()));
     }
 
     @Test
