@@ -252,6 +252,14 @@ public class UTF8InputTextTest {
         assertTrue(input.canBow(23)); // ア
     }
 
+    @Test
+    public void returnedSetShouldNotExposureInternalData() {
+        input = builder.build();
+        assertThat(input.getCharCategoryTypes(0), hasItem(CategoryType.ALPHA));
+        input.getCharCategoryTypes(0).clear();
+        assertThat(input.getCharCategoryTypes(0), hasItem(CategoryType.ALPHA));
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {
