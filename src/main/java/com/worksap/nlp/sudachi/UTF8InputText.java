@@ -91,7 +91,7 @@ class UTF8InputText implements InputText<byte[]> {
     
     @Override
     public Set<CategoryType> getCharCategoryTypes(int index) {
-        return charCategories.get(byteIndexes[index]);
+        return charCategories.get(byteIndexes[index]).clone();
     }
     
     @Override
