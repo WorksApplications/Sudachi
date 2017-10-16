@@ -91,7 +91,14 @@ class UTF8InputText implements InputText<byte[]> {
     
     @Override
     public Set<CategoryType> getCharCategoryTypes(int index) {
-        return charCategories.get(byteIndexes[index]).clone();
+        if (index < 0 || byteIndexes.length <= index) {
+            String message = String.format("Index should be zero or positive value less than %d, but was %d", byteIndexes.length, index);
+            throw new IllegalArgumentException(message);
+        }
+        int byteIndex = byteIndexes[index];
+        assert 0 <= byteIndex;
+        assert byteIndex < charCategories.size();
+        return charCategories.get(byteIndex).clone();
     }
     
     @Override
@@ -111,6 +118,10 @@ class UTF8InputText implements InputText<byte[]> {
 
     @Override
     public int getCharCategoryContinuousLength(int index) {
+        if (index < 0 || charCategoryContinuities.size() <= index) {
+            String message = String.format("Index should be zero or positive value less than %d, but was %d", charCategoryContinuities.size(), index);
+            throw new IllegalArgumentException(message);
+        }
         return charCategoryContinuities.get(index);
     }
     
