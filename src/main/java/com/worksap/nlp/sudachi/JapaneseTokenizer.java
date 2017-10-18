@@ -33,6 +33,7 @@ class JapaneseTokenizer implements Tokenizer {
     List<InputTextPlugin> inputTextPlugins;
     List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
+    OovProviderPlugin defaultOovProvider;
     PrintStream dumpOutput;
 
     LatticeImpl lattice;
@@ -48,6 +49,10 @@ class JapaneseTokenizer implements Tokenizer {
         this.oovProviderPlugins = oovProviderPlugins;
         this.pathRewritePlugins = pathRewritePlugins;
         this.lattice = new LatticeImpl(grammar);
+
+        if (!oovProviderPlugins.isEmpty()) {
+            defaultOovProvider = oovProviderPlugins.get(oovProviderPlugins.size() - 1);
+        }
     }
 
     @Override
@@ -84,11 +89,16 @@ class JapaneseTokenizer implements Tokenizer {
             }
 
             // OOV
-            if (input.getCharCategoryTypes(i).contains(CategoryType.NOOOVBOW)) {
-                continue;
+            if (!input.getCharCategoryTypes(i).contains(CategoryType.NOOOVBOW)) {
+                for (OovProviderPlugin plugin : oovProviderPlugins) {
+                    for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
+                        hasWords = true;
+                        lattice.insert(node.getBegin(), node.getEnd(), node);
+                    }
+                }
             }
-            for (OovProviderPlugin plugin : oovProviderPlugins) {
-                for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
+            if (!hasWords && defaultOovProvider != null) {
+                for (LatticeNode node : defaultOovProvider.getOOV(input, i, hasWords)) {
                     hasWords = true;
                     lattice.insert(node.getBegin(), node.getEnd(), node);
                 }

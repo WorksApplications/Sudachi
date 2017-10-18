@@ -1,0 +1,11 @@
+{
+    "systemDict" : "system.dic",
+    "characterDefinitionFile" : "char.def",
+    "oovProviderPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
+          "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],
+          "leftId" : 8,
+          "rightId" : 8,
+          "cost" : 6000 }
+    ]
+}
