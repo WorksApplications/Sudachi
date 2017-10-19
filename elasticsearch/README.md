@@ -1,6 +1,17 @@
 # Sudachi
 Sudachi is Japanese morphological analyzer.
 
+# Build
+
+1. Build and install Sudachi
+2. Copy files
+
+   $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+   $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+3. Build
+
+   $ mvn package
+
 # Installation
 
 
@@ -40,6 +51,17 @@ Originally under lucene, https://lucene.apache.org/
  
 # Sudachi
 Sudachi は日本語用の形態素解析器です。
+
+# ビルド方法
+
+1. Sudachi をビルドし、インストールします
+2. Sudachi の構成ファイルをコピーします
+
+   $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+   $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+3. プラグインをビルドします
+
+   $ mvn package
 
 # インストール方法
 

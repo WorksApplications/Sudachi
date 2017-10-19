@@ -61,14 +61,13 @@
 		<dependency>
 			<groupId>com.worksap.nlp</groupId>
 			<artifactId>sudachi</artifactId>
-			<version>0.9-SNAPSHOT</version>
-			<scope>runtime</scope>
+			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch -->
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>transport</artifactId>
-			<version>5.5.1</version>
+			<version>5.6.1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-kuromoji -->
 		<dependency>
@@ -110,7 +109,7 @@
 		<dependency>
 			<groupId>org.elasticsearch.test</groupId>
 			<artifactId>framework</artifactId>
-			<version>5.5.1</version>
+			<version>5.6.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

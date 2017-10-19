@@ -226,7 +226,7 @@ public class TestSudachiPathResolver {
         assumeTrue(NOT_OS_WINDOWS);
         assertThat(new SudachiPathResolver("/usr/share/elasticsearch/config",
                 "../../../sudachiSettings.json").resolvePathForFile(),
-                is("/usr/share/sudachiSettings.json"));
+                is("/usr/sudachiSettings.json"));
 
     }
 
@@ -262,7 +262,7 @@ public class TestSudachiPathResolver {
     public void testEmptyForNotWindowsForDirectory() throws IOException {
         assumeTrue(NOT_OS_WINDOWS);
         assertThat(new SudachiPathResolver("/usr/share/elasticsearch/config",
-                "/analysis-sudachi/sudachiSettings.json").resolvePathForDirectory(),
+                "").resolvePathForDirectory(),
                 is("/usr/share/elasticsearch/config"));
 
     }
