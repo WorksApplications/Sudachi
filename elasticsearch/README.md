@@ -6,11 +6,16 @@ Sudachi is Japanese morphological analyzer.
 1. Build and install Sudachi
 2. Copy files
 
-   $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
-   $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    ```sh
+    $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    ```
+
 3. Build
 
+    ```sh
    $ mvn package
+   ```
 
 # Installation
 
@@ -26,17 +31,17 @@ Sudachi is Japanese morphological analyzer.
 - settings\_path: Sudachi setting file path. The path may be absolute or relative; relative paths are resolved with respect to ES\_HOME. (string, default: null)  
 - resources_path: Sudachi dictionary path. The path may be absolute or relative; relative paths are resolved with respect to ES\_HOME. (string, default: null)  
 
-**[Example]** 
+**[Example]**
 
     "tokenizer": {
-        "mytokenizer": {
-		"type": "sudachi_tokenizer",
-		"mode": "search",
-		"discard_punctuation": true,
-		"settings_path": "sudachiSettings.json",
-		"resources_path": "config"
-         }
-      } 
+      "mytokenizer": {
+        "type": "sudachi_tokenizer",
+        "mode": "search",
+        "discard_punctuation": true,
+        "settings_path": "sudachiSettings.json",
+        "resources_path": "config"
+      }
+    }
 
 # Corresponding Filter
 - sudachi\_part\_of\_speech: Exclude the specified part of speech.  
@@ -48,7 +53,7 @@ Sudachi is Japanese morphological analyzer.
 Copyright (c) 2017 Works Applications Co., Ltd.  
 Originally under elasticsearch, https://www.elastic.co/jp/products/elasticsearch  
 Originally under lucene, https://lucene.apache.org/
- 
+
 # Sudachi
 Sudachi は日本語用の形態素解析器です。
 
@@ -57,11 +62,16 @@ Sudachi は日本語用の形態素解析器です。
 1. Sudachi をビルドし、インストールします
 2. Sudachi の構成ファイルをコピーします
 
-   $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
-   $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    ```sh
+    $ cp ../src/main/resources/*.def src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    $ cp ../target/system.dic src/test/resources/com/worksap/nlp/lucene/sudachi/ja
+    ```
+
 3. プラグインをビルドします
 
-   $ mvn package
+    ```sh
+    $ mvn package
+    ```
 
 # インストール方法
 
@@ -76,17 +86,17 @@ Sudachi は日本語用の形態素解析器です。
 - settings\_path: Sudachiの設定ファイルが配置されているファイルパスを設定します。絶対パス、相対パスともに設定可能です。相対パスの場合はES\_HOMEを基準にします。(string, default: null)  
 - resources_path: Sudachiで利用する辞書ファイルのディクショナリパスを設定します。絶対パス、相対パスともに設定可能です。相対パスの場合はES\_HOMEを基準にします。(string, default: null)  
 
-**[例]** 
+**[例]**
 
     "tokenizer": {
-        "mytokenizer": {
-		"type": "sudachi_tokenizer",
-		"mode": "search",
-		"discard_punctuation": true,
-		"settings_path": "sudachiSettings.json",
-		"resources_path": "config"
-         }
-      } 
+      "mytokenizer": {
+        "type": "sudachi_tokenizer",
+        "mode": "search",
+        "discard_punctuation": true,
+        "settings_path": "sudachiSettings.json",
+        "resources_path": "config"
+      }
+    }
 
 # 対応フィルター
 - sudachi\_part\_of\_speech: テキスト分割された結果から特定の品詞を排除することができます。  
