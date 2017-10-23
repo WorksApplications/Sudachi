@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -52,9 +51,13 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
-    public void inSystemDictionary() {
-        List<Morpheme> ms = tokenizer.tokenize("ぴらる");
+    public void getDictionaryId() {
+        List<Morpheme> ms = tokenizer.tokenize("京都");
         assertThat(ms.size(), is(1));
-        assertFalse(ms.get(0).inSystemDictionary());
+        assertThat(ms.get(0).getDictionaryId(), is(0));
+
+        ms = tokenizer.tokenize("ぴらる");
+        assertThat(ms.size(), is(1));
+        assertThat(ms.get(0).getDictionaryId(), is(1));
     }
 }

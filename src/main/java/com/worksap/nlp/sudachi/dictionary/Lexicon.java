@@ -68,11 +68,12 @@ public interface Lexicon {
     WordInfo getWordInfo(int wordId);
 
     /**
-     * Returns whether the morpheme specified by the word ID
-     * is in the system dictionary or not.
+     * Returns the ID of the dictionary containing the morpheme
+     * specified by the word ID.
      *
-     * @return {@code true} if, and only if the morpheme is in the system
-     * dictionary
+     * If the morpheme is in the system dictionary, it returns {@code 0}.
+     *
+     * @return the dictionary ID
      */
-    boolean inSystemDictionary(int wordId);
+    int getDictionaryId(int wordId);
 }

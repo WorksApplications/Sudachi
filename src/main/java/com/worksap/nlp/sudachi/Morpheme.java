@@ -111,10 +111,12 @@ public interface Morpheme {
     public boolean isOOV();
 
     /**
-     * Returns whether the morpheme is in the system dictionary or not.
+     * Returns the ID of the dicitionary containing the morpheme.
      *
-     * @return {@code true} if, and only if the morpheme is in the system
-     * dictionary
+     * If the morpheme is in the system dictionary, it returns {@code 0}.
+     * If the morpheme is OOV, it returns a negative value.
+     *
+     * @return the dictionary ID
      */
-    public boolean inSystemDictionary();
+    public int getDictionaryId();
 }

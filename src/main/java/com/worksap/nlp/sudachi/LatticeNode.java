@@ -107,11 +107,11 @@ public interface LatticeNode {
     public int getPathCost();
 
     /**
-     * Returns {@code true} if, and only if, the node has its origin
-     * in the system dictionary.
+     * Returns the ID of the dictionary ID containing the morpheme of the node.
      *
-     * @return {@code true} if the node is in the system dictionary,
-     * otherwise {@code false}
+     * If the morpheme is OOV, it returns a negative value.
+     *
+     * @return the dictionary ID
      */
-    public boolean inSystemDictionary();
+    public int getDictionaryId();
 }

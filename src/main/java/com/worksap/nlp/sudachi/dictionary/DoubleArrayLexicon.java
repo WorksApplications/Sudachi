@@ -128,8 +128,8 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
-    public boolean inSystemDictionary(int wordId) {
-        return true;
+    public int getDictionaryId(int wordId) {
+        return 0;
     }
 
     public void calculateCost(Tokenizer tokenizer) {

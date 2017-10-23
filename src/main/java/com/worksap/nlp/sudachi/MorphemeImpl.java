@@ -78,8 +78,8 @@ class MorphemeImpl implements Morpheme {
     }
     
     @Override
-    public boolean inSystemDictionary() {
-        return list.inSystemDictionary(index);
+    public int getDictionaryId() {
+        return list.getDictionaryId(index);
     }
 
     WordInfo getWordInfo() {

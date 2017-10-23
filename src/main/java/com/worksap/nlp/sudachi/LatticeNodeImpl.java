@@ -99,11 +99,11 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
-    public boolean inSystemDictionary() {
+    public int getDictionaryId() {
         if (wordId < 0) {
-            return false;
+            return -1;
         }
-        return lexicon.inSystemDictionary(wordId);
+        return lexicon.getDictionaryId(wordId);
     }
 
     @Override

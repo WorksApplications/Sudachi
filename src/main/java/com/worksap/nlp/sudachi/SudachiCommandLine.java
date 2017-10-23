@@ -65,6 +65,8 @@ public class SudachiCommandLine {
                         output.print(m.dictionaryForm());
                         output.print("\t");
                         output.print(m.readingForm());
+                        output.print("\t");
+                        output.print(m.getDictionaryId());
                         if (m.isOOV()) {
                             output.print("\t");
                             output.print("(OOV)");
