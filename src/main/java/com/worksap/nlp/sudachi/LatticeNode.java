@@ -105,4 +105,13 @@ public interface LatticeNode {
      * @return the cost of the path from BOS to this node
      */
     public int getPathCost();
+
+    /**
+     * Returns {@code true} if, and only if, the node has its origin
+     * in the system dictionary.
+     *
+     * @return {@code true} if the node is in the system dictionary,
+     * otherwise {@code false}
+     */
+    public boolean inSystemDictionary();
 }

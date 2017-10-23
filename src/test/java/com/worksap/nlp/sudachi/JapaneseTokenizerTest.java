@@ -17,9 +17,11 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,7 +38,7 @@ public class JapaneseTokenizerTest {
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(),
-                           "/system.dic", "/char.def", "/unk.def");
+                           "/system.dic", "/user.dic", "/char.def", "/unk.def");
 
         String path = temporaryFolder.getRoot().getPath();
         String settings = Utils.readAllResource("/sudachi.json");
@@ -47,5 +49,12 @@ public class JapaneseTokenizerTest {
     @Test
     public void tokenizeSmallKatakanaOnly() {
         assertThat(tokenizer.tokenize("ァ").size(), is(1));
+    }
+
+    @Test
+    public void inSystemDictionary() {
+        List<Morpheme> ms = tokenizer.tokenize("ぴらる");
+        assertThat(ms.size(), is(1));
+        assertFalse(ms.get(0).inSystemDictionary());
     }
 }

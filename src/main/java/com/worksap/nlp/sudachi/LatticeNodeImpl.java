@@ -99,6 +99,14 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
+    public boolean inSystemDictionary() {
+        if (wordId < 0) {
+            return false;
+        }
+        return lexicon.inSystemDictionary(wordId);
+    }
+
+    @Override
     public String toString() {
         String surface;
         if (wordId < 0 && extraWordInfo == null) {

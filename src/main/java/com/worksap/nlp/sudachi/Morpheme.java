@@ -109,4 +109,12 @@ public interface Morpheme {
      * @return {@code true} if, and only if the morpheme is OOV
      */
     public boolean isOOV();
+
+    /**
+     * Returns whether the morpheme is in the system dictionary or not.
+     *
+     * @return {@code true} if, and only if the morpheme is in the system
+     * dictionary
+     */
+    public boolean inSystemDictionary();
 }

@@ -102,6 +102,10 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.get(index).isOOV();
     }
 
+    boolean inSystemDictionary(int index) {
+        return path.get(index).inSystemDictionary();
+    }
+
     public int getInternalCost() {
         return path.get(path.size() - 1).getPathCost() - path.get(0).getPathCost();
     }

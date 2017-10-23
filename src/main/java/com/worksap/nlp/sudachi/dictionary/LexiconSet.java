@@ -102,6 +102,11 @@ public class LexiconSet implements Lexicon {
         return lexicons.get(getDictionaryId(wordId)).getWordInfo(getWordId(wordId));
     }
 
+    @Override
+    public boolean inSystemDictionary(int wordId) {
+        return getDictionaryId(wordId) == 0;
+    }
+
     private int getDictionaryId(int wordId) {
         return wordId >>> 28;
     }

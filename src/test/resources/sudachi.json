@@ -1,5 +1,6 @@
 {
     "systemDict" : "system.dic",
+    "userDict" : [ "user.dic" ],
     "characterDefinitionFile" : "char.def",
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",

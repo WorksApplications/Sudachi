@@ -77,6 +77,11 @@ class MorphemeImpl implements Morpheme {
         return list.isOOV(index);
     }
     
+    @Override
+    public boolean inSystemDictionary() {
+        return list.inSystemDictionary(index);
+    }
+
     WordInfo getWordInfo() {
         if (wordInfo == null) {
             wordInfo = list.getWordInfo(index);

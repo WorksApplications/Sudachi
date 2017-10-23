@@ -127,6 +127,11 @@ public class DoubleArrayLexicon implements Lexicon {
         return wordInfos.getWordInfo(wordId);
     }
 
+    @Override
+    public boolean inSystemDictionary(int wordId) {
+        return true;
+    }
+
     public void calculateCost(Tokenizer tokenizer) {
         for (int wordId = 0; wordId < wordParams.size(); wordId++) {
             if (getCost(wordId) != Short.MIN_VALUE) {
