@@ -99,6 +99,11 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
+    public int getWordId() {
+        return wordId;
+    }
+
+    @Override
     public int getDictionaryId() {
         if (wordId < 0) {
             return -1;

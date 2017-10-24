@@ -102,6 +102,10 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.get(index).isOOV();
     }
 
+    int getWordId(int index) {
+        return path.get(index).getWordId();
+    }
+
     int getDictionaryId(int index) {
         return path.get(index).getDictionaryId();
     }

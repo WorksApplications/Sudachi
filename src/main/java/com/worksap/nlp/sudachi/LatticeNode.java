@@ -107,6 +107,16 @@ public interface LatticeNode {
     public int getPathCost();
 
     /**
+     * Returns the ID of the morpheme.
+     *
+     * The IDs change when the dictionaries are updated or
+     * the combination of dictionaries changes.
+     *
+     * If the morpheme is OOV, it returns a negative value.
+     */
+    public int getWordId();
+
+    /**
      * Returns the ID of the dictionary ID containing the morpheme of the node.
      *
      * If the morpheme is OOV, it returns a negative value.

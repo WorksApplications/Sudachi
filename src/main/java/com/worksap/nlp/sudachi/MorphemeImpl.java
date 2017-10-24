@@ -78,6 +78,11 @@ class MorphemeImpl implements Morpheme {
     }
     
     @Override
+    public int getWordId() {
+        return list.getWordId(index);
+    }
+
+    @Override
     public int getDictionaryId() {
         return list.getDictionaryId(index);
     }

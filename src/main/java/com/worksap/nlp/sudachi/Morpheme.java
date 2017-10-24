@@ -111,6 +111,16 @@ public interface Morpheme {
     public boolean isOOV();
 
     /**
+     * Returns the ID of the morpheme.
+     *
+     * The IDs change when the dictionaries are updated or
+     * the combination of dictionaries changes.
+     *
+     * If the morpheme is OOV, it returns a negative value.
+     */
+    public int getWordId();
+
+    /**
      * Returns the ID of the dicitionary containing the morpheme.
      *
      * If the morpheme is in the system dictionary, it returns {@code 0}.
