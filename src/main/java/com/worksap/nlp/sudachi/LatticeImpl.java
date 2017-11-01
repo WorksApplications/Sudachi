@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class LatticeImpl implements Lattice {
 
@@ -153,12 +154,31 @@ class LatticeImpl implements Lattice {
             List<LatticeNodeImpl> rNodes
                 = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
             for (LatticeNodeImpl rNode : rNodes) {
-                output.print(String.format("%d: %s: ", index,
-                                           rNode.toString()));
+                String surface;
+                String pos;
+                if (rNode.wordId < 0 && rNode.extraWordInfo == null) {
+                    surface = "(null)";
+                    pos = "BOS/EOS";
+                } else {
+                    WordInfo wi = rNode.getWordInfo();
+                    surface = wi.getSurface();
+                    short posId = wi.getPOSId();
+                    if (posId < 0) {
+                        pos = "(null)";
+                    } else {
+                        pos = String.join(",", grammar.getPartOfSpeechString(posId));
+                    }
+                }
+
+                output.print(String.format("%d: %d %d %s(%d) %s %d %d %d: ",
+                                           index,
+                                           rNode.getBegin(), rNode.getEnd(),
+                                           surface, rNode.wordId, pos,
+                                           rNode.leftId, rNode.rightId, rNode.cost));
                 index++;
+
                 for (LatticeNodeImpl lNode : endLists.get(rNode.begin)) {
-                    int cost = lNode.totalCost
-                        + grammar.getConnectCost(lNode.rightId, rNode.leftId);
+                    int cost = grammar.getConnectCost(lNode.rightId, rNode.leftId);
                     output.print(String.format("%d ", cost));
                 }
                 output.println();
