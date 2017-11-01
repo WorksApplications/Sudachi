@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -135,7 +136,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     void readCharacterProperty(String charDef) throws IOException {
         try (FileInputStream input = new FileInputStream(charDef);
              LineNumberReader reader
-             = new LineNumberReader(new InputStreamReader(input))) {
+             = new LineNumberReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -174,7 +175,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     void readOOV(String unkDef, Grammar grammar) throws IOException {
         try (FileInputStream input = new FileInputStream(unkDef);
              LineNumberReader reader
-             = new LineNumberReader(new InputStreamReader(input))) {
+             = new LineNumberReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {

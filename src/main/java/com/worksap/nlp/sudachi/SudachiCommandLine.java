@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A command-line morphological analysis tool.
@@ -30,7 +31,7 @@ public class SudachiCommandLine {
 
     static String readAll(InputStream input) throws IOException {
         BufferedReader reader
-            = new BufferedReader(new InputStreamReader(input));
+            = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         while (true) {
             String line = reader.readLine();
