@@ -66,8 +66,12 @@ class JapaneseTokenizer implements Tokenizer {
             plugin.rewrite(builder);
         }
         UTF8InputText input = builder.build();
-        byte[] bytes = input.getByteText();
+        if (dumpOutput != null) {
+            dumpOutput.println("=== Input dump:");
+            dumpOutput.println(input.getText());
+        }
 
+        byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
             if (!input.canBow(i) || !lattice.hasPreviousNode(i)) {
