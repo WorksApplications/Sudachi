@@ -28,6 +28,6 @@ after_success:
 deploy:
   # To build SNAPSHOT packages with CSV file, we need to fetch & checkout by git-lfs
   - provider: script
-    script: git lfs fetch && git lfs checkout && mvn deploy --setting .travis/settings.xml
+    script: git lfs fetch && git lfs checkout && mvn deploy --settings .travis/settings.xml
     on:
       branch: develop
