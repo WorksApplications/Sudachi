@@ -15,6 +15,9 @@ cache:
 # Disable git-lfs to skip downloading large data
 git:
   lfs_skip_smudge: true
+before_install:
+  # Decrypt settings.xml which is necessary to deploy to Sonatype Maven Repositories
+  - if [ -n "$encrypted_7881e527c02e_key" ]; then openssl aes-256-cbc -K $encrypted_7881e527c02e_key -iv $encrypted_7881e527c02e_iv -in .travis/settings.xml.enc -out .travis/settings.xml -d; fi
 # `mvn package` needs file managed by git-lfs, so we need to skip invoking `mvn install`
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
@@ -22,3 +25,9 @@ script:
   - mvn jacoco:prepare-agent test -B
 after_success:
   - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN
+deploy:
+  # To build SNAPSHOT packages with CSV file, we need to fetch & checkout by git-lfs
+  - provider: script
+    script: git lfs fetch && git lfs checkout && mvn deploy --setting .travis/settings.xml
+    on:
+      branch: develop
