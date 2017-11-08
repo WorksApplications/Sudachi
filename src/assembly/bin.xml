@@ -30,6 +30,7 @@
       <outputDirectory>/</outputDirectory>
       <includes>
         <include>char.def</include>
+        <include>rewrite.def</include>
         <include>unk.def</include>
       </includes>
     </fileSet>
