@@ -73,6 +73,7 @@ public interface Lexicon {
      *
      * If the morpheme is in the system dictionary, it returns {@code 0}.
      *
+     * @param wordId the word ID of the morpheme
      * @return the dictionary ID
      */
     int getDictionaryId(int wordId);

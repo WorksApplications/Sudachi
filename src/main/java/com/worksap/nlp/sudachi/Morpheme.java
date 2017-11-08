@@ -117,6 +117,8 @@ public interface Morpheme {
      * the combination of dictionaries changes.
      *
      * If the morpheme is OOV, it returns a negative value.
+     *
+     * @return the word ID
      */
     public int getWordId();
 
