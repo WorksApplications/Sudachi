@@ -1,6 +1,9 @@
 language: java
 jdk: oraclejdk8
-sudo: false
+# To use 7.5GiB memory, specify 'required' for 'sudo'
+# https://docs.travis-ci.com/user/reference/overview/#Virtualization-environments
+sudo: required
+dist: trusty
 env:
   global:
     # GITHUB_TOKEN
