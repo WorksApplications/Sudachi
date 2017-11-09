@@ -26,8 +26,11 @@ script:
 after_success:
   - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN
 deploy:
-  # To build SNAPSHOT packages with CSV file, we need to fetch & checkout by git-lfs
   - provider: script
+    # To build SNAPSHOT packages with CSV file, we need to fetch & checkout by git-lfs
     script: git lfs fetch && git lfs checkout && mvn deploy --settings .travis/settings.xml
+    # Skip cleanup to keep decrepted .travis/settings.xml in workspace
+    # https://docs.travis-ci.com/user/deployment/
+    skip_cleanup: true
     on:
       branch: develop
