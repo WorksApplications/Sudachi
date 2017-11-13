@@ -160,16 +160,27 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptor>src/assembly/bin.xml</descriptor>
-          <finalName>sudachi-${project.version}</finalName>
-        </configuration>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <descriptor>src/assembly/bin.xml</descriptor>
+              <finalName>sudachi-${project.version}</finalName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>assemble-dictionary</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptor>src/assembly/dic.xml</descriptor>
+              <finalName>sudachi-dictionary-${project.version}</finalName>
+            </configuration>
           </execution>
         </executions>
       </plugin>
