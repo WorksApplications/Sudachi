@@ -22,7 +22,6 @@
       <includes>
         <include>sudachi*.jar</include>
         <include>javax.json*.jar</include>
-        <include>system.dic</include>
       </includes>
     </fileSet>
     <fileSet>

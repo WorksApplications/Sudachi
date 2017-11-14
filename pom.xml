@@ -14,6 +14,7 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
+    <dictionary.types>core</dictionary.types>
     <jacoco.skip>true</jacoco.skip>
     <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -51,6 +52,42 @@
                     <get src="${unidic.url}" dest="${dictionary.build.directory}/unidic-mecab-${unidic.version}_src.zip" />
                     <unzip src="${dictionary.build.directory}/unidic-mecab-${unidic.version}_src.zip" dest="${dictionary.build.directory}" />
                   </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <activation>
+        <property>
+          <name>skip.full.dictionary</name>
+          <value>!true</value>
+        </property>
+      </activation>
+      <properties>
+        <dictionary.types>core,full</dictionary.types>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <concat destfile="${dictionary.build.directory}/full_lex.csv">
+                      <fileset file="dictionary/core_lex.csv" />
+                      <fileset file="dictionary/notcore_lex.csv" />
+                    </concat>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>
@@ -136,24 +173,71 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.2</version>
         <executions>
           <execution>
-            <id>compile-system-dictionary</id>
-            <phase>package</phase>
-            <configuration>
-	      <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
-	      <arguments>
-                <argument>dictionary/sudachi_lex.csv</argument>
-		<argument>${unidic.matrix}</argument>
-		<argument>${project.build.directory}/system.dic</argument>
-	      </arguments>
-            </configuration>
+            <id>copy-core-dictionary-source</id>
+            <phase>prepare-package</phase>
             <goals>
-              <goal>java</goal>
+              <goal>copy-resources</goal>
             </goals>
+            <configuration>
+              <outputDirectory>${dictionary.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>dictionary</directory>
+                  <includes>
+                    <include>core_lex.csv</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.soebes.maven.plugins</groupId>
+        <artifactId>iterator-maven-plugin</artifactId>
+        <version>0.5.1</version>
+        <executions>
+          <execution>
+            <id>build-system-dictionary</id>
+            <phase>package</phase>
+            <goals>
+              <goal>iterator</goal>
+            </goals>
+            <configuration>
+              <content>${dictionary.types}</content>
+              <pluginExecutors>
+                <pluginExecutor>
+                  <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                  </plugin>
+                  <goal>java</goal>
+                  <configuration>
+	            <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
+	            <arguments>
+                      <argument>${dictionary.build.directory}/@item@_lex.csv</argument>
+		      <argument>${unidic.matrix}</argument>
+		      <argument>${project.build.directory}/system_@item@.dic</argument>
+	            </arguments>
+                  </configuration>
+                </pluginExecutor>
+                <pluginExecutor>
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                  </plugin>
+                  <goal>single</goal>
+                  <configuration>
+                    <descriptor>src/assembly/dic.xml</descriptor>
+                  </configuration>
+                </pluginExecutor>
+              </pluginExecutors>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -169,17 +253,6 @@
             <configuration>
               <descriptor>src/assembly/bin.xml</descriptor>
               <finalName>sudachi-${project.version}</finalName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>assemble-dictionary</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptor>src/assembly/dic.xml</descriptor>
-              <finalName>sudachi-dictionary-${project.version}</finalName>
             </configuration>
           </execution>
         </executions>
