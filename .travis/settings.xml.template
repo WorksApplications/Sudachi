@@ -1,0 +1,33 @@
+<!--
+  This file is a template for .travis/settings.xml.
+  This XML contains passphrase and password, so it should be encrypted by `travis encrypt-file` command.
+  https://docs.travis-ci.com/user/encrypting-files/
+-->
+<settings>
+  <servers>
+    <server>
+      <!--
+        User name and password to deploy onto Sonatype repository.
+        Necessary to deploy both signed artifact (stable version) and unsigned artifact (snapshot version).
+      -->
+      <id>ossrh</id>
+      <username>...</username>
+      <password>...</password>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <!--
+        GPG passphrase to sign artifacts.
+        Necessary only if we want to deploy signed artifact (stable version) by Travis CI.
+      -->
+      <id>deploy</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <gpg.passphrase>...</gpg.passphrase>
+      </properties>
+    </profile>
+  </profiles>
+</settings>
