@@ -197,6 +197,19 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.2.3</version>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>com.soebes.maven.plugins</groupId>
         <artifactId>iterator-maven-plugin</artifactId>
         <version>0.5.1</version>
@@ -223,6 +236,7 @@
                       <argument>${dictionary.build.directory}/@item@_lex.csv</argument>
 		      <argument>${unidic.matrix}</argument>
 		      <argument>${project.build.directory}/system_@item@.dic</argument>
+                      <argument>${git.commit.id}</argument>
 	            </arguments>
                   </configuration>
                 </pluginExecutor>
