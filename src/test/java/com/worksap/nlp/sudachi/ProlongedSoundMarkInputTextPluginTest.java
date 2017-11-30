@@ -31,15 +31,12 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class ProlongedSoundMarkInputTextPluginTest {
     
-    static final String ORIGINAL_TEXT = "ゴーーーーール";
-    static final String NORMALIZED_TEXT = "ゴール";
     UTF8InputTextBuilder builder;
     UTF8InputText text;
     ProlongedSoundMarkTextPlugin plugin;
     
     @Before
     public void setUp() {
-        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin = new ProlongedSoundMarkTextPlugin();
         try {
             plugin.setUp();
@@ -50,40 +47,13 @@ public class ProlongedSoundMarkInputTextPluginTest {
     }
     
     @Test
-    public void beforeRewrite() {
-        assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
-        assertThat(builder.getText(), is(ORIGINAL_TEXT));
-        text = builder.build();
-        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
-        assertThat(text.getText(), is(ORIGINAL_TEXT));
-        byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(21));
-        assertArrayEquals(
-            new byte[] {
-                    (byte)0xE3, (byte)0x82, (byte)0xB4, (byte)0xE3,
-                    (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                    (byte)0xBC, (byte)0xE3, (byte)0x83, (byte)0xBC,
-                    (byte)0xE3, (byte)0x83, (byte)0xBC, (byte)0xE3,
-                    (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                    (byte)0xAB
-            }, bytes
-        );
-        assertThat(text.getOriginalIndex(0), is(0));
-        assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(2));
-        assertThat(text.getOriginalIndex(9), is(3));
-        assertThat(text.getOriginalIndex(12), is(4));
-        assertThat(text.getOriginalIndex(15), is(5));
-        assertThat(text.getOriginalIndex(18), is(6));
-        assertThat(text.getOriginalIndex(21), is(7));
-    }
-
-    @Test
-    public void afterRewrite() {
-        assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
-        assertThat(builder.getText(), is(ORIGINAL_TEXT));
+    public void combineContinuousProlongedSoundMarks() {
+        final String ORIGINAL_TEXT = "ゴーーーーール";
+        final String NORMALIZED_TEXT = "ゴール";
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
         text = builder.build();
+
         assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
