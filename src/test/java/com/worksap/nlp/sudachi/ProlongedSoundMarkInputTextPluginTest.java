@@ -98,7 +98,7 @@ public class ProlongedSoundMarkInputTextPluginTest {
     }
 
     @Test
-    public void combineContinuousProlongedSoundMarksMultipleTypes() {
+    public void combineContinuousProlongedSoundMarksMultipleTimes() {
         final String ORIGINAL_TEXT = "スーーーパーーーーー";
         final String NORMALIZED_TEXT = "スーパー";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
