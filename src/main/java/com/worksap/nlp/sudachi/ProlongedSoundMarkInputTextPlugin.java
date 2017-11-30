@@ -51,11 +51,13 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
                 markStartIndex = i;
             }
             else if (isProlongedSoundMark && c != prolongedSoundMark) {
-                builder.replace(markStartIndex, i, "ー");
+                if ((i - markStartIndex) > 1) {
+                    builder.replace(markStartIndex, i, "ー");
+                }
                 isProlongedSoundMark = false;
             }
         }
-        if (isProlongedSoundMark) {
+        if (isProlongedSoundMark && (n - markStartIndex) > 1) {
             builder.replace(markStartIndex, n, "ー");
         }
     }

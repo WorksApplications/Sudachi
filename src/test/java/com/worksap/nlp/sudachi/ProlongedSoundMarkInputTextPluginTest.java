@@ -48,7 +48,7 @@ public class ProlongedSoundMarkInputTextPluginTest {
     
     @Test
     public void combineContinuousProlongedSoundMarks() {
-        final String ORIGINAL_TEXT = "ゴーーーーール";
+        final String ORIGINAL_TEXT = "ゴーール";
         final String NORMALIZED_TEXT = "ゴール";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
@@ -67,13 +67,13 @@ public class ProlongedSoundMarkInputTextPluginTest {
         );
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(6));
-        assertThat(text.getOriginalIndex(9), is(7));
+        assertThat(text.getOriginalIndex(6), is(3));
+        assertThat(text.getOriginalIndex(9), is(4));
     }
 
     @Test
     public void combineContinuousProlongedSoundMarksAtEnd() {
-        final String ORIGINAL_TEXT = "スーパーーー";
+        final String ORIGINAL_TEXT = "スーパーー";
         final String NORMALIZED_TEXT = "スーパー";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
@@ -94,7 +94,7 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(2));
         assertThat(text.getOriginalIndex(9), is(3));
-        assertThat(text.getOriginalIndex(12), is(6));
+        assertThat(text.getOriginalIndex(12), is(5));
     }
 
     @Test
