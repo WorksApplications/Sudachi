@@ -21,10 +21,10 @@ package com.worksap.nlp.sudachi;
 /**
  * A plugin that rewrites the Katakana-Hiragana Prolonged Sound Mark (Chōonpu) and similar symbols.
  *
- * <p>This plugin shrinks the continuous sequence of prolonged sound marks to 1 character.
+ * <p>This plugin combines the continuous sequence of prolonged sound marks to 1 character.
  *
  * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be refered as {@link Plugin#settings}.
+ * It can be referred as {@link Plugin#settings}.
  *
  * <p>The following is an example of settings.
  * <pre>{@code
@@ -40,20 +40,23 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
     @Override
     public void rewrite(InputTextBuilder<?> builder) {
         String text = builder.getText();
-        for (int i = 0; i < text.length(); i++) {
+
+        int n = text.length();
+        int markStartIndex = n;
+        boolean isProlongedSoundMark = false;
+        for (int i = 0; i < n; i++) {
             char c = text.charAt(i);
-            if (c != prolongedSoundMark) {
-                continue;
+            if (!isProlongedSoundMark && c == prolongedSoundMark) {
+                isProlongedSoundMark = true;
+                markStartIndex = i;
             }
-            else {
-                int j = i;
-                while (c == prolongedSoundMark) {
-                    j += 1;
-                    c = text.charAt(j);
-                }
-                builder.replace(i, j, "ー");
-                i = j;
+            else if (isProlongedSoundMark && c != prolongedSoundMark) {
+                builder.replace(markStartIndex, i, "ー");
+                isProlongedSoundMark = false;
             }
+        }
+        if (isProlongedSoundMark) {
+            builder.replace(markStartIndex, n, "ー");
         }
     }
 }
