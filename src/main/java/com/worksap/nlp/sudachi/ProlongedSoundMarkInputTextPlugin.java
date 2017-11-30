@@ -42,6 +42,7 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
         String text = builder.getText();
 
         int n = text.length();
+        int offset = 0;
         int markStartIndex = n;
         boolean isProlongedSoundMark = false;
         for (int i = 0; i < n; i++) {
@@ -52,13 +53,14 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
             }
             else if (isProlongedSoundMark && c != prolongedSoundMark) {
                 if ((i - markStartIndex) > 1) {
-                    builder.replace(markStartIndex, i, "ー");
+                    builder.replace(markStartIndex-offset, i-offset, "ー");
+                    offset += i - markStartIndex - 1;
                 }
                 isProlongedSoundMark = false;
             }
         }
         if (isProlongedSoundMark && (n - markStartIndex) > 1) {
-            builder.replace(markStartIndex, n, "ー");
+            builder.replace(markStartIndex-offset, n-offset, "ー");
         }
     }
 }
