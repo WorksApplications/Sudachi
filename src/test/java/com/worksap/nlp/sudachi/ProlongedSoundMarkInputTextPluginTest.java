@@ -35,11 +35,11 @@ public class ProlongedSoundMarkInputTextPluginTest {
     
     UTF8InputTextBuilder builder;
     UTF8InputText text;
-    ProlongedSoundMarkTextPlugin plugin;
+    ProlongedSoundMarkInputTextPlugin plugin;
     
     @Before
     public void setUp() throws IOException {
-        plugin = new ProlongedSoundMarkTextPlugin();
+        plugin = new ProlongedSoundMarkInputTextPlugin();
 
         String jsonString = Utils.readAllResource("/sudachi.json");
         Settings settings = Settings.parseSettings(null, jsonString);

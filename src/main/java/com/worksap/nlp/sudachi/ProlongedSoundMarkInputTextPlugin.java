@@ -43,7 +43,7 @@ package com.worksap.nlp.sudachi;
  *
  * <p>With above setting example, the plugin rewrites input "エーービ〜〜〜シ〰〰〰〰" to "エービーシー".
  */
-class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
+class ProlongedSoundMarkInputTextPlugin extends InputTextPlugin {
 
     private Set<Integer> prolongedSoundMarkSet = new HashSet<>();
     private String replacementSymbol;
