@@ -127,6 +127,36 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getOriginalIndex(18), is(12));
     }
 
+    @Test
+    public void combineContinuousProlongedSoundMarksMultipleSymbolTypes() {
+        final String ORIGINAL_TEXT = "エーービ〜〜〜シ〰〰〰〰";
+        final String NORMALIZED_TEXT = "エービーシー";
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
+        plugin.rewrite(builder);
+        text = builder.build();
+
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(NORMALIZED_TEXT));
+        byte[] bytes = text.getByteText();
+        assertThat(bytes.length, is(18));
+        assertArrayEquals(
+                new byte[] {
+                        (byte)0xE3, (byte)0x82, (byte)0xA8, (byte)0xE3,
+                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
+                        (byte)0x93, (byte)0xE3, (byte)0x83, (byte)0xBC,
+                        (byte)0xE3, (byte)0x82, (byte)0xB7, (byte)0xE3,
+                        (byte)0x83, (byte)0xBC
+                }, bytes
+        );
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(3), is(1));
+        assertThat(text.getOriginalIndex(6), is(3));
+        assertThat(text.getOriginalIndex(9), is(4));
+        assertThat(text.getOriginalIndex(12), is(7));
+        assertThat(text.getOriginalIndex(15), is(8));
+        assertThat(text.getOriginalIndex(18), is(12));
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {

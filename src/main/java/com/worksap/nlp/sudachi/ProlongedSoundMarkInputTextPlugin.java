@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+        import java.io.IOException;
+        import java.util.HashSet;
         import java.util.Set;
 
 /**
@@ -35,7 +37,16 @@ package com.worksap.nlp.sudachi;
  */
 class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
 
-    char prolongedSoundMark = 'ー';
+    private Set<Integer> prolongedSoundMarkSet = new HashSet<>();
+    private String replacementSymbol;
+
+    @Override
+    public void setUp() throws IOException {
+        prolongedSoundMarkSet.add("ー".codePointAt(0));
+        prolongedSoundMarkSet.add("〜".codePointAt(0));
+        prolongedSoundMarkSet.add("〰".codePointAt(0));
+        replacementSymbol = "ー";
+    }
 
     @Override
     public void rewrite(InputTextBuilder<?> builder) {
@@ -46,21 +57,21 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
         int markStartIndex = n;
         boolean isProlongedSoundMark = false;
         for (int i = 0; i < n; i++) {
-            char c = text.charAt(i);
-            if (!isProlongedSoundMark && c == prolongedSoundMark) {
+            int cp = text.codePointAt(i);
+            if (!isProlongedSoundMark && prolongedSoundMarkSet.contains(cp)) {
                 isProlongedSoundMark = true;
                 markStartIndex = i;
             }
-            else if (isProlongedSoundMark && c != prolongedSoundMark) {
+            else if (isProlongedSoundMark && !prolongedSoundMarkSet.contains(cp)) {
                 if ((i - markStartIndex) > 1) {
-                    builder.replace(markStartIndex-offset, i-offset, "ー");
+                    builder.replace(markStartIndex-offset, i-offset, replacementSymbol);
                     offset += i - markStartIndex - 1;
                 }
                 isProlongedSoundMark = false;
             }
         }
         if (isProlongedSoundMark && (n - markStartIndex) > 1) {
-            builder.replace(markStartIndex-offset, n-offset, "ー");
+            builder.replace(markStartIndex-offset, n-offset, replacementSymbol);
         }
     }
 }
