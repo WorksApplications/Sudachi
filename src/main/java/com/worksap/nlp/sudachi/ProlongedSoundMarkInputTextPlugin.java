@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi;
         import java.io.IOException;
         import java.util.HashSet;
         import java.util.Set;
+        import java.util.List;
 
 /**
  * A plugin that rewrites the Katakana-Hiragana Prolonged Sound Mark (Chōonpu) and similar symbols.
@@ -32,8 +33,15 @@ package com.worksap.nlp.sudachi;
  * <pre>{@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
+        "prolongedSoundMarks": ["ー", "〜", "〰"],
+        "replacementSymbol": "ー"
  *   }
  * }</pre>
+ *
+ * {@code prolongedSoundMarks} is the list of symbols to be combined.
+ * {@code replacementSymbol} is the symbol for replacement, after combining prolonged sound mark sequences.
+ *
+ * <p>With above setting example, the plugin rewrites input "エーービ〜〜〜シ〰〰〰〰" to "エービーシー".
  */
 class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
 
@@ -42,10 +50,11 @@ class ProlongedSoundMarkTextPlugin extends InputTextPlugin {
 
     @Override
     public void setUp() throws IOException {
-        prolongedSoundMarkSet.add("ー".codePointAt(0));
-        prolongedSoundMarkSet.add("〜".codePointAt(0));
-        prolongedSoundMarkSet.add("〰".codePointAt(0));
-        replacementSymbol = "ー";
+        List<String> prolongedSoundMarkStrings = settings.getStringList("prolongedSoundMarks");
+        for (String s : prolongedSoundMarkStrings) {
+            prolongedSoundMarkSet.add(s.codePointAt(0));
+        }
+        replacementSymbol = settings.getString("replacementSymbol");
     }
 
     @Override

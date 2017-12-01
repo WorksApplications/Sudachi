@@ -2,6 +2,11 @@
     "systemDict" : "system.dic",
     "userDict" : [ "user.dic" ],
     "characterDefinitionFile" : "char.def",
+    "inputTextPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
+          "prolongedSoundMarks": ["ー", "〜", "〰"],
+          "replacementSymbol": "ー"}
+    ],
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
           "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],

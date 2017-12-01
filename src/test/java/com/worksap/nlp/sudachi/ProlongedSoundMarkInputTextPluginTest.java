@@ -23,6 +23,8 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.List;
 
+import javax.json.JsonObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +38,19 @@ public class ProlongedSoundMarkInputTextPluginTest {
     ProlongedSoundMarkTextPlugin plugin;
     
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         plugin = new ProlongedSoundMarkTextPlugin();
+
+        String jsonString = Utils.readAllResource("/sudachi.json");
+        Settings settings = Settings.parseSettings(null, jsonString);
+        List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
+        for (JsonObject p : list) {
+            if (p.getString("class").equals("com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin")) {
+                plugin.setSettings(new Settings(p, null));
+                break;
+            }
+        }
+
         try {
             plugin.setUp();
         }
