@@ -4,7 +4,7 @@
     "inputTextPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
         { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
-          "prolongedSoundMarks": ["ー", "—", "―", "─", "━", "-", "－", "ｰ", "⁓", "~", "〜", "〰"],
+          "prolongedSoundMarks": ["ー", "-", "⁓", "〜", "〰"],
           "replacementSymbol": "ー"}
     ],
     "oovProviderPlugin" : [
