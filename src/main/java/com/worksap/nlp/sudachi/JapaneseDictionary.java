@@ -16,12 +16,16 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,11 +48,22 @@ class JapaneseDictionary implements Dictionary {
     List<PathRewritePlugin> pathRewritePlugins;
     List<MappedByteBuffer> buffers;
 
+    JapaneseDictionary() throws IOException {
+        this(null, null);
+    }
+
     JapaneseDictionary(String jsonString) throws IOException {
         this(null, jsonString);
     }
 
     JapaneseDictionary(String path, String jsonString) throws IOException {
+        if (jsonString == null) {
+            try (InputStream input
+                 = SudachiCommandLine.class
+                 .getResourceAsStream("/sudachi.json")) {
+                jsonString = readAll(input);
+            }
+        }
         Settings settings = Settings.parseSettings(path, jsonString);
 
         buffers = new ArrayList<>();
@@ -161,6 +176,21 @@ class JapaneseDictionary implements Dictionary {
         return new JapaneseTokenizer(grammar, lexicon,
                                      inputTextPlugins, oovProviderPlugins,
                                      pathRewritePlugins);
+    }
+
+    static String readAll(InputStream input) throws IOException {
+        try (InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(isReader)) {
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                sb.append(line);
+            }
+            return sb.toString();
+        }
     }
 
     static void destroyByteBuffer(ByteBuffer buffer) {

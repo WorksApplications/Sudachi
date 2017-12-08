@@ -40,7 +40,7 @@ class Utils {
 
     static String readAllResource(String file) throws IOException {
         try (InputStream src = Utils.class.getResourceAsStream(file)) {
-            return SudachiCommandLine.readAll(src);
+            return JapaneseDictionary.readAll(src);
         }
     }
 }

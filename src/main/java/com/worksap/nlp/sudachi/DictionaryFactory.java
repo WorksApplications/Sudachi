@@ -26,6 +26,16 @@ public class DictionaryFactory {
     /**
      * Creates <tt>Dictionary</tt> by read a dictionary file.
      *
+     * @return {@link Dictionary}
+     * @throws IOException if reading a file is failed
+     */
+    public Dictionary create() throws IOException {
+        return new JapaneseDictionary();
+    }
+
+    /**
+     * Creates <tt>Dictionary</tt> by read a dictionary file.
+     *
      * @param settings settings in JSON string
      * @return {@link Dictionary}
      * @throws IOException if reading a file is failed

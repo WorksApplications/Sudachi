@@ -22,26 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * A command-line morphological analysis tool.
  */
 public class SudachiCommandLine {
-
-    static String readAll(InputStream input) throws IOException {
-        BufferedReader reader
-            = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            sb.append(line);
-        }
-        return sb.toString();
-    }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
                     InputStream input, PrintStream output, boolean printAll)
@@ -114,7 +99,7 @@ public class SudachiCommandLine {
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
                 try (FileInputStream input = new FileInputStream(args[++i])) {
-                    settings = readAll(input);
+                    settings = JapaneseDictionary.readAll(input);
                 }
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
@@ -144,14 +129,6 @@ public class SudachiCommandLine {
                 return;
             } else {
                 break;
-            }
-        }
-
-        if (settings == null) {
-            try (InputStream input
-                 = SudachiCommandLine.class
-                 .getResourceAsStream("/sudachi.json")) {
-                settings = readAll(input);
             }
         }
 
