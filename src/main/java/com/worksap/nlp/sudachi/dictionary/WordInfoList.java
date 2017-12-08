@@ -22,10 +22,12 @@ class WordInfoList {
 
     private final ByteBuffer bytes;
     private final int offset;
+    private final int wordSize;
 
     WordInfoList(ByteBuffer bytes, int offset, int wordSize) {
         this.bytes = bytes;
         this.offset = offset;
+        this.wordSize = wordSize;
     }
 
     WordInfo getWordInfo(int wordId) {
@@ -51,9 +53,20 @@ class WordInfoList {
         }
         int[] aUnitSplit = bufferToIntArray(index);
         index += 1 + 4 * aUnitSplit.length;
+        if (!isValidSplit(aUnitSplit)) {
+            aUnitSplit = new int[0];
+        }
+
         int[] bUnitSplit = bufferToIntArray(index);
         index += 1 + 4 * bUnitSplit.length;
+        if (!isValidSplit(bUnitSplit)) {
+            bUnitSplit = new int[0];
+        }
+
         int[] wordStructure = bufferToIntArray(index);
+        if (!isValidSplit(wordStructure)) {
+            wordStructure = new int[0];
+        }
 
         String dictionaryForm = surface;
         if (dictionaryFormWordId >= 0 && dictionaryFormWordId != wordId) {
@@ -86,5 +99,14 @@ class WordInfoList {
             array[i] = bytes.getInt(offset + 4 * i);
         }
         return array;
+    }
+
+    private boolean isValidSplit(int[] split) {
+        for (int wordId : split) {
+            if (wordId >= wordSize) {
+                return false;
+            }
+        }
+        return true;
     }
 }
