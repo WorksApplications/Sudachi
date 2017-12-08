@@ -1,6 +1,5 @@
 {
     "systemDict" : "system_core.dic",
-    "characterDefinitionFile" : "char.def",
     "inputTextPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
         { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
@@ -8,9 +7,7 @@
           "replacementSymbol": "ー"}
     ],
     "oovProviderPlugin" : [
-        { "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
-          "charDef" : "char.def",
-          "unkDef" : "unk.def" },
+        { "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin" },
         { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
           "oovPOS" : [ "補助記号", "一般", "*", "*", "*", "*" ],
           "leftId" : 5968,

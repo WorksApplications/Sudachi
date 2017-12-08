@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
@@ -73,14 +74,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     @Override
     public void setUp(Grammar grammar) throws IOException {
         String charDef = settings.getPath("charDef");
-        if (charDef == null) {
-            throw new IllegalArgumentException("charDef is not defined");
-        }
         readCharacterProperty(charDef);
         String unkDef = settings.getPath("unkDef");
-        if (unkDef == null) {
-            throw new IllegalArgumentException("unkDef is not defined");
-        }
         readOOV(unkDef, grammar);
     }
 
@@ -134,9 +129,10 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readCharacterProperty(String charDef) throws IOException {
-        try (FileInputStream input = new FileInputStream(charDef);
-             LineNumberReader reader
-             = new LineNumberReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+        try (InputStream input = (charDef == null) ?
+             openFromJar("char.def") : new FileInputStream(charDef);
+             InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             LineNumberReader reader = new LineNumberReader(isReader)) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -173,9 +169,10 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readOOV(String unkDef, Grammar grammar) throws IOException {
-        try (FileInputStream input = new FileInputStream(unkDef);
-             LineNumberReader reader
-             = new LineNumberReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+        try (InputStream input = (unkDef == null) ?
+             openFromJar("unk.def") : new FileInputStream(unkDef);
+             InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+             LineNumberReader reader = new LineNumberReader(isReader)) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -210,5 +207,9 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 oovList.get(type).add(oov);
             }
         }
+    }
+
+    private InputStream openFromJar(String path) throws IOException {
+        return MeCabOovProviderPlugin.class.getClassLoader().getResourceAsStream(path);
     }
 }
