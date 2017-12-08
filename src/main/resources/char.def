@@ -49,8 +49,12 @@ CYRILLIC        1 1 0
 0x007B..0x007E SYMBOL   #{|}~
 
 # Latin
-0x00A1..0x00BF SYMBOL # Latin 1 #¡->ß
-0x00C0..0x00FF ALPHA  # Latin 1 #À->ÿ
+0x00A1..0x00BF SYMBOL # Latin 1 #¡->¿
+0x00C0..0x00D6 ALPHA  # Latin 1 #À->Ö
+0x00D7         SYMBOL # Latin 1 #×
+0x00D8..0x00F6 ALPHA  # Latin 1 #Ø->ö
+0x00F7         SYMBOL # Latin 1 #÷
+0x00F8..0x00FF ALPHA  # Latin 1 #ø->ÿ
 0x0100..0x017F ALPHA  # Latin Extended A
 0x0180..0x0236 ALPHA  # Latin Extended B
 0x1E00..0x1EF9 ALPHA  # Latin Extended Additional
