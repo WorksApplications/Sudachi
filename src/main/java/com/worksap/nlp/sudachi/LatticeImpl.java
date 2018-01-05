@@ -133,13 +133,16 @@ class LatticeImpl implements Lattice {
         rNode.totalCost += rNode.cost;
     }
 
-    List<LatticeNode> getBestPath() {
+    void connectEosNode() {
         connectNode(eosNode);
+    }
+
+    List<LatticeNode> getBestPath() {
         if (!eosNode.isConnectedToBOS) { // EOS node
             throw new IllegalStateException("EOS isn't connected to BOS");
         }
         ArrayList<LatticeNode> result = new ArrayList<>();
-        for (LatticeNodeImpl node = eosNode;
+        for (LatticeNodeImpl node = eosNode.bestPreviousNode;
              node != endLists.get(0).get(0);
              node = node.bestPreviousNode) {
             result.add(node);

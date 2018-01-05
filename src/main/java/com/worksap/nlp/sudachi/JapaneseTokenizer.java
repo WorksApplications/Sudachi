@@ -71,6 +71,44 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println(input.getText());
         }
 
+        buildLattice(input);
+
+        if (dumpOutput != null) {
+            dumpOutput.println("=== Lattice dump:");
+            lattice.dump(dumpOutput);
+        }
+
+        List<LatticeNode> path = lattice.getBestPath();
+
+        if (dumpOutput != null) {
+            dumpOutput.println("=== Before rewriting:");
+            dumpPath(path);
+        }
+
+        for (PathRewritePlugin plugin : pathRewritePlugins) {
+            plugin.rewrite(input, path, lattice);
+        }
+        lattice.clear();
+
+        if (mode != Tokenizer.SplitMode.C) {
+            path = splitPath(path, mode);
+        }
+
+        if (dumpOutput != null) {
+            dumpOutput.println("=== After rewriting:");
+            dumpPath(path);
+            dumpOutput.println("===");
+        }
+
+        return new MorphemeList(input, grammar, lexicon, path);
+    }
+
+    @Override
+    public void setDumpOutput(PrintStream output) {
+        dumpOutput = output;
+    }
+
+    LatticeImpl buildLattice(UTF8InputText input) {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
@@ -111,63 +149,37 @@ class JapaneseTokenizer implements Tokenizer {
                 throw new IllegalStateException("there is no morpheme at " + i);
             }
         }
+        lattice.connectEosNode();
 
-        List<LatticeNode> path = lattice.getBestPath();
-        if (dumpOutput != null) {
-            dumpOutput.println("=== Lattice dump:");
-            lattice.dump(dumpOutput);
-        }
-        lattice.clear();
-
-        path.remove(path.size() - 1); // remove EOS
-        if (dumpOutput != null) {
-            dumpOutput.println("=== Before rewriting:");
-            dumpPath(path);
-        }
-        for (PathRewritePlugin plugin : pathRewritePlugins) {
-            plugin.rewrite(input, path, lattice);
-        }
-
-        if (mode != Tokenizer.SplitMode.C) {
-            List<LatticeNode> newPath = new ArrayList<>();
-            for (LatticeNode node : path) {
-                int[] wids;
-                if (mode == Tokenizer.SplitMode.A) {
-                    wids = node.getWordInfo().getAunitSplit();
-                } else {        // Tokenizer.SplitMode.B
-                    wids = node.getWordInfo().getBunitSplit();
-                }
-                if (wids.length == 0 || wids.length == 1) {
-                    newPath.add(node);
-                } else {
-                    int offset = node.getBegin();
-                    for (int wid : wids) {
-                        LatticeNodeImpl n
-                            = new LatticeNodeImpl(lexicon,
-                                                  (short)0, (short)0, (short)0,
-                                                  wid);
-                        n.begin = offset;
-                        offset += n.getWordInfo().getLength();
-                        n.end = offset;
-                        newPath.add(n);
-                    }
-                }
-            }
-            path = newPath;
-        }
-
-        if (dumpOutput != null) {
-            dumpOutput.println("=== After rewriting:");
-            dumpPath(path);
-            dumpOutput.println("===");
-        }
-
-        return new MorphemeList(input, grammar, lexicon, path);
+        return lattice;
     }
 
-    @Override
-    public void setDumpOutput(PrintStream output) {
-        dumpOutput = output;
+    List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
+        List<LatticeNode> newPath = new ArrayList<>();
+        for (LatticeNode node : path) {
+            int[] wids;
+            if (mode == Tokenizer.SplitMode.A) {
+                wids = node.getWordInfo().getAunitSplit();
+            } else {        // Tokenizer.SplitMode.B
+                wids = node.getWordInfo().getBunitSplit();
+            }
+            if (wids.length == 0 || wids.length == 1) {
+                newPath.add(node);
+            } else {
+                int offset = node.getBegin();
+                for (int wid : wids) {
+                    LatticeNodeImpl n
+                        = new LatticeNodeImpl(lexicon,
+                                              (short)0, (short)0, (short)0,
+                                              wid);
+                    n.begin = offset;
+                    offset += n.getWordInfo().getLength();
+                    n.end = offset;
+                    newPath.add(n);
+                }
+            }
+        }
+        return newPath;
     }
 
     void dumpPath(List<LatticeNode> path) {
