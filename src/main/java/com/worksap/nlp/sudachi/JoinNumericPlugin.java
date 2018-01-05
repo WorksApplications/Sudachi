@@ -89,7 +89,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     }
                     i = beginIndex + 1;
                 }
-                if (joinKanjiNumeric) {
+                if (joinKanjiNumeric || joinAllNumeric) {
                     type = CategoryType.KANJINUMERIC;
                     beginIndex = i;
                 } else {
