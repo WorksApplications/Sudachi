@@ -204,6 +204,13 @@ This dictionary includes UniDic and a part of NEologd.
 - http://unidic.ninjal.ac.jp/
 - https://github.com/neologd/mecab-ipadic-neologd
 
+
+## Elasticsearch
+
+We release a plug-in for Elasticsearch.
+
+- https://github.com/WorksApplications/elasticsearch-sudachi
+
 -----
 # Sudachi
 
@@ -372,3 +379,9 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 - 正規化表記の拡充
 - 読み情報の整備 (発音読み → ふりがな読み)
 - 同義語辞書との連携
+
+## Elasticsearch
+
+Elasticsearch で Sudachi をつかうためのプラグインも公開しています。
+
+- https://github.com/WorksApplications/elasticsearch-sudachi
