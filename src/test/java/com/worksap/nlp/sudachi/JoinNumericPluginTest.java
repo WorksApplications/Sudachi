@@ -53,11 +53,7 @@ public class JoinNumericPluginTest {
     @Test
     public void testKanjiNumericEnabled() {
         plugin.joinKanjiNumeric = true;
-
-        UTF8InputText input = getInputText("123一二三123");
-        LatticeImpl lattice = tokenizer.buildLattice(input);
-        List<LatticeNode> path = lattice.getBestPath();
-        plugin.rewrite(input, path, lattice);
+        List<LatticeNode> path = getPath("123一二三123");
 
         assertEquals(3, path.size());
         assertEquals("123", path.get(0).getWordInfo().getSurface());
@@ -68,11 +64,7 @@ public class JoinNumericPluginTest {
     @Test
     public void testAllNumericEnabledNumericKanjiNumeric() {
         plugin.joinAllNumeric = true;
-
-        UTF8InputText input = getInputText("123一二三123");
-        LatticeImpl lattice = tokenizer.buildLattice(input);
-        List<LatticeNode> path = lattice.getBestPath();
-        plugin.rewrite(input, path, lattice);
+        List<LatticeNode> path = getPath("123一二三123");
 
         assertEquals(1, path.size());
         assertEquals("123一二三123", path.get(0).getWordInfo().getSurface());
@@ -81,11 +73,7 @@ public class JoinNumericPluginTest {
     @Test
     public void testAllNumericEnabledKanjiNumeric() {
         plugin.joinAllNumeric = true;
-
-        UTF8InputText input = getInputText("一二三");
-        LatticeImpl lattice = tokenizer.buildLattice(input);
-        List<LatticeNode> path = lattice.getBestPath();
-        plugin.rewrite(input, path, lattice);
+        List<LatticeNode> path = getPath("一二三");
 
         assertEquals(1, path.size());
         assertEquals("一二三", path.get(0).getWordInfo().getSurface());
@@ -94,20 +82,20 @@ public class JoinNumericPluginTest {
     @Test
     public void testAllNumericEnabledNonNumericKanjiNumeric() {
         plugin.joinAllNumeric = true;
-
-        UTF8InputText input = getInputText(".一二三");
-        LatticeImpl lattice = tokenizer.buildLattice(input);
-        List<LatticeNode> path = lattice.getBestPath();
-        plugin.rewrite(input, path, lattice);
+        List<LatticeNode> path = getPath(".一二三");
 
         assertEquals(2, path.size());
         assertEquals(".", path.get(0).getWordInfo().getSurface());
         assertEquals("一二三", path.get(1).getWordInfo().getSurface());
     }
 
-    private UTF8InputText getInputText(String text) {
-        UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, tokenizer.grammar);
-        return builder.build();
+    private List<LatticeNode> getPath(String text) {
+        UTF8InputText input
+            = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
+        LatticeImpl lattice = tokenizer.buildLattice(input);
+        List<LatticeNode> path = lattice.getBestPath();
+        plugin.rewrite(input, path, lattice);
+        return path;
     }
 
 }
