@@ -179,6 +179,25 @@ public class Settings {
     }
 
     /**
+     * Returns the value as the string to which the specified key is mapped,
+     * or {@code defaultValue} if this settings contains
+     * no mapping for the key.
+     *
+     * @param setting the key
+     * @param defaultValue the default mapping of the key
+     * @return the value or {@code defaultValue} if this settings
+     *         has no mapping
+     * @throws IllegalArgumentException if the value is not a string
+     */
+    public int getInt(String setting, int defaultValue) {
+        try {
+            return root.getInt(setting, defaultValue);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(setting + " is not a number", e);
+        }
+    }
+
+    /**
      * Returns the value as the list of integers to which the specified
      * key is mapped, or an empty list if this settings contains
      * no mapping for the key.

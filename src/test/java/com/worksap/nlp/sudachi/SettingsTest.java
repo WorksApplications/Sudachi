@@ -92,6 +92,16 @@ public class SettingsTest {
     }
 
     @Test
+    public void getIntWithDefaultValue() {
+        Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
+        assertEquals(123, settings.getInt("foo", 456));
+        assertEquals(456, settings.getInt("bazz", 456));
+
+        settings = Settings.parseSettings(null, "{\"foo\":\"nyaa\"}");
+        assertEquals(456, settings.getInt("foo", 456));
+    }
+
+    @Test
     public void getIntList() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[123,456]}");
         assertThat(settings.getIntList("foo"),
