@@ -34,13 +34,15 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  * <pre>{@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
- *     "oovPOS" : [ "POS1", "POS2", ... ]
+ *     "oovPOS" : [ "POS1", "POS2", ... ],
+ *     "minLength" : 3
  *   }
  * }</pre>
  */
 class JoinKatakanaOovPlugin extends PathRewritePlugin {
 
     short oovPosId;
+    int minLength;
 
     @Override
     public void setUp(Grammar grammar) {
@@ -52,14 +54,18 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
         if (oovPosId < 0) {
             throw new IllegalArgumentException("oovPOS is invalid");
         }
+        minLength = settings.getInt("minLength", 1);
+        if (minLength < 0) {
+            throw new IllegalArgumentException("minLength is negative");
+        }
     }
 
     @Override
     public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
-            if ((node.isOOV() ||
-                 (isOneChar(text, node) && canOovBowNode(text, node)))
+            if ((node.isOOV() || isShorter(minLength, text, node))
+                && canOovBowNode(text, node)
                 && isKatakanaNode(text, node)) {
                 int begin = i - 1;
                 for ( ; begin >= 0; begin--) {
@@ -92,9 +98,9 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
         return getCharCategoryTypes(text, node).contains(CategoryType.KATAKANA);
     }
 
-    boolean isOneChar(InputText<?> text, LatticeNode node) {
+    boolean isShorter(int length, InputText<?> text, LatticeNode node) {
         int b = node.getBegin();
-        return  b + text.getCodePointsOffsetLength(b, 1) == node.getEnd();
+        return  b + text.getCodePointsOffsetLength(b, length) > node.getEnd();
     }
 
     boolean canOovBowNode(InputText<?> text, LatticeNode node) {

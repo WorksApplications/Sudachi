@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
@@ -106,8 +107,7 @@ public abstract class PathRewritePlugin extends Plugin {
         LatticeNode node = lattice.createNode();
         node.setRange(b, e);
         node.setWordInfo(wi);
-        path.subList(begin, end).clear();
-        path.add(begin, node);
+        replaceNode(path, begin, end, node);
         return node;
     }
 
@@ -135,6 +135,14 @@ public abstract class PathRewritePlugin extends Plugin {
         }
         int b = path.get(begin).getBegin();
         int e = path.get(end - 1).getEnd();
+
+        Optional<? extends LatticeNode> n = lattice.getMinimumNode(b, e);
+        if (n.isPresent()) {
+            LatticeNode node = n.get();
+            replaceNode(path, begin, end, node);
+            return node;
+        }
+
         StringBuilder surface = new StringBuilder();
         int length = 0;
         for (int i = begin; i < end; i++) {
@@ -149,8 +157,7 @@ public abstract class PathRewritePlugin extends Plugin {
         node.setRange(b, e);
         node.setWordInfo(wi);
         node.setOOV();
-        path.subList(begin, end).clear();
-        path.add(begin, node);
+        replaceNode(path, begin, end, node);
         return node;
     }
 
@@ -163,5 +170,11 @@ public abstract class PathRewritePlugin extends Plugin {
      */
     public Set<CategoryType> getCharCategoryTypes(InputText<?> text, LatticeNode node) {
         return text.getCharCategoryTypes(node.getBegin(), node.getEnd());
+    }
+
+    private void replaceNode(List<LatticeNode> path, int begin, int end,
+                             LatticeNode node) {
+        path.subList(begin, end).clear();
+        path.add(begin, node);
     }
 }

@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -85,6 +86,13 @@ class LatticeImpl implements Lattice {
         return endLists.get(end).stream()
             .filter(n -> ((LatticeNodeImpl)n).begin == begin)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
+        return endLists.get(end).stream()
+            .filter(n -> ((LatticeNodeImpl)n).begin == begin)
+            .min((l, r) -> l.cost - r.cost);
     }
 
     @Override
