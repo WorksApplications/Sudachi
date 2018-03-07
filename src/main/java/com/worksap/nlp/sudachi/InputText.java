@@ -143,5 +143,10 @@ public interface InputText<E> {
      */
     public int codePointCount(int begin, int end);
 
+    /**
+     * Returns whether the character can be a head of a word or not.
+     *
+     * @return {@code true} if, and only if character can begin a word
+     */
     public boolean canBow(int index);
 }
