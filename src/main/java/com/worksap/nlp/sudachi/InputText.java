@@ -146,6 +146,7 @@ public interface InputText<E> {
     /**
      * Returns whether the character can be a head of a word or not.
      *
+     * @param index the index of the character
      * @return {@code true} if, and only if character can begin a word
      */
     public boolean canBow(int index);
