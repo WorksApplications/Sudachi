@@ -167,7 +167,7 @@ class LatticeImpl implements Lattice {
             for (LatticeNodeImpl rNode : rNodes) {
                 String surface;
                 String pos;
-                if (rNode.wordId < 0 && rNode.extraWordInfo == null) {
+                if (!rNode.isDefined) {
                     surface = "(null)";
                     pos = "BOS/EOS";
                 } else {

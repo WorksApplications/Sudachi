@@ -23,6 +23,8 @@ import java.util.NoSuchElementException;
 
 public class LexiconSet implements Lexicon {
 
+    static final int MAX_DICTIONARIES = 16;
+
     List<Lexicon> lexicons = new ArrayList<>();;
 
     public LexiconSet(Lexicon systemLexicon) {
@@ -33,6 +35,10 @@ public class LexiconSet implements Lexicon {
         if (!lexicons.contains(lexicon)) {
             lexicons.add(lexicon);
         }
+    }
+
+    public boolean isFull() {
+        return lexicons.size() >= MAX_DICTIONARIES;
     }
 
     @Override
@@ -115,7 +121,7 @@ public class LexiconSet implements Lexicon {
         if (wordId > 0x0fffffff) {
             throw new RuntimeException("wordId is too large: " + wordId);
         }
-        if (dictId > 0xf) {
+        if (dictId >= lexicons.size()) {
             throw new RuntimeException("dictionaryId is too large: " + dictId);
         }
         return (dictId << 28) | wordId;
