@@ -89,5 +89,10 @@ class MockInputText implements InputText<String> {
     }
 
     @Override
+    public int codePointCount(int begin, int end) {
+        return Character.codePointCount(text, begin, end);
+    }
+
+    @Override
     public boolean canBow(int index) { return true; }
 }

@@ -128,6 +128,11 @@ class UTF8InputText implements InputText<byte[]> {
     }
 
     @Override
+    public int codePointCount(int begin, int end) {
+        return byteIndexes[end] - byteIndexes[begin];
+    }
+
+    @Override
     public boolean canBow(int index) {
         return isCharAlignment(index) && canBowList.get(byteIndexes[index]);
     }

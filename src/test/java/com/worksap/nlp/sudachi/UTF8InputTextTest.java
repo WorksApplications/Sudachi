@@ -234,6 +234,14 @@ public class UTF8InputTextTest {
     }
     
     @Test
+    public void codePointCount() {
+        input = builder.build();
+        assertThat(input.codePointCount(0, 2), is(1));
+        assertThat(input.codePointCount(0, 7), is(4));
+        assertThat(input.codePointCount(13, 19), is(2));
+    }
+
+    @Test
     public void canBow() {
         input = builder.build();
         assertTrue(input.canBow(0)); // â

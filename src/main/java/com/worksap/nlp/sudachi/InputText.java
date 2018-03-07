@@ -131,5 +131,17 @@ public interface InputText<E> {
      */
     public int getCodePointsOffsetLength(int index, int codePointOffset);
 
+    /**
+     * Returns the number of Unicode code points in the text range.
+     * The text range begins at the specified {@code begin} and extends
+     * to the character at index {@code endIndex - 1}.
+     *
+     * @param begin the index to the first character of the text range
+     * @param end the index after the last character of the text range
+     * @return the number of Unicode code points in the specified text
+     * range
+     */
+    public int codePointCount(int begin, int end);
+
     public boolean canBow(int index);
 }
