@@ -126,6 +126,10 @@ class JapaneseDictionary implements Dictionary {
     }
 
     void readUserDictionary(String filename) throws IOException {
+        if (lexicon.isFull()) {
+            throw new IllegalArgumentException("too many dictionaries");
+        }
+
         MappedByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename);
              FileChannel inputFile = input.getChannel()) {

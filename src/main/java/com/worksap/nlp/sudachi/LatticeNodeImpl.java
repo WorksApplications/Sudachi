@@ -34,6 +34,7 @@ public class LatticeNodeImpl implements LatticeNode {
     LatticeNodeImpl bestPreviousNode;
     boolean isConnectedToBOS;
 
+    boolean isDefined;
     boolean isOOV;
     WordInfo extraWordInfo;
 
@@ -46,10 +47,11 @@ public class LatticeNodeImpl implements LatticeNode {
         this.rightId = rightId;
         this.cost = cost;
         this.wordId = wordId;
+        this.isDefined = true;
     }
 
     LatticeNodeImpl() {
-        wordId = -1;
+        isDefined = false;
     }
 
     @Override
@@ -79,18 +81,19 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public WordInfo getWordInfo() {
-        if (wordId >= 0) {
-            return lexicon.getWordInfo(wordId);
-        } else if (extraWordInfo != null) {
+        if (!isDefined) {
+            throw new RuntimeException("this node has no WordInfo");
+        }
+        if (extraWordInfo != null) {
             return extraWordInfo;
         }
-        throw new RuntimeException("this node has no WordInfo");
+        return lexicon.getWordInfo(wordId);
     }
 
     @Override
     public void setWordInfo(WordInfo wordInfo) {
         extraWordInfo = wordInfo;
-        wordId = -1;
+        isDefined = true;
     }
 
     @Override
@@ -105,7 +108,7 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public int getDictionaryId() {
-        if (wordId < 0) {
+        if (!isDefined || extraWordInfo != null) {
             return -1;
         }
         return lexicon.getDictionaryId(wordId);
@@ -116,7 +119,7 @@ public class LatticeNodeImpl implements LatticeNode {
 
         String surface;
         short pos;
-        if (wordId < 0 && extraWordInfo == null) {
+        if (!isDefined) {
             surface = "(null)";
             pos = -1;
         } else {

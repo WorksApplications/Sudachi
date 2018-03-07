@@ -116,7 +116,7 @@ public interface Morpheme {
      * The IDs change when the dictionaries are updated or
      * the combination of dictionaries changes.
      *
-     * If the morpheme is OOV, it returns a negative value.
+     * If the morpheme is OOV, it returns an undefined value.
      *
      * @return the word ID
      */
