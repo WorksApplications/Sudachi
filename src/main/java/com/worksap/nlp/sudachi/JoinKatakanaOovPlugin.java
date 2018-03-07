@@ -65,7 +65,6 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
             if ((node.isOOV() || isShorter(minLength, text, node))
-                && canOovBowNode(text, node)
                 && isKatakanaNode(text, node)) {
                 int begin = i - 1;
                 for ( ; begin >= 0; begin--) {
@@ -77,14 +76,14 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
                 if (begin < 0) {
                     begin = 0;
                 }
-                while (begin != i && !canOovBowNode(text, path.get(begin))) {
-                    begin++;
-                }
                 int end = i + 1;
                 for ( ; end < path.size(); end++) {
                     if (!isKatakanaNode(text, path.get(end))) {
                         break;
                     }
+                }
+                while (begin != end && !canOovBowNode(text, path.get(begin))) {
+                    begin++;
                 }
                 if (end - begin > 1) {
                     concatenateOov(path, begin, end, oovPosId, lattice);
@@ -99,8 +98,7 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     }
 
     boolean isShorter(int length, InputText<?> text, LatticeNode node) {
-        int b = node.getBegin();
-        return  b + text.getCodePointsOffsetLength(b, length) > node.getEnd();
+        return text.codePointCount(node.getBegin(), node.getEnd()) < length;
     }
 
     boolean canOovBowNode(InputText<?> text, LatticeNode node) {

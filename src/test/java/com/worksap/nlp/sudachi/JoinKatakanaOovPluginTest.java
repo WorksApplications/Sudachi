@@ -87,13 +87,20 @@ public class JoinKatakanaOovPluginTest {
     }
 
     @Test
+    public void testStartWithTail() {
+        plugin.minLength = 3;
+        List<LatticeNode> path = getPath("アイウアイウアイ");
+        assertEquals(1, path.size());
+    }
+
+    @Test
     public void testWithNOOOVBOW() {
         plugin.minLength = 3;
         List<LatticeNode> path = getPath("ァアイアイウ");
         assertEquals(2, path.size());
         assertEquals("ァ", path.get(0).getWordInfo().getSurface());
 
-        path = getPath("アイァアイウ");
+        path = getPath("アイウァアイウ");
         assertEquals(1, path.size());
     }
 
