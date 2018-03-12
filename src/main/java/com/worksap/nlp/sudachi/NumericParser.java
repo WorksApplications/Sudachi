@@ -210,7 +210,7 @@ class NumericParser {
             }
             tmp.clear();
         } else if (isLargeUnit(n)) {
-            if (!subtotal.add(tmp)) {
+            if (!subtotal.add(tmp) || subtotal.isZero()) {
                 return false;
             }
             subtotal.scale(-n);

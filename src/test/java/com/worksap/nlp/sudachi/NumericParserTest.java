@@ -116,6 +116,9 @@ public class NumericParserTest {
         assertTrue(parser.done());
         assertEquals("3200013270014.05", parser.getNormalized());
         parser.clear();
+
+        assertFalse(parse("億万"));
+        parser.clear();
     }
 
     @Test
