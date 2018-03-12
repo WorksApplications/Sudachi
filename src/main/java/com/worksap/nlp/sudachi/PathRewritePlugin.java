@@ -73,13 +73,15 @@ public abstract class PathRewritePlugin extends Plugin {
      * @param begin the beginning index
      * @param end the ending index
      * @param lattice the lattice
+     * @param normalizedForm if {@code normalizedForm} is {@code null},
+     *        concatenate the normalizedForms of each words
      * @return the concatenated node
-     * @throws IndexOutOfBoundsException if if {@code begin} or {@code end}
+     * @throws IndexOutOfBoundsException if {@code begin} or {@code end}
      *         are negative, greater than the length of the sequence,
      *         or {@code begin} equals or is greater than {@code end}
      */
     public LatticeNode concatenate(List<LatticeNode> path, int begin, int end,
-                                   Lattice lattice) {
+                                   Lattice lattice, String normalizedForm) {
         if (begin >= end) {
             throw new IndexOutOfBoundsException("begin >= end");
         }
@@ -88,19 +90,22 @@ public abstract class PathRewritePlugin extends Plugin {
         short posId = path.get(begin).getWordInfo().getPOSId();
         StringBuilder surface = new StringBuilder();
         int length = 0;
-        StringBuilder normalizedForm = new StringBuilder();
+        StringBuilder normalizedFormBuilder = new StringBuilder();
         StringBuilder dictionaryForm = new StringBuilder();
         StringBuilder readingForm = new StringBuilder();
         for (int i = begin; i < end; i++) {
             WordInfo info = path.get(i).getWordInfo();
             surface.append(info.getSurface());
             length += info.getLength();
-            normalizedForm.append(info.getNormalizedForm());
+            if (normalizedForm == null) {
+                normalizedFormBuilder.append(info.getNormalizedForm());
+            }
             dictionaryForm.append(info.getDictionaryForm());
             readingForm.append(info.getReadingForm());
         }
         WordInfo wi = new WordInfo(surface.toString(), (short)length, posId,
-                                   normalizedForm.toString(),
+                                   (normalizedForm == null) ?
+                                   normalizedFormBuilder.toString() : normalizedForm,
                                    dictionaryForm.toString(),
                                    readingForm.toString());
 

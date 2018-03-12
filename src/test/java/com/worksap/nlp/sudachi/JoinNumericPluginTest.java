@@ -51,42 +51,78 @@ public class JoinNumericPluginTest {
     }
 
     @Test
-    public void testKanjiNumericEnabled() {
-        plugin.joinKanjiNumeric = true;
-        List<LatticeNode> path = getPath("123一二三123");
-
-        assertEquals(3, path.size());
+    public void testDigit() {
+        List<LatticeNode> path = getPath("123円20銭");
+        assertEquals(4, path.size());
         assertEquals("123", path.get(0).getWordInfo().getSurface());
-        assertEquals("一二三", path.get(1).getWordInfo().getSurface());
-        assertEquals("123", path.get(2).getWordInfo().getSurface());
+        assertEquals("20", path.get(2).getWordInfo().getSurface());
     }
 
     @Test
-    public void testAllNumericEnabledNumericKanjiNumeric() {
-        plugin.joinAllNumeric = true;
-        List<LatticeNode> path = getPath("123一二三123");
-
-        assertEquals(1, path.size());
-        assertEquals("123一二三123", path.get(0).getWordInfo().getSurface());
-    }
-
-    @Test
-    public void testAllNumericEnabledKanjiNumeric() {
-        plugin.joinAllNumeric = true;
-        List<LatticeNode> path = getPath("一二三");
-
-        assertEquals(1, path.size());
-        assertEquals("一二三", path.get(0).getWordInfo().getSurface());
-    }
-
-    @Test
-    public void testAllNumericEnabledNonNumericKanjiNumeric() {
-        plugin.joinAllNumeric = true;
-        List<LatticeNode> path = getPath(".一二三");
-
+    public void testKanjiNumeric() {
+        List<LatticeNode> path = getPath("一二三万二千円");
         assertEquals(2, path.size());
-        assertEquals(".", path.get(0).getWordInfo().getSurface());
-        assertEquals("一二三", path.get(1).getWordInfo().getSurface());
+        assertEquals("一二三万二千", path.get(0).getWordInfo().getSurface());
+
+        path = getPath("二百百");
+        assertEquals(3, path.size());
+    }
+
+    @Test
+    public void testNormalize() {
+        plugin.enableNormalize = true;
+        List<LatticeNode> path = getPath("一二三万二千円");
+        assertEquals(2, path.size());
+        assertEquals("1232000", path.get(0).getWordInfo().getNormalizedForm());
+    }
+
+    @Test
+    public void testPoint() {
+        plugin.enableNormalize = true;
+
+        List<LatticeNode> path = getPath("1.002");
+        assertEquals(1, path.size());
+        assertEquals("1.002", path.get(0).getWordInfo().getNormalizedForm());
+
+        path = getPath(".002");
+        assertEquals(2, path.size());
+        assertEquals(".", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals("2", path.get(1).getWordInfo().getNormalizedForm());
+
+        path = getPath("1.2.3");
+        assertEquals(5, path.size());
+    }
+
+    @Test
+    public void testComma() {
+        plugin.enableNormalize = true;
+
+        List<LatticeNode> path = getPath("2,000,000");
+        assertEquals(1, path.size());
+        assertEquals("2000000", path.get(0).getWordInfo().getNormalizedForm());
+
+        path = getPath("2,00,000,000円");
+        assertEquals(8, path.size());
+        assertEquals("2", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals(",", path.get(1).getWordInfo().getNormalizedForm());
+        assertEquals("0", path.get(2).getWordInfo().getNormalizedForm());
+        assertEquals(",", path.get(3).getWordInfo().getNormalizedForm());
+        assertEquals("0", path.get(4).getWordInfo().getNormalizedForm());
+        assertEquals(",", path.get(5).getWordInfo().getNormalizedForm());
+        assertEquals("0", path.get(6).getWordInfo().getNormalizedForm());
+    }
+
+    @Test
+    public void testSingleNode() {
+        plugin.enableNormalize = false;
+        List<LatticeNode> path = getPath("猫三匹");
+        assertEquals(3, path.size());
+        assertEquals("三", path.get(1).getWordInfo().getNormalizedForm());
+
+        plugin.enableNormalize = true;
+        path = getPath("猫三匹");
+        assertEquals(3, path.size());
+        assertEquals("3", path.get(1).getWordInfo().getNormalizedForm());
     }
 
     private List<LatticeNode> getPath(String text) {
@@ -95,6 +131,7 @@ public class JoinNumericPluginTest {
         LatticeImpl lattice = tokenizer.buildLattice(input);
         List<LatticeNode> path = lattice.getBestPath();
         plugin.rewrite(input, path, lattice);
+        lattice.clear();
         return path;
     }
 

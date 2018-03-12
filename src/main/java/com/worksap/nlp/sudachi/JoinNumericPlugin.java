@@ -26,89 +26,110 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  * A plugin for concatenation of the numerics.
  *
  * This plugin concatenate the sequence of numerics.
- * Only the sequence of digits are joined by default.
  *
  * <p>The following is an example of settings.
  * <pre>{@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
- *     "joinKanjiNumeric" : true,
- *     "joinAllNumeric"   : false
+ *     "enableNormalize" : true,
  *   }
  * }</pre>
  *
- * <p>If {@code joinKanjiNumeric} is {@code true}, the sequence of
- * Kanji numerics are joined.
- * <p>If {@code joinAllNumeric} is {@code true}, the sequence of digits
- * and Kanji numerics are joined.
+ * <p>If {@code enableNormalize} is {@code true}, the normalized form
+ * of the sequence of digits and Kanji numerics is the numerical value
+ * represented by the sequence.
  */
 class JoinNumericPlugin extends PathRewritePlugin {
 
-    boolean joinKanjiNumeric;
-    boolean joinAllNumeric;
+    boolean enableNormalize;
 
     @Override
     public void setUp(Grammar grammar) {
-        joinKanjiNumeric = settings.getBoolean("joinKanjiNumeric", false);
-        joinAllNumeric = settings.getBoolean("joinAllNumeric", false);
+        enableNormalize = settings.getBoolean("enableNormalize", true);
     }
 
     @Override
     public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
         int beginIndex = -1;
-        CategoryType type = null;
+        NumericParser parser = new NumericParser();
+
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
             Set<CategoryType> types = getCharCategoryTypes(text, node);
-            if (types.contains(CategoryType.NUMERIC)) {
-                if (type == CategoryType.NUMERIC) {
-                    continue;
-                }
-                if (type == CategoryType.KANJINUMERIC) {
-                    if (joinAllNumeric) {
-                        continue;
-                    } else if (joinKanjiNumeric) {
-                        if (i - beginIndex > 1) {
-                            concatenate(path, beginIndex, i, lattice);
-                        }
-                        i = beginIndex + 1;
-                    }
-                }
-                type = CategoryType.NUMERIC;
-                beginIndex = i;
-            } else if (types.contains(CategoryType.KANJINUMERIC)) {
-                if (type == CategoryType.KANJINUMERIC) {
-                    continue;
-                }
-                if (type == CategoryType.NUMERIC) {
-                    if (joinAllNumeric) {
-                        continue;
-                    }
-                    if (i - beginIndex > 1) {
-                        concatenate(path, beginIndex, i, lattice);
-                    }
-                    i = beginIndex + 1;
-                }
-                if (joinKanjiNumeric || joinAllNumeric) {
-                    type = CategoryType.KANJINUMERIC;
+            String s = node.getWordInfo().getNormalizedForm();
+            if (types.contains(CategoryType.NUMERIC) ||
+                types.contains(CategoryType.KANJINUMERIC) ||
+                s.equals(".") || s.equals(",")) {
+
+                if (beginIndex < 0) {
+                    parser.clear();
                     beginIndex = i;
-                } else {
-                    type = null;
-                    beginIndex = -1;
+                }
+
+                for (int j = 0; j < s.length(); j++) {
+                    char c = s.charAt(j);
+                    if (!parser.append(c)) {
+                        if (beginIndex >= 0) {
+                            if (s.equals(",")) {
+                                i = splitByComma(path, beginIndex, i, lattice) + 1;
+                            }
+                            beginIndex = -1;
+                        }
+                        break;
+                    }
                 }
             } else {
-                if (beginIndex >= 0) {
-                    if (i - beginIndex > 1) {
-                        concatenate(path, beginIndex, i, lattice);
-                    }
+                if (beginIndex >= 0 && parser.done()) {
+                    concat(path, beginIndex, i, lattice, parser);
                     i = beginIndex + 1;
                 }
-                type = null;
                 beginIndex = -1;
             }
         }
-        if (beginIndex >= 0 && path.size() - beginIndex > 1) {
-            concatenate(path, beginIndex, path.size(), lattice);
+
+        if (beginIndex >= 0) {
+            if (parser.done()) {
+                concat(path, beginIndex, path.size(), lattice, parser);
+            }
         }
+    }
+
+    private void concat(List<LatticeNode> path, int begin, int end,
+              Lattice lattice, NumericParser parser) {
+        if (enableNormalize) {
+            String normalizedForm = parser.getNormalized();
+            if (end - begin > 1 || !normalizedForm.equals(path.get(begin).getWordInfo().getNormalizedForm())) {
+                concatenate(path, begin, end, lattice, normalizedForm);
+            }
+        } else {
+            if (end - begin > 1) {
+                concatenate(path, begin, end, lattice, null);
+            }
+        }
+    }
+
+    private int splitByComma(List<LatticeNode> path, int begin, int end, Lattice lattice) {
+        NumericParser parser = new NumericParser();
+
+        int b = begin;
+        for (int i = begin; i < end; i++) {
+            LatticeNode node = path.get(i);
+            String s = node.getWordInfo().getNormalizedForm();
+            if (s.equals(",")) {
+                parser.done();
+                concat(path, b, i, lattice, parser);
+                end -= i - b - 1;
+                i = b + 1;
+                b = i + 1;
+                parser.clear();
+            } else {
+                for (int j = 0; j < s.length(); j++) {
+                    parser.append(s.charAt(j));
+                }
+            }
+        }
+        concat(path, b, end, lattice, parser);
+
+        return b;
     }
 }
