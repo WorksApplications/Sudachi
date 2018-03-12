@@ -70,7 +70,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     char c = s.charAt(j);
                     if (!parser.append(c)) {
                         if (beginIndex >= 0) {
-                            if (s.equals(",")) {
+                            if (s.equals(",") && beginIndex != i) {
                                 i = splitByComma(path, beginIndex, i, lattice) + 1;
                             }
                             beginIndex = -1;

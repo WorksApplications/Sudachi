@@ -110,6 +110,9 @@ public class JoinNumericPluginTest {
         assertEquals("0", path.get(4).getWordInfo().getNormalizedForm());
         assertEquals(",", path.get(5).getWordInfo().getNormalizedForm());
         assertEquals("0", path.get(6).getWordInfo().getNormalizedForm());
+
+        path = getPath(",");
+        assertEquals(1, path.size());
     }
 
     @Test
