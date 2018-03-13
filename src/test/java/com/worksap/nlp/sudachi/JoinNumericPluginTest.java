@@ -54,6 +54,11 @@ public class JoinNumericPluginTest {
         assertEquals(4, path.size());
         assertEquals("123", path.get(0).getWordInfo().getSurface());
         assertEquals("20", path.get(2).getWordInfo().getSurface());
+
+        path = getPath("080-121");
+        assertEquals(3, path.size());
+        assertEquals("080", path.get(0).getWordInfo().getSurface());
+        assertEquals("121", path.get(2).getWordInfo().getSurface());
     }
 
     @Test
@@ -85,7 +90,7 @@ public class JoinNumericPluginTest {
         path = getPath(".002");
         assertEquals(2, path.size());
         assertEquals(".", path.get(0).getWordInfo().getNormalizedForm());
-        assertEquals("2", path.get(1).getWordInfo().getNormalizedForm());
+        assertEquals("002", path.get(1).getWordInfo().getNormalizedForm());
 
         path = getPath("2.");
         assertEquals(2, path.size());
@@ -109,11 +114,11 @@ public class JoinNumericPluginTest {
         assertEquals(8, path.size());
         assertEquals("2", path.get(0).getWordInfo().getNormalizedForm());
         assertEquals(",", path.get(1).getWordInfo().getNormalizedForm());
-        assertEquals("0", path.get(2).getWordInfo().getNormalizedForm());
+        assertEquals("00", path.get(2).getWordInfo().getNormalizedForm());
         assertEquals(",", path.get(3).getWordInfo().getNormalizedForm());
-        assertEquals("0", path.get(4).getWordInfo().getNormalizedForm());
+        assertEquals("000", path.get(4).getWordInfo().getNormalizedForm());
         assertEquals(",", path.get(5).getWordInfo().getNormalizedForm());
-        assertEquals("0", path.get(6).getWordInfo().getNormalizedForm());
+        assertEquals("000", path.get(6).getWordInfo().getNormalizedForm());
 
         path = getPath(",");
         assertEquals(1, path.size());

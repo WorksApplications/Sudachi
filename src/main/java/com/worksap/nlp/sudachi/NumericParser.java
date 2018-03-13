@@ -25,16 +25,18 @@ class NumericParser {
         StringBuilder significand = new StringBuilder();
         int scale = 0;
         int point = -1;
+        boolean isAllZero = true;
 
         void clear() {
             significand.setLength(0);
             scale = 0;
             point = -1;
+            isAllZero = true;
         }
 
         void append(int i) {
-            if (i == 0 && isZero()) {
-                return;
+            if (i != 0) {
+                isAllZero = false;
             }
             significand.append(intToChar(i));
         }
@@ -112,16 +114,9 @@ class NumericParser {
                     i--;
                 }
                 significand.delete(i + 1, significand.length());
-            }
-
-            int l = (point >= 0) ? point - 1 : significand.length();
-            int i = 0;
-            while (i < l && significand.charAt(i) == '0') {
-                i++;
-            }
-            significand.delete(0, i);
-            if (significand.charAt(significand.length() - 1) == '.') {
-                significand.deleteCharAt(significand.length() - 1);
+                if (significand.charAt(significand.length() - 1) == '.') {
+                    significand.deleteCharAt(significand.length() - 1);
+                }
             }
 
             return significand.toString();
@@ -258,7 +253,7 @@ class NumericParser {
         if (isFirstDigit) {
             return false;
         } else if (!hasComma) {
-            return digitLength <= 3 && !tmp.isZero();
+            return digitLength <= 3 && !tmp.isZero() && !tmp.isAllZero;
         } else {
             return digitLength == 3;
         }

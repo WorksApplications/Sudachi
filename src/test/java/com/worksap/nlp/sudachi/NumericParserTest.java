@@ -42,19 +42,19 @@ public class NumericParserTest {
     @Test
     public void startsWithZero() {
         assertTrue(parse("001000"));
-        assertEquals("1000", parser.getNormalized());
+        assertEquals("001000", parser.getNormalized());
         parser.clear();
 
         assertTrue(parse("〇一〇〇〇"));
-        assertEquals("1000", parser.getNormalized());
+        assertEquals("01000", parser.getNormalized());
         parser.clear();
 
         assertTrue(parse("00.1000"));
-        assertEquals("0.1", parser.getNormalized());
+        assertEquals("00.1", parser.getNormalized());
         parser.clear();
 
         assertTrue(parse("000"));
-        assertEquals("0", parser.getNormalized());
+        assertEquals("000", parser.getNormalized());
         parser.clear();
     }
 
