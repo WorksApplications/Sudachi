@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 public class NumericParserTest {
@@ -35,54 +34,45 @@ public class NumericParserTest {
 
     @Test
     public void digits() {
-        parse("1000");
-        assertTrue(parser.done());
+        assertTrue(parse("1000"));
         assertEquals("1000", parser.getNormalized());
         parser.clear();
     }
 
     @Test
     public void startsWithZero() {
-        parse("001000");
-        assertTrue(parser.done());
+        assertTrue(parse("001000"));
         assertEquals("1000", parser.getNormalized());
         parser.clear();
 
-        parse("〇一〇〇〇");
-        assertTrue(parser.done());
+        assertTrue(parse("〇一〇〇〇"));
         assertEquals("1000", parser.getNormalized());
         parser.clear();
 
-        parse("00.1000");
-        assertTrue(parser.done());
+        assertTrue(parse("00.1000"));
         assertEquals("0.1", parser.getNormalized());
         parser.clear();
 
-        parse("000");
-        assertTrue(parser.done());
+        assertTrue(parse("000"));
         assertEquals("0", parser.getNormalized());
         parser.clear();
     }
 
     @Test
     public void useSmallUnit() {
-        parse("二十七");
-        assertTrue(parser.done());
+        assertTrue(parse("二十七"));
         assertEquals("27", parser.getNormalized());
         parser.clear();
 
-        parse("千三百二十七");
-        assertTrue(parser.done());
+        assertTrue(parse("千三百二十七"));
         assertEquals("1327", parser.getNormalized());
         parser.clear();
 
-        parse("千十七");
-        assertTrue(parser.done());
+        assertTrue(parse("千十七"));
         assertEquals("1017", parser.getNormalized());
         parser.clear();
 
-        parse("千三百二十七.〇五");
-        assertTrue(parser.done());
+        assertTrue(parse("千三百二十七.〇五"));
         assertEquals("1327.05", parser.getNormalized());
         parser.clear();
 
@@ -92,28 +82,23 @@ public class NumericParserTest {
 
     @Test
     public void useLargeUnit() {
-        parse("1万");
-        assertTrue(parser.done());
+        assertTrue(parse("1万"));
         assertEquals("10000", parser.getNormalized());
         parser.clear();
 
-        parse("千三百二十七万");
-        assertTrue(parser.done());
+        assertTrue(parse("千三百二十七万"));
         assertEquals("13270000", parser.getNormalized());
         parser.clear();
 
-        parse("千三百二十七万一四");
-        assertTrue(parser.done());
+        assertTrue(parse("千三百二十七万一四"));
         assertEquals("13270014", parser.getNormalized());
         parser.clear();
 
-        parse("千三百二十七万一四.〇五");
-        assertTrue(parser.done());
+        assertTrue(parse("千三百二十七万一四.〇五"));
         assertEquals("13270014.05", parser.getNormalized());
         parser.clear();
 
-        parse("三兆2千億千三百二十七万一四.〇五");
-        assertTrue(parser.done());
+        assertTrue(parse("三兆2千億千三百二十七万一四.〇五"));
         assertEquals("3200013270014.05", parser.getNormalized());
         parser.clear();
 
@@ -123,51 +108,55 @@ public class NumericParserTest {
 
     @Test
     public void floatWithUnit() {
-        parse("1.5千");
-        assertTrue(parser.done());
+        assertTrue(parse("1.5千"));
         assertEquals("1500", parser.getNormalized());
         parser.clear();
 
-        parse("1.5百万");
-        assertTrue(parser.done());
+        assertTrue(parse("1.5百万"));
         assertEquals("1500000", parser.getNormalized());
         parser.clear();
 
-        parse("1.5百万1.5千20");
-        assertTrue(parser.done());
+        assertTrue(parse("1.5百万1.5千20"));
         assertEquals("1501520", parser.getNormalized());
         parser.clear();
 
-        parse("1.5千5百");
-        assertFalse(parser.done());
+        assertFalse(parse("1.5千5百"));
         parser.clear();
 
-        parse("1.5千500");
-        assertFalse(parser.done());
+        assertFalse(parse("1.5千500"));
         parser.clear();
     }
 
     @Test
     public void longNumeric() {
-        parse("200000000000000000000万");
+        assertTrue(parse("200000000000000000000万"));
         assertEquals("2000000000000000000000000", parser.getNormalized());
         parser.clear();
     }
 
     @Test
     public void withComma() {
-        parse("2,000,000");
-        assertTrue(parser.done());
+        assertTrue(parse("2,000,000"));
         assertEquals("2000000", parser.getNormalized());
         parser.clear();
 
+        assertTrue(parse("259万2,300"));
+        assertEquals("2592300", parser.getNormalized());
+        parser.clear();
+
         assertFalse(parse("200,00,000"));
+        parser.clear();
+
+        assertFalse(parse("2,4"));
         parser.clear();
 
         assertFalse(parse("000,000"));
         parser.clear();
 
         assertFalse(parse(",000"));
+        parser.clear();
+
+        assertFalse(parse("256,55.1"));
         parser.clear();
     }
 
@@ -189,6 +178,6 @@ public class NumericParserTest {
                 return false;
             }
         }
-        return true;
+        return parser.done();
     }
 }

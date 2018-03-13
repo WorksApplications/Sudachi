@@ -173,30 +173,34 @@ class NumericParser {
         CHAR_TO_NUM = map;
     }
 
-    int parsedLength = 0;
-    int previousComma = -1;
+    int digitLength;
+    boolean isFirstDigit;
+    boolean hasComma;
     StringNumber total = new StringNumber();
     StringNumber subtotal = new StringNumber();
     StringNumber tmp = new StringNumber();
 
+    NumericParser() {
+        clear();
+    }
+
     void clear() {
-        parsedLength = 0;
-        previousComma = -1;
+        digitLength = 0;
+        isFirstDigit = true;
+        hasComma = false;
         total.clear();
         subtotal.clear();
         tmp.clear();
     }
 
     boolean append(char c) {
-        parsedLength++;
-
         if (c == '.') {
-            if (parsedLength == 1) {
-                return false;
-            }
-            return tmp.setPoint();
+            return !isFirstDigit && (!hasComma || checkComma()) && tmp.setPoint();
         } else if (c == ',') {
-            return checkComma();
+            boolean ret = checkComma();
+            hasComma = true;
+            digitLength = 0;
+            return ret;
         }
 
         Integer n = CHAR_TO_NUM.get(c);
@@ -209,6 +213,9 @@ class NumericParser {
                 return false;
             }
             tmp.clear();
+            isFirstDigit = true;
+            digitLength = 0;
+            hasComma = false;
         } else if (isLargeUnit(n)) {
             if (!subtotal.add(tmp) || subtotal.isZero()) {
                 return false;
@@ -219,15 +226,20 @@ class NumericParser {
             }
             subtotal.clear();
             tmp.clear();
+            isFirstDigit = true;
+            digitLength = 0;
+            hasComma = false;
         } else {
             tmp.append(n);
+            isFirstDigit = false;
+            digitLength++;
         }
 
         return true;
     }
 
     boolean done() {
-        return subtotal.add(tmp) && total.add(subtotal);
+        return (!hasComma || digitLength == 3) && subtotal.add(tmp) && total.add(subtotal);
     }
 
     String getNormalized() {
@@ -235,16 +247,13 @@ class NumericParser {
     }
 
     private boolean checkComma() {
-        boolean ret;
-        if (parsedLength == 1) {
+        if (isFirstDigit) {
             return false;
-        } else if (previousComma < 0) {
-            ret = (parsedLength <= 4 && !tmp.isZero());
+        } else if (!hasComma) {
+            return digitLength <= 3 && !tmp.isZero();
         } else {
-            ret = (parsedLength - previousComma == 4);
+            return digitLength == 3;
         }
-        previousComma = parsedLength;
-        return ret;
     }
 
     private boolean isSmallUnit(int n) {

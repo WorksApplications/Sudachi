@@ -19,14 +19,12 @@ package com.worksap.nlp.sudachi;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import org.junit.rules.TemporaryFolder;
 
 public class JoinNumericPluginTest {
