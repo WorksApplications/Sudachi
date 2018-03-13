@@ -120,6 +120,9 @@ class NumericParser {
                 i++;
             }
             significand.delete(0, i);
+            if (significand.charAt(significand.length() - 1) == '.') {
+                significand.deleteCharAt(significand.length() - 1);
+            }
 
             return significand.toString();
         }
@@ -176,6 +179,7 @@ class NumericParser {
     int digitLength;
     boolean isFirstDigit;
     boolean hasComma;
+    boolean hasHangingPoint;
     StringNumber total = new StringNumber();
     StringNumber subtotal = new StringNumber();
     StringNumber tmp = new StringNumber();
@@ -188,6 +192,7 @@ class NumericParser {
         digitLength = 0;
         isFirstDigit = true;
         hasComma = false;
+        hasHangingPoint = false;
         total.clear();
         subtotal.clear();
         tmp.clear();
@@ -195,6 +200,7 @@ class NumericParser {
 
     boolean append(char c) {
         if (c == '.') {
+            hasHangingPoint = true;
             return !isFirstDigit && (!hasComma || checkComma()) && tmp.setPoint();
         } else if (c == ',') {
             boolean ret = checkComma();
@@ -233,13 +239,15 @@ class NumericParser {
             tmp.append(n);
             isFirstDigit = false;
             digitLength++;
+            hasHangingPoint = false;
         }
 
         return true;
     }
 
     boolean done() {
-        return (!hasComma || digitLength == 3) && subtotal.add(tmp) && total.add(subtotal);
+        return !hasHangingPoint && (!hasComma || digitLength == 3) &&
+                subtotal.add(tmp) && total.add(subtotal);
     }
 
     String getNormalized() {

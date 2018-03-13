@@ -87,8 +87,14 @@ public class JoinNumericPluginTest {
         assertEquals(".", path.get(0).getWordInfo().getNormalizedForm());
         assertEquals("2", path.get(1).getWordInfo().getNormalizedForm());
 
-        path = getPath("1.2.3");
+        path = getPath("2.");
+        assertEquals(2, path.size());
+        assertEquals("2", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals(".", path.get(1).getWordInfo().getNormalizedForm());
+
+        path = getPath("1.20.3");
         assertEquals(5, path.size());
+        assertEquals("20", path.get(2).getWordInfo().getNormalizedForm());
     }
 
     @Test

@@ -167,7 +167,14 @@ public class NumericParserTest {
     }
 
     @Test
-    public void duplicatedPoint() {
+    public void floatPoint() {
+        assertTrue(parse("6.0"));
+        assertEquals("6", parser.getNormalized());
+        parser.clear();
+
+        assertFalse(parse("6."));
+        parser.clear();
+
         assertFalse(parse("1.2.3"));
         parser.clear();
     }

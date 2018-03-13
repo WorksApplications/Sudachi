@@ -70,8 +70,8 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     char c = s.charAt(j);
                     if (!parser.append(c)) {
                         if (beginIndex >= 0) {
-                            if (s.equals(",") && beginIndex != i) {
-                                i = splitByComma(path, beginIndex, i, lattice) + 1;
+                            if ((s.equals(",") || s.equals(".")) && beginIndex != i) {
+                                i = split(s, path, beginIndex, i, lattice) + 1;
                             }
                             beginIndex = -1;
                         }
@@ -108,14 +108,14 @@ class JoinNumericPlugin extends PathRewritePlugin {
         }
     }
 
-    private int splitByComma(List<LatticeNode> path, int begin, int end, Lattice lattice) {
+    private int split(String delim, List<LatticeNode> path, int begin, int end, Lattice lattice) {
         NumericParser parser = new NumericParser();
 
         int b = begin;
         for (int i = begin; i < end; i++) {
             LatticeNode node = path.get(i);
             String s = node.getWordInfo().getNormalizedForm();
-            if (s.equals(",")) {
+            if (s.equals(delim)) {
                 parser.done();
                 concat(path, b, i, lattice, parser);
                 end -= i - b - 1;
@@ -128,6 +128,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
                 }
             }
         }
+        parser.done();
         concat(path, b, end, lattice, parser);
 
         return b;
