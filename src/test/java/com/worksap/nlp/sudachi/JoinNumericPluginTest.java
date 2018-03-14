@@ -92,10 +92,19 @@ public class JoinNumericPluginTest {
         assertEquals(".", path.get(0).getWordInfo().getNormalizedForm());
         assertEquals("002", path.get(1).getWordInfo().getNormalizedForm());
 
-        path = getPath("2.");
+        path = getPath("22.");
         assertEquals(2, path.size());
-        assertEquals("2", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals("22", path.get(0).getWordInfo().getNormalizedForm());
         assertEquals(".", path.get(1).getWordInfo().getNormalizedForm());
+
+        path = getPath("22.節");
+        assertEquals(3, path.size());
+        assertEquals("22", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals(".", path.get(1).getWordInfo().getNormalizedForm());
+
+        path = getPath(".c");
+        assertEquals(2, path.size());
+        assertEquals(".", path.get(0).getWordInfo().getNormalizedForm());
 
         path = getPath("1.20.3");
         assertEquals(5, path.size());

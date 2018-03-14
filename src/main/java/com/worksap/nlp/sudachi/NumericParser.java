@@ -261,6 +261,7 @@ class NumericParser {
     }
 
     boolean done() {
+        boolean ret = subtotal.add(tmp) && total.add(subtotal);
         if (hasHangingPoint) {
             errorState = Error.POINT;
             return false;
@@ -268,7 +269,7 @@ class NumericParser {
             errorState = Error.COMMA;
             return false;
         }
-        return subtotal.add(tmp) && total.add(subtotal);
+        return ret;
     }
 
     String getNormalized() {

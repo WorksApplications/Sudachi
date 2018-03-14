@@ -85,9 +85,18 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     }
                 }
             } else {
-                if (beginIndex >= 0 && parser.done()) {
-                    concat(path, beginIndex, i, lattice, parser);
-                    i = beginIndex + 1;
+                if (beginIndex >= 0) {
+                    if (parser.done()) {
+                        concat(path, beginIndex, i, lattice, parser);
+                        i = beginIndex + 1;
+                    } else {
+                        String ss = path.get(i - 1).getWordInfo().getNormalizedForm();
+                        if ((parser.errorState == NumericParser.Error.COMMA && ss.equals(",")) ||
+                            (parser.errorState == NumericParser.Error.POINT && ss.equals("."))) {
+                            concat(path, beginIndex, i - 1, lattice, parser);
+                            i = beginIndex + 2;
+                        }
+                    }
                 }
                 beginIndex = -1;
                 if (!commaAsDigit && !s.equals(",")) {
@@ -102,6 +111,12 @@ class JoinNumericPlugin extends PathRewritePlugin {
         if (beginIndex >= 0) {
             if (parser.done()) {
                 concat(path, beginIndex, path.size(), lattice, parser);
+            } else {
+                String ss = path.get(path.size() - 1).getWordInfo().getNormalizedForm();
+                if ((parser.errorState == NumericParser.Error.COMMA && ss.equals(",")) ||
+                    (parser.errorState == NumericParser.Error.POINT && ss.equals("."))) {
+                    concat(path, beginIndex, path.size() - 1, lattice, parser);
+                }
             }
         }
     }
