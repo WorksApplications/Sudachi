@@ -100,6 +100,10 @@ public class JoinNumericPluginTest {
         path = getPath("1.20.3");
         assertEquals(5, path.size());
         assertEquals("20", path.get(2).getWordInfo().getNormalizedForm());
+
+        path = getPath("652...");
+        assertEquals(4, path.size());
+        assertEquals("652", path.get(0).getWordInfo().getNormalizedForm());
     }
 
     @Test
@@ -122,6 +126,19 @@ public class JoinNumericPluginTest {
 
         path = getPath(",");
         assertEquals(1, path.size());
+
+        path = getPath("652,,,");
+        assertEquals(4, path.size());
+        assertEquals("652", path.get(0).getWordInfo().getNormalizedForm());
+
+        path = getPath("256,5.50389");
+        assertEquals(3, path.size());
+        assertEquals("256", path.get(0).getWordInfo().getNormalizedForm());
+        assertEquals("5.50389", path.get(2).getWordInfo().getNormalizedForm());
+
+        path = getPath("256,550.389");
+        assertEquals(1, path.size());
+        assertEquals("256550.389", path.get(0).getWordInfo().getNormalizedForm());
     }
 
     @Test

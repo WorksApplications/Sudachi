@@ -51,6 +51,8 @@ class JoinNumericPlugin extends PathRewritePlugin {
     @Override
     public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
         int beginIndex = -1;
+        boolean commaAsDigit = true;
+        boolean periodAsDigit = true;
         NumericParser parser = new NumericParser();
 
         for (int i = 0; i < path.size(); i++) {
@@ -59,7 +61,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
             String s = node.getWordInfo().getNormalizedForm();
             if (types.contains(CategoryType.NUMERIC) ||
                 types.contains(CategoryType.KANJINUMERIC) ||
-                s.equals(".") || s.equals(",")) {
+                (periodAsDigit && s.equals(".")) || (commaAsDigit && s.equals(","))) {
 
                 if (beginIndex < 0) {
                     parser.clear();
@@ -70,8 +72,12 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     char c = s.charAt(j);
                     if (!parser.append(c)) {
                         if (beginIndex >= 0) {
-                            if ((s.equals(",") || s.equals(".")) && beginIndex != i) {
-                                i = split(s, path, beginIndex, i, lattice) + 1;
+                            if (parser.errorState == NumericParser.Error.COMMA) {
+                                commaAsDigit = false;
+                                i = beginIndex - 1;
+                            } else if (parser.errorState == NumericParser.Error.POINT) {
+                                periodAsDigit = false;
+                                i = beginIndex - 1;
                             }
                             beginIndex = -1;
                         }
@@ -84,6 +90,12 @@ class JoinNumericPlugin extends PathRewritePlugin {
                     i = beginIndex + 1;
                 }
                 beginIndex = -1;
+                if (!commaAsDigit && !s.equals(",")) {
+                    commaAsDigit = true;
+                }
+                if (!periodAsDigit && !s.equals(".")) {
+                    periodAsDigit = true;
+                }
             }
         }
 
@@ -106,31 +118,5 @@ class JoinNumericPlugin extends PathRewritePlugin {
                 concatenate(path, begin, end, lattice, null);
             }
         }
-    }
-
-    private int split(String delim, List<LatticeNode> path, int begin, int end, Lattice lattice) {
-        NumericParser parser = new NumericParser();
-
-        int b = begin;
-        for (int i = begin; i < end; i++) {
-            LatticeNode node = path.get(i);
-            String s = node.getWordInfo().getNormalizedForm();
-            if (s.equals(delim)) {
-                parser.done();
-                concat(path, b, i, lattice, parser);
-                end -= i - b - 1;
-                i = b + 1;
-                b = i + 1;
-                parser.clear();
-            } else {
-                for (int j = 0; j < s.length(); j++) {
-                    parser.append(s.charAt(j));
-                }
-            }
-        }
-        parser.done();
-        concat(path, b, end, lattice, parser);
-
-        return b;
     }
 }

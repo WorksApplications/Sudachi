@@ -146,6 +146,10 @@ class NumericParser {
         }
     }
 
+    static enum Error {
+        NONE, POINT, COMMA, OTHER
+    }
+
     private static final Map<Character, Integer> CHAR_TO_NUM;
     static {
         Map<Character, Integer> map = new HashMap<>();
@@ -175,6 +179,7 @@ class NumericParser {
     boolean isFirstDigit;
     boolean hasComma;
     boolean hasHangingPoint;
+    Error errorState;
     StringNumber total = new StringNumber();
     StringNumber subtotal = new StringNumber();
     StringNumber tmp = new StringNumber();
@@ -188,6 +193,7 @@ class NumericParser {
         isFirstDigit = true;
         hasComma = false;
         hasHangingPoint = false;
+        errorState = Error.NONE;
         total.clear();
         subtotal.clear();
         tmp.clear();
@@ -196,12 +202,26 @@ class NumericParser {
     boolean append(char c) {
         if (c == '.') {
             hasHangingPoint = true;
-            return !isFirstDigit && (!hasComma || checkComma()) && tmp.setPoint();
+            if (isFirstDigit) {
+                errorState = Error.POINT;
+                return false;
+            } else if (hasComma && !checkComma()) {
+                errorState = Error.COMMA;
+                return false;
+            } else if (!tmp.setPoint()) {
+                errorState = Error.POINT;
+                return false;
+            }
+            hasComma = false;
+            return true;
         } else if (c == ',') {
-            boolean ret = checkComma();
+            if (!checkComma()) {
+                errorState = Error.COMMA;
+                return false;
+            }
             hasComma = true;
             digitLength = 0;
-            return ret;
+            return true;
         }
 
         Integer n = CHAR_TO_NUM.get(c);
@@ -241,8 +261,14 @@ class NumericParser {
     }
 
     boolean done() {
-        return !hasHangingPoint && (!hasComma || digitLength == 3) &&
-                subtotal.add(tmp) && total.add(subtotal);
+        if (hasHangingPoint) {
+            errorState = Error.POINT;
+            return false;
+        } else if (hasComma && digitLength != 3){
+            errorState = Error.COMMA;
+            return false;
+        }
+        return subtotal.add(tmp) && total.add(subtotal);
     }
 
     String getNormalized() {

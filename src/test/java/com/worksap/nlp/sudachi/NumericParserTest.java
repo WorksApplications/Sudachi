@@ -145,18 +145,23 @@ public class NumericParserTest {
         parser.clear();
 
         assertFalse(parse("200,00,000"));
+        assertEquals(NumericParser.Error.COMMA, parser.errorState);
         parser.clear();
 
         assertFalse(parse("2,4"));
+        assertEquals(NumericParser.Error.COMMA, parser.errorState);
         parser.clear();
 
         assertFalse(parse("000,000"));
+        assertEquals(NumericParser.Error.COMMA, parser.errorState);
         parser.clear();
 
         assertFalse(parse(",000"));
+        assertEquals(NumericParser.Error.COMMA, parser.errorState);
         parser.clear();
 
         assertFalse(parse("256,55.1"));
+        assertEquals(NumericParser.Error.COMMA, parser.errorState);
         parser.clear();
     }
 
@@ -173,9 +178,11 @@ public class NumericParserTest {
         parser.clear();
 
         assertFalse(parse("6."));
+        assertEquals(NumericParser.Error.POINT, parser.errorState);
         parser.clear();
 
         assertFalse(parse("1.2.3"));
+        assertEquals(NumericParser.Error.POINT, parser.errorState);
         parser.clear();
     }
 
