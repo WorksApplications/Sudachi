@@ -29,6 +29,16 @@ Sudachi has the following features.
     + We will release the sysnonym dictionary at a later date
 
 
+## Build
+
+Sudachi needs [Git LFS](https://git-lfs.github.com/) for download the sourses
+of the system dictionaries. If you fail to build the dictionaries, install
+Git LFS and `git lfs pull`.
+
+Building the dictionaries fails with a locale other than UTF-8.
+Add `-Dfile.encoding=UTF-8` to `MAVEN_OPTS`.
+
+
 ## Use on the command line
 
     $ java -jar sudachi-XX.jar [-r conf] [-m mode] [-a] [-d] [-o output] [file...]
@@ -241,6 +251,15 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
     + 文字正規化や未知語処理に機能追加が可能
 - 同義語辞書との連携
     + 後日公開予定
+
+
+## ビルド
+
+辞書のソースを取得するために [Git LFS](https://git-lfs.github.com/) が必要です。
+辞書構築に失敗した場合は Git LFS をインストールして `git lfs pull` を実行してください。
+
+システムロケールが UTF-8 以外の場合、辞書構築が失敗します。`MAVEN_OPTS` に
+`-Dfile.encoding=UTF-8` を追加してください。
 
 
 ## コマンドラインツール
