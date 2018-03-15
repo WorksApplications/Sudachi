@@ -31,7 +31,7 @@ Sudachi has the following features.
 
 ## Build
 
-Sudachi needs [Git LFS](https://git-lfs.github.com/) for download the sourses
+Sudachi needs [Git LFS](https://git-lfs.github.com/) to download the sourses
 of the system dictionaries. If you fail to build the dictionaries, install
 Git LFS and `git lfs pull`.
 
@@ -413,6 +413,6 @@ Elasticsearch で Sudachi をつかうためのプラグインも公開してい
 
 ## Python
 
-Python も公開しています。
+Python 版も公開しています。
 
 - https://github.com/WorksApplications/SudachiPy
