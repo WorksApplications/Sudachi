@@ -124,14 +124,14 @@ We prepared following plugins.
 |Type of Plugins  | Plugin                   |                                |
 |:----------------|:-------------------------|:-------------------------------|
 |Modify the Inputs| character nomalization   |Full/half-width, Cases, Variants|
-|                 | normalization of prolong symbols*| Normalize "~", "ー"s   |
+|                 | normalization of prolong symbols| Normalize "~", "ー"s   |
 |Make OOVs        | Make one character OOVs  | Use as the fallback            |
 |                 | MeCab compatible OOVs    |                                |
 |Connect Words    | Inhibition               | Specified by part-of-speech    |
 |Modify the Path  | Join Katakata OOVs       |                                |
 |                 | Join numerics            |                                |
 |                 | Equalization of splitting*| Smooth of OOVs and not OOVs   |
-|                 | Normalize numerics*  | Normalize Kanji numerics and scales|
+|                 | Normalize numerics   | Normalize Kanji numerics and scales|
 |                 | Estimate person names*   |                                |
 
 \* will be released at a later date.
