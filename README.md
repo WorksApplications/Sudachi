@@ -172,7 +172,7 @@ Sudachi normalize the following variations.
 
 ## Licenses
 
-## Sudachi
+### Sudachi
 
 Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, Version2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -190,14 +190,14 @@ Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, V
    See the License for the specific language governing permissions and
    limitations under the License.
 
-## Darts-clone
+### Darts-clone
 
 Port of the original Darts-clone to Java. The original one is written
 by Susumu Yata.
 
 - https://github.com/s-yata/darts-clone
 
-## System dictionary
+### System dictionary
 
 This dictionary includes UniDic and a part of NEologd.
 
@@ -210,6 +210,12 @@ This dictionary includes UniDic and a part of NEologd.
 We release a plug-in for Elasticsearch.
 
 - https://github.com/WorksApplications/elasticsearch-sudachi
+
+## Python
+
+An implementation of Sudachi in Python
+
+- https://github.com/WorksApplications/SudachiPy
 
 -----
 # Sudachi
@@ -325,14 +331,14 @@ Sudachi では形態素解析の各ステップをフックして処理を差し
 |:----------------|:-------------------------|:-------------------------------|
 |入力テキスト修正 | 文字列正規化             | 全半角、大文字/小文字、異体字  |
 |                 |                          | カスタマイズ可能               |
-|                 | 長音正規化*              | 「~」や長音記号連続の正規化    |
+|                 | 長音正規化               | 「~」や長音記号連続の正規化    |
 |未知語処理       | 1文字未知語              | フォールバックとして利用       |
 |                 | MeCab互換                |                                |
 |単語接続処理     | 品詞接続禁制             | カスタマイズ可能               |
 |出力解修正       | カタカナ未知語まとめ上げ |                                |
 |                 | 数詞まとめ上げ           |                                |
 |                 | 分割粒度調整*            | 未知語/既知語の分割粒度の平滑化|
-|                 | 数詞正規化*              | 漢数詞や位取りの正規化         |
+|                 | 数詞正規化               | 漢数詞や位取りの正規化         |
 |                 | 人名補正*                | 敬称や前後関係から人名部を推定 |
 
 \* は後日公開予定
@@ -385,3 +391,9 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 Elasticsearch で Sudachi をつかうためのプラグインも公開しています。
 
 - https://github.com/WorksApplications/elasticsearch-sudachi
+
+## Python
+
+Python も公開しています。
+
+- https://github.com/WorksApplications/SudachiPy
