@@ -227,6 +227,15 @@ An implementation of Sudachi in Python
 
 - https://github.com/WorksApplications/SudachiPy
 
+
+## Slack
+
+We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
+
+- https://sudachi-dev.slack.com/
+- (Please get an invite from https://join.slack.com/t/sudachi-dev/signup
+
+
 -----
 # Sudachi
 
@@ -416,3 +425,11 @@ Elasticsearch で Sudachi をつかうためのプラグインも公開してい
 Python 版も公開しています。
 
 - https://github.com/WorksApplications/SudachiPy
+
+
+## Slack
+
+開発者やユーザーの方々が質問したり議論するためのSlackワークスペースを用意しています。
+
+- https://sudachi-dev.slack.com/
+- (https://join.slack.com/t/sudachi-dev/signup から招待を受けてください)
