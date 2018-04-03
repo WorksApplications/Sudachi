@@ -182,6 +182,16 @@ class JapaneseDictionary implements Dictionary {
                                      pathRewritePlugins);
     }
 
+    @Override
+    public int getPartOfSpeechSize() {
+        return grammar.getPartOfSpeechSize();
+    }
+
+    @Override
+    public List<String> getPartOfSpeechString(short posId) {
+        return grammar.getPartOfSpeechString(posId);
+    }
+
     static String readAll(InputStream input) throws IOException {
         try (InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
              BufferedReader reader = new BufferedReader(isReader)) {

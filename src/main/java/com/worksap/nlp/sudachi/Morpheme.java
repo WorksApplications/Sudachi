@@ -61,6 +61,13 @@ public interface Morpheme {
     public List<String> partOfSpeech();
 
     /**
+     * Returns the ID of part of speech of the morpheme.
+     *
+     * @return the ID of part of speech of the morpheme
+     */
+    public short partOfSpeechId();
+
+    /**
      * Returns the dictionary form of morpheme.
      *
      * 'Dictionary form' means a word's lemma and '終止形' in Japanese.
