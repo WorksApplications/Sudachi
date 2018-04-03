@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +35,7 @@ public class JapaneseTokenizerTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    Dictionary dict;
     JapaneseTokenizer tokenizer;
 
     @Before
@@ -43,13 +45,24 @@ public class JapaneseTokenizerTest {
 
         String path = temporaryFolder.getRoot().getPath();
         String settings = Utils.readAllResource("/sudachi.json");
-        Dictionary dict = new DictionaryFactory().create(path, settings);
+        dict = new DictionaryFactory().create(path, settings);
         tokenizer = (JapaneseTokenizer)dict.create();
     }
 
     @Test
     public void tokenizeSmallKatakanaOnly() {
         assertThat(tokenizer.tokenize("ァ").size(), is(1));
+    }
+
+    @Test
+    public void partOfSpeech() {
+        List<Morpheme> ms = tokenizer.tokenize("京都");
+        assertThat(ms.size(), is(1));
+        Morpheme m = ms.get(0);
+        short pid = m.partOfSpeechId();
+        assertTrue(dict.getPartOfSpeechSize() > pid);
+        List<String> pos = m.partOfSpeech();
+        assertThat(dict.getPartOfSpeechString(pid), is(equalTo(pos)));
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.util.List;
+
 /**
  * A lexicon and a grammar for morphological analysis.
  *
@@ -38,4 +40,25 @@ public interface Dictionary extends AutoCloseable {
 
     @Override
     public void close();
+
+    /**
+     * Returns the number of types of part-of-speech.
+     *
+     * The IDs of part-of-speech are within the range of 0 to
+     * {@code getPartOfSpeechSize() - 1}.
+     *
+     * @return the number of types of part-of-speech
+     */
+    public int getPartOfSpeechSize();
+
+    /**
+     * Returns the array of strings of part-of-speech name.
+     *
+     * The name is divided into layers.
+     *
+     * @param posId the ID of the part-of-speech
+     * @return the list of strings of part-of-speech name
+     * @throws IndexOutOfBoundsException if {@code posId} is out of the range
+     */
+    public List<String> getPartOfSpeechString(short posId);
 }

@@ -49,6 +49,12 @@ class MorphemeImpl implements Morpheme {
     }
 
     @Override
+    public short partOfSpeechId() {
+        WordInfo wi = getWordInfo();
+        return wi.getPOSId();
+    }
+
+    @Override
     public String dictionaryForm() {
         WordInfo wi = getWordInfo();
         return wi.getDictionaryForm();
