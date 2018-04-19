@@ -151,6 +151,9 @@ Sudachi normalize the following variations.
 - Contracted form
     + e.g. ちゃあ → ては
 
+## User Dictionary
+
+To create and use your own dictionaries, please refer to [docs/user_dict.md](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md).
 
 ## Comparison with MeCab and Kuromoji
 
@@ -386,6 +389,9 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 - 縮約
     + 例) ちゃあ → ては
 
+## ユーザー辞書
+
+ユーザー辞書の作成と利用方法については、[docs/user_dict.md](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)をご覧ください。
 
 ## MeCab / kuromoji との比較
 
