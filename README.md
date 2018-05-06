@@ -239,6 +239,30 @@ We have a Slack workspace for developers and users to ask questions and discuss 
 - (Please get an invite from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzQ5NDQzOTQyODUxLTY1OGI3OTdkZGFjNzEyYjc2ZjAzNjYxMjVmYTIwY2M3ZjllYTRjYjdiNmMyMzNjNzM1YmJiOTRmMWVjNmEyOGY))
 
 
+## Citing Sudachi
+
+We have published a paper about Sudachi and its language resources; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+
+When citing Sudachi in papers, books, or services, please use the follow BibTex entry;
+
+```
+@InProceedings{TAKAOKA18.8884,
+  author = {Kazuma Takaoka ,Sorami Hisamoto ,Noriko Kawahara ,Miho Sakamoto ,Yoshitaka Uchida and Yuji Matsumoto},
+  title = {Sudachi: a Japanese Tokenizer for Business},
+  booktitle = {Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC 2018)},
+  year = {2018},
+  month = {may},
+  date = {7-12},
+  location = {Miyazaki, Japan},
+  editor = {Nicoletta Calzolari (Conference chair) and Khalid Choukri and Christopher Cieri and Thierry Declerck and Sara Goggi and Koiti Hasida and Hitoshi Isahara and Bente Maegaard and Joseph Mariani and Hélène Mazo and Asuncion Moreno and Jan Odijk and Stelios Piperidis and Takenobu Tokunaga},
+  publisher = {European Language Resources Association (ELRA)},
+  address = {Paris, France},
+  isbn = {979-10-95546-00-9},
+  language = {english}
+  }
+```
+
+
 -----
 # Sudachi
 
@@ -439,3 +463,27 @@ Python 版も公開しています。
 
 - https://sudachi-dev.slack.com/
 - ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzQ5NDQzOTQyODUxLTY1OGI3OTdkZGFjNzEyYjc2ZjAzNjYxMjVmYTIwY2M3ZjllYTRjYjdiNmMyMzNjNzM1YmJiOTRmMWVjNmEyOGY)から招待を受けてください)
+
+
+## Sudachiの引用
+
+Sudachiとその言語資源について、論文を発表しています; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+
+Sudachiを論文や書籍、サービスなどで引用される際には、以下のBibTexをご利用ください。
+
+```
+@InProceedings{TAKAOKA18.8884,
+  author = {Kazuma Takaoka ,Sorami Hisamoto ,Noriko Kawahara ,Miho Sakamoto ,Yoshitaka Uchida and Yuji Matsumoto},
+  title = {Sudachi: a Japanese Tokenizer for Business},
+  booktitle = {Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC 2018)},
+  year = {2018},
+  month = {may},
+  date = {7-12},
+  location = {Miyazaki, Japan},
+  editor = {Nicoletta Calzolari (Conference chair) and Khalid Choukri and Christopher Cieri and Thierry Declerck and Sara Goggi and Koiti Hasida and Hitoshi Isahara and Bente Maegaard and Joseph Mariani and Hélène Mazo and Asuncion Moreno and Jan Odijk and Stelios Piperidis and Takenobu Tokunaga},
+  publisher = {European Language Resources Association (ELRA)},
+  address = {Paris, France},
+  isbn = {979-10-95546-00-9},
+  language = {english}
+  }
+```
