@@ -427,7 +427,9 @@ Sudachi には2種類の辞書があります。
 1. [フル辞書用の設定ファイル](https://github.com/WorksApplications/Sudachi/blob/develop/src/main/resources/sudachi_fulldict.json) を取得します
 2. コマンドラインツールで設定ファイルを指定します
 
+```
     $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+```
 
 
 ## 機能追加プラグイン
