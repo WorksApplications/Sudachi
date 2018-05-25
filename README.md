@@ -83,7 +83,7 @@ In A mode, texts are divided into the shortest units equivalent
 to the UniDic short unit. In C mode, it extracts named entities.
 In B mode, into the middle units.
 
-The followings are an examples.
+The followings are an examples. (They are included the full dictionary)
 
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
@@ -102,6 +102,21 @@ The followings are an examples.
     C：新国立美術館
 
 In full-text searching, to use A and B can imrove precision and recall.
+
+## Dictionary type
+
+Sudachi has two types of dictionaries.
+
+- Core: include basic vocabulary (default)
+- Full: include miscellaneous proper nouns
+
+### How to use the full dictionary
+
+1. Get the [configuration file](https://github.com/WorksApplications/Sudachi/blob/develop/src/main/resources/sudachi_fulldict.json)
+ for the full dictionary
+2. Run the command line tool with the configuration file
+
+    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
 
 
 ## Plugins
@@ -340,7 +355,7 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 Sudachi では短い方から A, B, C の3つの分割モードを提供します。
 A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的な単位です。
 
-以下に例を示します。
+以下に例を示します。(フル辞書利用時)
 
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
@@ -360,6 +375,20 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
 
 検索用途であれば A と C を併用することで、再現率と適合率を向上させる
 ことができます。
+
+## 辞書の種類
+
+Sudachi には2種類の辞書があります。
+
+- Core: 基本的な語彙を収録 (デフォルト)
+- Full: 雑多な固有名詞まで収録
+
+### フル辞書の利用方法
+
+1. [フル辞書用の設定ファイル](https://github.com/WorksApplications/Sudachi/blob/develop/src/main/resources/sudachi_fulldict.json) を取得します
+2. コマンドラインツールで設定ファイルを指定します
+
+    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
 
 
 ## 機能追加プラグイン
