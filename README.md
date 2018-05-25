@@ -107,8 +107,8 @@ In full-text searching, to use A and B can imrove precision and recall.
 
 Sudachi has two types of dictionaries.
 
-- Core: include basic vocabulary (default)
-- Full: include miscellaneous proper nouns
+- Core: includes basic vocabulary (default)
+- Full: includes miscellaneous proper nouns
 
 ### How to use the full dictionary
 
@@ -116,8 +116,9 @@ Sudachi has two types of dictionaries.
  for the full dictionary
 2. Run the command line tool with the configuration file
 
-    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
-
+```
+$ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+```
 
 ## Plugins
 
