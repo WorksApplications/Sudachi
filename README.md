@@ -83,23 +83,41 @@ In A mode, texts are divided into the shortest units equivalent
 to the UniDic short unit. In C mode, it extracts named entities.
 In B mode, into the middle units.
 
-The followings are an examples. (They are included the full dictionary)
+The followings are examples in the core dictionary.
+
+    A：選挙/管理/委員/会
+    B：選挙/管理/委員会
+    C：選挙管理委員会
+    
+    A：客室/乗務/員
+    B：客室/乗務員
+    C：客室乗務員
+    
+    A：労働/者/協同/組合
+    B：労働者/協同/組合
+    C：労働者協同組合
+    
+    A：機能/性/食品
+    B：機能性/食品
+    C：機能性食品
+
+The followings are examples in the full dictionary.
 
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-
-    A：自転/車/安全/整備/士
-    B：自転車/安全/整備士
-    C：自転車安全整備士
-
+    
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-
-    A：新/国立/美術/館
-    B：新/国立/美術館
-    C：新国立美術館
+    
+    A：さっぽろ/テレビ/塔
+    B：さっぽろ/テレビ塔
+    C：さっぽろテレビ塔
+    
+    A：カンヌ/国際/映画/祭
+    B：カンヌ/国際/映画祭
+    C：カンヌ国際映画祭
 
 In full-text searching, to use A and B can imrove precision and recall.
 
@@ -356,23 +374,43 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 Sudachi では短い方から A, B, C の3つの分割モードを提供します。
 A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的な単位です。
 
-以下に例を示します。(フル辞書利用時)
+以下に例を示します。
+
+(コア辞書利用時)
+
+    A：選挙/管理/委員/会
+    B：選挙/管理/委員会
+    C：選挙管理委員会
+    
+    A：客室/乗務/員
+    B：客室/乗務員
+    C：客室乗務員
+    
+    A：労働/者/協同/組合
+    B：労働者/協同/組合
+    C：労働者協同組合
+    
+    A：機能/性/食品
+    B：機能性/食品
+    C：機能性食品
+
+(フル辞書利用時)
 
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-
-    A：自転/車/安全/整備/士
-    B：自転車/安全/整備士
-    C：自転車安全整備士
-
+    
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-
-    A：新/国立/美術/館
-    B：新/国立/美術館
-    C：新国立美術館
+    
+    A：さっぽろ/テレビ/塔
+    B：さっぽろ/テレビ塔
+    C：さっぽろテレビ塔
+    
+    A：カンヌ/国際/映画/祭
+    B：カンヌ/国際/映画祭
+    C：カンヌ国際映画祭
 
 検索用途であれば A と C を併用することで、再現率と適合率を向上させる
 ことができます。
