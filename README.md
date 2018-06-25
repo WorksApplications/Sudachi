@@ -268,7 +268,7 @@ An implementation of Sudachi in Python
 We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
 
 - https://sudachi-dev.slack.com/
-- (Please get an invite from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzcwMTgxMDUxODYxLTQ2Y2NhNGM3NmRlMjMxODEwN2EyYmM0ZjRlNTdmYTUzODg1ZmIzNzM1Zjc0Y2Q5ODg2ZjhiNGRhMGU4ZTllMGI))
+- (Please get an invite from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTg4YTkxMzAyNjE3MWY2YTRkMzZjODNmNjEwNzBmZWRhNGNlNDA3NDVjZjljN2M2Y2YyMjBmYjMwOGQ2OWYxNTI))
 
 
 ## Citing Sudachi
@@ -530,7 +530,7 @@ Python 版も公開しています。
 開発者やユーザーの方々が質問したり議論するためのSlackワークスペースを用意しています。
 
 - https://sudachi-dev.slack.com/
-- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzcwMTgxMDUxODYxLTQ2Y2NhNGM3NmRlMjMxODEwN2EyYmM0ZjRlNTdmYTUzODg1ZmIzNzM1Zjc0Y2Q5ODg2ZjhiNGRhMGU4ZTllMGI)から招待を受けてください)
+- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTg4YTkxMzAyNjE3MWY2YTRkMzZjODNmNjEwNzBmZWRhNGNlNDA3NDVjZjljN2M2Y2YyMjBmYjMwOGQ2OWYxNTI)から招待を受けてください)
 
 
 ## Sudachiの引用
