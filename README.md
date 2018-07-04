@@ -130,7 +130,7 @@ Sudachi has two types of dictionaries.
 
 ### How to use the full dictionary
 
-1. Get the [configuration file](https://github.com/WorksApplications/Sudachi/blob/develop/src/main/resources/sudachi_fulldict.json)
+1. Get the [configuration file](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json)
  for the full dictionary
 2. Run the command line tool with the configuration file
 
@@ -424,7 +424,7 @@ Sudachi には2種類の辞書があります。
 
 ### フル辞書の利用方法
 
-1. [フル辞書用の設定ファイル](https://github.com/WorksApplications/Sudachi/blob/develop/src/main/resources/sudachi_fulldict.json) を取得します
+1. [フル辞書用の設定ファイル](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json) を取得します
 2. コマンドラインツールで設定ファイルを指定します
 
 ```
