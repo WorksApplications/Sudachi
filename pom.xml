@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.worksap.nlp</groupId>
   <artifactId>sudachi</artifactId>
@@ -231,13 +231,13 @@
                   </plugin>
                   <goal>java</goal>
                   <configuration>
-	            <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
-	            <arguments>
+                    <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
+                    <arguments>
                       <argument>${dictionary.build.directory}/@item@_lex.csv</argument>
-		      <argument>${unidic.matrix}</argument>
-		      <argument>${project.build.directory}/system_@item@.dic</argument>
+                      <argument>${unidic.matrix}</argument>
+                      <argument>${project.build.directory}/system_@item@.dic</argument>
                       <argument>${git.commit.id}</argument>
-	            </arguments>
+                    </arguments>
                   </configuration>
                 </pluginExecutor>
                 <pluginExecutor>
@@ -267,6 +267,22 @@
             <configuration>
               <descriptor>src/assembly/bin.xml</descriptor>
               <finalName>sudachi-${project.version}</finalName>
+            </configuration>
+          </execution>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptor>src/assembly/portable.xml</descriptor>
+              <finalName>sudachi-${project.version}</finalName>
+              <archive>
+                <manifest>
+                  <mainClass>com.worksap.nlp.sudachi.SudachiCommandLine</mainClass>
+                  <addClasspath>true</addClasspath>
+                </manifest>
+              </archive>
             </configuration>
           </execution>
         </executions>
