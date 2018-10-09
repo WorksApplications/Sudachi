@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -41,11 +42,16 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  */
 class JoinNumericPlugin extends PathRewritePlugin {
 
+    static final List<String> NUMERIC_POS
+        = Arrays.asList("名詞", "数詞", "*", "*", "*", "*");
+
     boolean enableNormalize;
+    short numericPOSId;
 
     @Override
     public void setUp(Grammar grammar) {
         enableNormalize = settings.getBoolean("enableNormalize", true);
+        numericPOSId = grammar.getPartOfSpeechId(NUMERIC_POS);
     }
 
     @Override
@@ -123,6 +129,8 @@ class JoinNumericPlugin extends PathRewritePlugin {
 
     private void concat(List<LatticeNode> path, int begin, int end,
               Lattice lattice, NumericParser parser) {
+        if (path.get(begin).getWordInfo().getPOSId() != numericPOSId)
+            return;
         if (enableNormalize) {
             String normalizedForm = parser.getNormalized();
             if (end - begin > 1 || !normalizedForm.equals(path.get(begin).getWordInfo().getNormalizedForm())) {

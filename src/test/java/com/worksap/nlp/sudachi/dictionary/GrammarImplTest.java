@@ -105,14 +105,14 @@ public class GrammarImplTest {
 
         grammar = new GrammarImpl(bytes, header.storageSize());
 
-        assertEquals(7, grammar.getPartOfSpeechSize());
+        assertEquals(8, grammar.getPartOfSpeechSize());
 
         assertEquals(0, grammar.getConnectCost((short)0, (short)0));
         assertEquals(-3361, grammar.getConnectCost((short)1, (short)1));
         assertEquals(126, grammar.getConnectCost((short)3, (short)6));
         assertEquals(1180, grammar.getConnectCost((short)7, (short)2));
         assertEquals(3319, grammar.getConnectCost((short)5, (short)7));
-        assertEquals(410, grammar.storageSize());
+        assertEquals(470, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {
