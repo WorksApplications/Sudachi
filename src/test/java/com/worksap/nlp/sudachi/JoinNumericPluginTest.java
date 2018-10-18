@@ -46,6 +46,8 @@ public class JoinNumericPluginTest {
         tokenizer = (JapaneseTokenizer)dict.create();
 
         plugin = new JoinNumericPlugin();
+        plugin.setSettings(Settings.parseSettings(null, "{}"));
+        plugin.setUp(((JapaneseDictionary)dict).grammar);
     }
 
     @Test
@@ -77,6 +79,14 @@ public class JoinNumericPluginTest {
         List<LatticeNode> path = getPath("一二三万二千円");
         assertEquals(2, path.size());
         assertEquals("1232000", path.get(0).getWordInfo().getNormalizedForm());
+    }
+
+    @Test
+    public void testNormalizeWithNotNumeric() {
+        plugin.enableNormalize = true;
+        List<LatticeNode> path = getPath("六三四");
+        assertEquals(1, path.size());
+        assertEquals("六三四", path.get(0).getWordInfo().getNormalizedForm());
     }
 
     @Test
