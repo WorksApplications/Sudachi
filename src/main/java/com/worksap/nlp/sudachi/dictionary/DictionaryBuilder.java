@@ -143,7 +143,13 @@ public class DictionaryBuilder {
                 short posId = getPosId(cols[5], cols[6], cols[7],
                                        cols[8], cols[9], cols[10]);
                 if (posId < 0) {
-                    throw new IllegalArgumentException("invalid part of speach");
+                    throw new IllegalArgumentException("invalid part of speech");
+                }
+
+                int[] aUnitSplit = parseSplitInfo(cols[15]);
+                int[] bUnitSplit = parseSplitInfo(cols[16]);
+                if (cols[14].equals("A") && (aUnitSplit.length != 0 || bUnitSplit.length != 0)) {
+                    throw new IllegalArgumentException("invalid splitting");
                 }
 
                 WordInfo info
@@ -154,8 +160,8 @@ public class DictionaryBuilder {
                                    (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
                                    "", // dummy
                                    cols[11], // readingForm
-                                   parseSplitInfo(cols[15]), // aUnitSplit
-                                   parseSplitInfo(cols[16]), // bUnitSplit
+                                   aUnitSplit,
+                                   bUnitSplit,
                                    parseSplitInfo(cols[17]) // wordStructure
                                    );
                 wordInfos.add(info);
