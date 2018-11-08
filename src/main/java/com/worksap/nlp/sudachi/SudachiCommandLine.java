@@ -29,7 +29,7 @@ import java.io.PrintStream;
 public class SudachiCommandLine {
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
-                    InputStream input, PrintStream output, boolean printAll)
+                    InputStream input, PrintStream output, boolean printAll, boolean ignoreError)
         throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
@@ -40,27 +40,35 @@ public class SudachiCommandLine {
                 if (line == null) {
                     break;
                 }
-                for (Morpheme m : tokenizer.tokenize(mode, line)) {
-                    output.print(m.surface());
-                    output.print("\t");
-                    output.print(String.join(",", m.partOfSpeech()));
-                    output.print("\t");
-                    output.print(m.normalizedForm());
-                    if (printAll) {
+                try {
+                    for (Morpheme m : tokenizer.tokenize(mode, line)) {
+                        output.print(m.surface());
                         output.print("\t");
-                        output.print(m.dictionaryForm());
+                        output.print(String.join(",", m.partOfSpeech()));
                         output.print("\t");
-                        output.print(m.readingForm());
-                        output.print("\t");
-                        output.print(m.getDictionaryId());
-                        if (m.isOOV()) {
+                        output.print(m.normalizedForm());
+                        if (printAll) {
                             output.print("\t");
-                            output.print("(OOV)");
+                            output.print(m.dictionaryForm());
+                            output.print("\t");
+                            output.print(m.readingForm());
+                            output.print("\t");
+                            output.print(m.getDictionaryId());
+                            if (m.isOOV()) {
+                                output.print("\t");
+                                output.print("(OOV)");
+                            }
                         }
+                        output.println();
                     }
-                    output.println();
+                    output.println("EOS");
+                } catch (RuntimeException e) {
+                    if (ignoreError) {
+                        e.printStackTrace();
+                    } else {
+                        throw e;
+                    }
                 }
-                output.println("EOS");
             }
         }
     }
@@ -94,6 +102,7 @@ public class SudachiCommandLine {
         PrintStream output = System.out;
         boolean isEnableDump = false;
         boolean printAll = false;
+        boolean ignoreError = false;
 
         int i = 0;
         for (i = 0; i < args.length; i++) {
@@ -119,12 +128,15 @@ public class SudachiCommandLine {
                 printAll = true;
             } else if (args[i].equals("-d")) {
                 isEnableDump = true;
+            } else if (args[i].equals("-f")) {
+                ignoreError = true;
             } else if (args[i].equals("-h")) {
-                System.err.println("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]");
+                System.err.println("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]");
                 System.err.println("\t-r file\tread settings from file");
                 System.err.println("\t-m mode\tmode of splitting");
                 System.err.println("\t-o file\toutput to file");
                 System.err.println("\t-a\tprint all fields");
+                System.err.println("\t-f\tignore error");
                 System.err.println("\t-d\tdebug mode");
                 return;
             } else {
@@ -141,11 +153,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for ( ; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output, printAll);
+                        run(tokenizer, mode, input, output, printAll, ignoreError);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output, printAll);
+                run(tokenizer, mode, System.in, output, printAll, ignoreError);
             }
         }
         output.close();
