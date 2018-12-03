@@ -161,4 +161,7 @@ CYRILLIC        1 1 0
 # added 2006/3/13 
 0x3007 SYMBOL KANJINUMERIC
 
+# added 2018/11/30
+0x309b..0x309c HIRAGANA KATAKANA # voiced/semi-voiced sound marks
+
 # END OF TABLE
