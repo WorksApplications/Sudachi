@@ -12,7 +12,7 @@
     <java.version>1.8</java.version>
     <dictionary.build.directory>${project.build.directory}/dictionary</dictionary.build.directory>
     <unidic.version>2.1.2</unidic.version>
-    <unidic.url>http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/${unidic.version}/src/unidic-mecab-${unidic.version}_src.zip</unidic.url>
+    <unidic.url>https://unidic.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
     <dictionary.types>core</dictionary.types>
     <jacoco.skip>true</jacoco.skip>
