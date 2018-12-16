@@ -183,6 +183,27 @@ Sudachi normalize the following variations.
 - Contracted form
     + e.g. ちゃあ → ては
 
+## Character Normalization
+
+`DefaultInputTextPlugin` normalizes an input text in the following order.
+
+1. To lower case by `Character.toLowerCase()`
+2. Unicode normalization by NFKC
+
+When `rewrite.def` has the following descriptions, `DefaultInputTextPlugin` stops the above processing and aplies the followings.
+
+- Ignore
+
+    \# single code point: this character is skipped in character normalization
+    髙
+
+- Replace
+
+    \# rewrite rule: <target> <replacement>
+    A' Ā
+
+If the number of characters increases as a result of character normalization, Sudachi may output morphemes whose length is 0 in the original input text.
+
 ## User Dictionary
 
 To create and use your own dictionaries, please refer to [docs/user_dict.md](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md).
@@ -480,6 +501,27 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
     + 例) シュミレーション → シミュレーション
 - 縮約
     + 例) ちゃあ → ては
+
+## 文字正規化
+
+デフォルトで適用されるプラグイン `DefaultInputTextPlugin` で入力文に対して以下の順で正規化をおこないます。
+
+1. `Character.toLowerCase()` をつかった小文字化
+2. NFKC をつかった Unicode 正規化
+
+ただし、`rewrite.def` に以下の記述があった場合は上記の処理は適用されず、こちらの処理が優先されます。
+
+- 正規化抑制
+
+    \# コードポイントが1つのみ記述されている場合は、文字正規化を抑制します
+    髙
+
+- 置換
+
+    \# 置換対象文字列 置換先文字列
+    A' Ā
+
+文字正規化の結果、文字数が増えた場合、原文上では長さが0になる形態素が出力されることがあります。
 
 ## ユーザー辞書
 
