@@ -48,6 +48,7 @@ Add `-Dfile.encoding=UTF-8` to `MAVEN_OPTS`.
 - -a outputs the dictionary form and the reading form
 - -d dump the debug outputs
 - -o specifies output file (default: the standard output)
+- -f ignore errors
 
 ### Examples
 
@@ -362,6 +363,7 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 - -a 読み、辞書形も出力
 - -d デバッグ情報の出力
 - -o 出力ファイル (指定がない場合は標準出力)
+- -f エラーを無視して処理を続行する
 
 ### 出力例
 
