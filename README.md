@@ -1,5 +1,7 @@
 # Sudachi
 
+<p align="center"><a href="https://nlp.worksap.co.jp/"><img width="70" src="./docs/Sudachi.png" alt="Sudachi logo"></a></p>
+
 [![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop)](https://travis-ci.org/WorksApplications/Sudachi)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi)
 
