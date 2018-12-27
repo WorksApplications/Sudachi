@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop)](https://travis-ci.org/WorksApplications/Sudachi)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi)
 
+[日本語 README](#sudachi-日本語readme)
+
 
 Sudachi is Japanese morphological analyzer. Morphological analysis consists
 mainly of the following tasks.
@@ -318,7 +320,9 @@ When citing Sudachi in papers, books, or services, please use the follow BibTex 
 
 
 -----
-# Sudachi
+# Sudachi (日本語README)
+
+[English README](#sudachi)
 
 Sudachi は日本語形態素解析器です。形態素解析はおもに以下の3つの処理を
 おこないます。
