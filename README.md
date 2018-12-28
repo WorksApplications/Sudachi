@@ -1,7 +1,15 @@
 # Sudachi
 
-[![Build Status](https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop)](https://travis-ci.org/WorksApplications/Sudachi)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi)
+<p align="center"><a href="https://nlp.worksap.co.jp/"><img width="70" src="./docs/Sudachi.png" alt="Sudachi logo"></a></p>
+
+<p align="center">
+    <a href="https://travis-ci.org/WorksApplications/Sudachi"><img src="https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop" alt="Build Status"></a>
+    <a href="https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi"><img src="https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status" alt="Quality Gate"></a>
+</p>
+
+<p align="center">
+    <a href="#sudachi-%E6%97%A5%E6%9C%AC%E8%AA%9Ereadme">日本語 README</a>
+</p>
 
 [日本語 README](#sudachi-日本語readme)
 
