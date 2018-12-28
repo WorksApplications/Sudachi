@@ -7,10 +7,6 @@
     <a href="https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi"><img src="https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status" alt="Quality Gate"></a>
 </p>
 
-<p align="center">
-    <a href="#sudachi-%E6%97%A5%E6%9C%AC%E8%AA%9Ereadme">日本語 README</a>
-</p>
-
 [日本語 README](#sudachi-日本語readme)
 
 
