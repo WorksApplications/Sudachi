@@ -307,7 +307,7 @@ When citing Sudachi in papers, books, or services, please use the follow BibTex 
 
 ```
 @InProceedings{TAKAOKA18.8884,
-  author = {Kazuma Takaoka ,Sorami Hisamoto ,Noriko Kawahara ,Miho Sakamoto ,Yoshitaka Uchida and Yuji Matsumoto},
+  author = {Kazuma Takaoka and Sorami Hisamoto and Noriko Kawahara and Miho Sakamoto and Yoshitaka Uchida and Yuji Matsumoto},
   title = {Sudachi: a Japanese Tokenizer for Business},
   booktitle = {Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC 2018)},
   year = {2018},
@@ -593,7 +593,7 @@ Sudachiを論文や書籍、サービスなどで引用される際には、以�
 
 ```
 @InProceedings{TAKAOKA18.8884,
-  author = {Kazuma Takaoka ,Sorami Hisamoto ,Noriko Kawahara ,Miho Sakamoto ,Yoshitaka Uchida and Yuji Matsumoto},
+  author = {Kazuma Takaoka and Sorami Hisamoto and Noriko Kawahara and Miho Sakamoto and Yoshitaka Uchida and Yuji Matsumoto},
   title = {Sudachi: a Japanese Tokenizer for Business},
   booktitle = {Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC 2018)},
   year = {2018},
