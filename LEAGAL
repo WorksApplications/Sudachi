@@ -5,7 +5,7 @@ LEGAL NOTICE INFORMATION
 version 2.0. (see the file LICENSE-2.0.txt)
 
 
-- dictionary/core_lex.csv and dictionary/notcore_lex.csv contains a part of
+- dictionary/core_lex.csv and dictionary/notcore_lex.csv contain a part of
 UniDic (https://unidic.ninjal.ac.jp/).
 
 Copyright (c) 2011-2013, The UniDic Consortium
@@ -40,7 +40,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-- dictionary/core_lex.csv and dictionary/notcore_lex.csv contains a part of
+- dictionary/core_lex.csv and dictionary/notcore_lex.csv contain a part of
 NEologd (https://github.com/neologd/mecab-unidic-neologd).
 
 Copyright (C) 2015-2019 Toshinori Sato (@overlast)
