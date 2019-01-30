@@ -77,4 +77,11 @@ public interface Lexicon {
      * @return the dictionary ID
      */
     int getDictionaryId(int wordId);
+
+    /**
+     * Returns the number of morphemes in the dictionary.
+     *
+     * @return the number of morphemes
+     */
+    int size();
 }

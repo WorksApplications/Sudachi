@@ -133,6 +133,11 @@ public class DoubleArrayLexicon implements Lexicon {
         return 0;
     }
 
+    @Override
+    public int size() {
+        return wordParams.size();
+    }
+
     public void calculateCost(Tokenizer tokenizer) {
         for (int wordId = 0; wordId < wordParams.size(); wordId++) {
             if (getCost(wordId) != Short.MIN_VALUE) {
