@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ public class DoubleArrayLexicon implements Lexicon {
         trie = new DoubleArray();
         int size = bytes.getInt(offset);
         offset += 4;
-        bytes.position(offset);
+        ((Buffer)bytes).position(offset);
         IntBuffer array = bytes.asIntBuffer();
         trie.setArray(array, size);
         offset += trie.totalSize();

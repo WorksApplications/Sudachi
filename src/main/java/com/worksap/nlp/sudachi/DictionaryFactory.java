@@ -24,7 +24,7 @@ import java.io.IOException;
 public class DictionaryFactory {
 
     /**
-     * Creates <tt>Dictionary</tt> by read a dictionary file.
+     * Creates {@code Dictionary} by read a dictionary file.
      *
      * @return {@link Dictionary}
      * @throws IOException if reading a file is failed
@@ -34,7 +34,7 @@ public class DictionaryFactory {
     }
 
     /**
-     * Creates <tt>Dictionary</tt> by read a dictionary file.
+     * Creates {@code Dictionary} by read a dictionary file.
      *
      * @param settings settings in JSON string
      * @return {@link Dictionary}
@@ -45,7 +45,7 @@ public class DictionaryFactory {
     }
 
     /**
-     * Creates <tt>Dictionary</tt> by read a dictionary file.
+     * Creates {@code Dictionary} by read a dictionary file.
      *
      * @param path the base path if "path" is undefined in settings
      * @param settings settings in JSON string

@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import java.io.File;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -330,9 +331,11 @@ public class Settings {
 
             try {
                 o = this.getClass().getClassLoader()
-                    .loadClass(classname).newInstance();
-            } catch (ClassNotFoundException | InstantiationException
-                     | IllegalAccessException e) {
+                    .loadClass(classname).getDeclaredConstructor().newInstance();
+            } catch (ClassNotFoundException
+                     | NoSuchMethodException | SecurityException
+                     | InstantiationException | IllegalAccessException
+                     | IllegalArgumentException | InvocationTargetException e) {
                 throw new IllegalArgumentException(classname + " in " + setting + " cannot be initialized", e);
             }
 
