@@ -113,6 +113,11 @@ public class LexiconSet implements Lexicon {
         return wordId >>> 28;
     }
 
+    @Override
+    public int size() {
+        return lexicons.stream().mapToInt(Lexicon::size).sum();
+    }
+
     private int getWordId(int wordId) {
         return 0x0fffffff & wordId;
     }
