@@ -111,6 +111,11 @@ public class DoubleArrayLexiconTest {
         assertArrayEquals(new int[] { 5, 9 }, wi.getWordStructure());
     }
 
+    @Test
+    public void size() {
+        assertEquals(34, lexicon.size());
+    }
+
     static <E> List<E> iteratorToList(Iterator<E> iterator) {
         List<E> result = new ArrayList<>();
         while (iterator.hasNext()) {
