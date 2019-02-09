@@ -16,21 +16,19 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.worksap.nlp.sudachi.MMap;
+
 public class PrintDictionary {
 
     static Grammar readGrammar(String filename) throws IOException {
-        ByteBuffer bytes = readAsByteBuffer(filename);
+        ByteBuffer bytes = MMap.map(filename);
         int offset = 0;
 
         DictionaryHeader header = new DictionaryHeader(bytes, offset);
@@ -42,7 +40,7 @@ public class PrintDictionary {
     }
 
     static void printDictionary(String filename, Grammar grammar) throws IOException {
-        ByteBuffer bytes = readAsByteBuffer(filename);
+        ByteBuffer bytes = MMap.map(filename);
         int offset = 0;
 
         DictionaryHeader header = new DictionaryHeader(bytes, offset);
@@ -81,17 +79,6 @@ public class PrintDictionary {
                                              splitToString(wordInfo.getBunitSplit()),
                                              splitToString(wordInfo.getWordStructure())));
         }
-    }
-
-    static ByteBuffer readAsByteBuffer(String filename) throws IOException {
-        MappedByteBuffer bytes;
-        try (FileInputStream istream = new FileInputStream(filename);
-             FileChannel inputFile = istream.getChannel()) {
-            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
-                                  inputFile.size());
-            bytes.order(ByteOrder.LITTLE_ENDIAN);
-        }
-        return bytes;
     }
 
     static String wordIdToString(int wid) {

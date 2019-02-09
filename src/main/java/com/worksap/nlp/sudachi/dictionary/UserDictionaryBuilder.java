@@ -20,10 +20,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.time.Instant;
 import java.util.Arrays;
+
+import com.worksap.nlp.sudachi.MMap;
 
 /**
  * A user dictionary building tool. This class provide the converter
@@ -73,20 +74,13 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
             return;
         }
 
-        Grammar grammar;
-        try (FileInputStream istream = new FileInputStream(args[0]);
-             FileChannel inputFile = istream.getChannel()) {
-            ByteBuffer bytes;
-            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
-                                  inputFile.size());
-            bytes.order(ByteOrder.LITTLE_ENDIAN);
-            DictionaryHeader header = new DictionaryHeader(bytes, 0);
-            if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
-                System.err.println("Error: invalid system dictionary: " + args[0]);
-                return;
-            }
-            grammar = new GrammarImpl(bytes, header.storageSize());
+        ByteBuffer bytes = MMap.map(args[0]);
+        DictionaryHeader systemHeader = new DictionaryHeader(bytes, 0);
+        if (systemHeader.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
+            System.err.println("Error: invalid system dictionary: " + args[0]);
+            return;
         }
+        Grammar grammar = new GrammarImpl(bytes, systemHeader.storageSize());
 
         String description = (args.length >= 4) ? args[3] : "";
         DictionaryHeader header
