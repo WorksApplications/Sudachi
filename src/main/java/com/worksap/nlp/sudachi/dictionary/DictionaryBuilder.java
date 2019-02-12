@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -78,16 +79,24 @@ public class DictionaryBuilder {
 
     ByteBuffer buffer;
     int wordSize;
+    int wordId;
 
     DictionaryBuilder() {
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    void build(FileInputStream lexiconInput, FileInputStream matrixInput,
+    void build(List<String> lexiconPaths, FileInputStream matrixInput,
                FileOutputStream output) throws IOException {
-        buildLexicon(lexiconInput);
-        lexiconInput.close();
+        System.err.print("reading the source file...");
+        wordId = 0;
+        for (String path : lexiconPaths) {
+            try(FileInputStream lexiconInput = new FileInputStream(path)) {
+                buildLexicon(path, lexiconInput);
+            }
+        }
+        wordSize = wordId;
+        System.err.println(String.format(" %,d words", wordSize));
         
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
@@ -95,13 +104,10 @@ public class DictionaryBuilder {
         outputChannel.close();
     }
 
-    void buildLexicon(FileInputStream lexiconInput) throws IOException {
+    void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
         int lineno = -1;
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
              LineNumberReader reader = new LineNumberReader(isr)) {
-
-            System.err.print("reading the source file...");
-            int wordId = 0;
             for (; ; wordId++) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -166,14 +172,12 @@ public class DictionaryBuilder {
                                    );
                 wordInfos.add(info);
             }
-            wordSize = wordId;
         } catch (Exception e) {
             if (lineno > 0) {
-                System.err.println("Error: " + e.getMessage() + " at line " + lineno);
+                System.err.println("Error: " + e.getMessage() + " at line " + lineno + " in " + filename);
             }
             throw e;
         }
-        System.err.println(String.format(" %,d words", wordSize));
     }
 
     short getPosId(String... posStrings) {
@@ -401,41 +405,68 @@ public class DictionaryBuilder {
         }
     }
 
+    static void printUsage() {
+        System.err.println("usage: DictionaryBuilder -o file -m file [-d description] files...");
+        System.err.println("\t-o file\toutput to file");
+        System.err.println("\t-m file\tmatrix file");
+        System.err.println("\t-d description\tcomment");
+    }
+
     /**
      * Builds the system dictionary.
      *
      * This tool requires three arguments.
      * <ol start="0">
-     * <li>the path of the source file in the CSV format</li>
-     * <li>the path of the connection matrix file
+     * <li>{@code -o file} the path of the output file</li>
+     * <li>{@code -m file} the path of the connection matrix file
      *     in MeCab's matrix.def format</li>
-     * <li>the path of the output file</li>
-     * <li>(optional) the description which is embedded in the dictionary</li>
+     * <li>{@code -d string}
+     *     (optional) the description which is embedded in the dictionary</li>
+     * <li>the paths of the source files in the CSV format</li>
      * </ol>
-     * @param args the input filename, the connection matrix file,
-     * and the output filename
+     * @param args the options and input filenames
      * @throws IOException if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
-        if (args.length < 3) {
-            System.err.println("usage: DictionaryBuilder input.csv matrix.def output.dic [description]");
+        String description = "";
+        String outputPath = null;
+        String matrixPath = null;
+
+        int i = 0;
+        for (i = 0; i < args.length; i++) {
+            if (args[i].equals("-o") && i + 1 < args.length) {
+                outputPath = args[++i];
+            } else if (args[i].equals("-m") && i + 1 < args.length) {
+                matrixPath = args[++i];
+            } else if (args[i].equals("-d") && i + 1 < args.length) {
+                description = args[++i];
+            } else if (args[i].equals("-h")) {
+                printUsage();
+                return;
+            } else {
+                break;
+            }
+        }
+
+        if (args.length <= i || outputPath == null || matrixPath == null) {
+            printUsage();
             return;
         }
 
-        String description = (args.length >= 4) ? args[3] : "";
+        List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
+
         DictionaryHeader header
             = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION,
                                    Instant.now().getEpochSecond(),
                                    description);
 
-        try (FileInputStream lexiconInput = new FileInputStream(args[0]);
-             FileInputStream matrixInput = new FileInputStream(args[1]);
-             FileOutputStream output = new FileOutputStream(args[2])) {
+        try (FileInputStream matrixInput = new FileInputStream(matrixPath);
+             FileOutputStream output = new FileOutputStream(outputPath)) {
 
             output.write(header.toByte());
 
             DictionaryBuilder builder = new DictionaryBuilder();
-            builder.build(lexiconInput, matrixInput, output);
+            builder.build(lexiconPaths, matrixInput, output);
         }
     }
 }

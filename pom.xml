@@ -14,7 +14,7 @@
     <unidic.version>2.1.2</unidic.version>
     <unidic.url>https://unidic.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab-${unidic.version}_src.zip</unidic.url>
     <unidic.matrix>${dictionary.build.directory}/unidic-mecab-${unidic.version}_src/matrix.def</unidic.matrix>
-    <dictionary.types>core</dictionary.types>
+    <dictionary.builder>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</dictionary.builder>
     <jacoco.skip>true</jacoco.skip>
     <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -65,33 +65,97 @@
     <profile>
       <activation>
         <property>
-          <name>skip.full.dictionary</name>
+          <name>skip.build.dictionary</name>
           <value>!true</value>
         </property>
       </activation>
-      <properties>
-        <dictionary.types>core,full</dictionary.types>
-      </properties>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.2.3</version>
             <executions>
               <execution>
+                <id>get-the-git-infos</id>
+                <goals>
+                  <goal>revision</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <executions>
+              <execution>
+                <id>build-system-core-dict</id>
+                <goals>
+                  <goal>java</goal>
+                </goals>
                 <phase>prepare-package</phase>
                 <configuration>
-                  <target>
-                    <concat destfile="${dictionary.build.directory}/full_lex.csv">
-                      <fileset file="dictionary/core_lex.csv" />
-                      <fileset file="dictionary/notcore_lex.csv" />
-                    </concat>
-                  </target>
+	          <mainClass>${dictionary.builder}</mainClass>
+	          <arguments>
+                    <argument>-o</argument>
+	            <argument>${project.build.directory}/system_core.dic</argument>
+                    <argument>-m</argument>
+	            <argument>${unidic.matrix}</argument>
+                    <argument>-d</argument>
+                    <argument>${git.commit.id}</argument>
+                    <argument>dictionary/core_lex.csv</argument>
+	          </arguments>
                 </configuration>
+              </execution>
+              <execution>
+                <id>build-system-full-dict</id>
                 <goals>
-                  <goal>run</goal>
+                  <goal>java</goal>
                 </goals>
+                <phase>prepare-package</phase>
+                <configuration>
+	          <mainClass>${dictionary.builder}</mainClass>
+	          <arguments>
+                    <argument>-o</argument>
+	            <argument>${project.build.directory}/system_full.dic</argument>
+                    <argument>-m</argument>
+	            <argument>${unidic.matrix}</argument>
+                    <argument>-d</argument>
+                    <argument>${git.commit.id}</argument>
+                    <argument>dictionary/core_lex.csv</argument>
+                    <argument>dictionary/notcore_lex.csv</argument>
+	          </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.soebes.maven.plugins</groupId>
+            <artifactId>iterator-maven-plugin</artifactId>
+            <version>0.5.1</version>
+            <executions>
+              <execution>
+                <id>pack-system-dictionary</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>iterator</goal>
+                </goals>
+                <configuration>
+                  <content>core,full</content>
+                  <pluginExecutors>
+                    <pluginExecutor>
+                      <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                      </plugin>
+                      <goal>single</goal>
+                      <configuration>
+                        <descriptor>src/assembly/dic.xml</descriptor>
+                      </configuration>
+                    </pluginExecutor>
+                  </pluginExecutors>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -154,106 +218,6 @@
             </manifest>
           </archive>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.2</version>
-        <executions>
-          <execution>
-            <id>copy-core-dictionary-source</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${dictionary.build.directory}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>dictionary</directory>
-                  <includes>
-                    <include>core_lex.csv</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
-        <version>2.2.3</version>
-        <executions>
-          <execution>
-            <id>get-the-git-infos</id>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.soebes.maven.plugins</groupId>
-        <artifactId>iterator-maven-plugin</artifactId>
-        <version>0.5.1</version>
-        <executions>
-          <execution>
-            <id>build-system-dictionary</id>
-            <phase>package</phase>
-            <goals>
-              <goal>iterator</goal>
-            </goals>
-            <configuration>
-              <content>${dictionary.types}</content>
-              <pluginExecutors>
-                <pluginExecutor>
-                  <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                  </plugin>
-                  <goal>java</goal>
-                  <configuration>
-	            <mainClass>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</mainClass>
-	            <arguments>
-                      <argument>${dictionary.build.directory}/@item@_lex.csv</argument>
-		      <argument>${unidic.matrix}</argument>
-		      <argument>${project.build.directory}/system_@item@.dic</argument>
-                      <argument>${git.commit.id}</argument>
-	            </arguments>
-                  </configuration>
-                </pluginExecutor>
-                <pluginExecutor>
-                  <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                  </plugin>
-                  <goal>single</goal>
-                  <configuration>
-                    <descriptor>src/assembly/dic.xml</descriptor>
-                  </configuration>
-                </pluginExecutor>
-              </pluginExecutors>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
