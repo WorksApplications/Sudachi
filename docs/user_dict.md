@@ -171,14 +171,14 @@ Sudachi ではユーザー辞書をもちいて、システム辞書で不足し
 
 ユーザー辞書ソースファイルからバイナリ辞書ファイルを作成します。
 
-`$ java -Dfile.encoding=UTF-8 -cp sudachi-XX.jar com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder system_core.dic input output.dic [comment]`
+`$ java -Dfile.encoding=UTF-8 -cp sudachi-XX.jar com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder -o output.dic -s system_core.dic [-d comment] input`
 
 ### 引数
 
-- system_core.dic Sudachi のシステム辞書
-- input.csv ユーザ辞書ソースファイル名
 - output.dic 出力するバイナリ辞書ファイル名
+- system_core.dic Sudachi のシステム辞書
 - comment バイナリ辞書のヘッダーに埋め込むコメント
+- input.csv ユーザ辞書ソースファイル名
 
 
 ## ユーザー辞書の利用法
