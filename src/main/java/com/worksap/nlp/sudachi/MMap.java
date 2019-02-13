@@ -40,6 +40,7 @@ public class MMap {
      *
      * @param filename the filename to open
      * @return the mapped byte buffer
+     * @throws IOException if reading a file is failed
      */
     public static ByteBuffer map(String filename) throws IOException {
         try (FileInputStream istream = new FileInputStream(filename);
