@@ -353,7 +353,7 @@ public class DictionaryBuilder {
         output.position(mark);
         offsets.flip();
         output.write(offsets);
-        System.err.println(String.format(" %,d bytes", offsets.position() + 4));
+        System.err.println(String.format(" %,d bytes", offsets.position()));
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
