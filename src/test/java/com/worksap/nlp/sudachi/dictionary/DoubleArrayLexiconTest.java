@@ -112,8 +112,20 @@ public class DoubleArrayLexiconTest {
     }
 
     @Test
+    public void wordInfoWithLongWord() {
+        // 0123456789 * 30
+        WordInfo wi = lexicon.getWordInfo(36);
+        assertEquals(300, wi.getSurface().length());
+        assertEquals(300, wi.getLength());
+        assertEquals(300, wi.getNormalizedForm().length());
+        assertEquals(-1, wi.getDictionaryFormWordId());
+        assertEquals(300, wi.getDictionaryForm().length());
+        assertEquals(570, wi.getReadingForm().length());
+    }
+
+    @Test
     public void size() {
-        assertEquals(34, lexicon.size());
+        assertEquals(37, lexicon.size());
     }
 
     static <E> List<E> iteratorToList(Iterator<E> iterator) {

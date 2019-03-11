@@ -43,7 +43,8 @@ import com.worksap.nlp.dartsclone.DoubleArray;
  */
 public class DictionaryBuilder {
 
-    static final int MAX_LENGTH = 255;
+    static final int STRING_MAX_LENGTH = Short.MAX_VALUE;
+    static final int ARRAY_MAX_LENGTH = Byte.MAX_VALUE;
     static final int NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
@@ -123,10 +124,10 @@ public class DictionaryBuilder {
                     cols[i] = decode(cols[i]);
                 }
 
-                if (cols[0].length() > MAX_LENGTH
-                    || cols[4].length() > MAX_LENGTH
-                    || cols[11].length() > MAX_LENGTH
-                    || cols[12].length() > MAX_LENGTH) {
+                if (cols[0].getBytes(StandardCharsets.UTF_8).length > STRING_MAX_LENGTH
+                    || !isValidLength(cols[4])
+                    || !isValidLength(cols[11])
+                    || !isValidLength(cols[12])) {
                     throw new IllegalArgumentException("string is too long");
                 }
 
@@ -327,7 +328,7 @@ public class DictionaryBuilder {
             offsets.putInt((int)output.position());
 
             writeString(wi.getSurface());
-            buffer.put((byte)wi.getLength());
+            writeStringLength(wi.getLength());
             buffer.putShort(wi.getPOSId());
             if (wi.getNormalizedForm().equals(wi.getSurface())) {
                 writeString("");
@@ -356,6 +357,10 @@ public class DictionaryBuilder {
         System.err.println(String.format(" %,d bytes", offsets.position()));
     }
 
+    static boolean isValidLength(String text) {
+        return text.length() <= STRING_MAX_LENGTH;
+    }
+
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
     static String decode(String text) {
         Matcher m = unicodeLiteral.matcher(text);
@@ -381,7 +386,7 @@ public class DictionaryBuilder {
             return new int[0];
         }
         String[] ids = info.split("/");
-        if (ids.length > MAX_LENGTH) {
+        if (ids.length > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
         }
         int[] ret = new int[ids.length];
@@ -392,9 +397,18 @@ public class DictionaryBuilder {
     }
 
     void writeString(String text) {
-        buffer.put((byte)text.length());
+        writeStringLength((short)text.length());
         for (int i = 0; i < text.length(); i++) {
             buffer.putChar(text.charAt(i));
+        }
+    }
+
+    void writeStringLength(short length) {
+        if (length <= Byte.MAX_VALUE) {
+            buffer.put((byte)length);
+        } else {
+            buffer.put((byte)((length >> 8) | 0x80));
+            buffer.put((byte)(length & 0xFF));
         }
     }
 

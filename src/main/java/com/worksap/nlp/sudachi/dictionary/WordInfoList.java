@@ -31,39 +31,33 @@ class WordInfoList {
     }
 
     WordInfo getWordInfo(int wordId) {
-        int index = wordIdToOffset(wordId);
-        
-        String surface = bufferToString(index);
-        index += 1 + 2 * surface.length();
-        short headwordLength = (short)Byte.toUnsignedInt(bytes.get(index));
-        index += 1;
-        short posId = bytes.getShort(index);
-        index += 2;
-        String normalizedForm = bufferToString(index);
-        index += 1 + 2 * normalizedForm.length();
+        ByteBuffer buf = bytes.asReadOnlyBuffer();
+        buf.order(bytes.order());
+        buf.position(wordIdToOffset(wordId));
+
+        String surface = bufferToString(buf);
+        short headwordLength = (short)bufferToStringLength(buf);
+        short posId = buf.getShort();
+        String normalizedForm = bufferToString(buf);
         if (normalizedForm.isEmpty()) {
             normalizedForm = surface;
         }
-        int dictionaryFormWordId = bytes.getInt(index);
-        index += 4;
-        String readingForm = bufferToString(index);
-        index += 1 + 2 * readingForm.length();
+        int dictionaryFormWordId = buf.getInt();
+        String readingForm = bufferToString(buf);
         if (readingForm.isEmpty()) {
             readingForm = surface;
         }
-        int[] aUnitSplit = bufferToIntArray(index);
-        index += 1 + 4 * aUnitSplit.length;
+        int[] aUnitSplit = bufferToIntArray(buf);
         if (!isValidSplit(aUnitSplit)) {
             aUnitSplit = new int[0];
         }
 
-        int[] bUnitSplit = bufferToIntArray(index);
-        index += 1 + 4 * bUnitSplit.length;
+        int[] bUnitSplit = bufferToIntArray(buf);
         if (!isValidSplit(bUnitSplit)) {
             bUnitSplit = new int[0];
         }
 
-        int[] wordStructure = bufferToIntArray(index);
+        int[] wordStructure = bufferToIntArray(buf);
         if (!isValidSplit(wordStructure)) {
             wordStructure = new int[0];
         }
@@ -83,20 +77,30 @@ class WordInfoList {
         return bytes.getInt(offset + 4 * wordId);
     }
 
-    private String bufferToString(int offset) {
-        int length = Byte.toUnsignedInt(bytes.get(offset++));
+    private int bufferToStringLength(ByteBuffer buffer) {
+        byte length = buffer.get();
+        if (length < 0) {
+            int high = Byte.toUnsignedInt(length);
+            int low = Byte.toUnsignedInt(buffer.get());
+            return ((high & 0x7F) << 8) | low;
+        }
+        return length;
+    }
+
+    private String bufferToString(ByteBuffer buffer) {
+        int length = bufferToStringLength(buffer);
         char[] str = new char[length];
         for (int i = 0; i < length; i++) {
-            str[i] = bytes.getChar(offset + 2 * i);
+            str[i] = buffer.getChar();
         }
         return new String(str);
     }
 
-    private int[] bufferToIntArray(int offset) {
-        int length = Byte.toUnsignedInt(bytes.get(offset++));
+    private int[] bufferToIntArray(ByteBuffer buffer) {
+        int length = Byte.toUnsignedInt(buffer.get());
         int[] array = new int[length];
         for (int i = 0; i < length; i++) {
-            array[i] = bytes.getInt(offset + 4 * i);
+            array[i] = buffer.getInt();
         }
         return array;
     }
