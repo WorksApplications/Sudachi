@@ -320,6 +320,11 @@
       <artifactId>javax.json</artifactId>
       <version>1.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.worksap.nlp</groupId>
+      <artifactId>jdartsclone</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
 
   <url>https://github.com/WorksApplications/Sudachi</url>
