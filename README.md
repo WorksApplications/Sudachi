@@ -33,15 +33,9 @@ Sudachi has the following features.
     + We will release the sysnonym dictionary at a later date
 
 
-## Build
+## Get dictionaries
 
-Sudachi needs [Git LFS](https://git-lfs.github.com/) to download the sourses
-of the system dictionaries. If you fail to build the dictionaries, install
-Git LFS and `git lfs pull`.
-
-Building the dictionaries fails with a locale other than UTF-8.
-Add `-Dfile.encoding=UTF-8` to `MAVEN_OPTS`.
-
+See [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
 ## Use on the command line
 
@@ -263,20 +257,6 @@ Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, V
    See the License for the specific language governing permissions and
    limitations under the License.
 
-### Darts-clone
-
-Port of the original Darts-clone to Java. The original one is written
-by Susumu Yata.
-
-- https://github.com/s-yata/darts-clone
-
-### System dictionary
-
-This dictionary includes UniDic and a part of NEologd.
-
-- http://unidic.ninjal.ac.jp/
-- https://github.com/neologd/mecab-ipadic-neologd
-
 
 ## Elasticsearch
 
@@ -351,14 +331,9 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
     + 後日公開予定
 
 
-## ビルド
+## 辞書の取得
 
-辞書のソースを取得するために [Git LFS](https://git-lfs.github.com/) が必要です。
-辞書構築に失敗した場合は Git LFS をインストールして `git lfs pull` を実行してください。
-
-システムロケールが UTF-8 以外の場合、辞書構築が失敗します。`MAVEN_OPTS` に
-`-Dfile.encoding=UTF-8` を追加してください。
-
+辞書は [SudachiDict](https://github.com/WorksApplications/SudachiDict) で公開しています。
 
 ## コマンドラインツール
 
