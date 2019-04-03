@@ -1,8 +1,6 @@
 language: java
 jdk: oraclejdk8
-# To use 7.5GiB memory, specify 'required' for 'sudo'
-# https://docs.travis-ci.com/user/reference/overview/#Virtualization-environments
-sudo: required
+sudo: false
 dist: trusty
 env:
   global:
@@ -10,19 +8,10 @@ env:
     - secure: "HTYuvBhcN2u/MFObZsgNvBiCwP2NJJB+qwraDYJ9w3Wd5pDugUCpuZUaruCB0e5ThXf5pkBCCJkr0HVN/D4QK52L3rlOgUBj0SkzKasKkOPcRU70v9YHGOnNWqXIWGsIFXtXfMyOqMqhO2tBesxhzHDmIF1AiTwNdPEOwP1kaW4Hq44i7/DjyTbr8kYCmPkT+UiBXav/Ge9iMSiYEp1RLVxmUBYyY13QiWMbxip238aXUcI0UdZ/CaRVpRprD1AjGCYhdbJRLRBAzS+3UmasxSkczZrAnOGuvZ47N3k5JzJ+u+LQabVpLVLjoAQ+jKLEltRMXIyvLjVlu1dC/km9Dy6ae1kw8tctyielFpGjqY2VAu66rpGxKNcECoaftEB8OYwOHcgR717Q1Up/d7pUG+gKbnZEmZtHOCPrWgWrGBSjK3Q5F20qhSszT2F+KNH2G6sytA/Au5l7A2zF8ZwgZ3h1IQjDma8pZbMsRIIFSxmOk2jxYylhO0sOKUlHSlVAlorhpUw+kj6qxL2x2lO27sBjAvsHcdbOLpO4FYw/ziSGNTDnW3TBj1mKlD0m3il0wbaFkEsqEkIdHd2GvywJIwJ44xVRArsB7PA7UMmNlKgTy10npvVho0rri6NA+NOX8VurQUIZtrwFwgukou1kodVEQ2CHwI8OfBcxxbzokvg="
     # SONAR_LOGIN
     - secure: "KzKBYGIHFQZgXsF+Hi5BBJXg1Kt5wNNo8lex0gzIL0P5CP8BNCwgxAXDJxqK90cliyzbMXmOMgkFCQvP7T+w8b6WT8MX5siyFhBzIh4jq4kSVEFhONKd0nbwyO0anqUbpoWwRsEaSkDw0HRiGuENq1zxmk9ayusVDp9SoywFMnnbor3XkjPS6Y3aDYjUxPMWE/PZMSdnJWCY/dAj68/Uy+EXF59BEKemmTq1BI8tJnepQb0eF/01omCEjFpDxHrh9/rRRlppSrnvx/Xe+DfbwSFvgr0tgMVxnSGoTE2APcw77NSrdSNEe2XhzHXQalkDjbE5whsHX+Qn0Ujz0C06d7Q2ywXsIxZFWqymUoZ3XwarDrxEt5oWuUyQUu5d/+vXf8BKTcjTfklGOlrOHrxc12HYc7yjFAqwlCLUcNNu4w9Yaac8c/3730kVk2R9i9FmlysWRupiMiYooxS+VYvMvN9xv0A+RR7Gl4Fz1uWFdyDWPQ5eaU6tEmoKhsBuRDa1j5VOQ4/wL2TxsyRIN/C/soZLVBEs6oaG7EGBBezKlfCH78RUpzvSrR7iwT/EiIgSX8/yghcjy4MtPhUZMK6f+6Yf9spCzD9yGg/JCd8leQCal8EmG6qMJYtJXSFq914t+ZYtj83FW7zt+p+nJqTsQKs3gXvPTgtP9EJshkaqfC8="
-before_cache:
-  - rm -rf target/dictionary/*.zip
-cache:
-  directories:
-    - target/dictionary
-# Disable git-lfs to skip downloading large data
-git:
-  lfs_skip_smudge: true
 before_install:
-  # Decrypt settings.xml which is necessary to deploy to Sonatype Maven Repositories
-  - if [ -n "$encrypted_7881e527c02e_key" ]; then openssl aes-256-cbc -K $encrypted_7881e527c02e_key -iv $encrypted_7881e527c02e_iv -in .travis/settings.xml.enc -out .travis/settings.xml -d; fi
-# `mvn package` needs file managed by git-lfs, so we need to skip invoking `mvn install`
-# https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
+  # Decrypt settings.xml and codesigning.asc which is necessary to deploy to Sonatype Maven Repositories
+  - if [ -n "$encrypted_df516d7c6f97_key" ]; then openssl aes-256-cbc -K $encrypted_df516d7c6f97_key -iv $encrypted_df516d7c6f97_iv -in ./travis/settings_codesigning.tar.enc -out .travis/settings_codesigning.tar -d; tar xf .travis/settings_codesigning.tar -C .travis; fi
+  - if [ -f .travis/codesigning.asc ]; then gpg --fast-import .travis/codesigning.asc; fi
 install: true
 script:
   - mvn jacoco:prepare-agent test -B
@@ -30,8 +19,7 @@ after_success:
   - mvn sonar:sonar -Dsonar.login=$SONAR_LOGIN
 deploy:
   - provider: script
-    # To build SNAPSHOT packages with CSV file, we need to fetch & checkout by git-lfs
-    script: git lfs fetch && git lfs checkout && mvn deploy -B --settings .travis/settings.xml
+    script: mvn clean deploy -P release -B --settings .travis/settings.xml
     # Skip cleanup to keep decrepted .travis/settings.xml in workspace
     # https://docs.travis-ci.com/user/deployment/
     skip_cleanup: true
