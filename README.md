@@ -76,6 +76,15 @@ See [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
 You can find details in the Javadoc.
 
+To compile an application with Sudachi API, declare a dependency on Sudachi in maven project.
+
+```
+<dependency>
+  <groupId>com.worksap.nlp</groupId>
+  <artifactId>sudachi</artifactId>
+  <version>0.2.0</version>
+</dependency>
+```
 
 ## The modes of splitting
 
@@ -374,6 +383,15 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 
 ライブラリとしての利用は Javadoc を参照してください。
 
+Maven プロジェクトで利用する場合は以下の dependency を追加してください。
+
+```
+<dependency>
+  <groupId>com.worksap.nlp</groupId>
+  <artifactId>sudachi</artifactId>
+  <version>0.2.0</version>
+</dependency>
+```
 
 ## 分割モード
 
