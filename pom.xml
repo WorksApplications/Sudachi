@@ -10,6 +10,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
+    <dictionary.builder>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</dictionary.builder>
+    <userdictionary.builder>com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder</userdictionary.builder>
+    <test.dict.source.directory>${project.basedir}/src/test/dict</test.dict.source.directory>
     <jacoco.skip>true</jacoco.skip>
     <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -182,6 +185,66 @@
           <target>${java.version}</target>
           <compilerArgument>${compilerArgument}</compilerArgument>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>build-system-dict-for-test</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+	      <mainClass>${dictionary.builder}</mainClass>
+	      <arguments>
+                <argument>-o</argument>
+	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>-m</argument>
+	        <argument>${test.dict.source.directory}/matrix.def</argument>
+                <argument>-d</argument>
+                <argument>the system dictionary for the unit tests</argument>
+                <argument>${test.dict.source.directory}/lex.csv</argument>
+	      </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build-user-dict-for-test</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+	      <mainClass>${userdictionary.builder}</mainClass>
+	      <arguments>
+                <argument>-o</argument>
+	        <argument>${project.build.testOutputDirectory}/user.dic</argument>
+                <argument>-s</argument>
+	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>${test.dict.source.directory}/user.csv</argument>
+	      </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build-user2-dict-for-test</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+	      <mainClass>${userdictionary.builder}</mainClass>
+	      <arguments>
+                <argument>-o</argument>
+	        <argument>${project.build.testOutputDirectory}/user2.dic</argument>
+                <argument>-s</argument>
+	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>${test.dict.source.directory}/user2.csv</argument>
+	      </arguments>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
