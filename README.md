@@ -33,9 +33,26 @@ Sudachi has the following features.
     + We will release the sysnonym dictionary at a later date
 
 
-## Get dictionaries
+## Dictionaries
 
-See [SudachiDict](https://github.com/WorksApplications/SudachiDict).
+Sudachi has two types of dictionaries.
+
+- Core: includes basic vocabulary (default)
+    + [sudachi-dictionary-20190308-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20190308-core.zip)
+- Full: includes miscellaneous proper nouns
+    + [sudachi-dictionary-20190308-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20190308-full.zip)
+
+For more details, see [SudachiDict](https://github.com/WorksApplications/SudachiDict).
+
+### How to use the full dictionary
+
+1. Get the [configuration file](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json)
+ for the full dictionary
+2. Run the command line tool with the configuration file
+
+```
+$ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+```
 
 ## Use on the command line
 
@@ -130,23 +147,6 @@ The followings are examples in the full dictionary.
     C：カンヌ国際映画祭
 
 In full-text searching, to use A and B can imrove precision and recall.
-
-## Dictionary type
-
-Sudachi has two types of dictionaries.
-
-- Core: includes basic vocabulary (default)
-- Full: includes miscellaneous proper nouns
-
-### How to use the full dictionary
-
-1. Get the [configuration file](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json)
- for the full dictionary
-2. Run the command line tool with the configuration file
-
-```
-$ java -jar sudachi-XX.jar -r sudachi_fulldict.json
-```
 
 ## Plugins
 
@@ -342,7 +342,23 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 
 ## 辞書の取得
 
-辞書は [SudachiDict](https://github.com/WorksApplications/SudachiDict) で公開しています。
+Sudachi には2種類の辞書があります。
+
+- Core: 基本的な語彙を収録 (デフォルト)
+    + [sudachi-dictionary-20190308-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20190308-core.zip)
+- Full: 雑多な固有名詞まで収録
+    + [sudachi-dictionary-20190308-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20190308-full.zip)
+
+くわしくは [SudachiDict](https://github.com/WorksApplications/SudachiDict) をごらんください。
+
+### フル辞書の利用方法
+
+1. [フル辞書用の設定ファイル](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json) を取得します
+2. コマンドラインツールで設定ファイルを指定します
+
+```
+    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+```
 
 ## コマンドラインツール
 
@@ -438,23 +454,6 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
 
 検索用途であれば A と C を併用することで、再現率と適合率を向上させる
 ことができます。
-
-## 辞書の種類
-
-Sudachi には2種類の辞書があります。
-
-- Core: 基本的な語彙を収録 (デフォルト)
-- Full: 雑多な固有名詞まで収録
-
-### フル辞書の利用方法
-
-1. [フル辞書用の設定ファイル](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json) を取得します
-2. コマンドラインツールで設定ファイルを指定します
-
-```
-    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
-```
-
 
 ## 機能追加プラグイン
 
