@@ -204,13 +204,17 @@ When `rewrite.def` has the following descriptions, `DefaultInputTextPlugin` stop
 
 - Ignore
 
-    \# single code point: this character is skipped in character normalization
-    髙
+```
+# single code point: this character is skipped in character normalization
+髙
+```
 
 - Replace
 
-    \# rewrite rule: <target> <replacement>
-    A' Ā
+```
+# rewrite rule: <target> <replacement>
+A' Ā
+```
 
 If the number of characters increases as a result of character normalization, Sudachi may output morphemes whose length is 0 in the original input text.
 
@@ -515,13 +519,17 @@ Sudachi のシステム辞書では以下のような表記正規化を提供し
 
 - 正規化抑制
 
-    \# コードポイントが1つのみ記述されている場合は、文字正規化を抑制します
-    髙
+```
+# コードポイントが1つのみ記述されている場合は、文字正規化を抑制します
+髙
+```
 
 - 置換
 
-    \# 置換対象文字列 置換先文字列
-    A' Ā
+```
+# 置換対象文字列 置換先文字列
+A' Ā
+```
 
 文字正規化の結果、文字数が増えた場合、原文上では長さが0になる形態素が出力されることがあります。
 
