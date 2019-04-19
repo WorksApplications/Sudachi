@@ -105,7 +105,12 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public WordInfo getWordInfo(int wordId) {
-        return lexicons.get(getDictionaryId(wordId)).getWordInfo(getWordId(wordId));
+        int dictionaryId = getDictionaryId(wordId);
+        WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(getWordId(wordId));
+        convertSplit(wordInfo.getAunitSplit(), dictionaryId);
+        convertSplit(wordInfo.getBunitSplit(), dictionaryId);
+        convertSplit(wordInfo.getWordStructure(), dictionaryId);
+        return wordInfo;
     }
 
     @Override
@@ -130,5 +135,13 @@ public class LexiconSet implements Lexicon {
             throw new RuntimeException("dictionaryId is too large: " + dictId);
         }
         return (dictId << 28) | wordId;
+    }
+
+    private void convertSplit(int[] split, int dictionaryId) {
+        for (int i = 0; i < split.length; i++) {
+            if (getDictionaryId(split[i]) > 0) {
+                split[i] = buildWordId(dictionaryId, getWordId(split[i]));
+            }
+        }
     }
 }

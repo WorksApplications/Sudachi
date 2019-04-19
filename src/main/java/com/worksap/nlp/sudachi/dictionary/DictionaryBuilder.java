@@ -78,6 +78,8 @@ public class DictionaryBuilder {
     List<Short[]> params = new ArrayList<>();
     List<WordInfo> wordInfos = new ArrayList<>();
 
+    boolean isUserDictionary = false;
+
     ByteBuffer buffer;
     int wordSize;
     int wordId;
@@ -381,7 +383,7 @@ public class DictionaryBuilder {
         return sb.toString();
     }
 
-    static int[] parseSplitInfo(String info) {
+    int[] parseSplitInfo(String info) {
         if (info.equals("*")) {
             return new int[0];
         }
@@ -391,7 +393,14 @@ public class DictionaryBuilder {
         }
         int[] ret = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            ret[i] = Integer.parseInt(ids[i]);
+            if (ids[i].startsWith("U")) {
+                ret[i] = Integer.parseInt(ids[i].substring(1));
+                if (isUserDictionary) {
+                    ret[i] |= (1 << 28);
+                }
+            } else {
+                ret[i] = Integer.parseInt(ids[i]);
+            }
         }
         return ret;
     }

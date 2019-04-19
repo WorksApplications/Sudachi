@@ -76,4 +76,19 @@ public class UserDictionaryTest {
             + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
         Dictionary dict = new DictionaryFactory().create(path, settings);
     }
+
+    @Test
+    public void splitForUserDict() throws IOException {
+        String settings = COMMON_SETTINGS + USER_DICT2
+            + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
+        Dictionary dict = new DictionaryFactory().create(path, settings);
+        Tokenizer tokenizer = dict.create();
+        List<Morpheme> morphs = tokenizer.tokenize("東京府");
+        assertThat(morphs.size(), is(1));
+        Morpheme m = morphs.get(0);
+        List<Morpheme> splits = m.split(Tokenizer.SplitMode.A);
+        assertThat(splits.size(), is(2));
+        assertThat(splits.get(0).surface(), is("東京"));
+        assertThat(splits.get(1).surface(), is("府"));
+    }
 }
