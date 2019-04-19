@@ -37,6 +37,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
     UserDictionaryBuilder(Grammar grammar) {
         super();
+        isUserDictionary = true;
         this.grammar = grammar;
     }
 

@@ -48,19 +48,8 @@ class WordInfoList {
             readingForm = surface;
         }
         int[] aUnitSplit = bufferToIntArray(buf);
-        if (!isValidSplit(aUnitSplit)) {
-            aUnitSplit = new int[0];
-        }
-
         int[] bUnitSplit = bufferToIntArray(buf);
-        if (!isValidSplit(bUnitSplit)) {
-            bUnitSplit = new int[0];
-        }
-
         int[] wordStructure = bufferToIntArray(buf);
-        if (!isValidSplit(wordStructure)) {
-            wordStructure = new int[0];
-        }
 
         String dictionaryForm = surface;
         if (dictionaryFormWordId >= 0 && dictionaryFormWordId != wordId) {
@@ -103,14 +92,5 @@ class WordInfoList {
             array[i] = buffer.getInt();
         }
         return array;
-    }
-
-    private boolean isValidSplit(int[] split) {
-        for (int wordId : split) {
-            if (wordId >= wordSize) {
-                return false;
-            }
-        }
-        return true;
     }
 }
