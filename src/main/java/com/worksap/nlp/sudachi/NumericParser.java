@@ -41,7 +41,7 @@ class NumericParser {
             significand.append(intToChar(i));
         }
 
-        void scale(int i) {
+        void shiftScale(int i) {
             if (isZero()) {
                 significand.append('1');
             }
@@ -146,7 +146,7 @@ class NumericParser {
         }
     }
 
-    static enum Error {
+    enum Error {
         NONE, POINT, COMMA, OTHER
     }
 
@@ -229,7 +229,7 @@ class NumericParser {
             return false;
         }
         if (isSmallUnit(n)) {
-            tmp.scale(-n);
+            tmp.shiftScale(-n);
             if (!subtotal.add(tmp)) {
                 return false;
             }
@@ -241,7 +241,7 @@ class NumericParser {
             if (!subtotal.add(tmp) || subtotal.isZero()) {
                 return false;
             }
-            subtotal.scale(-n);
+            subtotal.shiftScale(-n);
             if (!total.add(subtotal)) {
                 return false;
             }
