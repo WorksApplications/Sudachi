@@ -37,10 +37,7 @@ public class CharacterCategory {
         EnumSet<CategoryType> categories = EnumSet.noneOf(CategoryType.class);
         
         boolean contains(int cp) {
-            if (cp >= low && cp <= high) {
-                return true;
-            }
-            return false;
+            return cp >= low && cp <= high;
         }
         
         int containingLength(String text) {
@@ -109,7 +106,7 @@ public class CharacterCategory {
                 }
                 String[] cols = line.split("\\s+");
                 if (cols.length < 2) {
-                    throw new RuntimeException(
+                    throw new IllegalArgumentException(
                         "invalid format at line " + reader.getLineNumber()
                     );
                 }
@@ -121,7 +118,7 @@ public class CharacterCategory {
                         range.high = Integer.decode(r[1]);
                     }
                     if (range.low > range.high) {
-                        throw new RuntimeException(
+                        throw new IllegalArgumentException(
                             "invalid range at line " + reader.getLineNumber()
                         );
                     }
@@ -131,8 +128,8 @@ public class CharacterCategory {
                         }
                         CategoryType type = CategoryType.valueOf(cols[i]);
                         if (type == null) {
-                            throw new RuntimeException(cols[i] + " is invalid type at line "
-                                                       + reader.getLineNumber());
+                            throw new IllegalArgumentException(cols[i] + " is invalid type at line "
+                                                               + reader.getLineNumber());
                         }
                         range.categories.add(type);
                     }

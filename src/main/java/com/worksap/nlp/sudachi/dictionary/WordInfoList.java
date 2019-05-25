@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 class WordInfoList {
@@ -33,7 +34,7 @@ class WordInfoList {
     WordInfo getWordInfo(int wordId) {
         ByteBuffer buf = bytes.asReadOnlyBuffer();
         buf.order(bytes.order());
-        buf.position(wordIdToOffset(wordId));
+        ((Buffer)buf).position(wordIdToOffset(wordId));
 
         String surface = bufferToString(buf);
         short headwordLength = (short)bufferToStringLength(buf);

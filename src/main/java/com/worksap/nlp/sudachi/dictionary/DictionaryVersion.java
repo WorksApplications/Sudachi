@@ -21,6 +21,8 @@ package com.worksap.nlp.sudachi.dictionary;
  */
 public class DictionaryVersion {
 
+    private DictionaryVersion() {}
+
     /** the version of system dictionries */
     public static final long SYSTEM_DICT_VERSION = 0x7366d3f18bd111e7L;
 

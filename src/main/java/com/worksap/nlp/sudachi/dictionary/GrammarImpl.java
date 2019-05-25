@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -24,9 +25,9 @@ import java.util.List;
 
 public class GrammarImpl implements Grammar {
 
-    private final int POS_DEPTH = 6;
-    private final short[] BOS_PARAMETER = new short[] { 0, 0, 0 }; 
-    private final short[] EOS_PARAMETER = new short[] { 0, 0, 0 }; 
+    private static final int POS_DEPTH = 6;
+    private static final short[] BOS_PARAMETER = new short[] { 0, 0, 0 };
+    private static final short[] EOS_PARAMETER = new short[] { 0, 0, 0 };
 
     private final ByteBuffer bytes;
     private List<List<String>> posList;
@@ -47,9 +48,9 @@ public class GrammarImpl implements Grammar {
         isCopiedConnectTable = false;
         int posSize = bytes.getShort(offset);
         offset += 2;
-        posList = new ArrayList<List<String>>(posSize);
+        posList = new ArrayList<>(posSize);
         for (int i = 0; i < posSize; i++) {
-            ArrayList<String> pos = new ArrayList<String>(POS_DEPTH);
+            ArrayList<String> pos = new ArrayList<>(POS_DEPTH);
             for (int j = 0; j < POS_DEPTH; j++) {
                 pos.add(bufferToString(offset));
                 offset += 1 + 2 * pos.get(j).length();
@@ -128,7 +129,7 @@ public class GrammarImpl implements Grammar {
         ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = connectTableBytes.duplicate();
-        srcBuffer.position(connectTableOffset);
+        ((Buffer)srcBuffer).position(connectTableOffset);
         srcBuffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
         newBuffer.put(srcBuffer);
         connectTableBytes = newBuffer;

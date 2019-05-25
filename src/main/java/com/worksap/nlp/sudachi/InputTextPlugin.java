@@ -51,5 +51,5 @@ public abstract class InputTextPlugin extends Plugin {
      *
      * @param builder the input text
      */
-    public abstract void rewrite(InputTextBuilder<?> builder);
+    public abstract void rewrite(InputTextBuilder builder);
 }

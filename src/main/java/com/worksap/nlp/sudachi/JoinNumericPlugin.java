@@ -55,7 +55,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
     }
 
     @Override
-    public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
+    public void rewrite(InputText text, List<LatticeNode> path, Lattice lattice) {
         int beginIndex = -1;
         boolean commaAsDigit = true;
         boolean periodAsDigit = true;

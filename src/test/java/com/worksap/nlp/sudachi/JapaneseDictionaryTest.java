@@ -52,7 +52,7 @@ public class JapaneseDictionaryTest {
     }
 
     @Test
-    public void close() {
+    public void close() throws IOException {
         dict.close();
     }
 

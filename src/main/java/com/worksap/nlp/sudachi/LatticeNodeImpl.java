@@ -40,6 +40,9 @@ public class LatticeNodeImpl implements LatticeNode {
 
     Lexicon lexicon;
 
+    static final WordInfo UNDEFINED_WORDINFO
+        = new WordInfo("(null)", (short)0, (short)-1, "(null)", "(null)", "(null)");
+
     LatticeNodeImpl(Lexicon lexicon,
                     short leftId, short rightId, short cost, int wordId) {
         this.lexicon = lexicon;
@@ -82,7 +85,7 @@ public class LatticeNodeImpl implements LatticeNode {
     @Override
     public WordInfo getWordInfo() {
         if (!isDefined) {
-            throw new RuntimeException("this node has no WordInfo");
+            return UNDEFINED_WORDINFO;
         }
         if (extraWordInfo != null) {
             return extraWordInfo;
@@ -116,17 +119,9 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public String toString() {
-
-        String surface;
-        short pos;
-        if (!isDefined) {
-            surface = "(null)";
-            pos = -1;
-        } else {
-            WordInfo wi = getWordInfo();
-            surface = wi.getSurface();
-            pos = wi.getPOSId();
-        }
+        WordInfo wi = getWordInfo();
+        String surface = wi.getSurface();
+        short pos = wi.getPOSId();
 
         return String.format("%d %d %s(%d) %d %d %d %d",
                              getBegin(), getEnd(), surface, wordId,

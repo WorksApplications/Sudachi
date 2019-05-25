@@ -92,7 +92,7 @@ class DefaultInputTextPlugin extends InputTextPlugin {
     }
 
     @Override
-    public void rewrite(InputTextBuilder<?> builder) {
+    public void rewrite(InputTextBuilder builder) {
         int offset = 0;
         int nextOffset = 0;
         String text = builder.getText();
@@ -150,15 +150,15 @@ class DefaultInputTextPlugin extends InputTextPlugin {
                 if (cols.length == 1) {
                     String key = cols[0];
                     if (key.codePointCount(0, key.length()) != 1) {
-                        throw new RuntimeException(cols[0] + " is not a character at line " + reader.getLineNumber());
+                        throw new IllegalArgumentException(cols[0] + " is not a character at line " + reader.getLineNumber());
                     }
                     ignoreNormalizeSet.add(key.codePointAt(0));
                 }
                 // replace char list
                 else if (cols.length == 2) {
                     if (replaceCharMap.containsKey(cols[0])) {
-                        throw new RuntimeException(cols[0] + " is already defined at line "
-                                                   + reader.getLineNumber());
+                        throw new IllegalArgumentException(cols[0] + " is already defined at line "
+                                                           + reader.getLineNumber());
                     }
                     if (keyLengths.getOrDefault(cols[0].charAt(0), -1) < cols[0].length()) {
                         // store the longest key length
@@ -166,8 +166,8 @@ class DefaultInputTextPlugin extends InputTextPlugin {
                     }
                     replaceCharMap.put(cols[0], cols[1]);
                 } else {
-                    throw new RuntimeException("invalid format at line "
-                                               + reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line "
+                                                       + reader.getLineNumber());
                 }
             }
         }

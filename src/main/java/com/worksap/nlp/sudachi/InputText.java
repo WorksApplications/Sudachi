@@ -28,7 +28,7 @@ import com.worksap.nlp.sudachi.dictionary.CategoryType;
  * code points. The meaning of the index is implementation dependent,
  * but users do not have to worry about it.
  */
-public interface InputText<E> {
+public interface InputText {
     
     /**
      * Returns the modified text.

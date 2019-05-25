@@ -107,9 +107,9 @@ class JapaneseDictionary implements Dictionary {
         }
         offset += header.storageSize();
 
-        GrammarImpl grammar = new GrammarImpl(bytes, offset);
-        this.grammar = grammar;
-        offset += grammar.storageSize();
+        GrammarImpl grammarImpl = new GrammarImpl(bytes, offset);
+        this.grammar = grammarImpl;
+        offset += grammarImpl.storageSize();
 
         lexicon = new LexiconSet(new DoubleArrayLexicon(bytes, offset));
     }
@@ -150,7 +150,7 @@ class JapaneseDictionary implements Dictionary {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         grammar = null;
         lexicon = null;
         for (ByteBuffer buffer : buffers) {

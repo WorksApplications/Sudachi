@@ -17,11 +17,14 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.List;
+
+import javax.json.Json;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,6 +117,38 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getOriginalIndex(17), is(7));
     }
     
+    @Test
+    public void setUpWithNull() throws IOException {
+        plugin = new DefaultInputTextPlugin();
+        plugin.setSettings(new Settings(Json.createObjectBuilder().build(), null));
+        plugin.setUp();
+        assertThat(plugin.rewriteDef, is(nullValue()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidFormatOfIgnoreList() throws IOException {
+        plugin = new DefaultInputTextPlugin();
+        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
+            .getResource("rewrite_error_ignorelist.def").getPath();
+        plugin.setUp();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidFormatOfReplaceList() throws IOException {
+        plugin = new DefaultInputTextPlugin();
+        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
+            .getResource("rewrite_error_replacelist.def").getPath();
+        plugin.setUp();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void duplicatedLinesInReplaceList() throws IOException {
+        plugin = new DefaultInputTextPlugin();
+        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
+            .getResource("rewrite_error_dup.def").getPath();
+        plugin.setUp();
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {

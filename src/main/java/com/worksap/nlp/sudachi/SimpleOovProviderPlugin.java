@@ -65,7 +65,7 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
     }
 
     @Override
-    public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
+    public List<LatticeNode> provideOOV(InputText inputText, int offset, boolean hasOtherWords) {
         if (!hasOtherWords) {
             LatticeNode node = createNode();
             node.setParameter(leftId, rightId, cost);

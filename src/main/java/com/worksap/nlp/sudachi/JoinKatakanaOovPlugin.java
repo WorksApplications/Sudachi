@@ -61,7 +61,7 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     }
 
     @Override
-    public void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice) {
+    public void rewrite(InputText text, List<LatticeNode> path, Lattice lattice) {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
             if ((node.isOOV() || isShorter(minLength, text, node))
@@ -93,15 +93,15 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
         }
     }
 
-    boolean isKatakanaNode(InputText<?> text, LatticeNode node) {
+    boolean isKatakanaNode(InputText text, LatticeNode node) {
         return getCharCategoryTypes(text, node).contains(CategoryType.KATAKANA);
     }
 
-    boolean isShorter(int length, InputText<?> text, LatticeNode node) {
+    boolean isShorter(int length, InputText text, LatticeNode node) {
         return text.codePointCount(node.getBegin(), node.getEnd()) < length;
     }
 
-    boolean canOovBowNode(InputText<?> text, LatticeNode node) {
+    boolean canOovBowNode(InputText text, LatticeNode node) {
         return !text.getCharCategoryTypes(node.getBegin()).contains(CategoryType.NOOOVBOW);
     }
 }
