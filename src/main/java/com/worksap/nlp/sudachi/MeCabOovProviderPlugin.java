@@ -24,7 +24,7 @@ import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,8 +68,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         short posId;
     }
 
-    Map<CategoryType, CategoryInfo> categories = new HashMap<>();
-    Map<CategoryType, List<OOV>> oovList = new HashMap<>();
+    Map<CategoryType, CategoryInfo> categories = new EnumMap<>(CategoryType.class);
+    Map<CategoryType, List<OOV>> oovList = new EnumMap<>(CategoryType.class);
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
@@ -143,20 +143,20 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 }
                 String[] cols = line.split("\\s+");
                 if (cols.length < 2) {
-                    throw new RuntimeException("invalid format at line " +
-                                               reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line " +
+                                                       reader.getLineNumber());
                 }
                 if (cols[0].startsWith("0x")) {
                     continue;
                 }
                 CategoryType type = CategoryType.valueOf(cols[0]);
                 if (type == null) {
-                    throw new RuntimeException(cols[0] + " is invalid type at line "
-                                               + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line "
+                                                       + reader.getLineNumber());
                 }
                 if (categories.containsKey(type)) {
-                    throw new RuntimeException(cols[0] + " is already defined at line "
-                                               + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is already defined at line "
+                                                       + reader.getLineNumber());
                 }
                 CategoryInfo info = new CategoryInfo();
                 info.type = type;
@@ -180,17 +180,17 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 }
                 String[] cols = line.split(",");
                 if (cols.length < 10) {
-                    throw new RuntimeException("invalid format at line " +
-                                               reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line " +
+                                                       reader.getLineNumber());
                 }
                 CategoryType type = CategoryType.valueOf(cols[0]);
                 if (type == null) {
-                    throw new RuntimeException(cols[0] + " is invalid type at line "
-                                               + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line "
+                                                       + reader.getLineNumber());
                 }
                 if (!categories.containsKey(type)) {
-                    throw new RuntimeException(cols[0] + " is undefined at line "
-                                               + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is undefined at line "
+                                                       + reader.getLineNumber());
                 }
 
                 OOV oov = new OOV();
@@ -209,7 +209,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         }
     }
 
-    private InputStream openFromJar(String path) throws IOException {
+    private InputStream openFromJar(String path) {
         return MeCabOovProviderPlugin.class.getClassLoader().getResourceAsStream(path);
     }
 }
