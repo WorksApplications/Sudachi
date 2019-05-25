@@ -84,14 +84,14 @@ class LatticeImpl implements Lattice {
     @Override
     public List<LatticeNodeImpl> getNodes(int begin, int end) {
         return endLists.get(end).stream()
-            .filter(n -> ((LatticeNodeImpl)n).begin == begin)
+            .filter(n -> (n.getBegin() == begin))
             .collect(Collectors.toList());
     }
 
     @Override
     public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
         return endLists.get(end).stream()
-            .filter(n -> ((LatticeNodeImpl)n).begin == begin)
+            .filter(n -> (n.getBegin() == begin))
             .min((l, r) -> l.cost - r.cost);
     }
 
@@ -137,7 +137,7 @@ class LatticeImpl implements Lattice {
                 rNode.bestPreviousNode = lNode;
             }
         }
-        rNode.isConnectedToBOS = !(rNode.bestPreviousNode == null);
+        rNode.isConnectedToBOS = (rNode.bestPreviousNode != null);
         rNode.totalCost += rNode.cost;
     }
 
