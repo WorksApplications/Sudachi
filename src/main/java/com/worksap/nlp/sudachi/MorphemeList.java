@@ -27,12 +27,12 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 public class MorphemeList extends AbstractList<Morpheme> {
 
-    final InputText<byte[]> inputText;
+    final InputText inputText;
     final Grammar grammar;
     final Lexicon lexicon;
     final List<LatticeNode> path;
 
-    MorphemeList(InputText<byte[]> input,
+    MorphemeList(InputText input,
                  Grammar grammar,
                  Lexicon lexicon,
                  List<LatticeNode> path) {

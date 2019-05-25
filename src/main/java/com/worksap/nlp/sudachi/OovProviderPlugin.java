@@ -58,7 +58,7 @@ public abstract class OovProviderPlugin extends Plugin {
      *        beginning at {@code offset}.
      * @return the nodes of OOV morphemes
      */
-    public abstract List<LatticeNode> provideOOV(InputText<?> inputText,
+    public abstract List<LatticeNode> provideOOV(InputText inputText,
                                                  int offset,
                                                  boolean hasOtherWords);
 

@@ -92,7 +92,7 @@ class DefaultInputTextPlugin extends InputTextPlugin {
     }
 
     @Override
-    public void rewrite(InputTextBuilder<?> builder) {
+    public void rewrite(InputTextBuilder builder) {
         int offset = 0;
         int nextOffset = 0;
         String text = builder.getText();

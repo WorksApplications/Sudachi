@@ -26,7 +26,7 @@ import java.util.Set;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-class UTF8InputTextBuilder implements InputTextBuilder<byte[]> {
+class UTF8InputTextBuilder implements InputTextBuilder {
 
     private final String originalText;
     private StringBuilder modifiedText;

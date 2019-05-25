@@ -21,7 +21,7 @@ package com.worksap.nlp.sudachi;
  * This class is used in {@link InputTextPlugin#rewrite} to modify
  * the input text.
  */
-public interface InputTextBuilder<E> {
+public interface InputTextBuilder {
     
     /**
      * Replaces the characters in a substring of this sequence
@@ -58,5 +58,5 @@ public interface InputTextBuilder<E> {
      *
      * @return the immutable sequence of characters
      */
-    public InputText<E> build();
+    public InputText build();
 }

@@ -58,7 +58,7 @@ class ProlongedSoundMarkInputTextPlugin extends InputTextPlugin {
     }
 
     @Override
-    public void rewrite(InputTextBuilder<?> builder) {
+    public void rewrite(InputTextBuilder builder) {
         String text = builder.getText();
 
         int n = text.length();

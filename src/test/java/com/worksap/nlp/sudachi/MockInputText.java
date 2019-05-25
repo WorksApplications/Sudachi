@@ -21,7 +21,7 @@ import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 
-class MockInputText implements InputText<String> {
+class MockInputText implements InputText {
 
     String text;
     EnumSet<CategoryType>[] types;

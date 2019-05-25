@@ -80,7 +80,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     @Override
-    public List<LatticeNode> provideOOV(InputText<?> inputText, int offset, boolean hasOtherWords) {
+    public List<LatticeNode> provideOOV(InputText inputText, int offset, boolean hasOtherWords) {
         List<LatticeNode> nodes = new ArrayList<>();
         int length = inputText.getCharCategoryContinuousLength(offset);
         if (length > 0) {

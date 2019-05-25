@@ -60,7 +60,7 @@ public abstract class PathRewritePlugin extends Plugin {
      * @param path the best path of the lattice
      * @param lattice the lattice
      */
-    public abstract void rewrite(InputText<?> text, List<LatticeNode> path, Lattice lattice);
+    public abstract void rewrite(InputText text, List<LatticeNode> path, Lattice lattice);
 
     /**
      * Concatenate the sequence of nodes in the path.
@@ -173,7 +173,7 @@ public abstract class PathRewritePlugin extends Plugin {
      * @param node the node
      * @return the set of the category types of the node
      */
-    public Set<CategoryType> getCharCategoryTypes(InputText<?> text, LatticeNode node) {
+    public Set<CategoryType> getCharCategoryTypes(InputText text, LatticeNode node) {
         return text.getCharCategoryTypes(node.getBegin(), node.getEnd());
     }
 

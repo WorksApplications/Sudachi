@@ -24,7 +24,7 @@ import java.util.Set;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-class UTF8InputText implements InputText<byte[]> {
+class UTF8InputText implements InputText {
     
     private final String originalText;
     private final String modifiedText;
