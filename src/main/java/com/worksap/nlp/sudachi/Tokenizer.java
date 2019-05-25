@@ -59,7 +59,7 @@ public interface Tokenizer {
     /**
      * A mode of splitting
      */
-    public static enum SplitMode {
+    public enum SplitMode {
         /** short mode */
         A,
 

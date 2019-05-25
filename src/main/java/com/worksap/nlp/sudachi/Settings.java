@@ -211,7 +211,7 @@ public class Settings {
     public List<Integer> getIntList(String setting) {
         try {
             return getList(setting, JsonNumber.class).stream()
-                .map(i -> i.intValue()).collect(Collectors.toList());
+                .map(JsonNumber::intValue).collect(Collectors.toList());
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(setting + " is not an array of numbers", e);
         }
@@ -231,7 +231,7 @@ public class Settings {
         try {
             return getList(setting, JsonArray.class).stream()
                 .map(a -> a.getValuesAs(JsonNumber.class).stream()
-                     .map(i -> i.intValue()).collect(Collectors.toList()))
+                     .map(JsonNumber::intValue).collect(Collectors.toList()))
                 .collect(Collectors.toList());
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(setting + " is not an array of arrays of numbers", e);

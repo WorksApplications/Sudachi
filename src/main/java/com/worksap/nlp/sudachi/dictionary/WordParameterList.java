@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -66,7 +67,7 @@ class WordParameterList {
         ByteBuffer newBuffer = ByteBuffer.allocate(ELEMENT_SIZE * size);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = bytes.duplicate();
-        srcBuffer.position(offset);
+        ((Buffer)srcBuffer).position(offset);
         srcBuffer.limit(offset + ELEMENT_SIZE * size);
         newBuffer.put(srcBuffer);
         bytes = newBuffer;

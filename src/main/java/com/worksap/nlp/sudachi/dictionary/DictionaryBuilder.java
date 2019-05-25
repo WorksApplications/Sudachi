@@ -60,7 +60,7 @@ public class DictionaryBuilder {
             return (short)id;
         }
 
-        List<String> getList() { return table; };
+        List<String> getList() { return table; }
     }
 
     POSTable posTable = new POSTable();
@@ -209,7 +209,7 @@ public class DictionaryBuilder {
             = new LineNumberReader(new InputStreamReader(matrixInput));
         String header = reader.readLine();
         if (header == null) {
-            throw new RuntimeException("invalid format at line " + reader.getLineNumber());
+            throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
         }
 
         System.err.print("writing the connection matrix...");
@@ -268,8 +268,8 @@ public class DictionaryBuilder {
             i++;
             List<Integer> wordIds = entry.getValue();
             wordIdTable.put((byte)wordIds.size());
-            for (int wordId : wordIds) {
-                wordIdTable.putInt(wordId);
+            for (int wid : wordIds) {
+                wordIdTable.putInt(wid);
             }
         }
 

@@ -65,8 +65,7 @@ class UTF8InputText implements InputText {
     }
     
     @Override
-    public String getSubstring(int begin, int end)
-        throws StringIndexOutOfBoundsException {
+    public String getSubstring(int begin, int end) {
         if (begin < 0) {
             throw new StringIndexOutOfBoundsException(begin);
         }
