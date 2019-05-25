@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +29,36 @@ import java.io.PrintStream;
  */
 public class SudachiCommandLine {
 
+    static class FileStdoutStream implements Closeable {
+        PrintStream output;
+        boolean isFile;
+
+        FileStdoutStream(String fileName) throws IOException {
+            if (fileName == null) {
+                output = System.out;
+            } else {
+                output = new PrintStream(fileName);
+                isFile = true;
+            }
+        }
+
+        void print(int x) { output.print(x); }
+        void print(String x) { output.print(x); }
+        void println() { output.println(); }
+        void println(String x) { output.println(x); }
+
+        PrintStream getPrintStream() { return output; }
+
+        @Override
+        public void close() {
+            if (isFile) {
+                output.close();
+            }
+        }
+    }
+
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
-                    InputStream input, PrintStream output, boolean printAll, boolean ignoreError)
+                    InputStream input, FileStdoutStream output, boolean printAll, boolean ignoreError)
         throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
@@ -99,7 +128,7 @@ public class SudachiCommandLine {
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
-        PrintStream output = System.out;
+        String outputFileName = null;
         boolean isEnableDump = false;
         boolean printAll = false;
         boolean ignoreError = false;
@@ -123,7 +152,7 @@ public class SudachiCommandLine {
                     break;
                 }
             } else if (args[i].equals("-o") && i + 1 < args.length) {
-                output = new PrintStream(args[++i]);
+                outputFileName = args[++i];
             } else if (args[i].equals("-a")) {
                 printAll = true;
             } else if (args[i].equals("-d")) {
@@ -144,10 +173,11 @@ public class SudachiCommandLine {
             }
         }
 
-        try (Dictionary dict = new DictionaryFactory().create(settings)) {
+        try (FileStdoutStream output = new FileStdoutStream(outputFileName);
+             Dictionary dict = new DictionaryFactory().create(settings)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
-                tokenizer.setDumpOutput(output);
+                tokenizer.setDumpOutput(output.getPrintStream());
             }
 
             if (i < args.length) {
@@ -160,6 +190,5 @@ public class SudachiCommandLine {
                 run(tokenizer, mode, System.in, output, printAll, ignoreError);
             }
         }
-        output.close();
     }
 }

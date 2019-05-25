@@ -25,7 +25,7 @@ public class LexiconSet implements Lexicon {
 
     static final int MAX_DICTIONARIES = 16;
 
-    List<Lexicon> lexicons = new ArrayList<>();;
+    List<Lexicon> lexicons = new ArrayList<>();
 
     public LexiconSet(Lexicon systemLexicon) {
         lexicons.add(systemLexicon);
@@ -129,10 +129,10 @@ public class LexiconSet implements Lexicon {
 
     private int buildWordId(int dictId, int wordId) {
         if (wordId > 0x0fffffff) {
-            throw new RuntimeException("wordId is too large: " + wordId);
+            throw new IndexOutOfBoundsException("wordId is too large: " + wordId);
         }
         if (dictId >= lexicons.size()) {
-            throw new RuntimeException("dictionaryId is too large: " + dictId);
+            throw new IndexOutOfBoundsException("dictionaryId is too large: " + dictId);
         }
         return (dictId << 28) | wordId;
     }

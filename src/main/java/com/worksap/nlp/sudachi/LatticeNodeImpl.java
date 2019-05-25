@@ -40,8 +40,10 @@ public class LatticeNodeImpl implements LatticeNode {
 
     Lexicon lexicon;
 
+    static final String NULL_SURFACE = "(null)";
     static final WordInfo UNDEFINED_WORDINFO
-        = new WordInfo("(null)", (short)0, (short)-1, "(null)", "(null)", "(null)");
+        = new WordInfo(NULL_SURFACE, (short)0, (short)-1,
+                       NULL_SURFACE, NULL_SURFACE, NULL_SURFACE);
 
     LatticeNodeImpl(Lexicon lexicon,
                     short leftId, short rightId, short cost, int wordId) {
