@@ -63,7 +63,7 @@ public class MMapTest {
     }
 
     @Test
-    public void unmapWithoutMappedByteBuffer() {
+    public void unmapWithoutMappedByteBuffer() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(new byte[] { 0x00, 0x00 });
         MMap.unmap(buffer);
     }

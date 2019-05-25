@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public interface Dictionary extends AutoCloseable {
     public Tokenizer create();
 
     @Override
-    public void close();
+    public void close() throws IOException;
 
     /**
      * Returns the number of types of part-of-speech.

@@ -24,9 +24,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.Objects;
 
 /**
  * Mmap functions
@@ -34,6 +34,8 @@ import java.nio.channels.FileChannel;
  * <p>This class provides mmap() and munmap().
  */
 public class MMap {
+
+    private MMap() {}
 
     /**
      * Maps a file directly into memory.
@@ -58,8 +60,9 @@ public class MMap {
      *
      * If the buffer is not a mapped file, this method do nothing.
      * @param buffer the mapped byte buffer to ummap
+     * @throws IOException if unmapping the buffer is failed
      */
-    public static void unmap(ByteBuffer buffer) {
+    public static void unmap(ByteBuffer buffer) throws IOException {
         if (!buffer.isDirect()) {
             return;
         }
@@ -96,15 +99,15 @@ public class MMap {
                     lookup.findVirtual(cleanerClass, "clean",
                                        MethodType.methodType(void.class));
                 final MethodHandle nonNullTest =
-                    lookup.findStatic(Object.class, "nonNull",
+                    lookup.findStatic(Objects.class, "nonNull",
                                       MethodType.methodType(boolean.class, Object.class))
                     .asType(MethodType.methodType(boolean.class, cleanerClass));
                 final MethodHandle noop = MethodHandles.dropArguments(MethodHandles.constant(Void.class, null).asType(MethodType.methodType(void.class)), 0, cleanerClass);
+
                 unmapper =
                     MethodHandles.filterReturnValue(directBufferCleanerMethod,
                                                     MethodHandles.guardWithTest(nonNullTest, cleanMethod, noop))
                     .asType(MethodType.methodType(void.class, ByteBuffer.class));
-                unmapper = directBufferCleanerMethod;
                 unmappableBufferClass = directBufferClass;
             }
         } catch (SecurityException se) {
@@ -117,8 +120,7 @@ public class MMap {
             try {
                 unmapper.invokeExact(buffer);
             } catch(Throwable e) {
-                e.printStackTrace();
-                throw new RuntimeException("can not destroy direct buffer " + buffer, e);
+                throw new IOException("can not destroy direct buffer " + buffer, e);
             }
         }
     }

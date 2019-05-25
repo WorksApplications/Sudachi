@@ -150,7 +150,7 @@ class JapaneseDictionary implements Dictionary {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         grammar = null;
         lexicon = null;
         for (ByteBuffer buffer : buffers) {
