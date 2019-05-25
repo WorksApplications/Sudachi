@@ -34,7 +34,7 @@ public class PrintDictionary {
         DictionaryHeader header = new DictionaryHeader(bytes, offset);
         offset += header.storageSize();
         if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
-            throw new RuntimeException(filename + " is not a system dictionary");
+            throw new IOException(filename + " is not a system dictionary");
         }
         return new GrammarImpl(bytes, offset);
     }
@@ -49,7 +49,7 @@ public class PrintDictionary {
             grammar = new GrammarImpl(bytes, offset);
             offset += ((GrammarImpl)grammar).storageSize();
         } else if (grammar == null) {
-            throw new RuntimeException("the system dictionary is not specified");
+            throw new IllegalArgumentException("the system dictionary is not specified");
         }
 
         List<String> posStrings = new ArrayList<>();
@@ -99,7 +99,7 @@ public class PrintDictionary {
         if (split.length == 0) {
             return "*";
         } else {
-            return Arrays.stream(split).mapToObj(i -> Integer.toString(i))
+            return Arrays.stream(split).mapToObj(Integer::toString)
                 .collect(Collectors.joining("/"));
         }
     }

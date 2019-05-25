@@ -22,7 +22,7 @@ import java.nio.ByteOrder;
 
 class WordParameterList {
 
-    private final int ELEMENT_SIZE = 2 * 3;
+    private static final int ELEMENT_SIZE = 2 * 3;
 
     private ByteBuffer bytes;
     private final int size;
