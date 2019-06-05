@@ -1,18 +1,16 @@
 language: java
 jdk: oraclejdk8
-sudo: false
 dist: trusty
-env:
-  global:
-    # GITHUB_TOKEN
-    - secure: "HTYuvBhcN2u/MFObZsgNvBiCwP2NJJB+qwraDYJ9w3Wd5pDugUCpuZUaruCB0e5ThXf5pkBCCJkr0HVN/D4QK52L3rlOgUBj0SkzKasKkOPcRU70v9YHGOnNWqXIWGsIFXtXfMyOqMqhO2tBesxhzHDmIF1AiTwNdPEOwP1kaW4Hq44i7/DjyTbr8kYCmPkT+UiBXav/Ge9iMSiYEp1RLVxmUBYyY13QiWMbxip238aXUcI0UdZ/CaRVpRprD1AjGCYhdbJRLRBAzS+3UmasxSkczZrAnOGuvZ47N3k5JzJ+u+LQabVpLVLjoAQ+jKLEltRMXIyvLjVlu1dC/km9Dy6ae1kw8tctyielFpGjqY2VAu66rpGxKNcECoaftEB8OYwOHcgR717Q1Up/d7pUG+gKbnZEmZtHOCPrWgWrGBSjK3Q5F20qhSszT2F+KNH2G6sytA/Au5l7A2zF8ZwgZ3h1IQjDma8pZbMsRIIFSxmOk2jxYylhO0sOKUlHSlVAlorhpUw+kj6qxL2x2lO27sBjAvsHcdbOLpO4FYw/ziSGNTDnW3TBj1mKlD0m3il0wbaFkEsqEkIdHd2GvywJIwJ44xVRArsB7PA7UMmNlKgTy10npvVho0rri6NA+NOX8VurQUIZtrwFwgukou1kodVEQ2CHwI8OfBcxxbzokvg="
-    # SONAR_LOGIN
-    - secure: "KzKBYGIHFQZgXsF+Hi5BBJXg1Kt5wNNo8lex0gzIL0P5CP8BNCwgxAXDJxqK90cliyzbMXmOMgkFCQvP7T+w8b6WT8MX5siyFhBzIh4jq4kSVEFhONKd0nbwyO0anqUbpoWwRsEaSkDw0HRiGuENq1zxmk9ayusVDp9SoywFMnnbor3XkjPS6Y3aDYjUxPMWE/PZMSdnJWCY/dAj68/Uy+EXF59BEKemmTq1BI8tJnepQb0eF/01omCEjFpDxHrh9/rRRlppSrnvx/Xe+DfbwSFvgr0tgMVxnSGoTE2APcw77NSrdSNEe2XhzHXQalkDjbE5whsHX+Qn0Ujz0C06d7Q2ywXsIxZFWqymUoZ3XwarDrxEt5oWuUyQUu5d/+vXf8BKTcjTfklGOlrOHrxc12HYc7yjFAqwlCLUcNNu4w9Yaac8c/3730kVk2R9i9FmlysWRupiMiYooxS+VYvMvN9xv0A+RR7Gl4Fz1uWFdyDWPQ5eaU6tEmoKhsBuRDa1j5VOQ4/wL2TxsyRIN/C/soZLVBEs6oaG7EGBBezKlfCH78RUpzvSrR7iwT/EiIgSX8/yghcjy4MtPhUZMK6f+6Yf9spCzD9yGg/JCd8leQCal8EmG6qMJYtJXSFq914t+ZYtj83FW7zt+p+nJqTsQKs3gXvPTgtP9EJshkaqfC8="
 before_install:
   # Decrypt settings.xml and codesigning.asc which is necessary to deploy to Sonatype Maven Repositories
-  - if [ -n "$encrypted_df516d7c6f97_key" ]; then openssl aes-256-cbc -K $encrypted_df516d7c6f97_key -iv $encrypted_df516d7c6f97_iv -in .travis/settings_codesigning.tar.enc -out .travis/settings_codesigning.tar -d; tar xf .travis/settings_codesigning.tar -C .travis; fi
+  - if [ -n "$encrypted_a8b7489a9830_key" ]; then openssl aes-256-cbc -K $encrypted_a8b7489a9830_key -iv $encrypted_a8b7489a9830_iv -in .travis/settings_codesigning.tar.enc -out .travis/settings_codesigning.tar -d; tar xf .travis/settings_codesigning.tar -C .travis; fi
   - if [ -f .travis/codesigning.asc ]; then gpg --fast-import .travis/codesigning.asc; fi
 install: true
+addons:
+  sonarcloud:
+    organization: "worksapplications"
+    token:
+      secure: "0OSnmNTuPizTDRI0ygBXEyI2cnCVJJKxNnRRixxjBpW60OrqwPmD6imnwaViIsgnG3jl68pMmLKybU+MDq90QHQFvlmViD3lt5zMUBiG0Hmjgsyo/+L3Q3xXyucEEojluxi6WEh9AeMYRTX/p4iiwd8R41V0Y7hpMkFvG5+ZlaU8wlnvW/qTZCW+j9i1//Z6zLpszNM+FmawDSWTsK2MiGCABhI1UrX1UG6Mrox32fVZo86pwTOLfYJE3ZS/O7+erupTRhmkQO++xPMm7yLJuzyPqWriGukIZJUKMhxN/4iKuQSec16C3P0hi/3uMoV3x3NS+yf5hAJFzcT3t1d1NN2akvUALTLL7MRjGc7kpivO6a1AS1HsmSCbRtHBu/4QLknMeaYS8WJuQLHk6ZidIGkB5p8eID2+nX3zbd+cNj84wNbqLNRf833AvwCJIzkYVgUbSomOHTT7NLIAlOKF3zTa8h6T44M1cLjQY3GZkG6nS0XUkznekTOQBdwFBSAPS3bEgSBOtDKczA7KrTOAJe3FdUQ2PooL4qLQZnzealGb/e1k97BiLIQ8QkDhYG6ei69lnuJ8Dxj0Kxxm5qJj0JpKd3aXSuOcC16fDuCW5phjO7s0I9ZYWxCGYtakTVZvcEkDnEh3HHeHmmh2D7MSN9Mv0OJn1/ALLEROzff8sgg="
 script:
   - mvn jacoco:prepare-agent test -B
 after_success:
@@ -25,3 +23,6 @@ deploy:
     skip_cleanup: true
     on:
       branch: develop
+cache:
+  directories:
+    - $HOME/.m2/repository/
