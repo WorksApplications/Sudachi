@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.worksap.nlp</groupId>
   <artifactId>sudachi</artifactId>
@@ -22,7 +21,7 @@
     <sonar.links.homepage>https://github.com/WorksApplications/Sudachi</sonar.links.homepage>
     <sonar.links.ci>https://travis-ci.org/WorksApplications/Sudachi</sonar.links.ci>
     <sonar.links.issue>https://github.com/WorksApplications/Sudachi/issues</sonar.links.issue>
-    <sonar.junit.reportsPath/>
+    <sonar.junit.reportsPath />
     <sonar.junit.reportPaths>${project.build.directory}/surefire-reports</sonar.junit.reportPaths>
   </properties>
 
@@ -192,16 +191,16 @@
             </goals>
             <phase>process-test-resources</phase>
             <configuration>
-	      <mainClass>${dictionary.builder}</mainClass>
-	      <arguments>
+              <mainClass>${dictionary.builder}</mainClass>
+              <arguments>
                 <argument>-o</argument>
-	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>${project.build.testOutputDirectory}/system.dic</argument>
                 <argument>-m</argument>
-	        <argument>${test.dict.source.directory}/matrix.def</argument>
+                <argument>${test.dict.source.directory}/matrix.def</argument>
                 <argument>-d</argument>
                 <argument>the system dictionary for the unit tests</argument>
                 <argument>${test.dict.source.directory}/lex.csv</argument>
-	      </arguments>
+              </arguments>
             </configuration>
           </execution>
           <execution>
@@ -211,14 +210,14 @@
             </goals>
             <phase>process-test-resources</phase>
             <configuration>
-	      <mainClass>${userdictionary.builder}</mainClass>
-	      <arguments>
+              <mainClass>${userdictionary.builder}</mainClass>
+              <arguments>
                 <argument>-o</argument>
-	        <argument>${project.build.testOutputDirectory}/user.dic</argument>
+                <argument>${project.build.testOutputDirectory}/user.dic</argument>
                 <argument>-s</argument>
-	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>${project.build.testOutputDirectory}/system.dic</argument>
                 <argument>${test.dict.source.directory}/user.csv</argument>
-	      </arguments>
+              </arguments>
             </configuration>
           </execution>
           <execution>
@@ -228,14 +227,14 @@
             </goals>
             <phase>process-test-resources</phase>
             <configuration>
-	      <mainClass>${userdictionary.builder}</mainClass>
-	      <arguments>
+              <mainClass>${userdictionary.builder}</mainClass>
+              <arguments>
                 <argument>-o</argument>
-	        <argument>${project.build.testOutputDirectory}/user2.dic</argument>
+                <argument>${project.build.testOutputDirectory}/user2.dic</argument>
                 <argument>-s</argument>
-	        <argument>${project.build.testOutputDirectory}/system.dic</argument>
+                <argument>${project.build.testOutputDirectory}/system.dic</argument>
                 <argument>${test.dict.source.directory}/user2.csv</argument>
-	      </arguments>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -262,6 +261,31 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.7.9</version>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>1.23.0</version>
+        <configuration>
+          <java>
+            <eclipse>
+              <file>${basedir}/.formatter/eclipse-formatter.xml</file>
+            </eclipse>
+            <removeUnusedImports />
+            <licenseHeader>
+              <file>${basedir}/.formatter/license-header</file>
+            </licenseHeader>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <id>check-code-format</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
