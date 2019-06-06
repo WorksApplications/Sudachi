@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,13 @@ class WordParameterList {
         isCopied = false;
     }
 
-    int storageSize() { return 4 + ELEMENT_SIZE * size; }
+    int storageSize() {
+        return 4 + ELEMENT_SIZE * size;
+    }
 
-    int size() { return size; }
+    int size() {
+        return size;
+    }
 
     short getLeftId(int wordId) {
         return bytes.getShort(offset + ELEMENT_SIZE * wordId);
@@ -67,7 +71,7 @@ class WordParameterList {
         ByteBuffer newBuffer = ByteBuffer.allocate(ELEMENT_SIZE * size);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = bytes.duplicate();
-        ((Buffer)srcBuffer).position(offset);
+        ((Buffer) srcBuffer).position(offset);
         srcBuffer.limit(offset + ELEMENT_SIZE * size);
         newBuffer.put(srcBuffer);
         bytes = newBuffer;

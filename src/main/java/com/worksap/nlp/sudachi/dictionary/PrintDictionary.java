@@ -47,7 +47,7 @@ public class PrintDictionary {
         offset += header.storageSize();
         if (header.getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
             grammar = new GrammarImpl(bytes, offset);
-            offset += ((GrammarImpl)grammar).storageSize();
+            offset += ((GrammarImpl) grammar).storageSize();
         } else if (grammar == null) {
             throw new IllegalArgumentException("the system dictionary is not specified");
         }
@@ -66,18 +66,12 @@ public class PrintDictionary {
 
             char unitType = getUnitType(wordInfo);
 
-            System.out.println(String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s",
-                                             wordInfo.getSurface(),
-                                             leftId, rightId, cost,
-                                             wordInfo.getSurface(),
-                                             posStrings.get(wordInfo.getPOSId()),
-                                             wordInfo.getReadingForm(),
-                                             wordInfo.getNormalizedForm(),
-                                             wordIdToString(wordInfo.getDictionaryFormWordId()),
-                                             unitType,
-                                             splitToString(wordInfo.getAunitSplit()),
-                                             splitToString(wordInfo.getBunitSplit()),
-                                             splitToString(wordInfo.getWordStructure())));
+            System.out.println(
+                    String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s", wordInfo.getSurface(), leftId, rightId,
+                            cost, wordInfo.getSurface(), posStrings.get(wordInfo.getPOSId()), wordInfo.getReadingForm(),
+                            wordInfo.getNormalizedForm(), wordIdToString(wordInfo.getDictionaryFormWordId()), unitType,
+                            splitToString(wordInfo.getAunitSplit()), splitToString(wordInfo.getBunitSplit()),
+                            splitToString(wordInfo.getWordStructure())));
         }
     }
 
@@ -99,23 +93,28 @@ public class PrintDictionary {
         if (split.length == 0) {
             return "*";
         } else {
-            return Arrays.stream(split).mapToObj(Integer::toString)
-                .collect(Collectors.joining("/"));
+            return Arrays.stream(split).mapToObj(Integer::toString).collect(Collectors.joining("/"));
         }
     }
 
     /**
      * Prints the contents of dictionary.
      *
-     * <p>Usage: {@code PrintDictionary [-s file] file}
-     * <p>The following are the options.
+     * <p>
+     * Usage: {@code PrintDictionary [-s file] file}
+     * <p>
+     * The following are the options.
      * <dl>
-     * <dt>{@code -s file}</dt><dd>the system dictionary file</dd>
+     * <dt>{@code -s file}</dt>
+     * <dd>the system dictionary file</dd>
      * </dl>
-     * <p>This tool requires the system dictionary when it dumps
-     * an user dictionary.
-     * @param args the option and the input filename
-     * @throws IOException if IO
+     * <p>
+     * This tool requires the system dictionary when it dumps an user dictionary.
+     * 
+     * @param args
+     *            the option and the input filename
+     * @throws IOException
+     *             if IO
      */
     public static void main(String[] args) throws IOException {
         Grammar grammar = null;

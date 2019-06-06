@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,12 @@ public class JoinKatakanaOovPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(),
-                "/system.dic", "/user.dic", "/char.def", "/unk.def");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
 
         String path = temporaryFolder.getRoot().getPath();
         String settings = Utils.readAllResource("/sudachi.json");
         Dictionary dict = new DictionaryFactory().create(path, settings);
-        tokenizer = (JapaneseTokenizer)dict.create();
+        tokenizer = (JapaneseTokenizer) dict.create();
 
         plugin = new JoinKatakanaOovPlugin();
     }
@@ -69,7 +68,7 @@ public class JoinKatakanaOovPluginTest {
         path = getPath("アイアイウ");
         assertEquals(1, path.size());
     }
- 
+
     @Test
     public void testPOS() {
         // アイアイウ is 名詞-固有名詞-地名-一般 in the dictionary
@@ -105,8 +104,7 @@ public class JoinKatakanaOovPluginTest {
     }
 
     private List<LatticeNode> getPath(String text) {
-        UTF8InputText input
-            = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
+        UTF8InputText input = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
         LatticeImpl lattice = tokenizer.buildLattice(input);
         List<LatticeNode> path = lattice.getBestPath();
         plugin.rewrite(input, path, lattice);

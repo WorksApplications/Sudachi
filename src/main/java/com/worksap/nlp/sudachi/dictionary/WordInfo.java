@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package com.worksap.nlp.sudachi.dictionary;
 /**
  * Informations of the morpheme.
  *
- * <p>This class has the informations which are not used in the graph
- * calculation.
+ * <p>
+ * This class has the informations which are not used in the graph calculation.
  */
 public class WordInfo {
 
@@ -35,16 +35,8 @@ public class WordInfo {
     private final int[] bUnitSplit;
     private final int[] wordStructure;
 
-    WordInfo(String surface,
-             short headwordLength,
-             short posId,
-             String normalizedForm,
-             int dictionaryFormWordId,
-             String dictionaryForm,
-             String readingForm,
-             int[] aUnitSplit,
-             int[] bUnitSplit,
-             int[] wordStructure) {
+    WordInfo(String surface, short headwordLength, short posId, String normalizedForm, int dictionaryFormWordId,
+            String dictionaryForm, String readingForm, int[] aUnitSplit, int[] bUnitSplit, int[] wordStructure) {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
@@ -60,19 +52,21 @@ public class WordInfo {
     /**
      * Allocates informations of morpheme not in the lexicons.
      *
-     * @param surface the text of the morpheme
-     * @param headwordLength the length of the morpheme
-     * @param posId the ID of the part-of-speech of the morpheme
-     * @param normalizedForm the normalized form of the morpheme
-     * @param dictionaryForm the dictionary form of the morpheme
-     * @param readingForm the reading form of the morpheme
+     * @param surface
+     *            the text of the morpheme
+     * @param headwordLength
+     *            the length of the morpheme
+     * @param posId
+     *            the ID of the part-of-speech of the morpheme
+     * @param normalizedForm
+     *            the normalized form of the morpheme
+     * @param dictionaryForm
+     *            the dictionary form of the morpheme
+     * @param readingForm
+     *            the reading form of the morpheme
      */
-    public WordInfo(String surface,
-             short headwordLength,
-             short posId,
-             String normalizedForm,
-             String dictionaryForm,
-             String readingForm) {
+    public WordInfo(String surface, short headwordLength, short posId, String normalizedForm, String dictionaryForm,
+            String readingForm) {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
@@ -97,9 +91,10 @@ public class WordInfo {
     /**
      * Returns the length of the text in internal use unit.
      *
-     * <p>This length is used to place a node in the
-     * {@link com.worksap.nlp.sudachi.Lattice},
-     * does not equals {@code getSurface().length()}.
+     * <p>
+     * This length is used to place a node in the
+     * {@link com.worksap.nlp.sudachi.Lattice}, does not equals
+     * {@code getSurface().length()}.
      *
      * @return the length of the text
      */
@@ -110,14 +105,15 @@ public class WordInfo {
     /**
      * Returns the part-of-speech ID of the morpheme.
      *
-     * The strings of part-of-speech name can be gotten
-     * with {@link Grammar#getPartOfSpeechString}.
+     * The strings of part-of-speech name can be gotten with
+     * {@link Grammar#getPartOfSpeechString}.
+     * 
      * @return the POS ID
      */
     public short getPOSId() {
         return posId;
     }
-    
+
     /**
      * Returns the normalized form of the morpheme.
      *
@@ -158,8 +154,7 @@ public class WordInfo {
     }
 
     /**
-     * Returns the array of word IDs which the morpheme is
-     * compounded of in A mode.
+     * Returns the array of word IDs which the morpheme is compounded of in A mode.
      *
      * @return the word IDs of A units
      */
@@ -168,8 +163,7 @@ public class WordInfo {
     }
 
     /**
-     * Returns the array of word IDs which the morpheme is
-     * compounded of in B mode.
+     * Returns the array of word IDs which the morpheme is compounded of in B mode.
      *
      * @return the word IDs of B units
      */
@@ -178,8 +172,7 @@ public class WordInfo {
     }
 
     /**
-     * Returns the array of the morphemes which the morpheme is
-     * compounded of.
+     * Returns the array of the morphemes which the morpheme is compounded of.
      *
      * @return the word IDs of the constituents of the morpheme
      */

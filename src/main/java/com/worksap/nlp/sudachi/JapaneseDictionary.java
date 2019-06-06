@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,7 @@ class JapaneseDictionary implements Dictionary {
 
     JapaneseDictionary(String path, String jsonString) throws IOException {
         if (jsonString == null) {
-            try (InputStream input
-                 = SudachiCommandLine.class
-                 .getResourceAsStream("/sudachi.json")) {
+            try (InputStream input = SudachiCommandLine.class.getResourceAsStream("/sudachi.json")) {
                 jsonString = readAll(input);
             }
         }
@@ -64,8 +62,8 @@ class JapaneseDictionary implements Dictionary {
         buffers = new ArrayList<>();
 
         readSystemDictionary(settings.getPath("systemDict"));
-        for (EditConnectionCostPlugin p :
-                 settings.<EditConnectionCostPlugin>getPluginList("editConnectionCostPlugin")) {
+        for (EditConnectionCostPlugin p : settings
+                .<EditConnectionCostPlugin>getPluginList("editConnectionCostPlugin")) {
             p.setUp(grammar);
             p.edit(grammar);
         }
@@ -129,17 +127,14 @@ class JapaneseDictionary implements Dictionary {
         }
         offset += header.storageSize();
 
-        DoubleArrayLexicon userLexicon
-            = new DoubleArrayLexicon(bytes, offset);
-        Tokenizer tokenizer
-            = new JapaneseTokenizer(grammar, lexicon,
-                                    inputTextPlugins, oovProviderPlugins,
-                                    Collections.emptyList());
+        DoubleArrayLexicon userLexicon = new DoubleArrayLexicon(bytes, offset);
+        Tokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
+                Collections.emptyList());
 
         userLexicon.calculateCost(tokenizer);
         lexicon.add(userLexicon);
     }
-    
+
     void readCharacterDefinition(String filename) throws IOException {
         if (grammar == null) {
             return;
@@ -160,9 +155,7 @@ class JapaneseDictionary implements Dictionary {
 
     @Override
     public Tokenizer create() {
-        return new JapaneseTokenizer(grammar, lexicon,
-                                     inputTextPlugins, oovProviderPlugins,
-                                     pathRewritePlugins);
+        return new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins, pathRewritePlugins);
     }
 
     @Override
@@ -177,7 +170,7 @@ class JapaneseDictionary implements Dictionary {
 
     static String readAll(InputStream input) throws IOException {
         try (InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
-             BufferedReader reader = new BufferedReader(isReader)) {
+                BufferedReader reader = new BufferedReader(isReader)) {
             StringBuilder sb = new StringBuilder();
             while (true) {
                 String line = reader.readLine();

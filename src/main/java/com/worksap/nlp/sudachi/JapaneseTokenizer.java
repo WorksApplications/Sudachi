@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,8 @@ class JapaneseTokenizer implements Tokenizer {
 
     LatticeImpl lattice;
 
-    JapaneseTokenizer(Grammar grammar, Lexicon lexicon,
-                      List<InputTextPlugin> inputTextPlugins,
-                      List<OovProviderPlugin> oovProviderPlugins,
-                      List<PathRewritePlugin> pathRewritePlugins) {
+    JapaneseTokenizer(Grammar grammar, Lexicon lexicon, List<InputTextPlugin> inputTextPlugins,
+            List<OovProviderPlugin> oovProviderPlugins, List<PathRewritePlugin> pathRewritePlugins) {
 
         this.grammar = grammar;
         this.lexicon = lexicon;
@@ -122,11 +120,8 @@ class JapaneseTokenizer implements Tokenizer {
                 int wordId = r[0];
                 int end = r[1];
 
-                LatticeNode n = new LatticeNodeImpl(lexicon,
-                                                    lexicon.getLeftId(wordId),
-                                                    lexicon.getRightId(wordId),
-                                                    lexicon.getCost(wordId),
-                                                    wordId);
+                LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
+                        lexicon.getCost(wordId), wordId);
                 lattice.insert(i, end, n);
             }
 
@@ -160,7 +155,7 @@ class JapaneseTokenizer implements Tokenizer {
             int[] wids;
             if (mode == Tokenizer.SplitMode.A) {
                 wids = node.getWordInfo().getAunitSplit();
-            } else {        // Tokenizer.SplitMode.B
+            } else { // Tokenizer.SplitMode.B
                 wids = node.getWordInfo().getBunitSplit();
             }
             if (wids.length == 0 || wids.length == 1) {
@@ -168,10 +163,7 @@ class JapaneseTokenizer implements Tokenizer {
             } else {
                 int offset = node.getBegin();
                 for (int wid : wids) {
-                    LatticeNodeImpl n
-                        = new LatticeNodeImpl(lexicon,
-                                              (short)0, (short)0, (short)0,
-                                              wid);
+                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
                     n.begin = offset;
                     offset += n.getWordInfo().getLength();
                     n.end = offset;

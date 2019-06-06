@@ -31,25 +31,26 @@ import java.util.Objects;
 /**
  * Mmap functions
  *
- * <p>This class provides mmap() and munmap().
+ * <p>
+ * This class provides mmap() and munmap().
  */
 public class MMap {
 
-    private MMap() {}
+    private MMap() {
+    }
 
     /**
      * Maps a file directly into memory.
      *
-     * @param filename the filename to open
+     * @param filename
+     *            the filename to open
      * @return the mapped byte buffer
-     * @throws IOException if reading a file is failed
+     * @throws IOException
+     *             if reading a file is failed
      */
     public static ByteBuffer map(String filename) throws IOException {
-        try (FileInputStream istream = new FileInputStream(filename);
-             FileChannel inputFile = istream.getChannel()) {
-            ByteBuffer buffer = inputFile.map(FileChannel.MapMode.READ_ONLY,
-                                              0,
-                                              inputFile.size());
+        try (FileInputStream istream = new FileInputStream(filename); FileChannel inputFile = istream.getChannel()) {
+            ByteBuffer buffer = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             return buffer;
         }
@@ -59,8 +60,11 @@ public class MMap {
      * Unmaps the region of the buffer.
      *
      * If the buffer is not a mapped file, this method do nothing.
-     * @param buffer the mapped byte buffer to ummap
-     * @throws IOException if unmapping the buffer is failed
+     * 
+     * @param buffer
+     *            the mapped byte buffer to ummap
+     * @throws IOException
+     *             if unmapping the buffer is failed
      */
     public static void unmap(ByteBuffer buffer) throws IOException {
         if (!buffer.isDirect()) {
@@ -75,9 +79,8 @@ public class MMap {
             try {
                 // for JDK 9 or later
                 final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-                final MethodHandle cleanerMethod =
-                    lookup.findVirtual(unsafeClass, "invokeCleaner",
-                                       MethodType.methodType(void.class, ByteBuffer.class));
+                final MethodHandle cleanerMethod = lookup.findVirtual(unsafeClass, "invokeCleaner",
+                        MethodType.methodType(void.class, ByteBuffer.class));
                 final Field f = unsafeClass.getDeclaredField("theUnsafe");
                 f.setAccessible(true);
                 final Object theUnsafe = f.get(null);
@@ -87,27 +90,25 @@ public class MMap {
                 throw se;
             } catch (ReflectiveOperationException | RuntimeException e) {
                 // for JDK 8
-                final Class<?> directBufferClass =
-                    Class.forName("java.nio.DirectByteBuffer");
+                final Class<?> directBufferClass = Class.forName("java.nio.DirectByteBuffer");
                 final Method m = directBufferClass.getMethod("cleaner");
                 m.setAccessible(true);
                 final MethodHandle directBufferCleanerMethod = lookup.unreflect(m);
-                final Class<?> cleanerClass
-                    = directBufferCleanerMethod.type().returnType();
+                final Class<?> cleanerClass = directBufferCleanerMethod.type().returnType();
 
-                final MethodHandle cleanMethod =
-                    lookup.findVirtual(cleanerClass, "clean",
-                                       MethodType.methodType(void.class));
-                final MethodHandle nonNullTest =
-                    lookup.findStatic(Objects.class, "nonNull",
-                                      MethodType.methodType(boolean.class, Object.class))
-                    .asType(MethodType.methodType(boolean.class, cleanerClass));
-                final MethodHandle noop = MethodHandles.dropArguments(MethodHandles.constant(Void.class, null).asType(MethodType.methodType(void.class)), 0, cleanerClass);
+                final MethodHandle cleanMethod = lookup.findVirtual(cleanerClass, "clean",
+                        MethodType.methodType(void.class));
+                final MethodHandle nonNullTest = lookup
+                        .findStatic(Objects.class, "nonNull", MethodType.methodType(boolean.class, Object.class))
+                        .asType(MethodType.methodType(boolean.class, cleanerClass));
+                final MethodHandle noop = MethodHandles.dropArguments(
+                        MethodHandles.constant(Void.class, null).asType(MethodType.methodType(void.class)), 0,
+                        cleanerClass);
 
-                unmapper =
-                    MethodHandles.filterReturnValue(directBufferCleanerMethod,
-                                                    MethodHandles.guardWithTest(nonNullTest, cleanMethod, noop))
-                    .asType(MethodType.methodType(void.class, ByteBuffer.class));
+                unmapper = MethodHandles
+                        .filterReturnValue(directBufferCleanerMethod,
+                                MethodHandles.guardWithTest(nonNullTest, cleanMethod, noop))
+                        .asType(MethodType.methodType(void.class, ByteBuffer.class));
                 unmappableBufferClass = directBufferClass;
             }
         } catch (SecurityException se) {
@@ -119,7 +120,7 @@ public class MMap {
         if (unmapper != null && unmappableBufferClass.isInstance(buffer)) {
             try {
                 unmapper.invokeExact(buffer);
-            } catch(Throwable e) {
+            } catch (Throwable e) {
                 throw new IOException("can not destroy direct buffer " + buffer, e);
             }
         }

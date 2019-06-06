@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,46 +32,56 @@ import java.util.Set;
 /**
  * A plugin that rewrites the characters of input texts.
  *
- * <p>This plugin rewites the characters by the user-defined rules,
- * converts them to lower case by {@link Character#toLowerCase}
- * and normalized by {@link java.text.Normalizer#normalize} with {@code NFKC}.
+ * <p>
+ * This plugin rewites the characters by the user-defined rules, converts them
+ * to lower case by {@link Character#toLowerCase} and normalized by
+ * {@link java.text.Normalizer#normalize} with {@code NFKC}.
  *
- * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be refered as {@link Plugin#settings}.
+ * <p>
+ * {@link Dictionary} initialize this plugin with {@link Settings}. It can be
+ * refered as {@link Plugin#settings}.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin",
  *     "rewriteDef" : "rewrite.def"
  *   }
- * }</pre>
+ * }
+ * </pre>
  *
- * {@code rewriteDef} is the file path of the rules of character
- * rewriting. If {@code rewirteDef} is not defined, this plugin
- * uses the default rules.
+ * {@code rewriteDef} is the file path of the rules of character rewriting. If
+ * {@code rewirteDef} is not defined, this plugin uses the default rules.
  *
- * <p>The following is an example of rewriting rules.
- * <pre>{@code
+ * <p>
+ * The following is an example of rewriting rules.
+ * 
+ * <pre>
+ * {@code
  * # single code point: this character is skipped in character normalization
  * 髙
  * # rewrite rule: <target> <replacement>
  * A' Ā
- * }</pre>
+ * }
+ * </pre>
  */
 class DefaultInputTextPlugin extends InputTextPlugin {
-    
+
     /** the file path of the rules */
     public String rewriteDef;
 
     private Set<Integer> ignoreNormalizeSet = new HashSet<>();
     private Map<Character, Integer> keyLengths = new HashMap<>();
     private Map<String, String> replaceCharMap = new HashMap<>();
-    
+
     /**
      * Reads the rewriting rules from the specified file.
      *
-     * @throws IOException if the file is not available.
+     * @throws IOException
+     *             if the file is not available.
      */
     @Override
     public void setUp() throws IOException {
@@ -100,8 +110,7 @@ class DefaultInputTextPlugin extends InputTextPlugin {
             offset += nextOffset;
             nextOffset = 0;
             // 1. replace char without normalize
-            for (int l = Math.min(keyLengths.getOrDefault(text.charAt(i), 0), text.length() - i);
-                 l > 0; l--) {
+            for (int l = Math.min(keyLengths.getOrDefault(text.charAt(i), 0), text.length() - i); l > 0; l--) {
                 String replace = replaceCharMap.get(text.substring(i, i + l));
                 if (replace != null) {
                     builder.replace(i + offset, i + l + offset, replace);
@@ -125,21 +134,19 @@ class DefaultInputTextPlugin extends InputTextPlugin {
                 replace = new String(Character.toChars(lower));
             } else {
                 // 2-2. normalize (except in ignoreNormalize)
-                //    e.g. full-width alphabet -> half-width / ligature / etc.
-                replace = Normalizer.normalize(new String(Character.toChars(lower)),
-                                               Form.NFKC);
+                // e.g. full-width alphabet -> half-width / ligature / etc.
+                replace = Normalizer.normalize(new String(Character.toChars(lower)), Form.NFKC);
             }
             nextOffset = replace.length() - charLength;
-            if (replace.length() != charLength
-                || original != replace.codePointAt(0)) {
+            if (replace.length() != charLength || original != replace.codePointAt(0)) {
                 builder.replace(i + offset, i + charLength + offset, replace);
             }
         }
     }
-    
+
     private void readRewriteLists(InputStream rewriteDef) throws IOException {
         try (InputStreamReader isr = new InputStreamReader(rewriteDef, StandardCharsets.UTF_8);
-             LineNumberReader reader = new LineNumberReader(isr)) {
+                LineNumberReader reader = new LineNumberReader(isr)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.matches("\\s*") || line.startsWith("#")) {
@@ -150,15 +157,16 @@ class DefaultInputTextPlugin extends InputTextPlugin {
                 if (cols.length == 1) {
                     String key = cols[0];
                     if (key.codePointCount(0, key.length()) != 1) {
-                        throw new IllegalArgumentException(cols[0] + " is not a character at line " + reader.getLineNumber());
+                        throw new IllegalArgumentException(
+                                cols[0] + " is not a character at line " + reader.getLineNumber());
                     }
                     ignoreNormalizeSet.add(key.codePointAt(0));
                 }
                 // replace char list
                 else if (cols.length == 2) {
                     if (replaceCharMap.containsKey(cols[0])) {
-                        throw new IllegalArgumentException(cols[0] + " is already defined at line "
-                                                           + reader.getLineNumber());
+                        throw new IllegalArgumentException(
+                                cols[0] + " is already defined at line " + reader.getLineNumber());
                     }
                     if (keyLengths.getOrDefault(cols[0].charAt(0), -1) < cols[0].length()) {
                         // store the longest key length
@@ -166,8 +174,7 @@ class DefaultInputTextPlugin extends InputTextPlugin {
                     }
                     replaceCharMap.put(cols[0], cols[1]);
                 } else {
-                    throw new IllegalArgumentException("invalid format at line "
-                                                       + reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
             }
         }

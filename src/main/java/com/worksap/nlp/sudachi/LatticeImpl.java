@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,21 +83,17 @@ class LatticeImpl implements Lattice {
 
     @Override
     public List<LatticeNodeImpl> getNodes(int begin, int end) {
-        return endLists.get(end).stream()
-            .filter(n -> (n.getBegin() == begin))
-            .collect(Collectors.toList());
+        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin)).collect(Collectors.toList());
     }
 
     @Override
     public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
-        return endLists.get(end).stream()
-            .filter(n -> (n.getBegin() == begin))
-            .min((l, r) -> l.cost - r.cost);
+        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin)).min((l, r) -> l.cost - r.cost);
     }
 
     @Override
     public void insert(int begin, int end, LatticeNode node) {
-        LatticeNodeImpl n = (LatticeNodeImpl)node;
+        LatticeNodeImpl n = (LatticeNodeImpl) node;
         endLists.get(end).add(n);
         n.begin = begin;
         n.end = end;
@@ -126,8 +122,7 @@ class LatticeImpl implements Lattice {
             if (!lNode.isConnectedToBOS) {
                 continue;
             }
-            short connectCost
-                = grammar.getConnectCost(lNode.rightId, rNode.leftId);
+            short connectCost = grammar.getConnectCost(lNode.rightId, rNode.leftId);
             if (connectCost == Grammar.INHIBITED_CONNECTION) {
                 continue; // this connection is not allowed
             }
@@ -150,9 +145,8 @@ class LatticeImpl implements Lattice {
             throw new IllegalStateException("EOS isn't connected to BOS");
         }
         ArrayList<LatticeNode> result = new ArrayList<>();
-        for (LatticeNodeImpl node = eosNode.bestPreviousNode;
-             node != endLists.get(0).get(0);
-             node = node.bestPreviousNode) {
+        for (LatticeNodeImpl node = eosNode.bestPreviousNode; node != endLists.get(0)
+                .get(0); node = node.bestPreviousNode) {
             result.add(node);
         }
         Collections.reverse(result);
@@ -162,8 +156,7 @@ class LatticeImpl implements Lattice {
     void dump(PrintStream output) {
         int index = 0;
         for (int i = size + 1; i >= 0; i--) {
-            List<LatticeNodeImpl> rNodes
-                = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
+            List<LatticeNodeImpl> rNodes = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
             for (LatticeNodeImpl rNode : rNodes) {
                 String surface;
                 String pos;
@@ -181,11 +174,8 @@ class LatticeImpl implements Lattice {
                     }
                 }
 
-                output.print(String.format("%d: %d %d %s(%d) %s %d %d %d: ",
-                                           index,
-                                           rNode.getBegin(), rNode.getEnd(),
-                                           surface, rNode.wordId, pos,
-                                           rNode.leftId, rNode.rightId, rNode.cost));
+                output.print(String.format("%d: %d %d %s(%d) %s %d %d %d: ", index, rNode.getBegin(), rNode.getEnd(),
+                        surface, rNode.wordId, pos, rNode.leftId, rNode.rightId, rNode.cost));
                 index++;
 
                 for (LatticeNodeImpl lNode : endLists.get(rNode.begin)) {

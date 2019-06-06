@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ class WordInfoList {
     WordInfo getWordInfo(int wordId) {
         ByteBuffer buf = bytes.asReadOnlyBuffer();
         buf.order(bytes.order());
-        ((Buffer)buf).position(wordIdToOffset(wordId));
+        ((Buffer) buf).position(wordIdToOffset(wordId));
 
         String surface = bufferToString(buf);
-        short headwordLength = (short)bufferToStringLength(buf);
+        short headwordLength = (short) bufferToStringLength(buf);
         short posId = buf.getShort();
         String normalizedForm = bufferToString(buf);
         if (normalizedForm.isEmpty()) {
@@ -58,9 +58,8 @@ class WordInfoList {
             dictionaryForm = wi.getSurface();
         }
 
-        return new WordInfo(surface, headwordLength, posId, normalizedForm,
-                            dictionaryFormWordId, dictionaryForm, readingForm,
-                            aUnitSplit, bUnitSplit, wordStructure);
+        return new WordInfo(surface, headwordLength, posId, normalizedForm, dictionaryFormWordId, dictionaryForm,
+                readingForm, aUnitSplit, bUnitSplit, wordStructure);
     }
 
     private int wordIdToOffset(int wordId) {

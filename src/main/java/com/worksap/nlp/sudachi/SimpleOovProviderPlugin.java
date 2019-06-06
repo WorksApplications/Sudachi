@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,11 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 /**
  * Provides the OOVs.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class"   : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
  *     "oovPOS"  : [ "補助記号", "一般", "*", "*", "*", "*" ],
@@ -34,11 +37,11 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  *     "rigthId" : 5968,
  *     "cost"    : 3857
  *   }
- * }</pre>
+ * }
+ * </pre>
  *
- * {@code oovPOS} is the part of speech of the OOVs.
- * {@code leftId} is the left-ID of the OOVs.
- * {@code rightId} is the right-ID of the OOVs.
+ * {@code oovPOS} is the part of speech of the OOVs. {@code leftId} is the
+ * left-ID of the OOVs. {@code rightId} is the right-ID of the OOVs.
  * {@code cost} is the cost of the OOVs.
  */
 class SimpleOovProviderPlugin extends OovProviderPlugin {
@@ -51,9 +54,9 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
     @Override
     public void setUp(Grammar grammar) {
         List<String> oovPOSStrings = settings.getStringList("oovPOS");
-        leftId = (short)settings.getInt("leftId");
-        rightId = (short)settings.getInt("rightId");
-        cost = (short)settings.getInt("cost");
+        leftId = (short) settings.getInt("leftId");
+        rightId = (short) settings.getInt("rightId");
+        cost = (short) settings.getInt("cost");
 
         if (oovPOSStrings.isEmpty()) {
             throw new IllegalArgumentException("oovPOS is not specified");
@@ -71,9 +74,7 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
             node.setParameter(leftId, rightId, cost);
             int length = inputText.getCodePointsOffsetLength(offset, 1);
             String s = inputText.getSubstring(offset, offset + length);
-            WordInfo info
-                = new WordInfo(s, (short)length,
-                               oovPOSId, s, s, "");
+            WordInfo info = new WordInfo(s, (short) length, oovPOSId, s, s, "");
             node.setWordInfo(info);
             return Collections.singletonList(node);
         } else {

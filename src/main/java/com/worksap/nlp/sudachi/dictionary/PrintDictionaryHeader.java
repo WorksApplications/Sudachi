@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,8 @@ public class PrintDictionaryHeader {
 
     static void printHeader(String filename) throws IOException {
         ByteBuffer bytes;
-        try (FileInputStream input = new FileInputStream(filename);
-             FileChannel inputFile = input.getChannel()) {
-            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0,
-                                  inputFile.size());
+        try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
+            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
         }
         DictionaryHeader header = new DictionaryHeader(bytes, 0);
@@ -51,7 +49,8 @@ public class PrintDictionaryHeader {
             return;
         }
 
-        System.out.println("createTime: " + Instant.ofEpochSecond(header.getCreateTime()).atZone(ZoneId.systemDefault()).toString());
+        System.out.println("createTime: "
+                + Instant.ofEpochSecond(header.getCreateTime()).atZone(ZoneId.systemDefault()).toString());
         System.out.println("description: " + header.getDescription());
     }
 
@@ -59,8 +58,11 @@ public class PrintDictionaryHeader {
      * Prints the contents of dictionary header.
      *
      * This tool requires filenames of dictionaries.
-     * @param args the input filenames
-     * @throws IOException if IO
+     * 
+     * @param args
+     *            the input filenames
+     * @throws IOException
+     *             if IO
      */
     public static void main(String[] args) throws IOException {
         for (String filename : args) {

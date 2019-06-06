@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,20 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 /**
  * Provides the OOVs in the same way as MeCab.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class"   : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
  *     "charDef" : "char.def",
  *     "unkDef"  : "unk.def"
  *   }
- * }</pre>
+ * }
+ * </pre>
  *
- * {@code charDef} is the file path of the definition of OOV insertion
- * behavior.
+ * {@code charDef} is the file path of the definition of OOV insertion behavior.
  * {@code unkDef} is the file path of the definition of OOV informations.
  *
  * These files are compatible with MeCab. But the definitions of character
@@ -94,8 +97,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 if (oovs == null) {
                     continue;
                 }
-                if (cinfo.isGroup &&
-                    (cinfo.isInvoke || !hasOtherWords)) {
+                if (cinfo.isGroup && (cinfo.isInvoke || !hasOtherWords)) {
                     String s = inputText.getSubstring(offset, offset + length);
                     for (OOV oov : oovs) {
                         nodes.add(getOOVNode(s, oov, length));
@@ -122,17 +124,15 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     LatticeNode getOOVNode(String text, OOV oov, int length) {
         LatticeNode node = createNode();
         node.setParameter(oov.leftId, oov.rightId, oov.cost);
-        WordInfo info
-            = new WordInfo(text, (short)length, oov.posId, text, text, "");
+        WordInfo info = new WordInfo(text, (short) length, oov.posId, text, text, "");
         node.setWordInfo(info);
         return node;
     }
 
     void readCharacterProperty(String charDef) throws IOException {
-        try (InputStream input = (charDef == null) ?
-             openFromJar("char.def") : new FileInputStream(charDef);
-             InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
-             LineNumberReader reader = new LineNumberReader(isReader)) {
+        try (InputStream input = (charDef == null) ? openFromJar("char.def") : new FileInputStream(charDef);
+                InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+                LineNumberReader reader = new LineNumberReader(isReader)) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -143,20 +143,18 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 }
                 String[] cols = line.split("\\s+");
                 if (cols.length < 2) {
-                    throw new IllegalArgumentException("invalid format at line " +
-                                                       reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
                 if (cols[0].startsWith("0x")) {
                     continue;
                 }
                 CategoryType type = CategoryType.valueOf(cols[0]);
                 if (type == null) {
-                    throw new IllegalArgumentException(cols[0] + " is invalid type at line "
-                                                       + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber());
                 }
                 if (categories.containsKey(type)) {
-                    throw new IllegalArgumentException(cols[0] + " is already defined at line "
-                                                       + reader.getLineNumber());
+                    throw new IllegalArgumentException(
+                            cols[0] + " is already defined at line " + reader.getLineNumber());
                 }
                 CategoryInfo info = new CategoryInfo();
                 info.type = type;
@@ -169,10 +167,9 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
     }
 
     void readOOV(String unkDef, Grammar grammar) throws IOException {
-        try (InputStream input = (unkDef == null) ?
-             openFromJar("unk.def") : new FileInputStream(unkDef);
-             InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
-             LineNumberReader reader = new LineNumberReader(isReader)) {
+        try (InputStream input = (unkDef == null) ? openFromJar("unk.def") : new FileInputStream(unkDef);
+                InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
+                LineNumberReader reader = new LineNumberReader(isReader)) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
@@ -180,25 +177,21 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 }
                 String[] cols = line.split(",");
                 if (cols.length < 10) {
-                    throw new IllegalArgumentException("invalid format at line " +
-                                                       reader.getLineNumber());
+                    throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
                 CategoryType type = CategoryType.valueOf(cols[0]);
                 if (type == null) {
-                    throw new IllegalArgumentException(cols[0] + " is invalid type at line "
-                                                       + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber());
                 }
                 if (!categories.containsKey(type)) {
-                    throw new IllegalArgumentException(cols[0] + " is undefined at line "
-                                                       + reader.getLineNumber());
+                    throw new IllegalArgumentException(cols[0] + " is undefined at line " + reader.getLineNumber());
                 }
 
                 OOV oov = new OOV();
                 oov.leftId = Short.parseShort(cols[1]);
                 oov.rightId = Short.parseShort(cols[2]);
                 oov.cost = Short.parseShort(cols[3]);
-                List<String> pos
-                    = Arrays.asList(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
+                List<String> pos = Arrays.asList(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
                 oov.posId = grammar.getPartOfSpeechId(pos);
 
                 if (!oovList.containsKey(type)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@ public interface Morpheme {
     /**
      * Returns the start index of the morpheme.
      *
-     * When the input text is normalized, some morphemes have
-     * the same start index.
+     * When the input text is normalized, some morphemes have the same start index.
      *
      * @return the index of first character of the morpheme
      */
@@ -36,8 +35,7 @@ public interface Morpheme {
     /**
      * Returns the offset after the last character of the morpheme.
      *
-     * When the input text is normalized, some morphemes have
-     * the same end index.
+     * When the input text is normalized, some morphemes have the same end index.
      *
      * @return the offset after the last character of the morpheme
      */
@@ -46,8 +44,7 @@ public interface Morpheme {
     /**
      * Returns the text of morpheme.
      *
-     * When the input text is normalized, some morphemes have
-     * the same surface.
+     * When the input text is normalized, some morphemes have the same surface.
      *
      * @return the text of morpheme
      */
@@ -79,8 +76,8 @@ public interface Morpheme {
     /**
      * Returns the normalized form of morpheme.
      *
-     * This method returns the form normalizing inconsistent spellings and
-     * inflected forms.
+     * This method returns the form normalizing inconsistent spellings and inflected
+     * forms.
      *
      * @return the normalized form of morpheme
      */
@@ -101,10 +98,11 @@ public interface Morpheme {
      * Split the morpheme in another splitting mode.
      *
      * If {@code mode} is the same with using in
-     * {@link Tokenizer#tokenize(Tokenizer.SplitMode,String)} or no more
-     * splitting, this method returns {@code this}.
+     * {@link Tokenizer#tokenize(Tokenizer.SplitMode,String)} or no more splitting,
+     * this method returns {@code this}.
      *
-     * @param mode a mode of splitting
+     * @param mode
+     *            a mode of splitting
      * @return the list of splitted morphemes
      * @see Tokenizer#tokenize(Tokenizer.SplitMode,String)
      */
@@ -120,8 +118,8 @@ public interface Morpheme {
     /**
      * Returns the ID of the morpheme.
      *
-     * The IDs change when the dictionaries are updated or
-     * the combination of dictionaries changes.
+     * The IDs change when the dictionaries are updated or the combination of
+     * dictionaries changes.
      *
      * If the morpheme is OOV, it returns an undefined value.
      *
@@ -132,8 +130,8 @@ public interface Morpheme {
     /**
      * Returns the ID of the dicitionary containing the morpheme.
      *
-     * If the morpheme is in the system dictionary, it returns {@code 0}.
-     * If the morpheme is OOV, it returns a negative value.
+     * If the morpheme is in the system dictionary, it returns {@code 0}. If the
+     * morpheme is OOV, it returns a negative value.
      *
      * @return the dictionary ID
      */

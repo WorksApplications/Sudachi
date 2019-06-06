@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public class GrammarImplTest {
     @Before
     public void setUp() {
         storage = ByteBuffer.allocate(allocateSize);
-        storage.putInt(0);      // dummy
-        
+        storage.putInt(0); // dummy
+
         int base = storage.position();
         buildPartOfSpeech();
         buildConnectTable();
@@ -53,35 +53,33 @@ public class GrammarImplTest {
 
     @Test
     public void getPartOfSpeechString() {
-        assertEquals(6, grammar.getPartOfSpeechString((short)0).size());
-        assertEquals("BOS/EOS", grammar.getPartOfSpeechString((short)0).get(0));
-        assertEquals("*", grammar.getPartOfSpeechString((short)0).get(5));
+        assertEquals(6, grammar.getPartOfSpeechString((short) 0).size());
+        assertEquals("BOS/EOS", grammar.getPartOfSpeechString((short) 0).get(0));
+        assertEquals("*", grammar.getPartOfSpeechString((short) 0).get(5));
 
-        assertEquals("一般", grammar.getPartOfSpeechString((short)1).get(1));
-        assertEquals("*", grammar.getPartOfSpeechString((short)1).get(5));
+        assertEquals("一般", grammar.getPartOfSpeechString((short) 1).get(1));
+        assertEquals("*", grammar.getPartOfSpeechString((short) 1).get(5));
 
-        assertEquals("五段-サ行", grammar.getPartOfSpeechString((short)2).get(4));
-        assertEquals("終止形-一般", grammar.getPartOfSpeechString((short)2).get(5));
+        assertEquals("五段-サ行", grammar.getPartOfSpeechString((short) 2).get(4));
+        assertEquals("終止形-一般", grammar.getPartOfSpeechString((short) 2).get(5));
     }
 
     @Test
     public void getPartOfSpeechId() {
-        assertEquals(0, grammar.getPartOfSpeechId(Arrays.asList("BOS/EOS",
-                                                                "*", "*", "*",
-                                                                "*", "*")));
+        assertEquals(0, grammar.getPartOfSpeechId(Arrays.asList("BOS/EOS", "*", "*", "*", "*", "*")));
     }
 
     @Test
     public void getConnectCost() {
-        assertEquals(0, grammar.getConnectCost((short)0, (short)0));
-        assertEquals(-100, grammar.getConnectCost((short)2, (short)1));
-        assertEquals(200, grammar.getConnectCost((short)1, (short)2));
+        assertEquals(0, grammar.getConnectCost((short) 0, (short) 0));
+        assertEquals(-100, grammar.getConnectCost((short) 2, (short) 1));
+        assertEquals(200, grammar.getConnectCost((short) 1, (short) 2));
     }
 
     @Test
     public void setConnectCost() {
-        grammar.setConnectCost((short)0, (short)0, (short)300);
-        assertEquals(300, grammar.getConnectCost((short)0, (short)0));
+        grammar.setConnectCost((short) 0, (short) 0, (short) 300);
+        assertEquals(300, grammar.getConnectCost((short) 0, (short) 0));
     }
 
     @Test
@@ -107,18 +105,18 @@ public class GrammarImplTest {
 
         assertEquals(8, grammar.getPartOfSpeechSize());
 
-        assertEquals(0, grammar.getConnectCost((short)0, (short)0));
-        assertEquals(-3361, grammar.getConnectCost((short)1, (short)1));
-        assertEquals(126, grammar.getConnectCost((short)3, (short)6));
-        assertEquals(1180, grammar.getConnectCost((short)7, (short)2));
-        assertEquals(3319, grammar.getConnectCost((short)5, (short)7));
+        assertEquals(0, grammar.getConnectCost((short) 0, (short) 0));
+        assertEquals(-3361, grammar.getConnectCost((short) 1, (short) 1));
+        assertEquals(126, grammar.getConnectCost((short) 3, (short) 6));
+        assertEquals(1180, grammar.getConnectCost((short) 7, (short) 2));
+        assertEquals(3319, grammar.getConnectCost((short) 5, (short) 7));
         assertEquals(470, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {
-        storage.putShort((short)3); // # of part of speech
+        storage.putShort((short) 3); // # of part of speech
 
-        storage.put((byte)7);
+        storage.put((byte) 7);
         storage.putChar('B');
         storage.putChar('O');
         storage.putChar('S');
@@ -126,50 +124,49 @@ public class GrammarImplTest {
         storage.putChar('E');
         storage.putChar('O');
         storage.putChar('S');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
 
-        storage.put((byte)2);
+        storage.put((byte) 2);
         storage.putChar('名');
         storage.putChar('詞');
-        storage.put((byte)2);
+        storage.put((byte) 2);
         storage.putChar('一');
         storage.putChar('般');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
 
-
-        storage.put((byte)2);
+        storage.put((byte) 2);
         storage.putChar('動');
         storage.putChar('詞');
-        storage.put((byte)2);
+        storage.put((byte) 2);
         storage.putChar('一');
         storage.putChar('般');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)1);
+        storage.put((byte) 1);
         storage.putChar('*');
-        storage.put((byte)5);
+        storage.put((byte) 5);
         storage.putChar('五');
         storage.putChar('段');
         storage.putChar('-');
         storage.putChar('サ');
         storage.putChar('行');
-        storage.put((byte)6);
+        storage.put((byte) 6);
         storage.putChar('終');
         storage.putChar('止');
         storage.putChar('形');
@@ -179,19 +176,19 @@ public class GrammarImplTest {
     }
 
     void buildConnectTable() {
-        storage.putShort((short)3); // # of leftId
-        storage.putShort((short)3); // # of rightId
-        
-        storage.putShort((short)0);    // # of rightId
-        storage.putShort((short)-300); // # of rightId
-        storage.putShort((short)3000); // # of rightId
+        storage.putShort((short) 3); // # of leftId
+        storage.putShort((short) 3); // # of rightId
 
-        storage.putShort((short)300);  // # of rightId
-        storage.putShort((short)-500); // # of rightId
-        storage.putShort((short)-100); // # of rightId
+        storage.putShort((short) 0); // # of rightId
+        storage.putShort((short) -300); // # of rightId
+        storage.putShort((short) 3000); // # of rightId
 
-        storage.putShort((short)-3000); // # of rightId
-        storage.putShort((short)200);   // # of rightId
-        storage.putShort((short)2000);  // # of rightId
+        storage.putShort((short) 300); // # of rightId
+        storage.putShort((short) -500); // # of rightId
+        storage.putShort((short) -100); // # of rightId
+
+        storage.putShort((short) -3000); // # of rightId
+        storage.putShort((short) 200); // # of rightId
+        storage.putShort((short) 2000); // # of rightId
     }
 }

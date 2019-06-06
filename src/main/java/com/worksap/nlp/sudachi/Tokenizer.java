@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ public interface Tokenizer {
     /**
      * Tokenize a text.
      *
-     * This method tokenizes a input text as a sentence.
-     * When the text is long, it required a lot of memory.
+     * This method tokenizes a input text as a sentence. When the text is long, it
+     * required a lot of memory.
      *
-     * @param mode a mode of splitting
-     * @param text input text
-     * @return  a result of tokenizing
+     * @param mode
+     *            a mode of splitting
+     * @param text
+     *            input text
+     * @return a result of tokenizing
      */
     public List<Morpheme> tokenize(SplitMode mode, String text);
 
@@ -41,8 +43,9 @@ public interface Tokenizer {
      *
      * Tokenize a text with {@link SplitMode}.C.
      *
-     * @param text input text
-     * @return  a result of tokenizing
+     * @param text
+     *            input text
+     * @return a result of tokenizing
      * @see #tokenize(SplitMode,String)
      */
     public default List<Morpheme> tokenize(String text) {
@@ -52,7 +55,8 @@ public interface Tokenizer {
     /**
      * Prints a lattice structure of analyzing.
      *
-     * @param output an output of printing
+     * @param output
+     *            an output of printing
      */
     public void setDumpOutput(PrintStream output);
 

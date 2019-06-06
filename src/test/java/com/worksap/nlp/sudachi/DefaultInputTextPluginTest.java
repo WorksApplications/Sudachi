@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,29 +33,27 @@ import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class DefaultInputTextPluginTest {
-    
+
     // U+2F3C '⼼' should not be normalized to U+5FC3 '心'
-    // 'Ⅲ' should not be normalized to 'III' but should be lower case 'ⅲ' 
+    // 'Ⅲ' should not be normalized to 'III' but should be lower case 'ⅲ'
     static final String ORIGINAL_TEXT = "ÂＢΓД㈱ｶﾞウ゛⼼Ⅲ";
     static final String NORMALIZED_TEXT = "âbγд(株)ガヴ⼼ⅲ";
     UTF8InputTextBuilder builder;
     UTF8InputText text;
     DefaultInputTextPlugin plugin;
-    
+
     @Before
     public void setUp() {
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin = new DefaultInputTextPlugin();
         try {
-            plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-                .getResource("rewrite.def").getPath();
+            plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite.def").getPath();
             plugin.setUp();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
-    
+
     @Test
     public void beforeRewrite() {
         assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
@@ -65,18 +63,11 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getText(), is(ORIGINAL_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(30));
-        assertArrayEquals(
-            new byte[] {
-                (byte)0xC3, (byte)0x82, (byte)0xEF, (byte)0xBC,
-                (byte)0xA2, (byte)0xCE, (byte)0x93, (byte)0xD0,
-                (byte)0x94, (byte)0xE3, (byte)0x88, (byte)0xB1,
-                (byte)0xEF, (byte)0xBD, (byte)0xB6, (byte)0xEF,
-                (byte)0xBE, (byte)0x9E, (byte)0xE3, (byte)0x82,
-                (byte)0xA6, (byte)0xE3, (byte)0x82, (byte)0x9B,
-                (byte)0xE2, (byte)0xBC, (byte)0xBC, (byte)0xE2,
-                (byte)0x85, (byte)0xA2
-            }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xC3, (byte) 0x82, (byte) 0xEF, (byte) 0xBC, (byte) 0xA2, (byte) 0xCE,
+                (byte) 0x93, (byte) 0xD0, (byte) 0x94, (byte) 0xE3, (byte) 0x88, (byte) 0xB1, (byte) 0xEF, (byte) 0xBD,
+                (byte) 0xB6, (byte) 0xEF, (byte) 0xBE, (byte) 0x9E, (byte) 0xE3, (byte) 0x82, (byte) 0xA6, (byte) 0xE3,
+                (byte) 0x82, (byte) 0x9B, (byte) 0xE2, (byte) 0xBC, (byte) 0xBC, (byte) 0xE2, (byte) 0x85,
+                (byte) 0xA2 }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(1), is(0));
         assertThat(text.getOriginalIndex(2), is(1));
@@ -86,7 +77,7 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getOriginalIndex(24), is(9));
         assertThat(text.getOriginalIndex(26), is(9));
     }
-    
+
     @Test
     public void afterRewrite() {
         assertThat(builder.getOriginalText(), is(ORIGINAL_TEXT));
@@ -97,16 +88,10 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(24));
-        assertArrayEquals(
-            new byte[] {
-                (byte)0xC3, (byte)0xA2, (byte)0x62, (byte)0xCE,
-                (byte)0xB3, (byte)0xD0, (byte)0xB4, (byte)0x28,
-                (byte)0xE6, (byte)0xA0, (byte)0xAA, (byte)0x29,
-                (byte)0xE3, (byte)0x82, (byte)0xAC, (byte)0xE3,
-                (byte)0x83, (byte)0xB4, (byte)0xE2, (byte)0xBC,
-                (byte)0xBC, (byte)0xE2, (byte)0x85, (byte)0xB2
-            }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xC3, (byte) 0xA2, (byte) 0x62, (byte) 0xCE, (byte) 0xB3, (byte) 0xD0,
+                (byte) 0xB4, (byte) 0x28, (byte) 0xE6, (byte) 0xA0, (byte) 0xAA, (byte) 0x29, (byte) 0xE3, (byte) 0x82,
+                (byte) 0xAC, (byte) 0xE3, (byte) 0x83, (byte) 0xB4, (byte) 0xE2, (byte) 0xBC, (byte) 0xBC, (byte) 0xE2,
+                (byte) 0x85, (byte) 0xB2 }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(1), is(0));
         assertThat(text.getOriginalIndex(2), is(1));
@@ -116,7 +101,7 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getOriginalIndex(15), is(7));
         assertThat(text.getOriginalIndex(17), is(7));
     }
-    
+
     @Test
     public void setUpWithNull() throws IOException {
         plugin = new DefaultInputTextPlugin();
@@ -129,7 +114,7 @@ public class DefaultInputTextPluginTest {
     public void invalidFormatOfIgnoreList() throws IOException {
         plugin = new DefaultInputTextPlugin();
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-            .getResource("rewrite_error_ignorelist.def").getPath();
+                .getResource("rewrite_error_ignorelist.def").getPath();
         plugin.setUp();
     }
 
@@ -137,15 +122,15 @@ public class DefaultInputTextPluginTest {
     public void invalidFormatOfReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-            .getResource("rewrite_error_replacelist.def").getPath();
+                .getResource("rewrite_error_replacelist.def").getPath();
         plugin.setUp();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void duplicatedLinesInReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-            .getResource("rewrite_error_dup.def").getPath();
+        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite_error_dup.def")
+                .getPath();
         plugin.setUp();
     }
 
@@ -154,40 +139,48 @@ public class DefaultInputTextPluginTest {
         public int getPartOfSpeechSize() {
             return 0;
         }
+
         @Override
         public List<String> getPartOfSpeechString(short posId) {
             return null;
         }
+
         @Override
         public short getPartOfSpeechId(List<String> pos) {
             return 0;
         }
+
         @Override
         public short getConnectCost(short leftId, short rightId) {
             return 0;
         }
+
         @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {}
+        public void setConnectCost(short leftId, short rightId, short cost) {
+        }
+
         @Override
         public short[] getBOSParameter() {
             return null;
         }
+
         @Override
         public short[] getEOSParameter() {
             return null;
         }
+
         @Override
         public CharacterCategory getCharacterCategory() {
             CharacterCategory charCategory = new CharacterCategory();
             try {
-                charCategory.readCharacterDefinition(DefaultInputTextPluginTest.class.getClassLoader()
-                    .getResource("char.def").getPath());
-            }
-            catch (IOException ex) {
+                charCategory.readCharacterDefinition(
+                        DefaultInputTextPluginTest.class.getClassLoader().getResource("char.def").getPath());
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
             return charCategory;
         }
+
         @Override
         public void setCharacterCategory(CharacterCategory charCategory) {
         }

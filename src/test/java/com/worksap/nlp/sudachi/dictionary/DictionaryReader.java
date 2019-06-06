@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class DictionaryReader {
         InputStream input = DictionaryReader.class.getResourceAsStream(filename);
         ArrayList<Byte> buffer = new ArrayList<>();
         for (int c = input.read(); c >= 0; c = input.read()) {
-            buffer.add((byte)c);
+            buffer.add((byte) c);
         }
         ByteBuffer bytes = ByteBuffer.allocate(buffer.size());
         bytes.order(ByteOrder.LITTLE_ENDIAN);

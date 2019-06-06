@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ public class UserDictionaryTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(),
-                           "/system.dic", "/user.dic", "/user2.dic");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/user2.dic");
         path = temporaryFolder.getRoot().getPath();
     }
 
@@ -54,8 +53,7 @@ public class UserDictionaryTest {
             userDicts.add(USER_DICT);
         }
         userDicts.add(USER_DICT2);
-        String settings = COMMON_SETTINGS
-            + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
+        String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
 
         Dictionary dict = new DictionaryFactory().create(path, settings);
         Tokenizer tokenizer = dict.create();
@@ -72,15 +70,13 @@ public class UserDictionaryTest {
         for (int i = 0; i < 16; i++) {
             userDicts.add(USER_DICT);
         }
-        String settings = COMMON_SETTINGS
-            + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
+        String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
         Dictionary dict = new DictionaryFactory().create(path, settings);
     }
 
     @Test
     public void splitForUserDict() throws IOException {
-        String settings = COMMON_SETTINGS + USER_DICT2
-            + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
+        String settings = COMMON_SETTINGS + USER_DICT2 + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
         Dictionary dict = new DictionaryFactory().create(path, settings);
         Tokenizer tokenizer = dict.create();
         List<Morpheme> morphs = tokenizer.tokenize("東京府");

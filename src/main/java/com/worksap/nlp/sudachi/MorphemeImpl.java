@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,14 @@ class MorphemeImpl implements Morpheme {
     }
 
     @Override
-    public int begin() { return list.getBegin(index); }
+    public int begin() {
+        return list.getBegin(index);
+    }
 
     @Override
-    public int end() { return list.getEnd(index); }
+    public int end() {
+        return list.getEnd(index);
+    }
 
     @Override
     public String surface() {
@@ -82,7 +86,7 @@ class MorphemeImpl implements Morpheme {
     public boolean isOOV() {
         return list.isOOV(index);
     }
-    
+
     @Override
     public int getWordId() {
         return list.getWordId(index);

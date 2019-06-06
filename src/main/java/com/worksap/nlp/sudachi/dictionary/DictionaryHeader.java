@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,9 @@ public class DictionaryHeader {
      * Returns the version of the dictionary.
      *
      * The version is {@link DictionaryVersion#SYSTEM_DICT_VERSION} or
-     * {@link DictionaryVersion#USER_DICT_VERSION}.
-     * If the file is not a dictionary, returns an other value.
+     * {@link DictionaryVersion#USER_DICT_VERSION}. If the file is not a dictionary,
+     * returns an other value.
+     * 
      * @return the version of the dictionary
      */
     public long getVersion() {
@@ -95,8 +96,7 @@ public class DictionaryHeader {
     }
 
     /**
-     * Returns the description of the dictionary which is specified at
-     * creating.
+     * Returns the description of the dictionary which is specified at creating.
      *
      * @return the description of the dictionary
      */

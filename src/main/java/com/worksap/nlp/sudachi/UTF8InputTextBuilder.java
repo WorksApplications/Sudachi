@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ class UTF8InputTextBuilder implements InputTextBuilder {
     private final String originalText;
     private StringBuilder modifiedText;
     private List<Integer> textOffsets;
-    
+
     private final Grammar grammar;
-    
+
     public UTF8InputTextBuilder(String text, Grammar grammar) {
         this.grammar = grammar;
-        
+
         originalText = text;
         modifiedText = new StringBuilder(text);
         textOffsets = new ArrayList<>(modifiedText.length() + 1);
@@ -48,7 +48,7 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         }
         textOffsets.add(originalText.length());
     }
-    
+
     @Override
     public void replace(int begin, int end, String str) {
         if (begin < 0) {
@@ -63,11 +63,11 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         if (begin == end) {
             throw new IllegalArgumentException("begin == end");
         }
-        
+
         if (end > modifiedText.length()) {
             end = modifiedText.length();
         }
-        
+
         modifiedText.replace(begin, end, str);
 
         int offset = textOffsets.get(begin);
@@ -83,17 +83,17 @@ class UTF8InputTextBuilder implements InputTextBuilder {
             }
         }
     }
-    
+
     @Override
     public String getOriginalText() {
         return originalText;
     }
-    
+
     @Override
     public String getText() {
         return modifiedText.toString();
     }
-    
+
     @Override
     public UTF8InputText build() {
         String modifiedStringText = getText();
@@ -115,18 +115,14 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         byteIndexes[length] = modifiedStringText.length();
         offsets[length] = textOffsets.get(textOffsets.size() - 1);
 
-        List<EnumSet<CategoryType>> charCategories
-            = getCharCategoryTypes(modifiedStringText);
-        List<Integer> charCategoryContinuities
-            = getCharCategoryContinuities(modifiedStringText, length, charCategories);
+        List<EnumSet<CategoryType>> charCategories = getCharCategoryTypes(modifiedStringText);
+        List<Integer> charCategoryContinuities = getCharCategoryContinuities(modifiedStringText, length,
+                charCategories);
         List<Boolean> canBowList = buildCanBowList(modifiedStringText, charCategories);
 
-        return new UTF8InputText(grammar, originalText, modifiedStringText, byteText,
-                                 offsets,
-                                 byteIndexes,
-            Collections.unmodifiableList(charCategories),
-            Collections.unmodifiableList(charCategoryContinuities),
-            Collections.unmodifiableList(canBowList));
+        return new UTF8InputText(grammar, originalText, modifiedStringText, byteText, offsets, byteIndexes,
+                Collections.unmodifiableList(charCategories), Collections.unmodifiableList(charCategoryContinuities),
+                Collections.unmodifiableList(canBowList));
     }
 
     private List<EnumSet<CategoryType>> getCharCategoryTypes(String text) {
@@ -140,21 +136,19 @@ class UTF8InputTextBuilder implements InputTextBuilder {
                 charCategoryTypes.add(types);
                 continue;
             }
-            types = grammar.getCharacterCategory()
-                .getCategoryTypes(text.codePointAt(i));
+            types = grammar.getCharacterCategory().getCategoryTypes(text.codePointAt(i));
             charCategoryTypes.add(types);
         }
         return charCategoryTypes;
     }
-    
-    private List<Integer> getCharCategoryContinuities(String text,
-                                                      int byteLength,
-                                                      List<EnumSet<CategoryType>> charCategories) {
+
+    private List<Integer> getCharCategoryContinuities(String text, int byteLength,
+            List<EnumSet<CategoryType>> charCategories) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
         List<Integer> charCategoryContinuities = new ArrayList<>(byteLength);
-        for (int i = 0; i < charCategories.size(); ) {
+        for (int i = 0; i < charCategories.size();) {
             int next = i + getCharCategoryContinuousLength(charCategories, i);
             int length = 0;
             for (int j = i; j < next; j = text.offsetByCodePoints(j, 1)) {
@@ -167,11 +161,10 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         }
         return charCategoryContinuities;
     }
-    
+
     private int getCharCategoryContinuousLength(List<EnumSet<CategoryType>> charCategories, int offset) {
         int length;
-        Set<CategoryType> continuousCategory
-            = charCategories.get(offset).clone();
+        Set<CategoryType> continuousCategory = charCategories.get(offset).clone();
         for (length = 1; length < charCategories.size() - offset; length++) {
             continuousCategory.retainAll(charCategories.get(offset + length));
             if (continuousCategory.isEmpty()) {
@@ -180,9 +173,8 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         }
         return length;
     }
-    
-    private List<Boolean> buildCanBowList(String text,
-                                          List<EnumSet<CategoryType>> charCategories) {
+
+    private List<Boolean> buildCanBowList(String text, List<EnumSet<CategoryType>> charCategories) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
@@ -199,9 +191,8 @@ class UTF8InputTextBuilder implements InputTextBuilder {
             }
 
             EnumSet<CategoryType> types = charCategories.get(i).clone();
-            if (types.contains(CategoryType.ALPHA) ||
-                types.contains(CategoryType.GREEK) ||
-                types.contains(CategoryType.CYRILLIC)) {
+            if (types.contains(CategoryType.ALPHA) || types.contains(CategoryType.GREEK)
+                    || types.contains(CategoryType.CYRILLIC)) {
                 types.retainAll(charCategories.get(i - 1));
                 canBowList.add(types.isEmpty());
                 continue;

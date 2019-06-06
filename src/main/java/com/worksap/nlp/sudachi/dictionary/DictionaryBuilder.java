@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import java.util.regex.Pattern;
 import com.worksap.nlp.dartsclone.DoubleArray;
 
 /**
- * A dictionary building tool. This class provide the converter
- * from the source file in the CSV format to the binary format.
+ * A dictionary building tool. This class provide the converter from the source
+ * file in the CSV format to the binary format.
  */
 public class DictionaryBuilder {
 
@@ -57,24 +57,25 @@ public class DictionaryBuilder {
                 id = table.size();
                 table.add(s);
             }
-            return (short)id;
+            return (short) id;
         }
 
-        List<String> getList() { return table; }
+        List<String> getList() {
+            return table;
+        }
     }
 
     POSTable posTable = new POSTable();
-    SortedMap<byte[], List<Integer>> trieKeys
-        = new TreeMap<>((byte[] l, byte[] r) -> {
-                int llen = l.length;
-                int rlen = r.length;
-                for (int i = 0; i < Math.min(llen, rlen); i++) {
-                    if (l[i] != r[i]) {
-                        return (l[i] & 0xff) - (r[i] & 0xff);
-                    }
-                }
-                return l.length - r.length;
-            });
+    SortedMap<byte[], List<Integer>> trieKeys = new TreeMap<>((byte[] l, byte[] r) -> {
+        int llen = l.length;
+        int rlen = r.length;
+        for (int i = 0; i < Math.min(llen, rlen); i++) {
+            if (l[i] != r[i]) {
+                return (l[i] & 0xff) - (r[i] & 0xff);
+            }
+        }
+        return l.length - r.length;
+    });
     List<Short[]> params = new ArrayList<>();
     List<WordInfo> wordInfos = new ArrayList<>();
 
@@ -89,18 +90,17 @@ public class DictionaryBuilder {
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    void build(List<String> lexiconPaths, FileInputStream matrixInput,
-               FileOutputStream output) throws IOException {
+    void build(List<String> lexiconPaths, FileInputStream matrixInput, FileOutputStream output) throws IOException {
         System.err.print("reading the source file...");
         wordId = 0;
         for (String path : lexiconPaths) {
-            try(FileInputStream lexiconInput = new FileInputStream(path)) {
+            try (FileInputStream lexiconInput = new FileInputStream(path)) {
                 buildLexicon(path, lexiconInput);
             }
         }
         wordSize = wordId;
         System.err.println(String.format(" %,d words", wordSize));
-        
+
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
         writeLexicon(outputChannel);
@@ -110,8 +110,8 @@ public class DictionaryBuilder {
     void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
         int lineno = -1;
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
-             LineNumberReader reader = new LineNumberReader(isr)) {
-            for (; ; wordId++) {
+                LineNumberReader reader = new LineNumberReader(isr)) {
+            for (;; wordId++) {
                 String line = reader.readLine();
                 if (line == null) {
                     break;
@@ -126,10 +126,8 @@ public class DictionaryBuilder {
                     cols[i] = decode(cols[i]);
                 }
 
-                if (cols[0].getBytes(StandardCharsets.UTF_8).length > STRING_MAX_LENGTH
-                    || !isValidLength(cols[4])
-                    || !isValidLength(cols[11])
-                    || !isValidLength(cols[12])) {
+                if (cols[0].getBytes(StandardCharsets.UTF_8).length > STRING_MAX_LENGTH || !isValidLength(cols[4])
+                        || !isValidLength(cols[11]) || !isValidLength(cols[12])) {
                     throw new IllegalArgumentException("string is too long");
                 }
 
@@ -145,12 +143,10 @@ public class DictionaryBuilder {
                     trieKeys.get(key).add(wordId);
                     // left-id, right-id, cost
                 }
-                params.add(new Short[] { Short.parseShort(cols[1]),
-                                         Short.parseShort(cols[2]),
-                                         Short.parseShort(cols[3]) });
+                params.add(new Short[] { Short.parseShort(cols[1]), Short.parseShort(cols[2]),
+                        Short.parseShort(cols[3]) });
 
-                short posId = getPosId(cols[5], cols[6], cols[7],
-                                       cols[8], cols[9], cols[10]);
+                short posId = getPosId(cols[5], cols[6], cols[7], cols[8], cols[9], cols[10]);
                 if (posId < 0) {
                     throw new IllegalArgumentException("invalid part of speech");
                 }
@@ -161,18 +157,13 @@ public class DictionaryBuilder {
                     throw new IllegalArgumentException("invalid splitting");
                 }
 
-                WordInfo info
-                    = new WordInfo(cols[4], // headword
-                                   (short)cols[0].getBytes(StandardCharsets.UTF_8).length,
-                                   posId,
-                                   cols[12], // normalizedForm
-                                   (cols[13].equals("*") ? -1 :Integer.parseInt(cols[13])), // dictionaryFormWordId
-                                   "", // dummy
-                                   cols[11], // readingForm
-                                   aUnitSplit,
-                                   bUnitSplit,
-                                   parseSplitInfo(cols[17]) // wordStructure
-                                   );
+                WordInfo info = new WordInfo(cols[4], // headword
+                        (short) cols[0].getBytes(StandardCharsets.UTF_8).length, posId, cols[12], // normalizedForm
+                        (cols[13].equals("*") ? -1 : Integer.parseInt(cols[13])), // dictionaryFormWordId
+                        "", // dummy
+                        cols[11], // readingForm
+                        aUnitSplit, bUnitSplit, parseSplitInfo(cols[17]) // wordStructure
+                );
                 wordInfos.add(info);
             }
         } catch (Exception e) {
@@ -187,13 +178,12 @@ public class DictionaryBuilder {
         return posTable.getId(String.join(",", posStrings));
     }
 
-    void writeGrammar(FileInputStream matrixInput,
-                      FileChannel output) throws IOException {
+    void writeGrammar(FileInputStream matrixInput, FileChannel output) throws IOException {
 
         System.err.print("writing the POS table...");
 
         List<String> posList = posTable.getList();
-        buffer.putShort((short)posList.size());
+        buffer.putShort((short) posList.size());
 
         for (String pos : posList) {
             for (String text : pos.split(",")) {
@@ -205,8 +195,7 @@ public class DictionaryBuilder {
         System.err.println(String.format(" %,d bytes", buffer.limit()));
         buffer.clear();
 
-        LineNumberReader reader
-            = new LineNumberReader(new InputStreamReader(matrixInput));
+        LineNumberReader reader = new LineNumberReader(new InputStreamReader(matrixInput));
         String header = reader.readLine();
         if (header == null) {
             throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
@@ -237,8 +226,7 @@ public class DictionaryBuilder {
             }
             String[] cols = line.split("\\s+");
             if (cols.length < 3) {
-                System.err.println("invalid format at line "
-                                   + reader.getLineNumber());
+                System.err.println("invalid format at line " + reader.getLineNumber());
                 continue;
             }
             short left = Short.parseShort(cols[0]);
@@ -267,17 +255,18 @@ public class DictionaryBuilder {
             values[i] = wordIdTable.position();
             i++;
             List<Integer> wordIds = entry.getValue();
-            wordIdTable.put((byte)wordIds.size());
+            wordIdTable.put((byte) wordIds.size());
             for (int wid : wordIds) {
                 wordIdTable.putInt(wid);
             }
         }
 
         System.err.print("building the trie");
-        trie.build(keys, values,
-                   (n, s) -> { if (n % ((s / 10) + 1) == 0) {
-                       System.err.print(".");
-                   }});
+        trie.build(keys, values, (n, s) -> {
+            if (n % ((s / 10) + 1) == 0) {
+                System.err.print(".");
+            }
+        });
         System.err.println("done");
 
         System.err.print("writing the trie...");
@@ -304,7 +293,7 @@ public class DictionaryBuilder {
 
         System.err.print("writing the word parameters...");
         buffer.putInt(params.size());
-        for(Short[] param : params) {
+        for (Short[] param : params) {
             buffer.putShort(param[0]);
             buffer.putShort(param[1]);
             buffer.putShort(param[2]);
@@ -320,14 +309,14 @@ public class DictionaryBuilder {
     void writeWordInfo(FileChannel output) throws IOException {
         long mark = output.position();
         output.position(mark + 4 * wordInfos.size());
-        
+
         ByteBuffer offsets = ByteBuffer.allocate(4 * wordInfos.size());
         offsets.order(ByteOrder.LITTLE_ENDIAN);
 
         System.err.print("writing the wordInfos...");
         long base = output.position();
         for (WordInfo wi : wordInfos) {
-            offsets.putInt((int)output.position());
+            offsets.putInt((int) output.position());
 
             writeString(wi.getSurface());
             writeStringLength(wi.getLength());
@@ -364,6 +353,7 @@ public class DictionaryBuilder {
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
+
     static String decode(String text) {
         Matcher m = unicodeLiteral.matcher(text);
         if (!m.find()) {
@@ -406,7 +396,7 @@ public class DictionaryBuilder {
     }
 
     void writeString(String text) {
-        writeStringLength((short)text.length());
+        writeStringLength((short) text.length());
         for (int i = 0; i < text.length(); i++) {
             buffer.putChar(text.charAt(i));
         }
@@ -414,15 +404,15 @@ public class DictionaryBuilder {
 
     void writeStringLength(short length) {
         if (length <= Byte.MAX_VALUE) {
-            buffer.put((byte)length);
+            buffer.put((byte) length);
         } else {
-            buffer.put((byte)((length >> 8) | 0x80));
-            buffer.put((byte)(length & 0xFF));
+            buffer.put((byte) ((length >> 8) | 0x80));
+            buffer.put((byte) (length & 0xFF));
         }
     }
 
     void writeIntArray(int[] array) {
-        buffer.put((byte)array.length);
+        buffer.put((byte) array.length);
         for (int i : array) {
             buffer.putInt(i);
         }
@@ -441,14 +431,17 @@ public class DictionaryBuilder {
      * This tool requires three arguments.
      * <ol start="0">
      * <li>{@code -o file} the path of the output file</li>
-     * <li>{@code -m file} the path of the connection matrix file
-     *     in MeCab's matrix.def format</li>
-     * <li>{@code -d string}
-     *     (optional) the description which is embedded in the dictionary</li>
+     * <li>{@code -m file} the path of the connection matrix file in MeCab's
+     * matrix.def format</li>
+     * <li>{@code -d string} (optional) the description which is embedded in the
+     * dictionary</li>
      * <li>the paths of the source files in the CSV format</li>
      * </ol>
-     * @param args the options and input filenames
-     * @throws IOException if IO or parsing is failed
+     * 
+     * @param args
+     *            the options and input filenames
+     * @throws IOException
+     *             if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
         String description = "";
@@ -478,13 +471,11 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DictionaryHeader header
-            = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION,
-                                   Instant.now().getEpochSecond(),
-                                   description);
+        DictionaryHeader header = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION,
+                Instant.now().getEpochSecond(), description);
 
         try (FileInputStream matrixInput = new FileInputStream(matrixPath);
-             FileOutputStream output = new FileOutputStream(outputPath)) {
+                FileOutputStream output = new FileOutputStream(outputPath)) {
 
             output.write(header.toByte());
 

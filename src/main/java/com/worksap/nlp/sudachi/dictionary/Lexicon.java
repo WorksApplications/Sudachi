@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ public interface Lexicon {
     /**
      * Returns the left-ID of the morpheme specified by the word ID.
      *
-     * <p>when the word ID is out of range, the behavior is undefined.
+     * <p>
+     * when the word ID is out of range, the behavior is undefined.
      *
-     * @param wordId the word ID of the morpheme
+     * @param wordId
+     *            the word ID of the morpheme
      * @return the left-ID of the morpheme
      */
     short getLeftId(int wordId);
@@ -38,20 +40,23 @@ public interface Lexicon {
     /**
      * Returns the right-ID of the morpheme specified by the word ID.
      *
-     * <p>when the word ID is out of range, the behavior is undefined.
+     * <p>
+     * when the word ID is out of range, the behavior is undefined.
      *
-     * @param wordId the word ID of the morpheme
+     * @param wordId
+     *            the word ID of the morpheme
      * @return the right-ID of the morpheme.
      */
     short getRightId(int wordId);
 
     /**
-     * Returns the word occurrence cost of the morpheme specified
-     * by the word ID.
+     * Returns the word occurrence cost of the morpheme specified by the word ID.
      *
-     * <p>when the word ID is out of range, the behavior is undefined.
+     * <p>
+     * when the word ID is out of range, the behavior is undefined.
      *
-     * @param wordId the word ID of the morpheme
+     * @param wordId
+     *            the word ID of the morpheme
      * @return the word occurrence cost
      */
     short getCost(int wordId);
@@ -59,21 +64,24 @@ public interface Lexicon {
     /**
      * Returns the informations of the morpheme specified by the word ID.
      *
-     * <p>when the word ID is out of range, the behavior is undefined.
+     * <p>
+     * when the word ID is out of range, the behavior is undefined.
      *
-     * @param wordId the word ID of the morpheme
+     * @param wordId
+     *            the word ID of the morpheme
      * @return the informations of the morpheme
      * @see WordInfo
      */
     WordInfo getWordInfo(int wordId);
 
     /**
-     * Returns the ID of the dictionary containing the morpheme
-     * specified by the word ID.
+     * Returns the ID of the dictionary containing the morpheme specified by the
+     * word ID.
      *
      * If the morpheme is in the system dictionary, it returns {@code 0}.
      *
-     * @param wordId the word ID of the morpheme
+     * @param wordId
+     *            the word ID of the morpheme
      * @return the dictionary ID
      */
     int getDictionaryId(int wordId);

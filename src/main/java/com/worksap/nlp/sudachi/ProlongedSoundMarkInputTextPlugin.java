@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,43 @@
 
 package com.worksap.nlp.sudachi;
 
-        import java.io.IOException;
-        import java.util.HashSet;
-        import java.util.Set;
-        import java.util.List;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.List;
 
 /**
- * A plugin that rewrites the Katakana-Hiragana Prolonged Sound Mark (Chōonpu) and similar symbols.
+ * A plugin that rewrites the Katakana-Hiragana Prolonged Sound Mark (Chōonpu)
+ * and similar symbols.
  *
- * <p>This plugin combines the continuous sequence of prolonged sound marks to 1 character.
+ * <p>
+ * This plugin combines the continuous sequence of prolonged sound marks to 1
+ * character.
  *
- * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be referred as {@link Plugin#settings}.
+ * <p>
+ * {@link Dictionary} initialize this plugin with {@link Settings}. It can be
+ * referred as {@link Plugin#settings}.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
         "prolongedSoundMarks": ["ー", "〜", "〰"],
         "replacementSymbol": "ー"
  *   }
- * }</pre>
+ * }
+ * </pre>
  *
  * {@code prolongedSoundMarks} is the list of symbols to be combined.
- * {@code replacementSymbol} is the symbol for replacement, after combining prolonged sound mark sequences.
+ * {@code replacementSymbol} is the symbol for replacement, after combining
+ * prolonged sound mark sequences.
  *
- * <p>With above setting example, the plugin rewrites input "エーービ〜〜〜シ〰〰〰〰" to "エービーシー".
+ * <p>
+ * With above setting example, the plugin rewrites input "エーービ〜〜〜シ〰〰〰〰" to
+ * "エービーシー".
  */
 class ProlongedSoundMarkInputTextPlugin extends InputTextPlugin {
 
@@ -70,17 +81,16 @@ class ProlongedSoundMarkInputTextPlugin extends InputTextPlugin {
             if (!isProlongedSoundMark && prolongedSoundMarkSet.contains(cp)) {
                 isProlongedSoundMark = true;
                 markStartIndex = i;
-            }
-            else if (isProlongedSoundMark && !prolongedSoundMarkSet.contains(cp)) {
+            } else if (isProlongedSoundMark && !prolongedSoundMarkSet.contains(cp)) {
                 if ((i - markStartIndex) > 1) {
-                    builder.replace(markStartIndex-offset, i-offset, replacementSymbol);
+                    builder.replace(markStartIndex - offset, i - offset, replacementSymbol);
                     offset += i - markStartIndex - 1;
                 }
                 isProlongedSoundMark = false;
             }
         }
         if (isProlongedSoundMark && (n - markStartIndex) > 1) {
-            builder.replace(markStartIndex-offset, n-offset, replacementSymbol);
+            builder.replace(markStartIndex - offset, n - offset, replacementSymbol);
         }
     }
 }

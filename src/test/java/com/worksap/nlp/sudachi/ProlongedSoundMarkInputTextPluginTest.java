@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class ProlongedSoundMarkInputTextPluginTest {
-    
+
     UTF8InputTextBuilder builder;
     UTF8InputText text;
     ProlongedSoundMarkInputTextPlugin plugin;
-    
+
     @Before
     public void setUp() throws IOException {
         plugin = new ProlongedSoundMarkInputTextPlugin();
@@ -53,12 +53,11 @@ public class ProlongedSoundMarkInputTextPluginTest {
 
         try {
             plugin.setUp();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
-    
+
     @Test
     public void combineContinuousProlongedSoundMarks() {
         final String ORIGINAL_TEXT = "ゴーール";
@@ -71,13 +70,8 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(9));
-        assertArrayEquals(
-                new byte[] {
-                        (byte)0xE3, (byte)0x82, (byte)0xB4, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                        (byte)0xAB
-                }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xB4, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
+                (byte) 0xE3, (byte) 0x83, (byte) 0xAB }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(3));
@@ -96,13 +90,8 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(12));
-        assertArrayEquals(
-                new byte[] {
-                        (byte)0xE3, (byte)0x82, (byte)0xB9, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                        (byte)0x91, (byte)0xE3, (byte)0x83, (byte)0xBC
-                }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xB9, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
+                (byte) 0xE3, (byte) 0x83, (byte) 0x91, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(2));
@@ -122,15 +111,9 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(18));
-        assertArrayEquals(
-                new byte[] {
-                        (byte)0xE3, (byte)0x82, (byte)0xA8, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                        (byte)0x93, (byte)0xE3, (byte)0x83, (byte)0xBC,
-                        (byte)0xE3, (byte)0x82, (byte)0xB7, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC
-                }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
+                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
+                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(3));
@@ -152,15 +135,9 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(18));
-        assertArrayEquals(
-                new byte[] {
-                        (byte)0xE3, (byte)0x82, (byte)0xA8, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                        (byte)0x93, (byte)0xE3, (byte)0x83, (byte)0xBC,
-                        (byte)0xE3, (byte)0x82, (byte)0xB7, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC
-                }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
+                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
+                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(3));
@@ -182,15 +159,9 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
         assertThat(bytes.length, is(18));
-        assertArrayEquals(
-                new byte[] {
-                        (byte)0xE3, (byte)0x82, (byte)0xA8, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC, (byte)0xE3, (byte)0x83,
-                        (byte)0x93, (byte)0xE3, (byte)0x83, (byte)0xBC,
-                        (byte)0xE3, (byte)0x82, (byte)0xB7, (byte)0xE3,
-                        (byte)0x83, (byte)0xBC
-                }, bytes
-        );
+        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
+                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
+                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(3));
@@ -205,40 +176,48 @@ public class ProlongedSoundMarkInputTextPluginTest {
         public int getPartOfSpeechSize() {
             return 0;
         }
+
         @Override
         public List<String> getPartOfSpeechString(short posId) {
             return null;
         }
+
         @Override
         public short getPartOfSpeechId(List<String> pos) {
             return 0;
         }
+
         @Override
         public short getConnectCost(short leftId, short rightId) {
             return 0;
         }
+
         @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {}
+        public void setConnectCost(short leftId, short rightId, short cost) {
+        }
+
         @Override
         public short[] getBOSParameter() {
             return null;
         }
+
         @Override
         public short[] getEOSParameter() {
             return null;
         }
+
         @Override
         public CharacterCategory getCharacterCategory() {
             CharacterCategory charCategory = new CharacterCategory();
             try {
-                charCategory.readCharacterDefinition(DefaultInputTextPluginTest.class.getClassLoader()
-                    .getResource("char.def").getPath());
-            }
-            catch (IOException ex) {
+                charCategory.readCharacterDefinition(
+                        DefaultInputTextPluginTest.class.getClassLoader().getResource("char.def").getPath());
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
             return charCategory;
         }
+
         @Override
         public void setCharacterCategory(CharacterCategory charCategory) {
         }

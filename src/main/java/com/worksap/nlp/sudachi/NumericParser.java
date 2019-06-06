@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ class NumericParser {
         }
 
         private static char intToChar(int i) {
-            return (char)('0' + i);
+            return (char) ('0' + i);
         }
     }
 
@@ -154,7 +154,7 @@ class NumericParser {
     static {
         Map<Character, Integer> map = new HashMap<>();
         for (int i = 0; i < 10; i++) {
-            map.put((char)('0' + i), i);
+            map.put((char) ('0' + i), i);
         }
         map.put('〇', 0);
         map.put('一', 1);
@@ -265,7 +265,7 @@ class NumericParser {
         if (hasHangingPoint) {
             errorState = Error.POINT;
             return false;
-        } else if (hasComma && digitLength != 3){
+        } else if (hasComma && digitLength != 3) {
             errorState = Error.COMMA;
             return false;
         }

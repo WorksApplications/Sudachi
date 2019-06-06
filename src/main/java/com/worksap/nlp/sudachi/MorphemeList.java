@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     final Lexicon lexicon;
     final List<LatticeNode> path;
 
-    MorphemeList(InputText input,
-                 Grammar grammar,
-                 Lexicon lexicon,
-                 List<LatticeNode> path) {
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
@@ -48,7 +45,9 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     @Override
-    public int size() { return path.size(); }
+    public int size() {
+        return path.size();
+    }
 
     int getBegin(int index) {
         return inputText.getOriginalIndex(path.get(index).getBegin());
@@ -67,7 +66,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     WordInfo getWordInfo(int index) {
         return path.get(index).getWordInfo();
     }
-    
+
     List<Morpheme> split(Tokenizer.SplitMode mode, int index, WordInfo wi) {
         int[] wordIds;
         switch (mode) {
@@ -87,8 +86,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         int offset = path.get(index).getBegin();
         List<LatticeNode> nodes = new ArrayList<>(wordIds.length);
         for (int wid : wordIds) {
-            LatticeNodeImpl n
-                = new LatticeNodeImpl(lexicon, (short)0, (short)0, (short)0, wid);
+            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
             n.begin = offset;
             offset += n.getWordInfo().getLength();
             n.end = offset;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,24 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 /**
  * A plugin for concatenation of Katakana OOVs.
  *
- * This plugin concatenate the Katakana OOV and
- * the adjacent Katakana morphemes.
+ * This plugin concatenate the Katakana OOV and the adjacent Katakana morphemes.
  *
- * <p>The concatenated morpheme is OOV, and its part of speech
- * must be specified in the settings.
+ * <p>
+ * The concatenated morpheme is OOV, and its part of speech must be specified in
+ * the settings.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
  *     "oovPOS" : [ "POS1", "POS2", ... ],
  *     "minLength" : 3
  *   }
- * }</pre>
+ * }
+ * </pre>
  */
 class JoinKatakanaOovPlugin extends PathRewritePlugin {
 
@@ -64,10 +68,9 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
     public void rewrite(InputText text, List<LatticeNode> path, Lattice lattice) {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
-            if ((node.isOOV() || isShorter(minLength, text, node))
-                && isKatakanaNode(text, node)) {
+            if ((node.isOOV() || isShorter(minLength, text, node)) && isKatakanaNode(text, node)) {
                 int begin = i - 1;
-                for ( ; begin >= 0; begin--) {
+                for (; begin >= 0; begin--) {
                     if (!isKatakanaNode(text, path.get(begin))) {
                         begin++;
                         break;
@@ -77,7 +80,7 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
                     begin = 0;
                 }
                 int end = i + 1;
-                for ( ; end < path.size(); end++) {
+                for (; end < path.size(); end++) {
                     if (!isKatakanaNode(text, path.get(end))) {
                         break;
                     }

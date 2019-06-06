@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ public class DictionaryHeaderTest {
 
     @Test
     public void getDescription() {
-        assertEquals("the system dictionary for the unit tests",
-                     header.getDescription());
+        assertEquals("the system dictionary for the unit tests", header.getDescription());
     }
 }

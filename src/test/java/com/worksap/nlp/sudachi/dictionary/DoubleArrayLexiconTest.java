@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,29 +44,26 @@ public class DoubleArrayLexiconTest {
 
     @Test
     public void lookup() {
-        List<int[]> results
-            = iteratorToList(lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0));
+        List<int[]> results = iteratorToList(lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0));
 
         assertEquals(3, results.size());
         assertArrayEquals(new int[] { 4, 3 }, results.get(0)); // 東
         assertArrayEquals(new int[] { 5, 6 }, results.get(1)); // 東京
         assertArrayEquals(new int[] { 6, 9 }, results.get(2)); // 東京都
 
-        results
-            = iteratorToList(lexicon.lookup("東京都に".getBytes(StandardCharsets.UTF_8), 9));
+        results = iteratorToList(lexicon.lookup("東京都に".getBytes(StandardCharsets.UTF_8), 9));
         assertEquals(2, results.size());
         assertArrayEquals(new int[] { 1, 12 }, results.get(0)); // に(接続助詞)
         assertArrayEquals(new int[] { 2, 12 }, results.get(1)); // に(格助詞)
 
-        results
-            = iteratorToList(lexicon.lookup("あれ".getBytes(StandardCharsets.UTF_8), 0));
+        results = iteratorToList(lexicon.lookup("あれ".getBytes(StandardCharsets.UTF_8), 0));
         assertEquals(0, results.size());
     }
 
     @Test
     public void parameters() {
         // た
-        assertEquals(1, lexicon.getLeftId(0)); 
+        assertEquals(1, lexicon.getLeftId(0));
         assertEquals(1, lexicon.getRightId(0));
         assertEquals(8729, lexicon.getCost(0));
 

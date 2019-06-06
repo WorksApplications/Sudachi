@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class GrammarImpl implements Grammar {
     private int connectTableOffset;
     private final short leftIdSize;
     private final short rightIdSize;
-    
+
     private CharacterCategory charCategory;
 
     private int storageSize;
@@ -82,13 +82,12 @@ public class GrammarImpl implements Grammar {
 
     @Override
     public short getPartOfSpeechId(List<String> pos) {
-        return (short)posList.indexOf(pos);
+        return (short) posList.indexOf(pos);
     }
 
     @Override
     public short getConnectCost(short leftId, short rightId) {
-        return connectTableBytes.getShort(connectTableOffset + leftId * 2
-                                          + 2 * leftIdSize * rightId);
+        return connectTableBytes.getShort(connectTableOffset + leftId * 2 + 2 * leftIdSize * rightId);
     }
 
     @Override
@@ -96,15 +95,18 @@ public class GrammarImpl implements Grammar {
         if (!isCopiedConnectTable) {
             copyConnectTable();
         }
-        connectTableBytes.putShort(connectTableOffset + leftId * 2
-                                   + 2 * leftIdSize * rightId, cost);
+        connectTableBytes.putShort(connectTableOffset + leftId * 2 + 2 * leftIdSize * rightId, cost);
     }
 
     @Override
-    public short[] getBOSParameter() { return BOS_PARAMETER; }
+    public short[] getBOSParameter() {
+        return BOS_PARAMETER;
+    }
 
     @Override
-    public short[] getEOSParameter() { return EOS_PARAMETER; }
+    public short[] getEOSParameter() {
+        return EOS_PARAMETER;
+    }
 
     @Override
     public CharacterCategory getCharacterCategory() {
@@ -129,7 +131,7 @@ public class GrammarImpl implements Grammar {
         ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = connectTableBytes.duplicate();
-        ((Buffer)srcBuffer).position(connectTableOffset);
+        ((Buffer) srcBuffer).position(connectTableOffset);
         srcBuffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
         newBuffer.put(srcBuffer);
         connectTableBytes = newBuffer;
