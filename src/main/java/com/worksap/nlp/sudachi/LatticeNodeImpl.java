@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,10 @@ public class LatticeNodeImpl implements LatticeNode {
     Lexicon lexicon;
 
     static final String NULL_SURFACE = "(null)";
-    static final WordInfo UNDEFINED_WORDINFO
-        = new WordInfo(NULL_SURFACE, (short)0, (short)-1,
-                       NULL_SURFACE, NULL_SURFACE, NULL_SURFACE);
+    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(NULL_SURFACE, (short) 0, (short) -1, NULL_SURFACE,
+            NULL_SURFACE, NULL_SURFACE);
 
-    LatticeNodeImpl(Lexicon lexicon,
-                    short leftId, short rightId, short cost, int wordId) {
+    LatticeNodeImpl(Lexicon lexicon, short leftId, short rightId, short cost, int wordId) {
         this.lexicon = lexicon;
         this.leftId = leftId;
         this.rightId = rightId;
@@ -67,10 +65,14 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
-    public int getBegin() { return begin; }
+    public int getBegin() {
+        return begin;
+    }
 
     @Override
-    public int getEnd() { return end; }
+    public int getEnd() {
+        return end;
+    }
 
     @Override
     public void setRange(int begin, int end) {
@@ -79,10 +81,14 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
-    public boolean isOOV() { return isOOV; }
+    public boolean isOOV() {
+        return isOOV;
+    }
 
     @Override
-    public void setOOV() { isOOV = true; }
+    public void setOOV() {
+        isOOV = true;
+    }
 
     @Override
     public WordInfo getWordInfo() {
@@ -125,8 +131,7 @@ public class LatticeNodeImpl implements LatticeNode {
         String surface = wi.getSurface();
         short pos = wi.getPOSId();
 
-        return String.format("%d %d %s(%d) %d %d %d %d",
-                             getBegin(), getEnd(), surface, wordId,
-                             pos, leftId, rightId, cost);
+        return String.format("%d %d %s(%d) %d %d %d %d", getBegin(), getEnd(), surface, wordId, pos, leftId, rightId,
+                cost);
     }
 }

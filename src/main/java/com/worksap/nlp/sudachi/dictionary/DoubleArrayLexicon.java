@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class DoubleArrayLexicon implements Lexicon {
         trie = new DoubleArray();
         int size = bytes.getInt(offset);
         offset += 4;
-        ((Buffer)bytes).position(offset);
+        ((Buffer) bytes).position(offset);
         IntBuffer array = bytes.asIntBuffer();
         trie.setArray(array, size);
         offset += trie.totalSize();
@@ -55,20 +55,22 @@ public class DoubleArrayLexicon implements Lexicon {
     /**
      * Returns the word IDs obtained by common prefix search.
      *
-     * <p>The search begin with the position at the {@code offset}
-     * of the {@code text}.
+     * <p>
+     * The search begin with the position at the {@code offset} of the {@code text}.
      *
-     * <p>The return value is consist of the word ID and the length
-     * of the matched part.
+     * <p>
+     * The return value is consist of the word ID and the length of the matched
+     * part.
      * 
-     * @param text the key
-     * @param offset the offset of the key
+     * @param text
+     *            the key
+     * @param offset
+     *            the offset of the key
      * @return the iterator of results
      */
     @Override
     public Iterator<int[]> lookup(byte[] text, int offset) {
-        Iterator<int[]> iterator
-            = trie.commonPrefixSearch(text, offset);
+        Iterator<int[]> iterator = trie.commonPrefixSearch(text, offset);
         if (!iterator.hasNext()) {
             return iterator;
         }
@@ -107,7 +109,6 @@ public class DoubleArrayLexicon implements Lexicon {
         }
     }
 
-
     @Override
     public short getLeftId(int wordId) {
         return wordParams.getLeftId(wordId);
@@ -144,15 +145,14 @@ public class DoubleArrayLexicon implements Lexicon {
                 continue;
             }
             String surface = getWordInfo(wordId).getSurface();
-            MorphemeList ms = (MorphemeList)tokenizer.tokenize(surface);
-            int cost = ms.getInternalCost()
-                + USER_DICT_COST_PAR_MORPH * ms.size();
+            MorphemeList ms = (MorphemeList) tokenizer.tokenize(surface);
+            int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
             if (cost > Short.MAX_VALUE) {
                 cost = Short.MAX_VALUE;
             } else if (cost < Short.MIN_VALUE) {
                 cost = Short.MIN_VALUE;
             }
-            wordParams.setCost(wordId, (short)cost);
+            wordParams.setCost(wordId, (short) cost);
         }
     }
 }

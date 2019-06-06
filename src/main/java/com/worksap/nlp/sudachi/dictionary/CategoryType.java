@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ package com.worksap.nlp.sudachi.dictionary;
  * {@link com.worksap.nlp.sudachi.OovProviderPlugin} and
  * {@link com.worksap.nlp.sudachi.PathRewritePlugin}.
  *
- * <p>You can defined the range of each category in the file which 
- * specified "characterDefinitionFile" of the settings.
+ * <p>
+ * You can defined the range of each category in the file which specified
+ * "characterDefinitionFile" of the settings.
  */
 public enum CategoryType {
     /** The fall back category. */
@@ -76,14 +77,15 @@ public enum CategoryType {
     }
 
     /**
-     * Returns the category to which the specified ID is mapped,
-     * or {@code null} if there is no associated category.
+     * Returns the category to which the specified ID is mapped, or {@code null} if
+     * there is no associated category.
      *
-     * @param id the ID number of category
-     * @return the category to which the specified ID is mapped,
-     *         or {@code null} if there is no associated category.
+     * @param id
+     *            the ID number of category
+     * @return the category to which the specified ID is mapped, or {@code null} if
+     *         there is no associated category.
      */
-    public static CategoryType getType(int id)  {
+    public static CategoryType getType(int id) {
         for (CategoryType type : CategoryType.values()) {
             if (type.getId() == id) {
                 return type;

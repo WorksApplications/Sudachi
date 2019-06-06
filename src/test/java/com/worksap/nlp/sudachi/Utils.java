@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 class Utils {
-    static void copyResource(Path folder, String... files)
-        throws IOException {
+    static void copyResource(Path folder, String... files) throws IOException {
         for (String file : files) {
             try {
-            URL src = Utils.class.getResource(file);
-            Path dest = Paths.get(src.toURI()).getFileName();
-            Files.copy(src.openStream(), folder.resolve(dest));
+                URL src = Utils.class.getResource(file);
+                Path dest = Paths.get(src.toURI()).getFileName();
+                Files.copy(src.openStream(), folder.resolve(dest));
             } catch (URISyntaxException e) {
                 throw new IOException(e);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,18 @@ import java.util.List;
  * A classifier of the categories of characters.
  */
 public class CharacterCategory {
-    
+
     static class Range {
         int low;
         int high;
         EnumSet<CategoryType> categories = EnumSet.noneOf(CategoryType.class);
-        
+
         boolean contains(int cp) {
             return cp >= low && cp <= high;
         }
-        
+
         int containingLength(String text) {
-            for (int i = 0; i < text.length();
-                i = text.offsetByCodePoints(i, 1)) {
+            for (int i = 0; i < text.length(); i = text.offsetByCodePoints(i, 1)) {
                 int c = text.codePointAt(i);
                 if (c < low || c > high) {
                     return i;
@@ -51,19 +50,19 @@ public class CharacterCategory {
             return text.length();
         }
     }
-    
+
     private List<Range> rangeList = new ArrayList<>();
-    
+
     /**
-     * Returns the set of the category types of the character (Unicode
-     * code point).
+     * Returns the set of the category types of the character (Unicode code point).
      *
-     * @param codePoint the code point value of the character
+     * @param codePoint
+     *            the code point value of the character
      * @return the set of the category types of the character
      */
     public EnumSet<CategoryType> getCategoryTypes(int codePoint) {
         EnumSet<CategoryType> categories = EnumSet.noneOf(CategoryType.class);
-        for (Range range: rangeList) {
+        for (Range range : rangeList) {
             if (range.contains(codePoint)) {
                 categories.addAll(range.categories);
             }
@@ -74,31 +73,34 @@ public class CharacterCategory {
         }
         return categories;
     }
-    
+
     /**
-     * Reads the definitions of the character categories from the file
-     * which is specified by {@code charDef}.
-     * If {@code charDef} is {@code null}, uses the default definitions.
+     * Reads the definitions of the character categories from the file which is
+     * specified by {@code charDef}. If {@code charDef} is {@code null}, uses the
+     * default definitions.
      *
-     * <p>The following is the format of definitions.
-     * <pre>{@code
+     * <p>
+     * The following is the format of definitions.
+     * 
+     * <pre>
+     * {@code
      * 0x0020 SPACE              # a white space
      * 0x0041..0x005A ALPHA      # Latin alphabets
      * 0x4E00 KANJINUMERIC KANJI # Kanji numeric and Kanji
-     * }</pre>
+     * }
+     * </pre>
+     * 
      * Lines that do not start with "0x" are ignored.
      *
-     * @param charDef the file of the definitions of character categories.
-     * @throws IOException if the definition file is not available.
+     * @param charDef
+     *            the file of the definitions of character categories.
+     * @throws IOException
+     *             if the definition file is not available.
      */
     public void readCharacterDefinition(String charDef) throws IOException {
-        try (
-            InputStream in = (charDef != null)
-                ? new FileInputStream(charDef)
+        try (InputStream in = (charDef != null) ? new FileInputStream(charDef)
                 : CharacterCategory.class.getClassLoader().getResourceAsStream("char.def");
-            LineNumberReader reader
-                = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-        ) {
+                LineNumberReader reader = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.matches("\\s*") || line.startsWith("#")) {
@@ -106,9 +108,7 @@ public class CharacterCategory {
                 }
                 String[] cols = line.split("\\s+");
                 if (cols.length < 2) {
-                    throw new IllegalArgumentException(
-                        "invalid format at line " + reader.getLineNumber()
-                    );
+                    throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
                 if (cols[0].startsWith("0x")) {
                     Range range = new Range();
@@ -118,9 +118,7 @@ public class CharacterCategory {
                         range.high = Integer.decode(r[1]);
                     }
                     if (range.low > range.high) {
-                        throw new IllegalArgumentException(
-                            "invalid range at line " + reader.getLineNumber()
-                        );
+                        throw new IllegalArgumentException("invalid range at line " + reader.getLineNumber());
                     }
                     for (int i = 1; i < cols.length; i++) {
                         if (cols[i].startsWith("#")) {
@@ -128,8 +126,8 @@ public class CharacterCategory {
                         }
                         CategoryType type = CategoryType.valueOf(cols[i]);
                         if (type == null) {
-                            throw new IllegalArgumentException(cols[i] + " is invalid type at line "
-                                                               + reader.getLineNumber());
+                            throw new IllegalArgumentException(
+                                    cols[i] + " is invalid type at line " + reader.getLineNumber());
                         }
                         range.categories.add(type);
                     }

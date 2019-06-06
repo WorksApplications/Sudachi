@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,9 @@ class WordIdTable {
         this.offset = offset + 4;
     }
 
-    int storageSize() { return 4 + size; }
+    int storageSize() {
+        return 4 + size;
+    }
 
     Integer[] get(int index) {
         int length = Byte.toUnsignedInt(bytes.get(offset + index++));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,17 @@ public class JoinNumericPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(),
-                "/system.dic", "/user.dic", "/joinnumeric/char.def", "/unk.def");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/joinnumeric/char.def",
+                "/unk.def");
 
         String path = temporaryFolder.getRoot().getPath();
         String settings = Utils.readAllResource("/sudachi.json");
         Dictionary dict = new DictionaryFactory().create(path, settings);
-        tokenizer = (JapaneseTokenizer)dict.create();
+        tokenizer = (JapaneseTokenizer) dict.create();
 
         plugin = new JoinNumericPlugin();
         plugin.setSettings(Settings.parseSettings(null, "{}"));
-        plugin.setUp(((JapaneseDictionary)dict).grammar);
+        plugin.setUp(((JapaneseDictionary) dict).grammar);
     }
 
     @Test
@@ -174,8 +174,7 @@ public class JoinNumericPluginTest {
     }
 
     private List<LatticeNode> getPath(String text) {
-        UTF8InputText input
-            = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
+        UTF8InputText input = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
         LatticeImpl lattice = tokenizer.buildLattice(input);
         List<LatticeNode> path = lattice.getBestPath();
         plugin.rewrite(input, path, lattice);

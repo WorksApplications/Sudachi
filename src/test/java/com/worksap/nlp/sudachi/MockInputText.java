@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,17 +44,25 @@ class MockInputText implements InputText {
     }
 
     @Override
-    public String getText() { return text; }
+    public String getText() {
+        return text;
+    }
 
     @Override
-    public String getOriginalText() { return text; }
-    
+    public String getOriginalText() {
+        return text;
+    }
+
     @Override
-    public String getSubstring(int begin, int end) { return text.substring(begin, end); }
-    
+    public String getSubstring(int begin, int end) {
+        return text.substring(begin, end);
+    }
+
     @Override
-    public int getOriginalIndex(int index) { return index; }
-    
+    public int getOriginalIndex(int index) {
+        return index;
+    }
+
     @Override
     public Set<CategoryType> getCharCategoryTypes(int index) {
         return types[index];
@@ -63,18 +71,16 @@ class MockInputText implements InputText {
     @Override
     public Set<CategoryType> getCharCategoryTypes(int begin, int end) {
         Set<CategoryType> continuousCategory = types[begin].clone();
-        for (int i = text.offsetByCodePoints(begin, 1); i < end;
-             i = text.offsetByCodePoints(i, 1)) {
+        for (int i = text.offsetByCodePoints(begin, 1); i < end; i = text.offsetByCodePoints(i, 1)) {
             continuousCategory.retainAll(types[i]);
         }
         return continuousCategory;
     }
-    
+
     @Override
     public int getCharCategoryContinuousLength(int index) {
         Set<CategoryType> continuousCategory = types[index].clone();
-        for (int i = text.offsetByCodePoints(index, 1); i < text.length();
-             i = text.offsetByCodePoints(i, 1)) {
+        for (int i = text.offsetByCodePoints(index, 1); i < text.length(); i = text.offsetByCodePoints(i, 1)) {
             continuousCategory.retainAll(types[i]);
             if (continuousCategory.isEmpty()) {
                 return i - index;
@@ -82,7 +88,7 @@ class MockInputText implements InputText {
         }
         return text.length() - index;
     }
-    
+
     @Override
     public int getCodePointsOffsetLength(int index, int codePointOffset) {
         return text.offsetByCodePoints(index, codePointOffset) - index;
@@ -94,5 +100,7 @@ class MockInputText implements InputText {
     }
 
     @Override
-    public boolean canBow(int index) { return true; }
+    public boolean canBow(int index) {
+        return true;
+    }
 }

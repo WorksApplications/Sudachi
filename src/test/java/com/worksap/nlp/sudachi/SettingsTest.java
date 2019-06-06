@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,7 @@ public class SettingsTest {
     @Test
     public void getStringList() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[\"baa\",\"bazz\"]}");
-        assertThat(settings.getStringList("foo"),
-                   allOf(hasItem("baa"), hasItem("bazz")));
+        assertThat(settings.getStringList("foo"), allOf(hasItem("baa"), hasItem("bazz")));
         assertTrue(settings.getStringList("baa").isEmpty());
     }
 
@@ -104,8 +103,7 @@ public class SettingsTest {
     @Test
     public void getIntList() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[123,456]}");
-        assertThat(settings.getIntList("foo"),
-                   allOf(hasItem(123), hasItem(456)));
+        assertThat(settings.getIntList("foo"), allOf(hasItem(123), hasItem(456)));
         assertTrue(settings.getIntList("baa").isEmpty());
     }
 
@@ -138,16 +136,13 @@ public class SettingsTest {
         assertNull(settings.getPath("bazz"));
 
         settings = Settings.parseSettings(null, "{\"path\":\"bazz\",\"foo\":\"baa\"}");
-        assertEquals(Paths.get("bazz", "baa").toString(),
-                     settings.getPath("foo"));
+        assertEquals(Paths.get("bazz", "baa").toString(), settings.getPath("foo"));
 
         settings = Settings.parseSettings("maa", "{\"foo\":\"baa\"}");
-        assertEquals(Paths.get("maa", "baa").toString(),
-                     settings.getPath("foo"));
+        assertEquals(Paths.get("maa", "baa").toString(), settings.getPath("foo"));
 
         settings = Settings.parseSettings("maa", "{\"path\":\"bazz\",\"foo\":\"baa\"}");
-        assertEquals(Paths.get("bazz", "baa").toString(),
-                     settings.getPath("foo"));
+        assertEquals(Paths.get("bazz", "baa").toString(), settings.getPath("foo"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -159,24 +154,20 @@ public class SettingsTest {
     @Test
     public void getPathList() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[\"baa\",\"bazz\"]}");
-        assertThat(settings.getPathList("foo"),
-                   allOf(hasItem("baa"), hasItem("bazz")));
+        assertThat(settings.getPathList("foo"), allOf(hasItem("baa"), hasItem("bazz")));
         assertTrue(settings.getPathList("baa").isEmpty());
 
         settings = Settings.parseSettings(null, "{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getPathList("foo"),
-                   allOf(hasItem(Paths.get("bazz", "baa").toString()),
-                         hasItem(Paths.get("bazz", "bazz").toString())));
+                allOf(hasItem(Paths.get("bazz", "baa").toString()), hasItem(Paths.get("bazz", "bazz").toString())));
 
         settings = Settings.parseSettings("maa", "{\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getPathList("foo"),
-                   allOf(hasItem(Paths.get("maa", "baa").toString()),
-                         hasItem(Paths.get("maa", "bazz").toString())));
+                allOf(hasItem(Paths.get("maa", "baa").toString()), hasItem(Paths.get("maa", "bazz").toString())));
 
         settings = Settings.parseSettings("maa", "{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}");
         assertThat(settings.getPathList("foo"),
-                   allOf(hasItem(Paths.get("bazz", "baa").toString()),
-                         hasItem(Paths.get("bazz", "bazz").toString())));
+                allOf(hasItem(Paths.get("bazz", "baa").toString()), hasItem(Paths.get("bazz", "bazz").toString())));
 
     }
 
@@ -191,7 +182,8 @@ public class SettingsTest {
 
     @Test
     public void getPluginList() {
-        Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"baa\":\"bazz\"}]}");
+        Settings settings = Settings.parseSettings(null,
+                "{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"baa\":\"bazz\"}]}");
         List<Plugin> list = settings.getPluginList("foo");
         assertEquals(1, list.size());
         assertThat(list.get(0), instanceOf(Foo.class));

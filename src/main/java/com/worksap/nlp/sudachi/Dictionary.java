@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.List;
 /**
  * A lexicon and a grammar for morphological analysis.
  *
- * This class requires a lot of memory.
- * When using multiple analyzers, it is recommended to generate only one
- * instance of this class, and generate multiple tokenizers.
+ * This class requires a lot of memory. When using multiple analyzers, it is
+ * recommended to generate only one instance of this class, and generate
+ * multiple tokenizers.
  *
  * @see DictionaryFactory
  * @see Tokenizer
@@ -57,9 +57,11 @@ public interface Dictionary extends AutoCloseable {
      *
      * The name is divided into layers.
      *
-     * @param posId the ID of the part-of-speech
+     * @param posId
+     *            the ID of the part-of-speech
      * @return the list of strings of part-of-speech name
-     * @throws IndexOutOfBoundsException if {@code posId} is out of the range
+     * @throws IndexOutOfBoundsException
+     *             if {@code posId} is out of the range
      */
     public List<String> getPartOfSpeechString(short posId);
 }

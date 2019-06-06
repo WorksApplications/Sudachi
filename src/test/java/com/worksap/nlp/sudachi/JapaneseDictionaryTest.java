@@ -38,8 +38,7 @@ public class JapaneseDictionaryTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(),
-                           "/system.dic", "/user.dic", "/char.def", "/unk.def");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
 
         String path = temporaryFolder.getRoot().getPath();
         String settings = Utils.readAllResource("/sudachi.json");
@@ -63,7 +62,7 @@ public class JapaneseDictionaryTest {
 
     @Test
     public void getPartOfSpeechString() {
-        List<String> pos = dict.getPartOfSpeechString((short)0);
+        List<String> pos = dict.getPartOfSpeechString((short) 0);
         assertThat(pos, notNullValue());
         assertThat(pos.get(0), is("助動詞"));
     }

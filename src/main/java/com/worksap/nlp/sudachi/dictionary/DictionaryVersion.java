@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ package com.worksap.nlp.sudachi.dictionary;
  */
 public class DictionaryVersion {
 
-    private DictionaryVersion() {}
+    private DictionaryVersion() {
+    }
 
     /** the version of system dictionries */
     public static final long SYSTEM_DICT_VERSION = 0x7366d3f18bd111e7L;

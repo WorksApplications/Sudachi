@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,24 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 /**
  * A Plugin for inhibiting the connections.
  *
- * <p>{@link Dictionary} initialize this plugin with {@link Settings}.
- * It can be referred as {@link Plugin#settings}.
+ * <p>
+ * {@link Dictionary} initialize this plugin with {@link Settings}. It can be
+ * referred as {@link Plugin#settings}.
  *
- * <p>The following is an example of settings.
- * <pre>{@code
+ * <p>
+ * The following is an example of settings.
+ * 
+ * <pre>
+ * {@code
  *   {
  *     "class" : "com.worksap.nlp.sudachi.InhibitConnectionPlugin",
  *     "inhibitedPair" : [ [ 0, 233 ], [435, 332] ]
  *   }
- * }</pre>
+ * }
+ * </pre>
  *
- * {@code inhibitPair} is a list of lists of two numbers.
- * At each pair, the first number is left-ID and the second is
- * right-ID of a connection.
+ * {@code inhibitPair} is a list of lists of two numbers. At each pair, the
+ * first number is left-ID and the second is right-ID of a connection.
  */
 class InhibitConnectionPlugin extends EditConnectionCostPlugin {
 
@@ -53,8 +57,7 @@ class InhibitConnectionPlugin extends EditConnectionCostPlugin {
             if (pair.size() < 2) {
                 continue;
             }
-            inhibitConnection(grammar,
-                              pair.get(0).shortValue(), pair.get(1).shortValue());
+            inhibitConnection(grammar, pair.get(0).shortValue(), pair.get(1).shortValue());
         }
     }
 }

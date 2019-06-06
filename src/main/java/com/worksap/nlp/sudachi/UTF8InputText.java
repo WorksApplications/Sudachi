@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 class UTF8InputText implements InputText {
-    
+
     private final String originalText;
     private final String modifiedText;
     private final byte[] bytes;
@@ -34,12 +34,11 @@ class UTF8InputText implements InputText {
     private final List<EnumSet<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     private final List<Boolean> canBowList;
-    
-    UTF8InputText(Grammar grammar, String originalText, String modifiedText,
-        byte[] bytes, int[] offsets, int[] byteIndexes,
-        List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
-        List<Boolean> canBowList) {
-        
+
+    UTF8InputText(Grammar grammar, String originalText, String modifiedText, byte[] bytes, int[] offsets,
+            int[] byteIndexes, List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
+            List<Boolean> canBowList) {
+
         this.originalText = originalText;
         this.modifiedText = modifiedText;
         this.bytes = bytes;
@@ -49,21 +48,21 @@ class UTF8InputText implements InputText {
         this.charCategoryContinuities = charCategoryContinuities;
         this.canBowList = canBowList;
     }
-    
+
     @Override
     public String getOriginalText() {
         return originalText;
     }
-    
+
     @Override
     public String getText() {
         return modifiedText;
     }
-    
+
     byte[] getByteText() {
         return bytes;
     }
-    
+
     @Override
     public String getSubstring(int begin, int end) {
         if (begin < 0) {
@@ -78,21 +77,21 @@ class UTF8InputText implements InputText {
 
         return modifiedText.substring(byteIndexes[begin], byteIndexes[end]);
     }
-    
+
     int getOffsetTextLength(int index) {
         return byteIndexes[index];
     }
-    
+
     @Override
     public int getOriginalIndex(int index) {
         return offsets[index];
     }
-    
+
     @Override
     public Set<CategoryType> getCharCategoryTypes(int index) {
         return charCategories.get(byteIndexes[index]);
     }
-    
+
     @Override
     public Set<CategoryType> getCharCategoryTypes(int begin, int end) {
         if (begin + getCharCategoryContinuousLength(begin) < end) {
@@ -100,8 +99,7 @@ class UTF8InputText implements InputText {
         }
         int b = byteIndexes[begin];
         int e = byteIndexes[end];
-        Set<CategoryType> continuousCategory
-            = charCategories.get(b).clone();
+        Set<CategoryType> continuousCategory = charCategories.get(b).clone();
         for (int i = b + 1; i < e; i++) {
             continuousCategory.retainAll(charCategories.get(i));
         }
@@ -112,7 +110,7 @@ class UTF8InputText implements InputText {
     public int getCharCategoryContinuousLength(int index) {
         return charCategoryContinuities.get(index);
     }
-    
+
     @Override
     public int getCodePointsOffsetLength(int index, int codePointOffset) {
         int length = 0;

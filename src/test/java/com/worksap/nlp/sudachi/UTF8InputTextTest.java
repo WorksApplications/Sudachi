@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,38 +34,34 @@ import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class UTF8InputTextTest {
-    
+
     // mixed full-width, half-width, accented
     // U+2123D '𡈽' uses surrogate pair
     static final String TEXT = "âｂC1あ234漢字𡈽アｺﾞ";
-    byte[] bytes = {
-        (byte)0xC3, (byte)0xA2, (byte)0xEF, (byte)0xBD, (byte)0x82, (byte)0x43,
-        (byte)0x31, (byte)0xE3, (byte)0x81, (byte)0x82, (byte)0x32, (byte)0x33,
-        (byte)0x34, (byte)0xE6, (byte)0xBC, (byte)0xA2, (byte)0xE5, (byte)0xAD,
-        (byte)0x97, (byte)0xF0, (byte)0xA1, (byte)0x88, (byte)0xBD, (byte)0xE3,
-        (byte)0x82, (byte)0xA2, (byte)0xEF, (byte)0xBD, (byte)0xBA, (byte)0xEF,
-        (byte)0xBE, (byte)0x9E
-    };
+    byte[] bytes = { (byte) 0xC3, (byte) 0xA2, (byte) 0xEF, (byte) 0xBD, (byte) 0x82, (byte) 0x43, (byte) 0x31,
+            (byte) 0xE3, (byte) 0x81, (byte) 0x82, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0xE6, (byte) 0xBC,
+            (byte) 0xA2, (byte) 0xE5, (byte) 0xAD, (byte) 0x97, (byte) 0xF0, (byte) 0xA1, (byte) 0x88, (byte) 0xBD,
+            (byte) 0xE3, (byte) 0x82, (byte) 0xA2, (byte) 0xEF, (byte) 0xBD, (byte) 0xBA, (byte) 0xEF, (byte) 0xBE,
+            (byte) 0x9E };
     UTF8InputText input;
     UTF8InputTextBuilder builder;
     MockGrammar grammar;
-    
+
     @Before
     public void setUp() {
         grammar = new MockGrammar();
         CharacterCategory charCategory = new CharacterCategory();
         try {
-            charCategory.readCharacterDefinition(UTF8InputTextTest.class.getClassLoader()
-                .getResource("char.def").getPath());
-        }
-        catch (IOException ex) {
+            charCategory.readCharacterDefinition(
+                    UTF8InputTextTest.class.getClassLoader().getResource("char.def").getPath());
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
         grammar.setCharacterCategory(charCategory);
-        
+
         builder = new UTF8InputTextBuilder(TEXT, grammar);
     }
-    
+
     @Test
     public void getOriginalText() {
         assertThat(builder.getOriginalText(), is(TEXT));
@@ -74,14 +70,14 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is(TEXT));
     }
-    
+
     @Test
     public void getByteText() {
         input = builder.build();
         assertThat(input.getByteText().length, is(32));
         assertArrayEquals(bytes, input.getByteText());
     }
-    
+
     @Test
     public void getOriginalIndex() {
         input = builder.build();
@@ -99,7 +95,7 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalIndex(28), is(13));
         assertThat(input.getOriginalIndex(31), is(14));
     }
-    
+
     @Test
     public void getCharCategoryTypes() {
         input = builder.build();
@@ -118,7 +114,7 @@ public class UTF8InputTextTest {
         assertThat(input.getCharCategoryTypes(26), hasItem(CategoryType.KATAKANA));
         assertThat(input.getCharCategoryTypes(31), hasItem(CategoryType.KATAKANA));
     }
-    
+
     @Test
     public void getCharCategoryContinuousLength() {
         input = builder.build();
@@ -137,7 +133,7 @@ public class UTF8InputTextTest {
         assertThat(input.getCharCategoryContinuousLength(26), is(6));
         assertThat(input.getCharCategoryContinuousLength(31), is(1));
     }
-    
+
     @Test
     public void replaceWithSameLength() {
         builder.replace(8, 10, "ああ");
@@ -193,7 +189,7 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalIndex(25), is(10));
         assertThat(input.getOriginalIndex(34), is(14));
     }
-    
+
     @Test
     public void replaceMultiTimes() {
         builder.replace(0, 1, "a");
@@ -219,7 +215,7 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalIndex(22), is(13));
         assertThat(input.getOriginalIndex(24), is(13));
     }
-    
+
     @Test
     public void getByteLengthByCodePoints() {
         input = builder.build();
@@ -232,7 +228,7 @@ public class UTF8InputTextTest {
         assertThat(input.getCodePointsOffsetLength(19, 1), is(4));
         assertThat(input.getCodePointsOffsetLength(23, 3), is(9));
     }
-    
+
     @Test
     public void codePointCount() {
         input = builder.build();
@@ -250,8 +246,8 @@ public class UTF8InputTextTest {
         assertFalse(input.canBow(3));
         assertFalse(input.canBow(4));
         assertFalse(input.canBow(5)); // C
-        assertTrue(input.canBow(6));  // 1
-        assertTrue(input.canBow(7));  // あ
+        assertTrue(input.canBow(6)); // 1
+        assertTrue(input.canBow(7)); // あ
 
         assertTrue(input.canBow(19)); // 𡈽
         assertFalse(input.canBow(20));
@@ -265,40 +261,48 @@ public class UTF8InputTextTest {
         public int getPartOfSpeechSize() {
             return 0;
         }
+
         @Override
         public List<String> getPartOfSpeechString(short posId) {
             return null;
         }
+
         @Override
         public short getPartOfSpeechId(List<String> pos) {
             return 0;
         }
+
         @Override
         public short getConnectCost(short leftId, short rightId) {
             return 0;
         }
+
         @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {}
+        public void setConnectCost(short leftId, short rightId, short cost) {
+        }
+
         @Override
         public short[] getBOSParameter() {
             return null;
         }
+
         @Override
         public short[] getEOSParameter() {
             return null;
         }
+
         @Override
         public CharacterCategory getCharacterCategory() {
             CharacterCategory charCategory = new CharacterCategory();
             try {
-                charCategory.readCharacterDefinition(UTF8InputTextTest.class.getClassLoader()
-                    .getResource("char.def").getPath());
-            }
-            catch (IOException ex) {
+                charCategory.readCharacterDefinition(
+                        UTF8InputTextTest.class.getClassLoader().getResource("char.def").getPath());
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
             return charCategory;
         }
+
         @Override
         public void setCharacterCategory(CharacterCategory charCategory) {
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,18 +41,15 @@ public class MeCabOovProviderPluginTest {
         oov1.posId = 1;
         MeCabOovProviderPlugin.OOV oov2 = new MeCabOovProviderPlugin.OOV();
         oov2.posId = 2;
-        plugin.oovList.put(CategoryType.KANJI,
-                           Collections.singletonList(oov1));
-        plugin.oovList.put(CategoryType.KANJINUMERIC,
-                           Arrays.asList(oov1, oov2));
+        plugin.oovList.put(CategoryType.KANJI, Collections.singletonList(oov1));
+        plugin.oovList.put(CategoryType.KANJINUMERIC, Arrays.asList(oov1, oov2));
 
         inputText = new MockInputText("あいうえお");
     }
 
     @Test
     public void provideOOV000() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = false;
@@ -70,8 +67,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV100() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = true;
         cinfo.isGroup = false;
@@ -89,8 +85,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV010() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = true;
@@ -113,8 +108,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV110() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = true;
         cinfo.isGroup = true;
@@ -137,8 +131,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV002() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = false;
@@ -165,8 +158,7 @@ public class MeCabOovProviderPluginTest {
     }
 
     public void provideOOV102() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = false;
@@ -194,8 +186,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV012() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = true;
@@ -228,8 +219,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV112() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = true;
         cinfo.isGroup = true;
@@ -262,8 +252,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOV006() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;
         cinfo.isInvoke = false;
         cinfo.isGroup = false;
@@ -296,8 +285,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOVMultiOOV() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJINUMERIC;
         cinfo.isInvoke = false;
         cinfo.isGroup = true;
@@ -330,8 +318,7 @@ public class MeCabOovProviderPluginTest {
 
     @Test
     public void provideOOVWithoutOOVList() {
-        MeCabOovProviderPlugin.CategoryInfo cinfo
-            = new MeCabOovProviderPlugin.CategoryInfo();
+        MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.HIRAGANA;
         cinfo.isInvoke = false;
         cinfo.isGroup = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ public class DictionaryFactory {
      * Creates {@code Dictionary} by read a dictionary file.
      *
      * @return {@link Dictionary}
-     * @throws IOException if reading a file is failed
+     * @throws IOException
+     *             if reading a file is failed
      */
     public Dictionary create() throws IOException {
         return new JapaneseDictionary();
@@ -36,9 +37,11 @@ public class DictionaryFactory {
     /**
      * Creates {@code Dictionary} by read a dictionary file.
      *
-     * @param settings settings in JSON string
+     * @param settings
+     *            settings in JSON string
      * @return {@link Dictionary}
-     * @throws IOException if reading a file is failed
+     * @throws IOException
+     *             if reading a file is failed
      */
     public Dictionary create(String settings) throws IOException {
         return new JapaneseDictionary(settings);
@@ -47,10 +50,13 @@ public class DictionaryFactory {
     /**
      * Creates {@code Dictionary} by read a dictionary file.
      *
-     * @param path the base path if "path" is undefined in settings
-     * @param settings settings in JSON string
+     * @param path
+     *            the base path if "path" is undefined in settings
+     * @param settings
+     *            settings in JSON string
      * @return {@link Dictionary}
-     * @throws IOException if reading a file is failed
+     * @throws IOException
+     *             if reading a file is failed
      */
     public Dictionary create(String path, String settings) throws IOException {
         return new JapaneseDictionary(path, settings);

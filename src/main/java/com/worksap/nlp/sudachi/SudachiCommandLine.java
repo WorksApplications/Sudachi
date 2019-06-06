@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Works Applications Co., Ltd.
+ * Copyright (c) 2019 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,25 @@ public class SudachiCommandLine {
             }
         }
 
-        void print(int x) { output.print(x); }
-        void print(String x) { output.print(x); }
-        void println() { output.println(); }
-        void println(String x) { output.println(x); }
+        void print(int x) {
+            output.print(x);
+        }
 
-        PrintStream getPrintStream() { return output; }
+        void print(String x) {
+            output.print(x);
+        }
+
+        void println() {
+            output.println();
+        }
+
+        void println(String x) {
+            output.println(x);
+        }
+
+        PrintStream getPrintStream() {
+            return output;
+        }
 
         @Override
         public void close() {
@@ -57,12 +70,11 @@ public class SudachiCommandLine {
         }
     }
 
-    static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode,
-                    InputStream input, FileStdoutStream output, boolean printAll, boolean ignoreError)
-        throws IOException {
+    static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, FileStdoutStream output,
+            boolean printAll, boolean ignoreError) throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
-             BufferedReader reader = new BufferedReader(inputReader)) {
+                BufferedReader reader = new BufferedReader(inputReader)) {
 
             while (true) {
                 String line = reader.readLine();
@@ -105,25 +117,39 @@ public class SudachiCommandLine {
     /**
      * Analyzes the input texts.
      *
-     * <p>Usage: {@code SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]}
-     * <p>The following are the options.
+     * <p>
+     * Usage:
+     * {@code SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]}
+     * <p>
+     * The following are the options.
      * <dl>
-     * <dt>{@code -r file}</dt><dd>the settings file in JSON format</dd>
-     * <dt>{@code -m {A|B|C}}</dt><dd>the mode of splitting</dd>
-     * <dt>{@code -o file}</dt><dd>the output file</dd>
-     * <dt>{@code -a}</dt><dd>print all of the fields</dd>
-     * <dt>{@code -d}</dt><dd>print the debug informations</dd>
-     * <dt>{@code -h}</dt><dd>show the usage</dd>
+     * <dt>{@code -r file}</dt>
+     * <dd>the settings file in JSON format</dd>
+     * <dt>{@code -m {A|B|C}}</dt>
+     * <dd>the mode of splitting</dd>
+     * <dt>{@code -o file}</dt>
+     * <dd>the output file</dd>
+     * <dt>{@code -a}</dt>
+     * <dd>print all of the fields</dd>
+     * <dt>{@code -d}</dt>
+     * <dd>print the debug informations</dd>
+     * <dt>{@code -h}</dt>
+     * <dd>show the usage</dd>
      * </dl>
-     * <p>If the output file is not specified, this tool writes the output
-     * to the standard output.
-     * <p>The {@code file} operands are processed in command-line order.
-     * If {@code file} is absent, this tool reads from the starndard input.
+     * <p>
+     * If the output file is not specified, this tool writes the output to the
+     * standard output.
+     * <p>
+     * The {@code file} operands are processed in command-line order. If
+     * {@code file} is absent, this tool reads from the starndard input.
      *
-     * <p>This tool processes a line as a sentence.
+     * <p>
+     * This tool processes a line as a sentence.
      *
-     * @param args the options and the input filenames
-     * @throws IOException if IO is failed
+     * @param args
+     *            the options and the input filenames
+     * @throws IOException
+     *             if IO is failed
      */
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
@@ -174,14 +200,14 @@ public class SudachiCommandLine {
         }
 
         try (FileStdoutStream output = new FileStdoutStream(outputFileName);
-             Dictionary dict = new DictionaryFactory().create(settings)) {
+                Dictionary dict = new DictionaryFactory().create(settings)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output.getPrintStream());
             }
 
             if (i < args.length) {
-                for ( ; i < args.length; i++) {
+                for (; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
                         run(tokenizer, mode, input, output, printAll, ignoreError);
                     }
