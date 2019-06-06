@@ -3,7 +3,7 @@
 <p align="center"><a href="https://nlp.worksap.co.jp/"><img width="70" src="./docs/Sudachi.png" alt="Sudachi logo"></a></p>
 
 <p align="center">
-    <a href="https://travis-ci.org/WorksApplications/Sudachi"><img src="https://travis-ci.org/WorksApplications/Sudachi.svg?branch=develop" alt="Build Status"></a>
+    <a href="https://travis-ci.com/WorksApplications/Sudachi"><img src="https://travis-ci.com/WorksApplications/Sudachi.svg?branch=develop" alt="Build Status"></a>
     <a href="https://sonarcloud.io/dashboard/index/com.worksap.nlp.sudachi"><img src="https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp.sudachi&metric=alert_status" alt="Quality Gate"></a>
 </p>
 
