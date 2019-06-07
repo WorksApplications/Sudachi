@@ -24,4 +24,5 @@ deploy:
     on:
       branch: develop
 cache:
-  directories:                                                                      - $HOME/.m2/repository/
+  directories:
+    - $HOME/.m2/repository/
