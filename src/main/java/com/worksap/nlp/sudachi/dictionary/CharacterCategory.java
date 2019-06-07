@@ -124,10 +124,12 @@ public class CharacterCategory {
                         if (cols[i].startsWith("#")) {
                             break;
                         }
-                        CategoryType type = CategoryType.valueOf(cols[i]);
-                        if (type == null) {
+                        CategoryType type;
+                        try {
+                            type = CategoryType.valueOf(cols[i]);
+                        } catch (IllegalArgumentException e) {
                             throw new IllegalArgumentException(
-                                    cols[i] + " is invalid type at line " + reader.getLineNumber());
+                                    cols[i] + " is invalid type at line " + reader.getLineNumber(), e);
                         }
                         range.categories.add(type);
                     }
