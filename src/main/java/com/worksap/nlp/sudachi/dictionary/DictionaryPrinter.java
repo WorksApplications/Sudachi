@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,9 @@ import java.util.stream.Collectors;
 import com.worksap.nlp.sudachi.MMap;
 
 public class DictionaryPrinter {
+
+    private DictionaryPrinter() {
+    }
 
     static Grammar readGrammar(String filename) throws IOException {
         ByteBuffer bytes = MMap.map(filename);
@@ -39,7 +43,7 @@ public class DictionaryPrinter {
         return new GrammarImpl(bytes, offset);
     }
 
-    static void printDictionary(String filename, Grammar grammar) throws IOException {
+    static void printDictionary(String filename, Grammar grammar, PrintStream output) throws IOException {
         ByteBuffer bytes = MMap.map(filename);
         int offset = 0;
 
@@ -66,7 +70,7 @@ public class DictionaryPrinter {
 
             char unitType = getUnitType(wordInfo);
 
-            System.out.println(
+            output.println(
                     String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s", wordInfo.getSurface(), leftId, rightId,
                             cost, wordInfo.getSurface(), posStrings.get(wordInfo.getPOSId()), wordInfo.getReadingForm(),
                             wordInfo.getNormalizedForm(), wordIdToString(wordInfo.getDictionaryFormWordId()), unitType,
@@ -93,7 +97,9 @@ public class DictionaryPrinter {
         if (split.length == 0) {
             return "*";
         } else {
-            return Arrays.stream(split).mapToObj(Integer::toString).collect(Collectors.joining("/"));
+            return Arrays.stream(split)
+                    .mapToObj(i -> (i >> 28 != 0) ? "U" + Integer.toString(i & ((1 << 28) - 1)) : Integer.toString(i))
+                    .collect(Collectors.joining("/"));
         }
     }
 
@@ -133,7 +139,7 @@ public class DictionaryPrinter {
         }
 
         if (i < args.length) {
-            printDictionary(args[i], grammar);
+            printDictionary(args[i], grammar, System.out);
         }
     }
 }

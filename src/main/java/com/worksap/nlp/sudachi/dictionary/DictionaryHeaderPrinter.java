@@ -30,6 +30,9 @@ import java.time.ZoneId;
  */
 public class DictionaryHeaderPrinter {
 
+    private DictionaryHeaderPrinter() {
+    }
+
     static void printHeader(String filename, PrintStream output) throws IOException {
         ByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
