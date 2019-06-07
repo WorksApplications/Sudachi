@@ -81,6 +81,26 @@ public class DictionaryBuilderTest {
         builder.parseLine(sb.toString());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLineWithInvalidSplits() {
+        DictionaryBuilder builder = new DictionaryBuilder();
+        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,1/2,1/2,1/2");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLineWithTooManySplits() {
+        DictionaryBuilder builder = new DictionaryBuilder();
+        builder.parseLine(
+                "京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,B,0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0,*,*");
+    }
+
+    @Test
+    public void parseLineWithSameReadingForm() {
+        DictionaryBuilder builder = new DictionaryBuilder();
+        DictionaryBuilder.WordEntry entry = builder.parseLine("〒,6,6,5293,〒,名詞,普通名詞,一般,*,*,*,〒,〒,*,A,*,*,*");
+        assertThat(entry.wordInfo.getReadingForm(), is("〒"));
+    }
+
     @Test
     public void addToTrie() {
         DictionaryBuilder builder = new DictionaryBuilder();

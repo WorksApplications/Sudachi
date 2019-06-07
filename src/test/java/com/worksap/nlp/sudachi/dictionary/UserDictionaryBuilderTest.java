@@ -28,6 +28,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -40,11 +42,32 @@ public class UserDictionaryBuilderTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    File systemDictFile;
+    ByteBuffer bytes;
+    Grammar grammar;
+
+    @Before
+    public void setUp() throws IOException {
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
+        systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
+        bytes = MMap.map(systemDictFile.getPath());
+        DictionaryHeader systemHeader = new DictionaryHeader(bytes, 0);
+        grammar = new GrammarImpl(bytes, systemHeader.storageSize());
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        MMap.unmap(bytes);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLineWithInvalidPOS() {
+        UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar);
+        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n");
+    }
+
     @Test
     public void commandLine() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
-
-        File systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
         File outputFile = temporaryFolder.newFile();
         File inputFile = temporaryFolder.newFile();
 
