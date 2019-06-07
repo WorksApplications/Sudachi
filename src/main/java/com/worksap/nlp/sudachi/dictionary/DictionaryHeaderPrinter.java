@@ -27,7 +27,7 @@ import java.time.ZoneId;
 /**
  * A dictionary header printing tool.
  */
-public class PrintDictionaryHeader {
+public class DictionaryHeaderPrinter {
 
     static void printHeader(String filename) throws IOException {
         ByteBuffer bytes;

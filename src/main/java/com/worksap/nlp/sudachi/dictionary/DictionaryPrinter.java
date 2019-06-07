@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import com.worksap.nlp.sudachi.MMap;
 
-public class PrintDictionary {
+public class DictionaryPrinter {
 
     static Grammar readGrammar(String filename) throws IOException {
         ByteBuffer bytes = MMap.map(filename);
