@@ -178,7 +178,7 @@ public class DictionaryBuilderTest {
         }
 
         try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,1/2,*,1/2\n");
+            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,1/2,*,1/2\n");
             writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*\n");
             writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*\n");
         }
@@ -191,6 +191,7 @@ public class DictionaryBuilderTest {
         DictionaryHeader header = new DictionaryHeader(bytes, offset);
         offset += header.storageSize();
         assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION));
+        assertThat(header.getDescription(), is("test"));
 
         GrammarImpl grammar = new GrammarImpl(bytes, offset);
         offset += grammar.storageSize();
@@ -199,7 +200,7 @@ public class DictionaryBuilderTest {
         assertThat(grammar.getPartOfSpeechString((short) 1), contains("名詞", "普通名詞", "一般", "*", "*", "*"));
         assertThat(grammar.getConnectCost((short) 0, (short) 0), is((short) 200));
 
-        Lexicon lexicon = new LexiconSet(new DoubleArrayLexicon(bytes, offset));
+        Lexicon lexicon = new DoubleArrayLexicon(bytes, offset);
         assertThat(lexicon.size(), is(3));
 
         assertThat(lexicon.getLeftId(0), is((short) 0));
@@ -208,7 +209,7 @@ public class DictionaryBuilderTest {
         assertThat(info.getSurface(), is("東京都"));
         assertThat(info.getNormalizedForm(), is("東京都"));
         assertThat(info.getDictionaryFormWordId(), is(-1));
-        assertThat(info.getReadingForm(), is("トウキョウト"));
+        assertThat(info.getReadingForm(), is("ヒガシキョウト"));
         assertThat(info.getPOSId(), is((short) 0));
         assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
         assertThat(info.getBunitSplit().length, is(0));

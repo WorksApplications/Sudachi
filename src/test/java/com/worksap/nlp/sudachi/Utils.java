@@ -24,8 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-class Utils {
-    static void copyResource(Path folder, String... files) throws IOException {
+public class Utils {
+    public static void copyResource(Path folder, String... files) throws IOException {
         for (String file : files) {
             try {
                 URL src = Utils.class.getResource(file);
@@ -37,7 +37,7 @@ class Utils {
         }
     }
 
-    static String readAllResource(String file) throws IOException {
+    public static String readAllResource(String file) throws IOException {
         try (InputStream src = Utils.class.getResourceAsStream(file)) {
             return JapaneseDictionary.readAll(src);
         }
