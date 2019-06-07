@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -29,7 +30,7 @@ import java.time.ZoneId;
  */
 public class DictionaryHeaderPrinter {
 
-    static void printHeader(String filename) throws IOException {
+    static void printHeader(String filename, PrintStream output) throws IOException {
         ByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
@@ -37,21 +38,21 @@ public class DictionaryHeaderPrinter {
         }
         DictionaryHeader header = new DictionaryHeader(bytes, 0);
 
-        System.out.println("filename: " + filename);
+        output.println("filename: " + filename);
 
         long version = header.getVersion();
         if (version == DictionaryVersion.SYSTEM_DICT_VERSION) {
-            System.out.println("type: system dictionary");
+            output.println("type: system dictionary");
         } else if (version == DictionaryVersion.USER_DICT_VERSION) {
-            System.out.println("type: user dictionary");
+            output.println("type: user dictionary");
         } else {
-            System.out.println("invalid file");
+            output.println("invalid file");
             return;
         }
 
-        System.out.println("createTime: "
+        output.println("createTime: "
                 + Instant.ofEpochSecond(header.getCreateTime()).atZone(ZoneId.systemDefault()).toString());
-        System.out.println("description: " + header.getDescription());
+        output.println("description: " + header.getDescription());
     }
 
     /**
@@ -66,7 +67,7 @@ public class DictionaryHeaderPrinter {
      */
     public static void main(String[] args) throws IOException {
         for (String filename : args) {
-            printHeader(filename);
+            printHeader(filename, System.out);
         }
     }
 }

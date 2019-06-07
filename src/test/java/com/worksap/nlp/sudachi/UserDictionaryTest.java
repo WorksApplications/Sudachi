@@ -71,7 +71,7 @@ public class UserDictionaryTest {
             userDicts.add(USER_DICT);
         }
         String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
-        Dictionary dict = new DictionaryFactory().create(path, settings);
+        new DictionaryFactory().create(path, settings);
     }
 
     @Test
