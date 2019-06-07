@@ -43,14 +43,12 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
     void build(List<String> lexiconPaths, FileOutputStream output) throws IOException {
         System.err.print("reading the source file...");
-        wordId = 0;
         for (String path : lexiconPaths) {
             try (FileInputStream lexiconInput = new FileInputStream(path)) {
                 buildLexicon(path, lexiconInput);
             }
         }
-        wordSize = wordId;
-        System.err.println(String.format(" %,d words", wordSize));
+        System.err.println(String.format(" %,d words", wordInfos.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeLexicon(outputChannel);

@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.ByteBuffer;
@@ -48,6 +49,12 @@ public class DictionaryBuilder {
     static final int NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
+    static class WordEntry {
+        String headword;
+        short[] parameters;
+        WordInfo wordInfo;
+    }
+
     static class POSTable {
         private List<String> table = new ArrayList<>();
 
@@ -76,14 +83,12 @@ public class DictionaryBuilder {
         }
         return l.length - r.length;
     });
-    List<Short[]> params = new ArrayList<>();
+    List<short[]> params = new ArrayList<>();
     List<WordInfo> wordInfos = new ArrayList<>();
 
     boolean isUserDictionary = false;
 
     ByteBuffer buffer;
-    int wordSize;
-    int wordId;
 
     DictionaryBuilder() {
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -92,14 +97,12 @@ public class DictionaryBuilder {
 
     void build(List<String> lexiconPaths, FileInputStream matrixInput, FileOutputStream output) throws IOException {
         System.err.print("reading the source file...");
-        wordId = 0;
         for (String path : lexiconPaths) {
             try (FileInputStream lexiconInput = new FileInputStream(path)) {
                 buildLexicon(path, lexiconInput);
             }
         }
-        wordSize = wordId;
-        System.err.println(String.format(" %,d words", wordSize));
+        System.err.println(String.format(" %,d words", wordInfos.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
@@ -111,60 +114,14 @@ public class DictionaryBuilder {
         int lineno = -1;
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
                 LineNumberReader reader = new LineNumberReader(isr)) {
-            for (;; wordId++) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 lineno = reader.getLineNumber();
-
-                String[] cols = line.split(",");
-                if (cols.length != NUMBER_OF_COLUMNS) {
-                    throw new IllegalArgumentException("invalid format");
+                WordEntry entry = parseLine(line);
+                if (entry.headword != null) {
+                    addToTrie(entry.headword, wordInfos.size());
                 }
-                for (int i = 0; i < cols.length; i++) {
-                    cols[i] = decode(cols[i]);
-                }
-
-                if (cols[0].getBytes(StandardCharsets.UTF_8).length > STRING_MAX_LENGTH || !isValidLength(cols[4])
-                        || !isValidLength(cols[11]) || !isValidLength(cols[12])) {
-                    throw new IllegalArgumentException("string is too long");
-                }
-
-                if (cols[0].length() == 0) {
-                    throw new IllegalArgumentException("headword is empty");
-                }
-                if (!cols[1].equals("-1")) {
-                    // headword
-                    byte[] key = cols[0].getBytes(StandardCharsets.UTF_8);
-                    if (!trieKeys.containsKey(key)) {
-                        trieKeys.put(key, new ArrayList<Integer>());
-                    }
-                    trieKeys.get(key).add(wordId);
-                    // left-id, right-id, cost
-                }
-                params.add(new Short[] { Short.parseShort(cols[1]), Short.parseShort(cols[2]),
-                        Short.parseShort(cols[3]) });
-
-                short posId = getPosId(cols[5], cols[6], cols[7], cols[8], cols[9], cols[10]);
-                if (posId < 0) {
-                    throw new IllegalArgumentException("invalid part of speech");
-                }
-
-                int[] aUnitSplit = parseSplitInfo(cols[15]);
-                int[] bUnitSplit = parseSplitInfo(cols[16]);
-                if (cols[14].equals("A") && (aUnitSplit.length != 0 || bUnitSplit.length != 0)) {
-                    throw new IllegalArgumentException("invalid splitting");
-                }
-
-                WordInfo info = new WordInfo(cols[4], // headword
-                        (short) cols[0].getBytes(StandardCharsets.UTF_8).length, posId, cols[12], // normalizedForm
-                        (cols[13].equals("*") ? -1 : Integer.parseInt(cols[13])), // dictionaryFormWordId
-                        "", // dummy
-                        cols[11], // readingForm
-                        aUnitSplit, bUnitSplit, parseSplitInfo(cols[17]) // wordStructure
-                );
-                wordInfos.add(info);
+                params.add(entry.parameters);
+                wordInfos.add(entry.wordInfo);
             }
         } catch (Exception e) {
             if (lineno > 0) {
@@ -174,6 +131,63 @@ public class DictionaryBuilder {
         }
     }
 
+    WordEntry parseLine(String line) {
+        String[] cols = line.split(",");
+        if (cols.length != NUMBER_OF_COLUMNS) {
+            throw new IllegalArgumentException("invalid format");
+        }
+        for (int i = 0; i < cols.length; i++) {
+            cols[i] = decode(cols[i]);
+        }
+
+        if (cols[0].getBytes(StandardCharsets.UTF_8).length > STRING_MAX_LENGTH || !isValidLength(cols[4])
+                || !isValidLength(cols[11]) || !isValidLength(cols[12])) {
+            throw new IllegalArgumentException("string is too long");
+        }
+
+        if (cols[0].length() == 0) {
+            throw new IllegalArgumentException("headword is empty");
+        }
+
+        WordEntry entry = new WordEntry();
+
+        // headword for trie
+        if (!cols[1].equals("-1")) {
+            entry.headword = cols[0];
+        }
+
+        // left-id, right-id, cost
+        entry.parameters = new short[] { Short.parseShort(cols[1]), Short.parseShort(cols[2]),
+                Short.parseShort(cols[3]) };
+
+        // part of speech
+        short posId = getPosId(cols[5], cols[6], cols[7], cols[8], cols[9], cols[10]);
+        if (posId < 0) {
+            throw new IllegalArgumentException("invalid part of speech");
+        }
+
+        int[] aUnitSplit = parseSplitInfo(cols[15]);
+        int[] bUnitSplit = parseSplitInfo(cols[16]);
+        if (cols[14].equals("A") && (aUnitSplit.length != 0 || bUnitSplit.length != 0)) {
+            throw new IllegalArgumentException("invalid splitting");
+        }
+
+        entry.wordInfo = new WordInfo(cols[4], // headword
+                (short) cols[0].getBytes(StandardCharsets.UTF_8).length, posId, cols[12], // normalizedForm
+                (cols[13].equals("*") ? -1 : Integer.parseInt(cols[13])), // dictionaryFormWordId
+                "", // dummy
+                cols[11], // readingForm
+                aUnitSplit, bUnitSplit, parseSplitInfo(cols[17]) // wordStructure
+        );
+
+        return entry;
+    }
+
+    void addToTrie(String headword, int wordId) {
+        byte[] key = headword.getBytes(StandardCharsets.UTF_8);
+        trieKeys.computeIfAbsent(key, k -> new ArrayList<>()).add(wordId);
+    }
+
     short getPosId(String... posStrings) {
         return posTable.getId(String.join(",", posStrings));
     }
@@ -181,8 +195,23 @@ public class DictionaryBuilder {
     void writeGrammar(FileInputStream matrixInput, FileChannel output) throws IOException {
 
         System.err.print("writing the POS table...");
+        convertPOSTable(posTable.getList());
+        buffer.flip();
+        output.write(buffer);
+        System.err.println(String.format(" %,d bytes", buffer.limit()));
+        buffer.clear();
 
-        List<String> posList = posTable.getList();
+        System.err.print("writing the connection matrix...");
+        ByteBuffer matrix = convertMatrix(matrixInput);
+        buffer.flip();
+        output.write(buffer);
+        buffer.clear();
+        output.write(matrix);
+        System.err.println(String.format(" %,d bytes", matrix.limit() + 4));
+        matrix = null;
+    }
+
+    void convertPOSTable(List<String> posList) {
         buffer.putShort((short) posList.size());
 
         for (String pos : posList) {
@@ -190,28 +219,20 @@ public class DictionaryBuilder {
                 writeString(text);
             }
         }
-        buffer.flip();
-        output.write(buffer);
-        System.err.println(String.format(" %,d bytes", buffer.limit()));
-        buffer.clear();
+    }
 
+    ByteBuffer convertMatrix(InputStream matrixInput) throws IOException {
         LineNumberReader reader = new LineNumberReader(new InputStreamReader(matrixInput));
         String header = reader.readLine();
         if (header == null) {
             throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
         }
 
-        System.err.print("writing the connection matrix...");
-
         String[] lr = header.split("\\s+");
         short leftSize = Short.parseShort(lr[0]);
         short rightSize = Short.parseShort(lr[1]);
-
         buffer.putShort(leftSize);
         buffer.putShort(rightSize);
-        buffer.flip();
-        output.write(buffer);
-        buffer.clear();
 
         ByteBuffer matrix = ByteBuffer.allocate(2 * leftSize * rightSize);
         matrix.order(ByteOrder.LITTLE_ENDIAN);
@@ -234,9 +255,7 @@ public class DictionaryBuilder {
             short cost = Short.parseShort(cols[2]);
             matrix.putShort(2 * (left + leftSize * right), cost);
         }
-        output.write(matrix);
-        System.err.println(String.format(" %,d bytes", matrix.limit() + 4));
-        matrix = null;
+        return matrix;
     }
 
     void writeLexicon(FileChannel output) throws IOException {
@@ -246,7 +265,7 @@ public class DictionaryBuilder {
 
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ByteBuffer wordIdTable = ByteBuffer.allocate(wordSize * (4 + 2));
+        ByteBuffer wordIdTable = ByteBuffer.allocate(wordInfos.size() * (4 + 2));
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
         int i = 0;
@@ -293,7 +312,7 @@ public class DictionaryBuilder {
 
         System.err.print("writing the word parameters...");
         buffer.putInt(params.size());
-        for (Short[] param : params) {
+        for (short[] param : params) {
             buffer.putShort(param[0]);
             buffer.putShort(param[1]);
             buffer.putShort(param[2]);
