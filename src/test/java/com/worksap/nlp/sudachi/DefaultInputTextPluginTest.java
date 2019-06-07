@@ -22,15 +22,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.json.Json;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class DefaultInputTextPluginTest {
 
@@ -132,57 +128,5 @@ public class DefaultInputTextPluginTest {
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite_error_dup.def")
                 .getPath();
         plugin.setUp();
-    }
-
-    class MockGrammar implements Grammar {
-        @Override
-        public int getPartOfSpeechSize() {
-            return 0;
-        }
-
-        @Override
-        public List<String> getPartOfSpeechString(short posId) {
-            return null;
-        }
-
-        @Override
-        public short getPartOfSpeechId(List<String> pos) {
-            return 0;
-        }
-
-        @Override
-        public short getConnectCost(short leftId, short rightId) {
-            return 0;
-        }
-
-        @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {
-        }
-
-        @Override
-        public short[] getBOSParameter() {
-            return null;
-        }
-
-        @Override
-        public short[] getEOSParameter() {
-            return null;
-        }
-
-        @Override
-        public CharacterCategory getCharacterCategory() {
-            CharacterCategory charCategory = new CharacterCategory();
-            try {
-                charCategory.readCharacterDefinition(
-                        DefaultInputTextPluginTest.class.getClassLoader().getResource("char.def").getPath());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            return charCategory;
-        }
-
-        @Override
-        public void setCharacterCategory(CharacterCategory charCategory) {
-        }
     }
 }

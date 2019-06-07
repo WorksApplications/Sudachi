@@ -133,24 +133,20 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         try (InputStream input = (charDef == null) ? openFromJar("char.def") : new FileInputStream(charDef);
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
                 LineNumberReader reader = new LineNumberReader(isReader)) {
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                if (line.matches("\\s*") || line.startsWith("#")) {
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (line.matches("\\s*") || line.startsWith("#") || line.startsWith("0x")) {
                     continue;
                 }
                 String[] cols = line.split("\\s+");
-                if (cols.length < 2) {
+                if (cols.length < 4) {
                     throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
-                if (cols[0].startsWith("0x")) {
-                    continue;
-                }
-                CategoryType type = CategoryType.valueOf(cols[0]);
-                if (type == null) {
-                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber());
+                CategoryType type;
+                try {
+                    type = CategoryType.valueOf(cols[0]);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber(),
+                            e);
                 }
                 if (categories.containsKey(type)) {
                     throw new IllegalArgumentException(
@@ -170,18 +166,17 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         try (InputStream input = (unkDef == null) ? openFromJar("unk.def") : new FileInputStream(unkDef);
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
                 LineNumberReader reader = new LineNumberReader(isReader)) {
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 String[] cols = line.split(",");
                 if (cols.length < 10) {
                     throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
-                CategoryType type = CategoryType.valueOf(cols[0]);
-                if (type == null) {
-                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber());
+                CategoryType type;
+                try {
+                    type = CategoryType.valueOf(cols[0]);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(cols[0] + " is invalid type at line " + reader.getLineNumber(),
+                            e);
                 }
                 if (!categories.containsKey(type)) {
                     throw new IllegalArgumentException(cols[0] + " is undefined at line " + reader.getLineNumber());
@@ -194,10 +189,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 List<String> pos = Arrays.asList(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
                 oov.posId = grammar.getPartOfSpeechId(pos);
 
-                if (!oovList.containsKey(type)) {
-                    oovList.put(type, new ArrayList<OOV>());
-                }
-                oovList.get(type).add(oov);
+                oovList.computeIfAbsent(type, t -> new ArrayList<OOV>()).add(oov);
             }
         }
     }
