@@ -43,11 +43,7 @@ public class SudachiCommandLine {
         try (InputStreamReader inputReader = new InputStreamReader(input);
                 BufferedReader reader = new BufferedReader(inputReader)) {
 
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 try {
                     for (Morpheme m : tokenizer.tokenize(mode, line)) {
                         output.print(m.surface());
