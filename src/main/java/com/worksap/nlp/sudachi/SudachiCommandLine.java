@@ -17,8 +17,9 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,48 +30,14 @@ import java.io.PrintStream;
  */
 public class SudachiCommandLine {
 
-    static class FileStdoutStream implements Closeable {
-        PrintStream output;
-        boolean isFile;
+    static class FileOrStdoutPrintStream extends PrintStream {
 
-        FileStdoutStream(String fileName) throws IOException {
-            if (fileName == null) {
-                output = System.out;
-            } else {
-                output = new PrintStream(fileName);
-                isFile = true;
-            }
-        }
-
-        void print(int x) {
-            output.print(x);
-        }
-
-        void print(String x) {
-            output.print(x);
-        }
-
-        void println() {
-            output.println();
-        }
-
-        void println(String x) {
-            output.println(x);
-        }
-
-        PrintStream getPrintStream() {
-            return output;
-        }
-
-        @Override
-        public void close() {
-            if (isFile) {
-                output.close();
-            }
+        FileOrStdoutPrintStream(String fileName) throws FileNotFoundException {
+            super(fileName == null ? System.out : new FileOutputStream(fileName), fileName == null);
         }
     }
 
-    static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, FileStdoutStream output,
+    static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, PrintStream output,
             boolean printAll, boolean ignoreError) throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
@@ -154,6 +121,7 @@ public class SudachiCommandLine {
     public static void main(String[] args) throws IOException {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
+        String resourcesDirectory = null;
         String outputFileName = null;
         boolean isEnableDump = false;
         boolean printAll = false;
@@ -165,6 +133,8 @@ public class SudachiCommandLine {
                 try (FileInputStream input = new FileInputStream(args[++i])) {
                     settings = JapaneseDictionary.readAll(input);
                 }
+            } else if (args[i].equals("-p") && i + 1 < args.length) {
+                resourcesDirectory = args[++i];
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -188,6 +158,7 @@ public class SudachiCommandLine {
             } else if (args[i].equals("-h")) {
                 System.err.println("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]");
                 System.err.println("\t-r file\tread settings from file");
+                System.err.println("\t-p directory\troot directory of resources");
                 System.err.println("\t-m mode\tmode of splitting");
                 System.err.println("\t-o file\toutput to file");
                 System.err.println("\t-a\tprint all fields");
@@ -199,11 +170,11 @@ public class SudachiCommandLine {
             }
         }
 
-        try (FileStdoutStream output = new FileStdoutStream(outputFileName);
-                Dictionary dict = new DictionaryFactory().create(settings)) {
+        try (PrintStream output = new FileOrStdoutPrintStream(outputFileName);
+                Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
-                tokenizer.setDumpOutput(output.getPrintStream());
+                tokenizer.setDumpOutput(output);
             }
 
             if (i < args.length) {
