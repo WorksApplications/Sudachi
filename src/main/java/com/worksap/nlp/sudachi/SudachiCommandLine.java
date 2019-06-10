@@ -32,8 +32,20 @@ public class SudachiCommandLine {
 
     static class FileOrStdoutPrintStream extends PrintStream {
 
+        private boolean isFile;
+
         FileOrStdoutPrintStream(String fileName) throws FileNotFoundException {
             super(fileName == null ? System.out : new FileOutputStream(fileName), fileName == null);
+            isFile = fileName != null;
+        }
+
+        @Override
+        public void close() {
+            if (isFile) {
+                super.close();
+            } else {
+                flush();
+            }
         }
     }
 
