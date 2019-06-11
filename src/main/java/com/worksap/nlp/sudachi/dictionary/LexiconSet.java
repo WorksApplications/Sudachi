@@ -89,6 +89,17 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
+    public int getWordId(String headword, short posId, String readingForm) {
+        for (int dictId = 1; dictId < lexicons.size(); dictId++) {
+            int wid = lexicons.get(dictId).getWordId(headword, posId, readingForm);
+            if (wid >= 0) {
+                return buildWordId(dictId, wid);
+            }
+        }
+        return lexicons.get(0).getWordId(headword, posId, readingForm);
+    }
+
+    @Override
     public short getLeftId(int wordId) {
         return lexicons.get(getDictionaryId(wordId)).getLeftId(getWordId(wordId));
     }

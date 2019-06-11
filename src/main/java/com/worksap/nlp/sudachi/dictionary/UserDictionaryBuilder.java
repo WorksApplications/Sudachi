@@ -34,11 +34,13 @@ import com.worksap.nlp.sudachi.MMap;
 public class UserDictionaryBuilder extends DictionaryBuilder {
 
     Grammar grammar;
+    Lexicon systemLexicon;
 
-    UserDictionaryBuilder(Grammar grammar) {
+    UserDictionaryBuilder(Grammar grammar, Lexicon systemLexicon) {
         super();
         isUserDictionary = true;
         this.grammar = grammar;
+        this.systemLexicon = systemLexicon;
     }
 
     void build(List<String> lexiconPaths, FileOutputStream output) throws IOException {
@@ -48,7 +50,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
                 buildLexicon(path, lexiconInput);
             }
         }
-        System.err.println(String.format(" %,d words", wordInfos.size()));
+        System.err.println(String.format(" %,d words", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeLexicon(outputChannel);
@@ -58,6 +60,15 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
     @Override
     short getPosId(String... posStrings) {
         return grammar.getPartOfSpeechId(Arrays.asList(posStrings));
+    }
+
+    @Override
+    int getWordId(String headword, short posId, String readingForm) {
+        int wid = super.getWordId(headword, posId, readingForm);
+        if (wid >= 0) {
+            return wid | (1 << 28);
+        }
+        return systemLexicon.getWordId(headword, posId, readingForm); // ToDo: headword should be normalized
     }
 
     static void printUsage() {
@@ -111,12 +122,16 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         }
 
         ByteBuffer bytes = MMap.map(sysDictPath);
-        DictionaryHeader systemHeader = new DictionaryHeader(bytes, 0);
+        int offset = 0;
+        DictionaryHeader systemHeader = new DictionaryHeader(bytes, offset);
         if (systemHeader.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
             System.err.println("Error: invalid system dictionary: " + sysDictPath);
             return;
         }
-        Grammar grammar = new GrammarImpl(bytes, systemHeader.storageSize());
+        offset += systemHeader.storageSize();
+        GrammarImpl grammar = new GrammarImpl(bytes, offset);
+        offset += grammar.storageSize();
+        Lexicon systemLexicon = new DoubleArrayLexicon(bytes, offset);
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
@@ -126,7 +141,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         try (FileOutputStream output = new FileOutputStream(outputPath)) {
             output.write(header.toByte());
 
-            UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar);
+            UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
             builder.build(lexiconPaths, output);
         }
     }

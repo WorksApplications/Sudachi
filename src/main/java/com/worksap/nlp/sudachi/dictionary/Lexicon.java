@@ -25,6 +25,8 @@ public interface Lexicon {
 
     Iterator<int[]> lookup(byte[] text, int offset);
 
+    int getWordId(String headword, short posId, String readingForm);
+
     /**
      * Returns the left-ID of the morpheme specified by the word ID.
      *

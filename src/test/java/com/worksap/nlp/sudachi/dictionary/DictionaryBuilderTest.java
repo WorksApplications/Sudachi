@@ -53,8 +53,8 @@ public class DictionaryBuilderTest {
         assertThat(entry.headword, is("京都"));
         assertThat(entry.parameters, is(new short[] { 6, 6, 5293 }));
         assertThat(entry.wordInfo.getPOSId(), is((short) 0));
-        assertThat(entry.wordInfo.getAunitSplit().length, is(0));
-        assertThat(entry.wordInfo.getBunitSplit().length, is(0));
+        assertThat(entry.aUnitSplitString, is("*"));
+        assertThat(entry.bUnitSplitString, is("*"));
 
         entry = builder.parseLine("京都,-1,-1,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
         assertNull(entry.headword);
@@ -146,7 +146,7 @@ public class DictionaryBuilderTest {
         assertThat(builder.parseSplitInfo("1/2/3"), is(new int[] { 1, 2, 3 }));
         assertThat(builder.parseSplitInfo("1/U2/3")[1], is(2));
 
-        builder = new UserDictionaryBuilder(null);
+        builder = new UserDictionaryBuilder(null, null);
         assertThat(builder.parseSplitInfo("1/U2/3")[1], is(2 | 1 << 28));
     }
 
@@ -200,7 +200,7 @@ public class DictionaryBuilderTest {
         }
 
         try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,1/2,*,1/2\n");
+            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/2\",*,1/2\n");
             writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*\n");
             writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*\n");
         }
