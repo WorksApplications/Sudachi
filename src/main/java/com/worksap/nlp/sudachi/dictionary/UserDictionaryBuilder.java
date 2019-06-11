@@ -68,7 +68,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         if (wid >= 0) {
             return wid | (1 << 28);
         }
-        return systemLexicon.getWordId(headword, posId, readingForm); // ToDo: headword should be normalized
+        return systemLexicon.getWordId(headword, posId, readingForm);
     }
 
     static void printUsage() {

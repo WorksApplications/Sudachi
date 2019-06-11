@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
@@ -112,10 +111,10 @@ public class DoubleArrayLexicon implements Lexicon {
 
     @Override
     public int getWordId(String headword, short posId, String readingForm) {
-        int[] p = trie.exactMatchSearch(headword.getBytes(StandardCharsets.UTF_8));
-        for (int wid : wordIdTable.get(p[0])) {
+        for (int wid = 0; wid < wordInfos.size(); wid++) {
             WordInfo info = wordInfos.getWordInfo(wid);
-            if (info.getPOSId() == posId && info.getReadingForm().equals(readingForm)) {
+            if (info.getSurface().equals(headword) && info.getPOSId() == posId
+                    && info.getReadingForm().equals(readingForm)) {
                 return wid;
             }
         }
