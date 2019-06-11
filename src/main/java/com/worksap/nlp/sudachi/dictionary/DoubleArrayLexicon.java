@@ -110,6 +110,18 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
+    public int getWordId(String headword, short posId, String readingForm) {
+        for (int wid = 0; wid < wordInfos.size(); wid++) {
+            WordInfo info = wordInfos.getWordInfo(wid);
+            if (info.getSurface().equals(headword) && info.getPOSId() == posId
+                    && info.getReadingForm().equals(readingForm)) {
+                return wid;
+            }
+        }
+        return -1;
+    }
+
+    @Override
     public short getLeftId(int wordId) {
         return wordParams.getLeftId(wordId);
     }

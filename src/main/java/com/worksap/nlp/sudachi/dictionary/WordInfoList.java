@@ -62,6 +62,10 @@ class WordInfoList {
                 readingForm, aUnitSplit, bUnitSplit, wordStructure);
     }
 
+    int size() {
+        return wordSize;
+    }
+
     private int wordIdToOffset(int wordId) {
         return bytes.getInt(offset + 4 * wordId);
     }

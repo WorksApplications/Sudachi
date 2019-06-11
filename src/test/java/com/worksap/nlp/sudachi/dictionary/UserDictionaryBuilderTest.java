@@ -44,15 +44,20 @@ public class UserDictionaryBuilderTest {
 
     File systemDictFile;
     ByteBuffer bytes;
-    Grammar grammar;
+    GrammarImpl grammar;
+    Lexicon systemLexicon;
 
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
         systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
         bytes = MMap.map(systemDictFile.getPath());
+        int offset = 0;
         DictionaryHeader systemHeader = new DictionaryHeader(bytes, 0);
-        grammar = new GrammarImpl(bytes, systemHeader.storageSize());
+        offset += systemHeader.storageSize();
+        grammar = new GrammarImpl(bytes, offset);
+        offset += grammar.storageSize();
+        systemLexicon = new DoubleArrayLexicon(bytes, offset);
     }
 
     @After
@@ -62,8 +67,8 @@ public class UserDictionaryBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithInvalidPOS() {
-        UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar);
-        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n");
+        UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
+        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n".split(","));
     }
 
     @Test
@@ -72,7 +77,8 @@ public class UserDictionaryBuilderTest {
         File inputFile = temporaryFolder.newFile();
 
         try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("東京都市,0,0,0,東京都市,名詞,固有名詞,地名,一般,*,*,ヒガシキョウトシ,東京都市,*,B,3/4/U1,*,3/4/U1\n");
+            writer.write(
+                    "東京都市,0,0,0,東京都市,名詞,固有名詞,地名,一般,*,*,ヒガシキョウトシ,東京都市,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/3/U1\",*,\"4/3/市,名詞,普通名詞,一般,*,*,*,シ\"\n");
             writer.write("市,-1,-1,0,市,名詞,普通名詞,一般,*,*,*,シ,市,*,A,*,*,*\n");
         }
 
@@ -97,8 +103,9 @@ public class UserDictionaryBuilderTest {
         assertThat(info.getDictionaryFormWordId(), is(-1));
         assertThat(info.getReadingForm(), is("ヒガシキョウトシ"));
         assertThat(info.getPOSId(), is((short) 3));
-        assertThat(info.getAunitSplit(), is(new int[] { 3, 4, 1 | (1 << 28) }));
+        assertThat(info.getAunitSplit(), is(new int[] { 4, 3, 1 | (1 << 28) }));
         assertThat(info.getBunitSplit().length, is(0));
+        assertThat(info.getWordStructure(), is(new int[] { 4, 3, 1 | (1 << 28) }));
         Iterator<int[]> i = lexicon.lookup("東京都市".getBytes(StandardCharsets.UTF_8), 0);
         assertTrue(i.hasNext());
         assertThat(i.next(), is(new int[] { 0, "東京都市".getBytes(StandardCharsets.UTF_8).length }));

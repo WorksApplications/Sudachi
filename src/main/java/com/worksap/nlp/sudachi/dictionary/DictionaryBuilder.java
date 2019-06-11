@@ -53,6 +53,9 @@ public class DictionaryBuilder {
         String headword;
         short[] parameters;
         WordInfo wordInfo;
+        String aUnitSplitString;
+        String bUnitSplitString;
+        String wordStructureString;
     }
 
     static class POSTable {
@@ -83,8 +86,7 @@ public class DictionaryBuilder {
         }
         return l.length - r.length;
     });
-    List<short[]> params = new ArrayList<>();
-    List<WordInfo> wordInfos = new ArrayList<>();
+    List<WordEntry> entries = new ArrayList<>();
 
     boolean isUserDictionary = false;
 
@@ -102,7 +104,7 @@ public class DictionaryBuilder {
                 buildLexicon(path, lexiconInput);
             }
         }
-        System.err.println(String.format(" %,d words", wordInfos.size()));
+        System.err.println(String.format(" %,d words", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
@@ -113,15 +115,15 @@ public class DictionaryBuilder {
     void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
         int lineno = -1;
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
-                LineNumberReader reader = new LineNumberReader(isr)) {
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                LineNumberReader reader = new LineNumberReader(isr);
+                CSVParser parser = new CSVParser(reader)) {
+            for (List<String> columns = parser.getNextRecord(); columns != null; columns = parser.getNextRecord()) {
                 lineno = reader.getLineNumber();
-                WordEntry entry = parseLine(line);
+                WordEntry entry = parseLine(columns.toArray(new String[columns.size()]));
                 if (entry.headword != null) {
-                    addToTrie(entry.headword, wordInfos.size());
+                    addToTrie(entry.headword, entries.size());
                 }
-                params.add(entry.parameters);
-                wordInfos.add(entry.wordInfo);
+                entries.add(entry);
             }
         } catch (Exception e) {
             if (lineno > 0) {
@@ -131,12 +133,11 @@ public class DictionaryBuilder {
         }
     }
 
-    WordEntry parseLine(String line) {
-        String[] cols = line.split(",");
+    WordEntry parseLine(String[] cols) {
         if (cols.length != NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
-        for (int i = 0; i < cols.length; i++) {
+        for (int i = 0; i < 15; i++) {
             cols[i] = decode(cols[i]);
         }
 
@@ -145,7 +146,7 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("string is too long");
         }
 
-        if (cols[0].length() == 0) {
+        if (cols[0].isEmpty()) {
             throw new IllegalArgumentException("headword is empty");
         }
 
@@ -166,9 +167,13 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("invalid part of speech");
         }
 
-        int[] aUnitSplit = parseSplitInfo(cols[15]);
-        int[] bUnitSplit = parseSplitInfo(cols[16]);
-        if (cols[14].equals("A") && (aUnitSplit.length != 0 || bUnitSplit.length != 0)) {
+        entry.aUnitSplitString = cols[15];
+        entry.bUnitSplitString = cols[16];
+        entry.wordStructureString = cols[17];
+        checkSplitInfoFormat(entry.aUnitSplitString);
+        checkSplitInfoFormat(entry.bUnitSplitString);
+        checkSplitInfoFormat(entry.wordStructureString);
+        if (cols[14].equals("A") && (!entry.aUnitSplitString.equals("*") || !entry.bUnitSplitString.equals("*"))) {
             throw new IllegalArgumentException("invalid splitting");
         }
 
@@ -177,8 +182,7 @@ public class DictionaryBuilder {
                 (cols[13].equals("*") ? -1 : Integer.parseInt(cols[13])), // dictionaryFormWordId
                 "", // dummy
                 cols[11], // readingForm
-                aUnitSplit, bUnitSplit, parseSplitInfo(cols[17]) // wordStructure
-        );
+                null, null, null);
 
         return entry;
     }
@@ -265,7 +269,7 @@ public class DictionaryBuilder {
 
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ByteBuffer wordIdTable = ByteBuffer.allocate(wordInfos.size() * (4 + 2));
+        ByteBuffer wordIdTable = ByteBuffer.allocate(entries.size() * (4 + 2));
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
         int i = 0;
@@ -311,30 +315,31 @@ public class DictionaryBuilder {
         wordIdTable = null;
 
         System.err.print("writing the word parameters...");
-        buffer.putInt(params.size());
-        for (short[] param : params) {
-            buffer.putShort(param[0]);
-            buffer.putShort(param[1]);
-            buffer.putShort(param[2]);
+        buffer.putInt(entries.size());
+        for (WordEntry entry : entries) {
+            buffer.putShort(entry.parameters[0]);
+            buffer.putShort(entry.parameters[1]);
+            buffer.putShort(entry.parameters[2]);
             buffer.flip();
             output.write(buffer);
             buffer.clear();
         }
-        System.err.println(String.format(" %,d bytes", params.size() * 6 + 4));
+        System.err.println(String.format(" %,d bytes", entries.size() * 6 + 4));
 
         writeWordInfo(output);
     }
 
     void writeWordInfo(FileChannel output) throws IOException {
         long mark = output.position();
-        output.position(mark + 4 * wordInfos.size());
+        output.position(mark + 4 * entries.size());
 
-        ByteBuffer offsets = ByteBuffer.allocate(4 * wordInfos.size());
+        ByteBuffer offsets = ByteBuffer.allocate(4 * entries.size());
         offsets.order(ByteOrder.LITTLE_ENDIAN);
 
         System.err.print("writing the wordInfos...");
         long base = output.position();
-        for (WordInfo wi : wordInfos) {
+        for (WordEntry entry : entries) {
+            WordInfo wi = entry.wordInfo;
             offsets.putInt((int) output.position());
 
             writeString(wi.getSurface());
@@ -351,9 +356,9 @@ public class DictionaryBuilder {
             } else {
                 writeString(wi.getReadingForm());
             }
-            writeIntArray(wi.getAunitSplit());
-            writeIntArray(wi.getBunitSplit());
-            writeIntArray(wi.getWordStructure());
+            writeIntArray(parseSplitInfo(entry.aUnitSplitString));
+            writeIntArray(parseSplitInfo(entry.bUnitSplitString));
+            writeIntArray(parseSplitInfo(entry.wordStructureString));
             buffer.flip();
             output.write(buffer);
             buffer.clear();
@@ -392,26 +397,74 @@ public class DictionaryBuilder {
         return sb.toString();
     }
 
+    void checkSplitInfoFormat(String info) {
+        if (info.chars().filter(i -> i == '/').count() + 1 > ARRAY_MAX_LENGTH) {
+            throw new IllegalArgumentException("too many units");
+        }
+    }
+
     int[] parseSplitInfo(String info) {
         if (info.equals("*")) {
             return new int[0];
         }
-        String[] ids = info.split("/");
-        if (ids.length > ARRAY_MAX_LENGTH) {
+        String[] words = info.split("/");
+        if (words.length > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
         }
-        int[] ret = new int[ids.length];
-        for (int i = 0; i < ids.length; i++) {
-            if (ids[i].startsWith("U")) {
-                ret[i] = Integer.parseInt(ids[i].substring(1));
-                if (isUserDictionary) {
-                    ret[i] |= (1 << 28);
-                }
+        int[] ret = new int[words.length];
+        for (int i = 0; i < words.length; i++) {
+            if (isId(words[i])) {
+                ret[i] = parseId(words[i]);
             } else {
-                ret[i] = Integer.parseInt(ids[i]);
+                ret[i] = wordToId(words[i]);
             }
         }
         return ret;
+    }
+
+    boolean isId(String text) {
+        return text.matches("U?\\d+");
+    }
+
+    int parseId(String text) {
+        int id = 0;
+        if (text.startsWith("U")) {
+            id = Integer.parseInt(text.substring(1));
+            if (isUserDictionary) {
+                id |= (1 << 28);
+            }
+        } else {
+            id = Integer.parseInt(text);
+            if (id < 0) {
+                throw new IllegalArgumentException("not found such a word");
+            }
+        }
+        return id;
+    }
+
+    int wordToId(String text) {
+        String[] cols = text.split(",");
+        if (cols.length < 8) {
+            throw new IllegalArgumentException("too few columns");
+        }
+        String headword = decode(cols[0]);
+        short posId = getPosId(cols[1], cols[2], cols[3], cols[4], cols[5], cols[6]);
+        if (posId < 0) {
+            throw new IllegalArgumentException("invalid part of speech");
+        }
+        String reading = decode(cols[7]);
+        return getWordId(headword, posId, reading);
+    }
+
+    int getWordId(String headword, short posId, String readingForm) {
+        for (int wid = 0; wid < entries.size(); wid++) {
+            WordInfo info = entries.get(wid).wordInfo;
+            if (info.getSurface().equals(headword) && info.getPOSId() == posId
+                    && info.getReadingForm().equals(readingForm)) {
+                return wid;
+            }
+        }
+        return -1;
     }
 
     void writeString(String text) {
