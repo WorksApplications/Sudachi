@@ -63,7 +63,7 @@ public class UserDictionaryBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithInvalidPOS() {
         UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar);
-        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n");
+        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n".split(","));
     }
 
     @Test

@@ -113,10 +113,11 @@ public class DictionaryBuilder {
     void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
         int lineno = -1;
         try (InputStreamReader isr = new InputStreamReader(lexiconInput);
-                LineNumberReader reader = new LineNumberReader(isr)) {
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                LineNumberReader reader = new LineNumberReader(isr);
+                CSVParser parser = new CSVParser(reader)) {
+            for (List<String> columns = parser.getNextRecord(); columns != null; columns = parser.getNextRecord()) {
                 lineno = reader.getLineNumber();
-                WordEntry entry = parseLine(line);
+                WordEntry entry = parseLine(columns.toArray(new String[columns.size()]));
                 if (entry.headword != null) {
                     addToTrie(entry.headword, wordInfos.size());
                 }
@@ -131,8 +132,7 @@ public class DictionaryBuilder {
         }
     }
 
-    WordEntry parseLine(String line) {
-        String[] cols = line.split(",");
+    WordEntry parseLine(String[] cols) {
         if (cols.length != NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
@@ -145,7 +145,7 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("string is too long");
         }
 
-        if (cols[0].length() == 0) {
+        if (cols[0].isEmpty()) {
             throw new IllegalArgumentException("headword is empty");
         }
 
