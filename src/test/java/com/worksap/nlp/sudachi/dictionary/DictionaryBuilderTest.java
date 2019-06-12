@@ -33,8 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import com.worksap.nlp.sudachi.MMap;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -208,49 +206,48 @@ public class DictionaryBuilderTest {
         DictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-m", matrixFile.getPath(), "-d", "test",
                 inputFile.getPath() });
 
-        ByteBuffer bytes = MMap.map(outputFile.getPath());
-        int offset = 0;
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-        assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION));
-        assertThat(header.getDescription(), is("test"));
+        try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
 
-        GrammarImpl grammar = new GrammarImpl(bytes, offset);
-        offset += grammar.storageSize();
-        assertThat(grammar.getPartOfSpeechSize(), is(2));
-        assertThat(grammar.getPartOfSpeechString((short) 0), contains("名詞", "固有名詞", "地名", "一般", "*", "*"));
-        assertThat(grammar.getPartOfSpeechString((short) 1), contains("名詞", "普通名詞", "一般", "*", "*", "*"));
-        assertThat(grammar.getConnectCost((short) 0, (short) 0), is((short) 200));
+            DictionaryHeader header = dictionary.getDictionaryHeader();
+            assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION));
+            assertThat(header.getDescription(), is("test"));
 
-        Lexicon lexicon = new DoubleArrayLexicon(bytes, offset);
-        assertThat(lexicon.size(), is(3));
+            Grammar grammar = dictionary.getGrammar();
+            assertThat(grammar.getPartOfSpeechSize(), is(2));
+            assertThat(grammar.getPartOfSpeechString((short) 0), contains("名詞", "固有名詞", "地名", "一般", "*", "*"));
+            assertThat(grammar.getPartOfSpeechString((short) 1), contains("名詞", "普通名詞", "一般", "*", "*", "*"));
+            assertThat(grammar.getConnectCost((short) 0, (short) 0), is((short) 200));
 
-        assertThat(lexicon.getLeftId(0), is((short) 0));
-        assertThat(lexicon.getCost(0), is((short) 0));
-        WordInfo info = lexicon.getWordInfo(0);
-        assertThat(info.getSurface(), is("東京都"));
-        assertThat(info.getNormalizedForm(), is("東京都"));
-        assertThat(info.getDictionaryFormWordId(), is(-1));
-        assertThat(info.getReadingForm(), is("ヒガシキョウト"));
-        assertThat(info.getPOSId(), is((short) 0));
-        assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
-        assertThat(info.getBunitSplit().length, is(0));
-        Iterator<int[]> i = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
-        assertTrue(i.hasNext());
-        assertThat(i.next(), is(new int[] { 0, "東京都".getBytes(StandardCharsets.UTF_8).length }));
-        assertFalse(i.hasNext());
+            Lexicon lexicon = dictionary.getLexicon();
+            assertThat(lexicon.size(), is(3));
 
-        assertThat(lexicon.getLeftId(1), is((short) -1));
-        assertThat(lexicon.getCost(1), is((short) 0));
-        info = lexicon.getWordInfo(1);
-        assertThat(info.getSurface(), is("東"));
-        assertThat(info.getNormalizedForm(), is("ひがし"));
-        assertThat(info.getDictionaryFormWordId(), is(-1));
-        assertThat(info.getReadingForm(), is("ヒガシ"));
-        assertThat(info.getPOSId(), is((short) 1));
-        assertThat(info.getAunitSplit().length, is(0));
-        assertThat(info.getBunitSplit().length, is(0));
-        i = lexicon.lookup("東".getBytes(StandardCharsets.UTF_8), 0);
-        assertFalse(i.hasNext());
+            assertThat(lexicon.getLeftId(0), is((short) 0));
+            assertThat(lexicon.getCost(0), is((short) 0));
+            WordInfo info = lexicon.getWordInfo(0);
+            assertThat(info.getSurface(), is("東京都"));
+            assertThat(info.getNormalizedForm(), is("東京都"));
+            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getReadingForm(), is("ヒガシキョウト"));
+            assertThat(info.getPOSId(), is((short) 0));
+            assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
+            assertThat(info.getBunitSplit().length, is(0));
+            Iterator<int[]> i = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
+            assertTrue(i.hasNext());
+            assertThat(i.next(), is(new int[] { 0, "東京都".getBytes(StandardCharsets.UTF_8).length }));
+            assertFalse(i.hasNext());
+
+            assertThat(lexicon.getLeftId(1), is((short) -1));
+            assertThat(lexicon.getCost(1), is((short) 0));
+            info = lexicon.getWordInfo(1);
+            assertThat(info.getSurface(), is("東"));
+            assertThat(info.getNormalizedForm(), is("ひがし"));
+            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getReadingForm(), is("ヒガシ"));
+            assertThat(info.getPOSId(), is((short) 1));
+            assertThat(info.getAunitSplit().length, is(0));
+            assertThat(info.getBunitSplit().length, is(0));
+            i = lexicon.lookup("東".getBytes(StandardCharsets.UTF_8), 0);
+            assertFalse(i.hasNext());
+        }
     }
 }

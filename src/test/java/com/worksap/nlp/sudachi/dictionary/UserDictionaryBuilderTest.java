@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
@@ -34,7 +33,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.worksap.nlp.sudachi.MMap;
 import com.worksap.nlp.sudachi.Utils;
 
 public class UserDictionaryBuilderTest {
@@ -43,26 +41,22 @@ public class UserDictionaryBuilderTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     File systemDictFile;
-    ByteBuffer bytes;
-    GrammarImpl grammar;
+    BinaryDictionary systemDict;
+    Grammar grammar;
     Lexicon systemLexicon;
 
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
         systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
-        bytes = MMap.map(systemDictFile.getPath());
-        int offset = 0;
-        DictionaryHeader systemHeader = new DictionaryHeader(bytes, 0);
-        offset += systemHeader.storageSize();
-        grammar = new GrammarImpl(bytes, offset);
-        offset += grammar.storageSize();
-        systemLexicon = new DoubleArrayLexicon(bytes, offset);
+        systemDict = new BinaryDictionary(systemDictFile.getPath());
+        grammar = systemDict.getGrammar();
+        systemLexicon = systemDict.getLexicon();
     }
 
     @After
     public void tearDown() throws IOException {
-        MMap.unmap(bytes);
+        systemDict.close();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -85,43 +79,42 @@ public class UserDictionaryBuilderTest {
         UserDictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-s", systemDictFile.getPath(), "-d",
                 "test", inputFile.getPath() });
 
-        ByteBuffer bytes = MMap.map(outputFile.getPath());
-        int offset = 0;
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-        assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION));
-        assertThat(header.getDescription(), is("test"));
+        try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
+            DictionaryHeader header = dictionary.getDictionaryHeader();
+            assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION));
+            assertThat(header.getDescription(), is("test"));
 
-        Lexicon lexicon = new DoubleArrayLexicon(bytes, offset);
-        assertThat(lexicon.size(), is(2));
+            Lexicon lexicon = dictionary.getLexicon();
+            assertThat(lexicon.size(), is(2));
 
-        assertThat(lexicon.getLeftId(0), is((short) 0));
-        assertThat(lexicon.getCost(0), is((short) 0));
-        WordInfo info = lexicon.getWordInfo(0);
-        assertThat(info.getSurface(), is("東京都市"));
-        assertThat(info.getNormalizedForm(), is("東京都市"));
-        assertThat(info.getDictionaryFormWordId(), is(-1));
-        assertThat(info.getReadingForm(), is("ヒガシキョウトシ"));
-        assertThat(info.getPOSId(), is((short) 3));
-        assertThat(info.getAunitSplit(), is(new int[] { 4, 3, 1 | (1 << 28) }));
-        assertThat(info.getBunitSplit().length, is(0));
-        assertThat(info.getWordStructure(), is(new int[] { 4, 3, 1 | (1 << 28) }));
-        Iterator<int[]> i = lexicon.lookup("東京都市".getBytes(StandardCharsets.UTF_8), 0);
-        assertTrue(i.hasNext());
-        assertThat(i.next(), is(new int[] { 0, "東京都市".getBytes(StandardCharsets.UTF_8).length }));
-        assertFalse(i.hasNext());
+            assertThat(lexicon.getLeftId(0), is((short) 0));
+            assertThat(lexicon.getCost(0), is((short) 0));
+            WordInfo info = lexicon.getWordInfo(0);
+            assertThat(info.getSurface(), is("東京都市"));
+            assertThat(info.getNormalizedForm(), is("東京都市"));
+            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getReadingForm(), is("ヒガシキョウトシ"));
+            assertThat(info.getPOSId(), is((short) 3));
+            assertThat(info.getAunitSplit(), is(new int[] { 4, 3, 1 | (1 << 28) }));
+            assertThat(info.getBunitSplit().length, is(0));
+            assertThat(info.getWordStructure(), is(new int[] { 4, 3, 1 | (1 << 28) }));
+            Iterator<int[]> i = lexicon.lookup("東京都市".getBytes(StandardCharsets.UTF_8), 0);
+            assertTrue(i.hasNext());
+            assertThat(i.next(), is(new int[] { 0, "東京都市".getBytes(StandardCharsets.UTF_8).length }));
+            assertFalse(i.hasNext());
 
-        assertThat(lexicon.getLeftId(1), is((short) -1));
-        assertThat(lexicon.getCost(1), is((short) 0));
-        info = lexicon.getWordInfo(1);
-        assertThat(info.getSurface(), is("市"));
-        assertThat(info.getNormalizedForm(), is("市"));
-        assertThat(info.getDictionaryFormWordId(), is(-1));
-        assertThat(info.getReadingForm(), is("シ"));
-        assertThat(info.getPOSId(), is((short) 4));
-        assertThat(info.getAunitSplit().length, is(0));
-        assertThat(info.getBunitSplit().length, is(0));
-        i = lexicon.lookup("市".getBytes(StandardCharsets.UTF_8), 0);
-        assertFalse(i.hasNext());
+            assertThat(lexicon.getLeftId(1), is((short) -1));
+            assertThat(lexicon.getCost(1), is((short) 0));
+            info = lexicon.getWordInfo(1);
+            assertThat(info.getSurface(), is("市"));
+            assertThat(info.getNormalizedForm(), is("市"));
+            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getReadingForm(), is("シ"));
+            assertThat(info.getPOSId(), is((short) 4));
+            assertThat(info.getAunitSplit().length, is(0));
+            assertThat(info.getBunitSplit().length, is(0));
+            i = lexicon.lookup("市".getBytes(StandardCharsets.UTF_8), 0);
+            assertFalse(i.hasNext());
+        }
     }
 }

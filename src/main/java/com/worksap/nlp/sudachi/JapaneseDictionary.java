@@ -20,18 +20,15 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.DictionaryHeader;
-import com.worksap.nlp.sudachi.dictionary.DictionaryVersion;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
 import com.worksap.nlp.sudachi.dictionary.LexiconSet;
 
 class JapaneseDictionary implements Dictionary {
@@ -41,7 +38,7 @@ class JapaneseDictionary implements Dictionary {
     List<InputTextPlugin> inputTextPlugins;
     List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
-    List<ByteBuffer> buffers;
+    List<BinaryDictionary> dictionaries;
 
     JapaneseDictionary() throws IOException {
         this(null, null);
@@ -59,7 +56,7 @@ class JapaneseDictionary implements Dictionary {
         }
         Settings settings = Settings.parseSettings(path, jsonString);
 
-        buffers = new ArrayList<>();
+        dictionaries = new ArrayList<>();
 
         readSystemDictionary(settings.getPath("systemDict"));
         for (EditConnectionCostPlugin p : settings
@@ -95,21 +92,11 @@ class JapaneseDictionary implements Dictionary {
         if (filename == null) {
             throw new IllegalArgumentException("system dictionary is not specified");
         }
-        ByteBuffer bytes = MMap.map(filename);
-        buffers.add(bytes);
 
-        int offset = 0;
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
-            throw new IllegalArgumentException("invalid system dictionary");
-        }
-        offset += header.storageSize();
-
-        GrammarImpl grammarImpl = new GrammarImpl(bytes, offset);
-        this.grammar = grammarImpl;
-        offset += grammarImpl.storageSize();
-
-        lexicon = new LexiconSet(new DoubleArrayLexicon(bytes, offset));
+        BinaryDictionary dictionary = BinaryDictionary.readSystemDictionary(filename);
+        dictionaries.add(dictionary);
+        grammar = dictionary.getGrammar();
+        lexicon = new LexiconSet(dictionary.getLexicon());
     }
 
     void readUserDictionary(String filename) throws IOException {
@@ -117,21 +104,14 @@ class JapaneseDictionary implements Dictionary {
             throw new IllegalArgumentException("too many dictionaries");
         }
 
-        ByteBuffer bytes = MMap.map(filename);
-        buffers.add(bytes);
+        BinaryDictionary dictionary = BinaryDictionary.readUserDictionary(filename);
+        dictionaries.add(dictionary);
 
-        int offset = 0;
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        if (header.getVersion() != DictionaryVersion.USER_DICT_VERSION) {
-            throw new IllegalArgumentException("invalid user dictionary");
-        }
-        offset += header.storageSize();
-
-        DoubleArrayLexicon userLexicon = new DoubleArrayLexicon(bytes, offset);
+        DoubleArrayLexicon userLexicon = dictionary.getLexicon();
         Tokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
                 Collections.emptyList());
-
         userLexicon.calculateCost(tokenizer);
+
         lexicon.add(userLexicon);
     }
 
@@ -148,8 +128,8 @@ class JapaneseDictionary implements Dictionary {
     public void close() throws IOException {
         grammar = null;
         lexicon = null;
-        for (ByteBuffer buffer : buffers) {
-            MMap.unmap(buffer);
+        for (BinaryDictionary dictionary : dictionaries) {
+            dictionary.close();
         }
     }
 

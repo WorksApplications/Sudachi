@@ -19,13 +19,10 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-
-import com.worksap.nlp.sudachi.MMap;
 
 /**
  * A user dictionary building tool. This class provide the converter from the
@@ -121,28 +118,21 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
             return;
         }
 
-        ByteBuffer bytes = MMap.map(sysDictPath);
-        int offset = 0;
-        DictionaryHeader systemHeader = new DictionaryHeader(bytes, offset);
-        if (systemHeader.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
-            System.err.println("Error: invalid system dictionary: " + sysDictPath);
-            return;
-        }
-        offset += systemHeader.storageSize();
-        GrammarImpl grammar = new GrammarImpl(bytes, offset);
-        offset += grammar.storageSize();
-        Lexicon systemLexicon = new DoubleArrayLexicon(bytes, offset);
+        try (BinaryDictionary systemDict = BinaryDictionary.readSystemDictionary(sysDictPath)) {
+            Grammar grammar = systemDict.getGrammar();
+            Lexicon systemLexicon = systemDict.getLexicon();
 
-        List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
+            List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION,
-                Instant.now().getEpochSecond(), description);
+            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION,
+                    Instant.now().getEpochSecond(), description);
 
-        try (FileOutputStream output = new FileOutputStream(outputPath)) {
-            output.write(header.toByte());
+            try (FileOutputStream output = new FileOutputStream(outputPath)) {
+                output.write(header.toByte());
 
-            UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
-            builder.build(lexiconPaths, output);
+                UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
+                builder.build(lexiconPaths, output);
+            }
         }
     }
 }
