@@ -417,6 +417,9 @@ public class DictionaryBuilder {
                 ret[i] = parseId(words[i]);
             } else {
                 ret[i] = wordToId(words[i]);
+                if (ret[i] < 0) {
+                    throw new IllegalArgumentException("not found such a word");
+                }
             }
         }
         return ret;
@@ -435,10 +438,8 @@ public class DictionaryBuilder {
             }
         } else {
             id = Integer.parseInt(text);
-            if (id < 0) {
-                throw new IllegalArgumentException("not found such a word");
-            }
         }
+        checkWordId(id);
         return id;
     }
 
@@ -465,6 +466,12 @@ public class DictionaryBuilder {
             }
         }
         return -1;
+    }
+
+    void checkWordId(int wordId) {
+        if (wordId < 0 || wordId >= entries.size()) {
+            throw new IllegalArgumentException("invalid word ID");
+        }
     }
 
     void writeString(String text) {

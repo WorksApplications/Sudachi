@@ -68,6 +68,15 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         return systemLexicon.getWordId(headword, posId, readingForm);
     }
 
+    @Override
+    void checkWordId(int wordId) {
+        if (wordId >= (1 << 28)) {
+            super.checkWordId(wordId & ((1 << 28) - 1));
+        } else if (wordId < 0 || wordId >= systemLexicon.size()) {
+            throw new IllegalArgumentException("invalid word ID");
+        }
+    }
+
     static void printUsage() {
         System.err.println("usage: UserDictionaryBuilder -o file -s file [-d description] files...");
         System.err.println("\t-o file\toutput to file");

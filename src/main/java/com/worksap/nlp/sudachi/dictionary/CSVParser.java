@@ -51,6 +51,9 @@ class CSVParser implements Closeable {
 
     static final Pattern TOKEN_PATTERN = Pattern.compile(",|\"|[^,\"]+");
 
+    static final String INVALID_FORMAT_ERROR_MESSAGE = "invalid format";
+    static final String UNKNOWN_ERROR_MESSAGE = "unknown error";
+
     private BufferedReader reader;
     private Deque<Token> tokenBuffer = new ArrayDeque<>();
     private boolean hasNextField = false;
@@ -100,7 +103,8 @@ class CSVParser implements Closeable {
         case EOF:
             return null;
         default:
-            throw new IllegalArgumentException("Invalid format");
+            // unreachable
+            throw new IllegalArgumentException(UNKNOWN_ERROR_MESSAGE);
         }
     }
 
@@ -116,13 +120,14 @@ class CSVParser implements Closeable {
             hasNextField = false;
             ungetToken(NL_TOKEN);
             return "";
+        case TEXTDATA:
+            return getUnescapedField(token);
         case EOF:
             hasNextField = false;
             return "";
-        case TEXTDATA:
-            return getUnescapedField(token);
         default:
-            throw new IllegalArgumentException("Invalid format");
+            // unreachable
+            throw new IllegalArgumentException(UNKNOWN_ERROR_MESSAGE);
         }
     }
 
@@ -159,18 +164,19 @@ class CSVParser implements Closeable {
                 break;
             case TEXTDATA:
                 if (isClosed) {
-                    throw new IllegalArgumentException("Invalid format");
+                    throw new IllegalArgumentException(INVALID_FORMAT_ERROR_MESSAGE);
                 } else {
                     content.append(token.content);
                 }
                 break;
             case EOF:
                 if (!isClosed) {
-                    throw new IllegalArgumentException("Invalid format");
+                    throw new IllegalArgumentException(INVALID_FORMAT_ERROR_MESSAGE);
                 }
                 return null;
             default:
-                throw new IllegalArgumentException("Invalid format");
+                // unreachable
+                throw new IllegalArgumentException(UNKNOWN_ERROR_MESSAGE);
             }
         }
     }
@@ -193,7 +199,8 @@ class CSVParser implements Closeable {
             case EOF:
                 return null;
             default:
-                throw new IllegalArgumentException("Invalid format");
+                // unreachable
+                throw new IllegalArgumentException(UNKNOWN_ERROR_MESSAGE);
             }
         }
     }

@@ -39,6 +39,55 @@ import org.junit.rules.TemporaryFolder;
 
 public class DictionaryBuilderTest {
 
+    static class MockLexicon implements Lexicon {
+
+        private final int size;
+
+        MockLexicon(int size) {
+            this.size = size;
+        }
+
+        @Override
+        public int getWordId(String headword, short posId, String readingForm) {
+            return -1;
+        }
+
+        @Override
+        public Iterator<int[]> lookup(byte[] text, int offset) {
+            return null;
+        }
+
+        @Override
+        public short getLeftId(int wordId) {
+            return -1;
+        }
+
+        @Override
+        public short getRightId(int wordId) {
+            return -1;
+        }
+
+        @Override
+        public short getCost(int wordId) {
+            return 0;
+        }
+
+        @Override
+        public WordInfo getWordInfo(int wordId) {
+            return null;
+        }
+
+        @Override
+        public int getDictionaryId(int wordId) {
+            return -1;
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+    }
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -140,12 +189,34 @@ public class DictionaryBuilderTest {
     @Test
     public void parseSplitInfo() {
         DictionaryBuilder builder = new DictionaryBuilder();
+        builder.entries.addAll(Arrays.asList(null, null, null, null));
         assertThat(builder.parseSplitInfo("*").length, is(0));
         assertThat(builder.parseSplitInfo("1/2/3"), is(new int[] { 1, 2, 3 }));
         assertThat(builder.parseSplitInfo("1/U2/3")[1], is(2));
 
-        builder = new UserDictionaryBuilder(null, null);
+        builder = new UserDictionaryBuilder(null, new MockLexicon(4));
+        builder.entries.addAll(Arrays.asList(null, null, null));
         assertThat(builder.parseSplitInfo("1/U2/3")[1], is(2 | 1 << 28));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSplitInfoWithInvalidWordId() {
+        DictionaryBuilder builder = new DictionaryBuilder();
+        builder.parseSplitInfo("1/2/3");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSplitInfoWithInvalidWordIdInUserDict() {
+        DictionaryBuilder builder = new UserDictionaryBuilder(null, new MockLexicon(1));
+        builder.entries.add(null);
+        builder.parseSplitInfo("0/U1");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSplitInfoWithInvalidSystemWordIdInUserDict() {
+        DictionaryBuilder builder = new UserDictionaryBuilder(null, new MockLexicon(1));
+        builder.entries.add(null);
+        builder.parseSplitInfo("1/U0");
     }
 
     @Test
