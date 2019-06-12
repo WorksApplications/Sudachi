@@ -71,8 +71,9 @@ class WordParameterList {
         ByteBuffer newBuffer = ByteBuffer.allocate(ELEMENT_SIZE * size);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = bytes.duplicate();
-        ((Buffer) srcBuffer).position(offset);
-        srcBuffer.limit(offset + ELEMENT_SIZE * size);
+        Buffer buffer = srcBuffer; // a kludge for Java 9
+        buffer.position(offset);
+        buffer.limit(offset + ELEMENT_SIZE * size);
         newBuffer.put(srcBuffer);
         bytes = newBuffer;
         offset = 0;

@@ -131,8 +131,9 @@ public class GrammarImpl implements Grammar {
         ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
         newBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer srcBuffer = connectTableBytes.duplicate();
-        ((Buffer) srcBuffer).position(connectTableOffset);
-        srcBuffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
+        Buffer buffer = srcBuffer; // a kludge for Java 9
+        buffer.position(connectTableOffset);
+        buffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
         newBuffer.put(srcBuffer);
         connectTableBytes = newBuffer;
         connectTableOffset = 0;

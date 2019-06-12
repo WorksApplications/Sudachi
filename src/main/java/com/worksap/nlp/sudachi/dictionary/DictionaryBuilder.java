@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -90,11 +91,13 @@ public class DictionaryBuilder {
 
     boolean isUserDictionary = false;
 
-    ByteBuffer buffer;
+    ByteBuffer byteBuffer;
+    Buffer buffer;
 
     DictionaryBuilder() {
-        buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer = byteBuffer; // a kludge for Java 9
     }
 
     void build(List<String> lexiconPaths, FileInputStream matrixInput, FileOutputStream output) throws IOException {
@@ -197,18 +200,17 @@ public class DictionaryBuilder {
     }
 
     void writeGrammar(FileInputStream matrixInput, FileChannel output) throws IOException {
-
         System.err.print("writing the POS table...");
         convertPOSTable(posTable.getList());
         buffer.flip();
-        output.write(buffer);
-        System.err.println(String.format(" %,d bytes", buffer.limit()));
+        output.write(byteBuffer);
+        System.err.println(String.format(" %,d bytes", byteBuffer.limit()));
         buffer.clear();
 
         System.err.print("writing the connection matrix...");
         ByteBuffer matrix = convertMatrix(matrixInput);
         buffer.flip();
-        output.write(buffer);
+        output.write(byteBuffer);
         buffer.clear();
         output.write(matrix);
         System.err.println(String.format(" %,d bytes", matrix.limit() + 4));
@@ -216,7 +218,7 @@ public class DictionaryBuilder {
     }
 
     void convertPOSTable(List<String> posList) {
-        buffer.putShort((short) posList.size());
+        byteBuffer.putShort((short) posList.size());
 
         for (String pos : posList) {
             for (String text : pos.split(",")) {
@@ -235,8 +237,8 @@ public class DictionaryBuilder {
         String[] lr = header.split("\\s+");
         short leftSize = Short.parseShort(lr[0]);
         short rightSize = Short.parseShort(lr[1]);
-        buffer.putShort(leftSize);
-        buffer.putShort(rightSize);
+        byteBuffer.putShort(leftSize);
+        byteBuffer.putShort(rightSize);
 
         ByteBuffer matrix = ByteBuffer.allocate(2 * leftSize * rightSize);
         matrix.order(ByteOrder.LITTLE_ENDIAN);
@@ -294,9 +296,9 @@ public class DictionaryBuilder {
 
         System.err.print("writing the trie...");
         buffer.clear();
-        buffer.putInt(trie.size());
+        byteBuffer.putInt(trie.size());
         buffer.flip();
-        output.write(buffer);
+        output.write(byteBuffer);
         buffer.clear();
 
         output.write(trie.byteArray());
@@ -304,24 +306,24 @@ public class DictionaryBuilder {
         trie = null;
 
         System.err.print("writing the word-ID table...");
-        buffer.putInt(wordIdTable.position());
+        byteBuffer.putInt(wordIdTable.position());
         buffer.flip();
-        output.write(buffer);
+        output.write(byteBuffer);
         buffer.clear();
 
-        wordIdTable.flip();
+        ((Buffer) wordIdTable).flip(); // a kludge for Java 9
         output.write(wordIdTable);
         System.err.println(String.format(" %,d bytes", wordIdTable.position() + 4));
         wordIdTable = null;
 
         System.err.print("writing the word parameters...");
-        buffer.putInt(entries.size());
+        byteBuffer.putInt(entries.size());
         for (WordEntry entry : entries) {
-            buffer.putShort(entry.parameters[0]);
-            buffer.putShort(entry.parameters[1]);
-            buffer.putShort(entry.parameters[2]);
+            byteBuffer.putShort(entry.parameters[0]);
+            byteBuffer.putShort(entry.parameters[1]);
+            byteBuffer.putShort(entry.parameters[2]);
             buffer.flip();
-            output.write(buffer);
+            output.write(byteBuffer);
             buffer.clear();
         }
         System.err.println(String.format(" %,d bytes", entries.size() * 6 + 4));
@@ -344,13 +346,13 @@ public class DictionaryBuilder {
 
             writeString(wi.getSurface());
             writeStringLength(wi.getLength());
-            buffer.putShort(wi.getPOSId());
+            byteBuffer.putShort(wi.getPOSId());
             if (wi.getNormalizedForm().equals(wi.getSurface())) {
                 writeString("");
             } else {
                 writeString(wi.getNormalizedForm());
             }
-            buffer.putInt(wi.getDictionaryFormWordId());
+            byteBuffer.putInt(wi.getDictionaryFormWordId());
             if (wi.getReadingForm().equals(wi.getSurface())) {
                 writeString("");
             } else {
@@ -360,14 +362,14 @@ public class DictionaryBuilder {
             writeIntArray(parseSplitInfo(entry.bUnitSplitString));
             writeIntArray(parseSplitInfo(entry.wordStructureString));
             buffer.flip();
-            output.write(buffer);
+            output.write(byteBuffer);
             buffer.clear();
         }
         System.err.println(String.format(" %,d bytes", output.position() - base));
 
         System.err.print("writing wordInfo offsets...");
         output.position(mark);
-        offsets.flip();
+        ((Buffer) offsets).flip(); // a kludge for Java 9
         output.write(offsets);
         System.err.println(String.format(" %,d bytes", offsets.position()));
     }
@@ -477,23 +479,23 @@ public class DictionaryBuilder {
     void writeString(String text) {
         writeStringLength((short) text.length());
         for (int i = 0; i < text.length(); i++) {
-            buffer.putChar(text.charAt(i));
+            byteBuffer.putChar(text.charAt(i));
         }
     }
 
     void writeStringLength(short length) {
         if (length <= Byte.MAX_VALUE) {
-            buffer.put((byte) length);
+            byteBuffer.put((byte) length);
         } else {
-            buffer.put((byte) ((length >> 8) | 0x80));
-            buffer.put((byte) (length & 0xFF));
+            byteBuffer.put((byte) ((length >> 8) | 0x80));
+            byteBuffer.put((byte) (length & 0xFF));
         }
     }
 
     void writeIntArray(int[] array) {
-        buffer.put((byte) array.length);
+        byteBuffer.put((byte) array.length);
         for (int i : array) {
-            buffer.putInt(i);
+            byteBuffer.putInt(i);
         }
     }
 

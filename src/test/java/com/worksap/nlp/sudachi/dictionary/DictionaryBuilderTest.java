@@ -163,7 +163,7 @@ public class DictionaryBuilderTest {
     public void convertPOSTable() {
         DictionaryBuilder builder = new DictionaryBuilder();
         builder.convertPOSTable(Arrays.asList("a,b,c,d,e,f", "g,h,i,j,k,l"));
-        assertThat(builder.buffer.position(), is(2 + 3 * 12));
+        assertThat(builder.byteBuffer.position(), is(2 + 3 * 12));
     }
 
     @Test
@@ -172,8 +172,8 @@ public class DictionaryBuilderTest {
                 "2 3\n0 0 0\n0 1 1\n0 2 2\n\n1 0 3\n1 1 4\n1 2 5\n".getBytes(StandardCharsets.UTF_8));
         DictionaryBuilder builder = new DictionaryBuilder();
         ByteBuffer matrix = builder.convertMatrix(input);
-        assertThat(builder.buffer.getShort(0), is((short) 2));
-        assertThat(builder.buffer.getShort(2), is((short) 3));
+        assertThat(builder.byteBuffer.getShort(0), is((short) 2));
+        assertThat(builder.byteBuffer.getShort(2), is((short) 3));
         assertThat(matrix.limit(), is(2 * 3 * 2));
         assertThat(matrix.getShort(0), is((short) 0));
         assertThat(matrix.getShort((2 + 1) * 2), is((short) 4));
@@ -222,40 +222,40 @@ public class DictionaryBuilderTest {
     @Test
     public void writeString() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        int position = builder.buffer.position();
+        int position = builder.byteBuffer.position();
         builder.writeString("");
-        assertThat(builder.buffer.get(position), is((byte) 0));
-        assertThat(builder.buffer.position(), is(position + 1));
+        assertThat(builder.byteBuffer.get(position), is((byte) 0));
+        assertThat(builder.byteBuffer.position(), is(position + 1));
 
-        position = builder.buffer.position();
+        position = builder.byteBuffer.position();
         builder.writeString("あ𠮟");
-        assertThat(builder.buffer.get(position), is((byte) 3));
-        assertThat(builder.buffer.getChar(position + 1), is('あ'));
-        assertThat(builder.buffer.getChar(position + 3), is('\ud842'));
-        assertThat(builder.buffer.getChar(position + 5), is('\udf9f'));
-        assertThat(builder.buffer.position(), is(position + 7));
+        assertThat(builder.byteBuffer.get(position), is((byte) 3));
+        assertThat(builder.byteBuffer.getChar(position + 1), is('あ'));
+        assertThat(builder.byteBuffer.getChar(position + 3), is('\ud842'));
+        assertThat(builder.byteBuffer.getChar(position + 5), is('\udf9f'));
+        assertThat(builder.byteBuffer.position(), is(position + 7));
 
-        position = builder.buffer.position();
+        position = builder.byteBuffer.position();
         final String longString = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
         int length = longString.length();
         builder.writeString(longString);
-        assertThat(builder.buffer.get(position), is((byte) (length >> 8 | 0x80)));
-        assertThat(builder.buffer.get(position + 1), is((byte) (length & 0xff)));
-        assertThat(builder.buffer.position(), is(position + 2 + length * 2));
+        assertThat(builder.byteBuffer.get(position), is((byte) (length >> 8 | 0x80)));
+        assertThat(builder.byteBuffer.get(position + 1), is((byte) (length & 0xff)));
+        assertThat(builder.byteBuffer.position(), is(position + 2 + length * 2));
     }
 
     @Test
     public void writeIntArray() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        int position = builder.buffer.position();
+        int position = builder.byteBuffer.position();
         builder.writeIntArray(new int[] {});
-        assertThat(builder.buffer.get(position), is((byte) 0));
+        assertThat(builder.byteBuffer.get(position), is((byte) 0));
         builder.writeIntArray(new int[] { 1, 2, 3 });
-        assertThat(builder.buffer.get(position + 1), is((byte) 3));
-        assertThat(builder.buffer.getInt(position + 2), is(1));
-        assertThat(builder.buffer.getInt(position + 6), is(2));
-        assertThat(builder.buffer.getInt(position + 10), is(3));
-        assertThat(builder.buffer.position(), is(position + 14));
+        assertThat(builder.byteBuffer.get(position + 1), is((byte) 3));
+        assertThat(builder.byteBuffer.getInt(position + 2), is(1));
+        assertThat(builder.byteBuffer.getInt(position + 6), is(2));
+        assertThat(builder.byteBuffer.getInt(position + 10), is(3));
+        assertThat(builder.byteBuffer.position(), is(position + 14));
     }
 
     @Test
