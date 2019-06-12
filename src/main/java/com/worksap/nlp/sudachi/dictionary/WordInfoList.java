@@ -34,7 +34,7 @@ class WordInfoList {
     WordInfo getWordInfo(int wordId) {
         ByteBuffer buf = bytes.asReadOnlyBuffer();
         buf.order(bytes.order());
-        ((Buffer) buf).position(wordIdToOffset(wordId));
+        ((Buffer) buf).position(wordIdToOffset(wordId)); // a kludge for Java 9
 
         String surface = bufferToString(buf);
         short headwordLength = (short) bufferToStringLength(buf);

@@ -38,7 +38,7 @@ public class DoubleArrayLexicon implements Lexicon {
         trie = new DoubleArray();
         int size = bytes.getInt(offset);
         offset += 4;
-        ((Buffer) bytes).position(offset);
+        ((Buffer) bytes).position(offset); // a kludge for Java 9
         IntBuffer array = bytes.asIntBuffer();
         trie.setArray(array, size);
         offset += trie.totalSize();
