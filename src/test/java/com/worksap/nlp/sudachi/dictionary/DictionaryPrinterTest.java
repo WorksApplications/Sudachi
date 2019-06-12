@@ -57,14 +57,15 @@ public class DictionaryPrinterTest {
     public void printHeaderWithUserDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         File systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
-        Grammar grammar = DictionaryPrinter.readGrammar(systemDictFile.getPath());
-        String[] actuals;
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
-            DictionaryPrinter.printDictionary(inputFile.getPath(), grammar, ps);
-            actuals = output.toString().split("\n");
+        try (BinaryDictionary systemDict = BinaryDictionary.readSystemDictionary(systemDictFile.getPath())) {
+            String[] actuals;
+            try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
+                DictionaryPrinter.printDictionary(inputFile.getPath(), systemDict, ps);
+                actuals = output.toString().split("\n");
+            }
+            assertThat(actuals.length, is(3));
+            assertThat(actuals[2], is("東京府,6,6,2816,東京府,名詞,固有名詞,地名,一般,*,*,トウキョウフ,東京府,*,B,5/U1,*,5/U1"));
         }
-        assertThat(actuals.length, is(3));
-        assertThat(actuals[2], is("東京府,6,6,2816,東京府,名詞,固有名詞,地名,一般,*,*,トウキョウフ,東京府,*,B,5/U1,*,5/U1"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -78,6 +79,6 @@ public class DictionaryPrinterTest {
     @Test(expected = IOException.class)
     public void readGrammarWithInvalidFile() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "unk.def");
-        DictionaryPrinter.readGrammar(inputFile.getPath());
+        BinaryDictionary.readSystemDictionary(inputFile.getPath());
     }
 }

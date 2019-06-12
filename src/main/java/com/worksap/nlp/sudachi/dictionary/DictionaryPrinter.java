@@ -18,64 +18,49 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.worksap.nlp.sudachi.MMap;
 
 public class DictionaryPrinter {
 
     private DictionaryPrinter() {
     }
 
-    static Grammar readGrammar(String filename) throws IOException {
-        ByteBuffer bytes = MMap.map(filename);
-        int offset = 0;
+    static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
+        Grammar grammar = null;
 
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-        if (header.getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
-            throw new IOException(filename + " is not a system dictionary");
-        }
-        return new GrammarImpl(bytes, offset);
-    }
+        try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
+            if (dictionary.getDictionaryHeader().getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
+                grammar = dictionary.getGrammar();
+            } else if (systemDict == null) {
+                throw new IllegalArgumentException("the system dictionary is not specified");
+            } else {
+                grammar = systemDict.getGrammar();
+            }
 
-    static void printDictionary(String filename, Grammar grammar, PrintStream output) throws IOException {
-        ByteBuffer bytes = MMap.map(filename);
-        int offset = 0;
+            List<String> posStrings = new ArrayList<>();
+            for (short pid = 0; pid < grammar.getPartOfSpeechSize(); pid++) {
+                posStrings.add(String.join(",", grammar.getPartOfSpeechString(pid)));
+            }
 
-        DictionaryHeader header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-        if (header.getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
-            grammar = new GrammarImpl(bytes, offset);
-            offset += ((GrammarImpl) grammar).storageSize();
-        } else if (grammar == null) {
-            throw new IllegalArgumentException("the system dictionary is not specified");
-        }
+            Lexicon lexicon = dictionary.getLexicon();
+            for (int wordId = 0; wordId < lexicon.size(); wordId++) {
+                short leftId = lexicon.getLeftId(wordId);
+                short rightId = lexicon.getRightId(wordId);
+                short cost = lexicon.getCost(wordId);
+                WordInfo wordInfo = lexicon.getWordInfo(wordId);
 
-        List<String> posStrings = new ArrayList<>();
-        for (short pid = 0; pid < grammar.getPartOfSpeechSize(); pid++) {
-            posStrings.add(String.join(",", grammar.getPartOfSpeechString(pid)));
-        }
+                char unitType = getUnitType(wordInfo);
 
-        Lexicon lexicon = new DoubleArrayLexicon(bytes, offset);
-        for (int wordId = 0; wordId < lexicon.size(); wordId++) {
-            short leftId = lexicon.getLeftId(wordId);
-            short rightId = lexicon.getRightId(wordId);
-            short cost = lexicon.getCost(wordId);
-            WordInfo wordInfo = lexicon.getWordInfo(wordId);
-
-            char unitType = getUnitType(wordInfo);
-
-            output.println(
-                    String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s", wordInfo.getSurface(), leftId, rightId,
-                            cost, wordInfo.getSurface(), posStrings.get(wordInfo.getPOSId()), wordInfo.getReadingForm(),
-                            wordInfo.getNormalizedForm(), wordIdToString(wordInfo.getDictionaryFormWordId()), unitType,
-                            splitToString(wordInfo.getAunitSplit()), splitToString(wordInfo.getBunitSplit()),
-                            splitToString(wordInfo.getWordStructure())));
+                output.println(String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s", wordInfo.getSurface(), leftId,
+                        rightId, cost, wordInfo.getSurface(), posStrings.get(wordInfo.getPOSId()),
+                        wordInfo.getReadingForm(), wordInfo.getNormalizedForm(),
+                        wordIdToString(wordInfo.getDictionaryFormWordId()), unitType,
+                        splitToString(wordInfo.getAunitSplit()), splitToString(wordInfo.getBunitSplit()),
+                        splitToString(wordInfo.getWordStructure())));
+            }
         }
     }
 
@@ -123,23 +108,29 @@ public class DictionaryPrinter {
      *             if IO
      */
     public static void main(String[] args) throws IOException {
-        Grammar grammar = null;
+        BinaryDictionary systemDict = null;
 
-        int i = 0;
-        for (i = 0; i < args.length; i++) {
-            if (args[i].equals("-s") && i + 1 < args.length) {
-                grammar = readGrammar(args[++i]);
-            } else if (args[i].equals("-h")) {
-                System.err.println("usage: PrintDictionary [-s file] file");
-                System.err.println("\t-s file\tsystem dictionary");
-                return;
-            } else {
-                break;
+        try {
+            int i = 0;
+            for (i = 0; i < args.length; i++) {
+                if (args[i].equals("-s") && i + 1 < args.length) {
+                    systemDict = BinaryDictionary.readSystemDictionary(args[++i]);
+                } else if (args[i].equals("-h")) {
+                    System.err.println("usage: PrintDictionary [-s file] file");
+                    System.err.println("\t-s file\tsystem dictionary");
+                    return;
+                } else {
+                    break;
+                }
             }
-        }
 
-        if (i < args.length) {
-            printDictionary(args[i], grammar, System.out);
+            if (i < args.length) {
+                printDictionary(args[i], systemDict, System.out);
+            }
+        } finally {
+            if (systemDict != null) {
+                systemDict.close();
+            }
         }
     }
 }
