@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,11 +25,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * A command-line morphological analysis tool.
  */
 public class SudachiCommandLine {
+
+    static Logger logger;
 
     static class FileOrStdoutPrintStream extends PrintStream {
 
@@ -80,7 +85,7 @@ public class SudachiCommandLine {
                     output.println("EOS");
                 } catch (RuntimeException e) {
                     if (ignoreError) {
-                        e.printStackTrace();
+                        logger.throwing(SudachiCommandLine.class.getName(), "run", e);
                     } else {
                         throw e;
                     }
@@ -127,6 +132,12 @@ public class SudachiCommandLine {
      *             if IO is failed
      */
     public static void main(String[] args) throws IOException {
+        InputStream is = SudachiCommandLine.class.getResourceAsStream("/logger.properties");
+        if (is != null) {
+            LogManager.getLogManager().readConfiguration(is);
+        }
+        logger = Logger.getLogger(SudachiCommandLine.class.getName());
+
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
         String resourcesDirectory = null;
@@ -164,14 +175,15 @@ public class SudachiCommandLine {
             } else if (args[i].equals("-f")) {
                 ignoreError = true;
             } else if (args[i].equals("-h")) {
-                System.err.println("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]");
-                System.err.println("\t-r file\tread settings from file");
-                System.err.println("\t-p directory\troot directory of resources");
-                System.err.println("\t-m mode\tmode of splitting");
-                System.err.println("\t-o file\toutput to file");
-                System.err.println("\t-a\tprint all fields");
-                System.err.println("\t-f\tignore error");
-                System.err.println("\t-d\tdebug mode");
+                Console console = System.console();
+                console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]");
+                console.printf("\t-r file\tread settings from file");
+                console.printf("\t-p directory\troot directory of resources");
+                console.printf("\t-m mode\tmode of splitting");
+                console.printf("\t-o file\toutput to file");
+                console.printf("\t-a\tprint all fields");
+                console.printf("\t-f\tignore error");
+                console.printf("\t-d\tdebug mode");
                 return;
             } else {
                 break;
