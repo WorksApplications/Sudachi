@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,13 +42,13 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
     }
 
     void build(List<String> lexiconPaths, FileOutputStream output) throws IOException {
-        System.err.print("reading the source file...");
+        logger.info("reading the source file...");
         for (String path : lexiconPaths) {
             try (FileInputStream lexiconInput = new FileInputStream(path)) {
                 buildLexicon(path, lexiconInput);
             }
         }
-        System.err.println(String.format(" %,d words", entries.size()));
+        logger.info(String.format(" %,d words\n", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeLexicon(outputChannel);
@@ -78,10 +79,11 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
     }
 
     static void printUsage() {
-        System.err.println("usage: UserDictionaryBuilder -o file -s file [-d description] files...");
-        System.err.println("\t-o file\toutput to file");
-        System.err.println("\t-s file\tsystem dictionary");
-        System.err.println("\t-d description\tcomment");
+        Console console = System.console();
+        console.printf("usage: UserDictionaryBuilder -o file -s file [-d description] files...");
+        console.printf("\t-o file\toutput to file");
+        console.printf("\t-s file\tsystem dictionary");
+        console.printf("\t-d description\tcomment");
     }
 
     /**
@@ -102,6 +104,8 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
      *             if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
+        readLoggerConfig();
+
         String description = "";
         String outputPath = null;
         String sysDictPath = null;
