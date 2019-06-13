@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -94,20 +97,23 @@ public class DictionaryBuilder {
     ByteBuffer byteBuffer;
     Buffer buffer;
 
+    protected Logger logger;
+
     DictionaryBuilder() {
+        logger = Logger.getLogger(this.getClass().getName());
         byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer = byteBuffer; // a kludge for Java 9
     }
 
     void build(List<String> lexiconPaths, FileInputStream matrixInput, FileOutputStream output) throws IOException {
-        System.err.print("reading the source file...");
+        logger.info("reading the source file...");
         for (String path : lexiconPaths) {
             try (FileInputStream lexiconInput = new FileInputStream(path)) {
                 buildLexicon(path, lexiconInput);
             }
         }
-        System.err.println(String.format(" %,d words", entries.size()));
+        logger.info(String.format(" %,d words\n", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
@@ -130,7 +136,7 @@ public class DictionaryBuilder {
             }
         } catch (Exception e) {
             if (lineno > 0) {
-                System.err.println("Error: " + e.getMessage() + " at line " + lineno + " in " + filename);
+                logger.severe("Error: " + e.getMessage() + " at line " + lineno + " in " + filename + "\n");
             }
             throw e;
         }
@@ -200,20 +206,20 @@ public class DictionaryBuilder {
     }
 
     void writeGrammar(FileInputStream matrixInput, FileChannel output) throws IOException {
-        System.err.print("writing the POS table...");
+        logger.info("writing the POS table...");
         convertPOSTable(posTable.getList());
         buffer.flip();
         output.write(byteBuffer);
-        System.err.println(String.format(" %,d bytes", byteBuffer.limit()));
+        printSize(byteBuffer.limit());
         buffer.clear();
 
-        System.err.print("writing the connection matrix...");
+        logger.info("writing the connection matrix...");
         ByteBuffer matrix = convertMatrix(matrixInput);
         buffer.flip();
         output.write(byteBuffer);
         buffer.clear();
         output.write(matrix);
-        System.err.println(String.format(" %,d bytes", matrix.limit() + 4));
+        printSize(matrix.limit() + 4);
         matrix = null;
     }
 
@@ -253,7 +259,7 @@ public class DictionaryBuilder {
             }
             String[] cols = line.split("\\s+");
             if (cols.length < 3) {
-                System.err.println("invalid format at line " + reader.getLineNumber());
+                logger.warning("invalid format at line " + reader.getLineNumber());
                 continue;
             }
             short left = Short.parseShort(cols[0]);
@@ -286,15 +292,15 @@ public class DictionaryBuilder {
             }
         }
 
-        System.err.print("building the trie");
+        logger.info("building the trie");
         trie.build(keys, values, (n, s) -> {
             if (n % ((s / 10) + 1) == 0) {
-                System.err.print(".");
+                logger.info(".");
             }
         });
-        System.err.println("done");
+        logger.info("done\n");
 
-        System.err.print("writing the trie...");
+        logger.info("writing the trie...");
         buffer.clear();
         byteBuffer.putInt(trie.size());
         buffer.flip();
@@ -302,10 +308,10 @@ public class DictionaryBuilder {
         buffer.clear();
 
         output.write(trie.byteArray());
-        System.err.println(String.format(" %,d bytes", trie.size() * 4 + 4));
+        printSize(trie.size() * 4 + 4);
         trie = null;
 
-        System.err.print("writing the word-ID table...");
+        logger.info("writing the word-ID table...");
         byteBuffer.putInt(wordIdTable.position());
         buffer.flip();
         output.write(byteBuffer);
@@ -313,10 +319,10 @@ public class DictionaryBuilder {
 
         ((Buffer) wordIdTable).flip(); // a kludge for Java 9
         output.write(wordIdTable);
-        System.err.println(String.format(" %,d bytes", wordIdTable.position() + 4));
+        printSize(wordIdTable.position() + 4);
         wordIdTable = null;
 
-        System.err.print("writing the word parameters...");
+        logger.info("writing the word parameters...");
         byteBuffer.putInt(entries.size());
         for (WordEntry entry : entries) {
             byteBuffer.putShort(entry.parameters[0]);
@@ -326,7 +332,7 @@ public class DictionaryBuilder {
             output.write(byteBuffer);
             buffer.clear();
         }
-        System.err.println(String.format(" %,d bytes", entries.size() * 6 + 4));
+        printSize(entries.size() * 6 + 4);
 
         writeWordInfo(output);
     }
@@ -338,7 +344,7 @@ public class DictionaryBuilder {
         ByteBuffer offsets = ByteBuffer.allocate(4 * entries.size());
         offsets.order(ByteOrder.LITTLE_ENDIAN);
 
-        System.err.print("writing the wordInfos...");
+        logger.info("writing the wordInfos...");
         long base = output.position();
         for (WordEntry entry : entries) {
             WordInfo wi = entry.wordInfo;
@@ -365,13 +371,13 @@ public class DictionaryBuilder {
             output.write(byteBuffer);
             buffer.clear();
         }
-        System.err.println(String.format(" %,d bytes", output.position() - base));
+        printSize(output.position() - base);
 
-        System.err.print("writing wordInfo offsets...");
+        logger.info("writing wordInfo offsets...");
         output.position(mark);
         ((Buffer) offsets).flip(); // a kludge for Java 9
         output.write(offsets);
-        System.err.println(String.format(" %,d bytes", offsets.position()));
+        printSize(offsets.position());
     }
 
     static boolean isValidLength(String text) {
@@ -499,11 +505,23 @@ public class DictionaryBuilder {
         }
     }
 
+    void printSize(long size) {
+        logger.info(String.format(" %,d bytes\n", size));
+    }
+
     static void printUsage() {
-        System.err.println("usage: DictionaryBuilder -o file -m file [-d description] files...");
-        System.err.println("\t-o file\toutput to file");
-        System.err.println("\t-m file\tmatrix file");
-        System.err.println("\t-d description\tcomment");
+        Console console = System.console();
+        console.printf("usage: DictionaryBuilder -o file -m file [-d description] files...\n");
+        console.printf("\t-o file\toutput to file\n");
+        console.printf("\t-m file\tmatrix file\n");
+        console.printf("\t-d description\tcomment\n");
+    }
+
+    static void readLoggerConfig() throws SecurityException, IOException {
+        InputStream is = DictionaryBuilder.class.getResourceAsStream("/logger.properties");
+        if (is != null) {
+            LogManager.getLogManager().readConfiguration(is);
+        }
     }
 
     /**
@@ -525,6 +543,8 @@ public class DictionaryBuilder {
      *             if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
+        readLoggerConfig();
+
         String description = "";
         String outputPath = null;
         String matrixPath = null;

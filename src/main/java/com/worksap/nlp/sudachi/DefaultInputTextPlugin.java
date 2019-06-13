@@ -71,7 +71,7 @@ import java.util.Set;
 class DefaultInputTextPlugin extends InputTextPlugin {
 
     /** the file path of the rules */
-    public String rewriteDef;
+    String rewriteDef;
 
     private Set<Integer> ignoreNormalizeSet = new HashSet<>();
     private Map<Character, Integer> keyLengths = new HashMap<>();
