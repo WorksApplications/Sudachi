@@ -85,7 +85,7 @@ public class SudachiCommandLine {
                     output.println("EOS");
                 } catch (RuntimeException e) {
                     if (ignoreError) {
-                        logger.throwing(SudachiCommandLine.class.getName(), "run", e);
+                        logger.warning(e.getMessage() + "\n");
                     } else {
                         throw e;
                     }
@@ -176,14 +176,14 @@ public class SudachiCommandLine {
                 ignoreError = true;
             } else if (args[i].equals("-h")) {
                 Console console = System.console();
-                console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]");
-                console.printf("\t-r file\tread settings from file");
-                console.printf("\t-p directory\troot directory of resources");
-                console.printf("\t-m mode\tmode of splitting");
-                console.printf("\t-o file\toutput to file");
-                console.printf("\t-a\tprint all fields");
-                console.printf("\t-f\tignore error");
-                console.printf("\t-d\tdebug mode");
+                console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
+                console.printf("\t-r file\tread settings from file\n");
+                console.printf("\t-p directory\troot directory of resources\n");
+                console.printf("\t-m mode\tmode of splitting\n");
+                console.printf("\t-o file\toutput to file\n");
+                console.printf("\t-a\tprint all fields\n");
+                console.printf("\t-f\tignore error\n");
+                console.printf("\t-d\tdebug mode\n");
                 return;
             } else {
                 break;
