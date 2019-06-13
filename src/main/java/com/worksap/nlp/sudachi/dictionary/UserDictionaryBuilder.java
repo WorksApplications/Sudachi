@@ -48,7 +48,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
                 buildLexicon(path, lexiconInput);
             }
         }
-        logger.info(String.format(" %,d words\n", entries.size()));
+        logger.info(() -> String.format(" %,d words%n", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeLexicon(outputChannel);
@@ -80,10 +80,10 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
     static void printUsage() {
         Console console = System.console();
-        console.printf("usage: UserDictionaryBuilder -o file -s file [-d description] files...");
-        console.printf("\t-o file\toutput to file");
-        console.printf("\t-s file\tsystem dictionary");
-        console.printf("\t-d description\tcomment");
+        console.printf("usage: UserDictionaryBuilder -o file -s file [-d description] files...\n");
+        console.printf("\t-o file\toutput to file\n");
+        console.printf("\t-s file\tsystem dictionary\n");
+        console.printf("\t-d description\tcomment\n");
     }
 
     /**

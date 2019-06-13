@@ -113,7 +113,7 @@ public class DictionaryBuilder {
                 buildLexicon(path, lexiconInput);
             }
         }
-        logger.info(String.format(" %,d words\n", entries.size()));
+        logger.info(() -> String.format(" %,d words%n", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
         writeGrammar(matrixInput, outputChannel);
@@ -219,7 +219,7 @@ public class DictionaryBuilder {
         output.write(byteBuffer);
         buffer.clear();
         output.write(matrix);
-        printSize(matrix.limit() + 4);
+        printSize(matrix.limit() + 4L);
         matrix = null;
     }
 
@@ -308,7 +308,7 @@ public class DictionaryBuilder {
         buffer.clear();
 
         output.write(trie.byteArray());
-        printSize(trie.size() * 4 + 4);
+        printSize(trie.size() * 4 + 4L);
         trie = null;
 
         logger.info("writing the word-ID table...");
@@ -319,7 +319,7 @@ public class DictionaryBuilder {
 
         ((Buffer) wordIdTable).flip(); // a kludge for Java 9
         output.write(wordIdTable);
-        printSize(wordIdTable.position() + 4);
+        printSize(wordIdTable.position() + 4L);
         wordIdTable = null;
 
         logger.info("writing the word parameters...");
@@ -332,7 +332,7 @@ public class DictionaryBuilder {
             output.write(byteBuffer);
             buffer.clear();
         }
-        printSize(entries.size() * 6 + 4);
+        printSize(entries.size() * 6 + 4L);
 
         writeWordInfo(output);
     }
@@ -506,7 +506,7 @@ public class DictionaryBuilder {
     }
 
     void printSize(long size) {
-        logger.info(String.format(" %,d bytes\n", size));
+        logger.info(() -> String.format(" %,d bytes%n", size));
     }
 
     static void printUsage() {
@@ -517,7 +517,7 @@ public class DictionaryBuilder {
         console.printf("\t-d description\tcomment\n");
     }
 
-    static void readLoggerConfig() throws SecurityException, IOException {
+    static void readLoggerConfig() throws IOException {
         InputStream is = DictionaryBuilder.class.getResourceAsStream("/logger.properties");
         if (is != null) {
             LogManager.getLogManager().readConfiguration(is);
