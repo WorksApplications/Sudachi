@@ -22,14 +22,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
@@ -361,6 +366,65 @@ public class Settings {
             result.add(plugin);
         }
         return result;
+    }
+
+    void merge(Settings settings) {
+        if (settings.basePath != null) {
+            this.basePath = settings.basePath;
+        }
+        JsonObjectBuilder newRoot = Json.createObjectBuilder();
+        for (Map.Entry<String, JsonValue> thisEntry : this.root.entrySet()) {
+            String thisKey = thisEntry.getKey();
+            JsonValue thisValue = thisEntry.getValue();
+            if (settings.root.containsKey(thisKey)) {
+                JsonValue value = settings.root.get(thisKey);
+                if (thisValue instanceof JsonString || thisValue instanceof JsonNumber
+                        || thisValue instanceof JsonObject) {
+                    newRoot.add(thisKey, value);
+                } else if (thisValue instanceof JsonArray) {
+                    newRoot.add(thisKey, mergeArray(thisValue, value));
+                }
+            } else {
+                newRoot.add(thisKey, thisValue);
+            }
+        }
+        for (Map.Entry<String, JsonValue> entry : settings.root.entrySet()) {
+            if (!this.root.containsKey(entry.getKey())) {
+                newRoot.add(entry.getKey(), entry.getValue());
+            }
+        }
+        this.root = newRoot.build();
+    }
+
+    private JsonArray mergeArray(JsonValue thisValue, JsonValue value) {
+        if (value instanceof JsonArray && ((JsonArray) value).isEmpty()) {
+            return (JsonArray) value;
+        }
+        JsonArray thisList = (JsonArray) thisValue;
+        JsonArrayBuilder newList = Json.createArrayBuilder();
+        Map<Integer, JsonValue> replaceItems = new HashMap<>();
+
+        for (JsonValue item : (JsonArray) value) {
+            boolean isReplaced = false;
+            if (item instanceof JsonObject && ((JsonObject) item).containsKey("class")) {
+                JsonValue className = ((JsonObject) item).get("class");
+                for (int i = 0; i < thisList.size(); i++) {
+                    JsonValue thisItem = thisList.get(i);
+                    if (thisItem instanceof JsonObject && ((JsonObject) thisItem).get("class").equals(className)) {
+                        replaceItems.put(i, item);
+                        isReplaced = true;
+                    }
+                }
+            }
+            if (!isReplaced) {
+                newList.add(item);
+            }
+        }
+        for (int i = 0; i < thisList.size(); i++) {
+            JsonValue item = replaceItems.get(i);
+            newList.add(item == null ? thisList.get(i) : item);
+        }
+        return newList.build();
     }
 
     private boolean isAbsolutePath(String path) {

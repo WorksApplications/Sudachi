@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -195,35 +197,50 @@ public class SettingsTest {
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutList() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":123}");
-        @SuppressWarnings("unused")
-        List<Plugin> list = settings.getPluginList("foo");
+        settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithoutClass() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[{}]}");
-        @SuppressWarnings("unused")
-        List<Plugin> list = settings.getPluginList("foo");
+        settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotStringClass() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":123}]}");
-        @SuppressWarnings("unused")
-        List<Plugin> list = settings.getPluginList("foo");
+        settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotInitializableClass() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"bazz\"}]}");
-        @SuppressWarnings("unused")
-        List<Plugin> list = settings.getPluginList("foo");
+        settings.getPluginList("foo");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getPluginListWithNotPluginClass() {
         Settings settings = Settings.parseSettings(null, "{\"foo\":[{\"class\":\"java.lang.String\"}]}");
-        @SuppressWarnings("unused")
+        settings.getPluginList("foo");
+    }
+
+    @Test
+    public void merge() {
+        Settings settings = Settings.parseSettings(null,
+                "{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"attr1\":123}],\"baa\":\"bazz\",\"list\":[1,2]}");
+        Settings settings2 = Settings.parseSettings("path",
+                "{\"foo\":[{\"class\":\"com.worksap.nlp.sudachi.SettingsTest$Foo\",\"attr2\":456}],\"baa\":\"boo\",\"list\":[0],\"list2\":[0]}");
+        settings.merge(settings2);
+
         List<Plugin> list = settings.getPluginList("foo");
+        assertEquals(1, list.size());
+        assertThat(list.get(0), instanceOf(Foo.class));
+        assertThat(list.get(0).settings.getInt("attr1"), is(0));
+        assertThat(list.get(0).settings.getInt("attr2"), is(456));
+
+        assertThat(settings.getString("baa"), is("boo"));
+
+        assertThat(settings.getIntList("list"), contains(0, 1, 2));
+        assertThat(settings.getIntList("list2"), contains(0));
     }
 }

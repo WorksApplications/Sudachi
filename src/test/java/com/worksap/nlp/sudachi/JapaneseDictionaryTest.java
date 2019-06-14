@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,25 +35,27 @@ public class JapaneseDictionaryTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    String path;
+    String settings;
     Dictionary dict;
 
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
 
-        String path = temporaryFolder.getRoot().getPath();
-        String settings = Utils.readAllResource("/sudachi.json");
+        path = temporaryFolder.getRoot().getPath();
+        settings = Utils.readAllResource("/sudachi.json");
         dict = new DictionaryFactory().create(path, settings);
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        dict.close();
     }
 
     @Test
     public void create() {
         assertThat(dict.create(), isA(Tokenizer.class));
-    }
-
-    @Test
-    public void close() throws IOException {
-        dict.close();
     }
 
     @Test
@@ -67,4 +70,19 @@ public class JapaneseDictionaryTest {
         assertThat(pos.get(0), is("助動詞"));
     }
 
+    @Test
+    public void createWithMergingSettings() throws IOException {
+        dict.close();
+        dict = new DictionaryFactory().create(path, "{\"userDict\":[]}", true);
+        Tokenizer t = dict.create();
+        assertThat(t.tokenize("東京府").size(), is(2));
+    }
+
+    @Test
+    public void createWithMergingNullSettings() throws IOException {
+        dict.close();
+        dict = new DictionaryFactory().create(path, null, true);
+        Tokenizer t = dict.create();
+        assertThat(t.tokenize("東京府").size(), is(1));
+    }
 }

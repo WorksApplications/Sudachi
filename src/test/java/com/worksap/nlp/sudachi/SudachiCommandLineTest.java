@@ -43,7 +43,8 @@ public class SudachiCommandLineTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/sudachi.json", "/user.dic", "/char.def",
+                "/unk.def");
         temporaryFolderName = temporaryFolder.getRoot().getPath();
         outputFileName = temporaryFolder.newFile().getPath();
         inputFileName = temporaryFolder.newFile().getPath();
@@ -102,6 +103,26 @@ public class SudachiCommandLineTest {
         SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-d", inputFileName });
         try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
             assertThat(lines.filter(l -> l.equals("EOS")).count(), is(2L));
+        }
+    }
+
+    @Test
+    public void commandLineWithROption() throws IOException {
+        String settingsPath = Paths.get(temporaryFolderName, "sudachi.json").toString();
+        SudachiCommandLine.main(
+                new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-r", settingsPath, inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(10L));
+        }
+    }
+
+    @Test
+    public void commandLineWithSOption() throws IOException {
+        String settingsPath = Paths.get(temporaryFolderName, "sudachi.json").toString();
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-r", settingsPath,
+                "-s", "{\"userDict\":[]}", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(11L));
         }
     }
 
