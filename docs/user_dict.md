@@ -201,12 +201,6 @@ Sudachi ではユーザー辞書をもちいて、システム辞書で不足し
 
 `"userDict" : [ "user1.dic", "user2.dic" ]`
 
-Sudachi コマンドラインツールで設定ファイルを指定する場合は、以下のように実行します。(ここでは設定ファイルを `sudachi.json` としています。)
+Sudachi コマンドラインツールでユーザ辞書設定を指定する場合は、以下のように実行します。
 
-`$ java -jar sudachi-XX.jar -r sudachi.json`
-
-### デフォルトの設定ファイル
-
-Sudachi のコマンドラインツールがデフォルトで利用している設定ファイルを得るには JDK に付属の jar コマンドをつかって、以下のように実行します。
-
-`jar xf sudachi-XX.jar sudachi.json`
+`$ java -jar sudachi-XX.jar -s '{"userDict":["user1.dic","user2.dic"]}'`
