@@ -46,19 +46,19 @@ Sudachi has three types of dictionaries.
 
 For more details, see [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
-### How to use the full dictionary
+### How to use the small / full dictionary
 
-1. Get the [configuration file](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json)
- for the full dictionary
-2. Run the command line tool with the configuration file
+Run the command line tool with the configuration string
 
 ```
-$ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+$ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ```
 
 ## Use on the command line
 
-    $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+```
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+```
 
 ### Options
 
@@ -361,18 +361,19 @@ Sudachi には3種類の辞書があります。
 
 くわしくは [SudachiDict](https://github.com/WorksApplications/SudachiDict) をごらんください。
 
-### フル辞書の利用方法
+### スモール/フル辞書の利用方法
 
-1. [フル辞書用の設定ファイル](https://raw.githubusercontent.com/WorksApplications/Sudachi/develop/src/main/resources/sudachi_fulldict.json) を取得します
-2. コマンドラインツールで設定ファイルを指定します
+コマンドラインツールで設定文字列を指定します
 
 ```
-    $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
+$ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ```
 
 ## コマンドラインツール
 
-    $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+```
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+```
 
 ### オプション
 
