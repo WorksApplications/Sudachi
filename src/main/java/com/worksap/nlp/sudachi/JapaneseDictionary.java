@@ -41,20 +41,15 @@ class JapaneseDictionary implements Dictionary {
     List<BinaryDictionary> dictionaries;
 
     JapaneseDictionary() throws IOException {
-        this(null, null);
+        this(null, null, false);
     }
 
     JapaneseDictionary(String jsonString) throws IOException {
-        this(null, jsonString);
+        this(null, jsonString, false);
     }
 
-    JapaneseDictionary(String path, String jsonString) throws IOException {
-        if (jsonString == null) {
-            try (InputStream input = SudachiCommandLine.class.getResourceAsStream("/sudachi.json")) {
-                jsonString = readAll(input);
-            }
-        }
-        Settings settings = Settings.parseSettings(path, jsonString);
+    JapaneseDictionary(String path, String jsonString, boolean mergeSettings) throws IOException {
+        Settings settings = buildSettings(path, jsonString, mergeSettings);
 
         dictionaries = new ArrayList<>();
 
@@ -85,6 +80,21 @@ class JapaneseDictionary implements Dictionary {
 
         for (String filename : settings.getPathList("userDict")) {
             readUserDictionary(filename);
+        }
+    }
+
+    Settings buildSettings(String path, String jsonString, boolean mergeSettings) throws IOException {
+        Settings defaultSettings;
+        try (InputStream input = SudachiCommandLine.class.getResourceAsStream("/sudachi.json")) {
+            defaultSettings = Settings.parseSettings(path, readAll(input));
+        }
+        if (jsonString == null) {
+            return defaultSettings;
+        } else if (mergeSettings) {
+            defaultSettings.merge(Settings.parseSettings(path, jsonString));
+            return defaultSettings;
+        } else {
+            return Settings.parseSettings(path, jsonString);
         }
     }
 

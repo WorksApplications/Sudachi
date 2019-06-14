@@ -59,6 +59,25 @@ public class DictionaryFactory {
      *             if reading a file is failed
      */
     public Dictionary create(String path, String settings) throws IOException {
-        return new JapaneseDictionary(path, settings);
+        return new JapaneseDictionary(path, settings, false);
+    }
+
+    /**
+     * Creates {@code Dictionary} by read a dictionary file.
+     *
+     * @param path
+     *            the base path if "path" is undefined in settings
+     * @param settings
+     *            settings in JSON string
+     * @param mergeSettings
+     *            if true, settings is merged with the default settings. if false,
+     *            returns the same result as {@link create(String,String)
+     *            create(path, settings)}
+     * @return {@link Dictionary}
+     * @throws IOException
+     *             if reading a file is failed
+     */
+    public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {
+        return new JapaneseDictionary(path, settings, mergeSettings);
     }
 }

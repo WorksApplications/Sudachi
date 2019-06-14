@@ -58,11 +58,13 @@ $ java -jar sudachi-XX.jar -r sudachi_fulldict.json
 
 ## Use on the command line
 
-    $ java -jar sudachi-XX.jar [-r conf] [-m mode] [-a] [-d] [-o output] [file...]
+    $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
 
 ### Options
 
-- -r conf specifies the setting file
+- -r conf specifies the setting file (overrids -s)
+- -s json additional settings (overrids -r)
+- -p directory root directory of resources
 - -m {A|B|C} specifies the mode of splitting
 - -a outputs the dictionary form and the reading form
 - -d dump the debug outputs
@@ -370,11 +372,13 @@ Sudachi には3種類の辞書があります。
 
 ## コマンドラインツール
 
-    $ java -jar sudachi-XX.jar [-r conf] [-m mode] [-a] [-d] [-o output] [file...]
+    $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
 
 ### オプション
 
-- -r conf 設定ファイルを指定
+- -r conf 設定ファイルを指定 (-s と排他)
+- -s json デフォルト設定の上書き (-r と排他)
+- -p directory リソースの起点となるディレクトリを指定
 - -m {A|B|C} 分割モード
 - -a 読み、辞書形も出力
 - -d デバッグ情報の出力

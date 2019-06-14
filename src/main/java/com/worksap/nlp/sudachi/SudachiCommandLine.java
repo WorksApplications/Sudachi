@@ -104,7 +104,9 @@ public class SudachiCommandLine {
      * The following are the options.
      * <dl>
      * <dt>{@code -r file}</dt>
-     * <dd>the settings file in JSON format</dd>
+     * <dd>the settings file in JSON format (overrides -s)</dd>
+     * <dt>{@code -s string}</dt>
+     * <dd>an additional settings string in JSON format (overrides -r)</dd>
      * <dt>{@code -m {A|B|C}}</dt>
      * <dd>the mode of splitting</dd>
      * <dt>{@code -o file}</dt>
@@ -140,6 +142,7 @@ public class SudachiCommandLine {
 
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         String settings = null;
+        boolean mergeSettings = false;
         String resourcesDirectory = null;
         String outputFileName = null;
         boolean isEnableDump = false;
@@ -151,9 +154,13 @@ public class SudachiCommandLine {
             if (args[i].equals("-r") && i + 1 < args.length) {
                 try (FileInputStream input = new FileInputStream(args[++i])) {
                     settings = JapaneseDictionary.readAll(input);
+                    mergeSettings = false;
                 }
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 resourcesDirectory = args[++i];
+            } else if (args[i].equals("-s") && i + 1 < args.length) {
+                settings = args[++i];
+                mergeSettings = true;
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -177,7 +184,8 @@ public class SudachiCommandLine {
             } else if (args[i].equals("-h")) {
                 Console console = System.console();
                 console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
-                console.printf("\t-r file\tread settings from file\n");
+                console.printf("\t-r file\tread settings from file (overrides -s)\n");
+                console.printf("\t-s string\tadditional settings (overrides -r)\n");
                 console.printf("\t-p directory\troot directory of resources\n");
                 console.printf("\t-m mode\tmode of splitting\n");
                 console.printf("\t-o file\toutput to file\n");
@@ -191,7 +199,7 @@ public class SudachiCommandLine {
         }
 
         try (PrintStream output = new FileOrStdoutPrintStream(outputFileName);
-                Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings)) {
+                Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings, mergeSettings)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output);
