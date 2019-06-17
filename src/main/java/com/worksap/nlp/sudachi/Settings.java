@@ -75,7 +75,7 @@ import javax.json.stream.JsonParsingException;
  * </pre>
  *
  * <p>
- * {@code path} is a reserved key. Its value is used in {@link getPath} as the
+ * {@code path} is a reserved key. Its value is used in {@link #getPath} as the
  * base path to make an absolute path from a relative path.
  */
 public class Settings {

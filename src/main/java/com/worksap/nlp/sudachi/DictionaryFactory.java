@@ -71,7 +71,7 @@ public class DictionaryFactory {
      *            settings in JSON string
      * @param mergeSettings
      *            if true, settings is merged with the default settings. if false,
-     *            returns the same result as {@link create(String,String)
+     *            returns the same result as {@link #create(String,String)
      *            create(path, settings)}
      * @return {@link Dictionary}
      * @throws IOException

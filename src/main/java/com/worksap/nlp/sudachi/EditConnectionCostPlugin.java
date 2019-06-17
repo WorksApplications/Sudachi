@@ -58,7 +58,7 @@ public abstract class EditConnectionCostPlugin extends Plugin {
      * Edit the connection costs.
      *
      * To edit connection costs, you can use {@link Grammar#getConnectCost},
-     * {@link Grammar#setConnectCost}, and {@link inhibitConnection}.
+     * {@link Grammar#setConnectCost}, and {@link #inhibitConnection}.
      *
      * @param grammar
      *            the grammar of the system dictionary
