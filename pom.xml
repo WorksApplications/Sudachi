@@ -12,8 +12,6 @@
     <dictionary.builder>com.worksap.nlp.sudachi.dictionary.DictionaryBuilder</dictionary.builder>
     <userdictionary.builder>com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder</userdictionary.builder>
     <test.dict.source.directory>${project.basedir}/src/test/dict</test.dict.source.directory>
-    <jacoco.skip>true</jacoco.skip>
-    <sonar.skip>true</sonar.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>com.worksap.nlp.sudachi</sonar.projectKey>
     <sonar.language>java</sonar.language>
@@ -26,36 +24,6 @@
   </properties>
 
   <profiles>
-    <profile>
-      <id>pre-merge</id>
-      <activation>
-        <property>
-          <name>env.TRAVIS_EVENT_TYPE</name>
-          <value>pull_request</value>
-        </property>
-      </activation>
-      <properties>
-        <sonar.skip>false</sonar.skip>
-        <sonar.analysis.mode>preview</sonar.analysis.mode>
-        <sonar.github.oauth>${env.GITHUB_TOKEN}</sonar.github.oauth>
-        <sonar.github.pullRequest>${env.TRAVIS_PULL_REQUEST}</sonar.github.pullRequest>
-        <sonar.github.repository>${env.TRAVIS_REPO_SLUG}</sonar.github.repository>
-        <jacoco.skip>false</jacoco.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>post-merge</id>
-      <activation>
-        <property>
-          <name>env.TRAVIS_BRANCH</name>
-          <value>develop</value>
-        </property>
-      </activation>
-      <properties>
-        <sonar.skip>false</sonar.skip>
-        <jacoco.skip>false</jacoco.skip>
-      </properties>
-    </profile>
     <profile>
       <id>release</id>
       <build>
@@ -255,12 +223,12 @@
       <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
-        <version>3.3.0.603</version>
+        <version>3.6.0.1398</version>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.7.9</version>
+        <version>0.8.4</version>
       </plugin>
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
