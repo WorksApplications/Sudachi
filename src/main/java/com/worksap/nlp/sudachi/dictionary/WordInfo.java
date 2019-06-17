@@ -26,7 +26,7 @@ public class WordInfo {
 
     private final String surface;
     private final short headwordLength;
-    private final short posId;
+    private short posId;
     private final String normalizedForm;
     private final int dictionaryFormWordId;
     private final String dictionaryForm;
@@ -112,6 +112,16 @@ public class WordInfo {
      */
     public short getPOSId() {
         return posId;
+    }
+
+    /**
+     * Sets the part-of-speech ID of the morpheme.
+     *
+     * @param posId
+     *            the POS ID
+     */
+    public void setPOSId(short posId) {
+        this.posId = posId;
     }
 
     /**

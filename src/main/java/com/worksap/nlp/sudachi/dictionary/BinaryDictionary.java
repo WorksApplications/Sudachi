@@ -36,10 +36,13 @@ public class BinaryDictionary implements Closeable {
         header = new DictionaryHeader(bytes, offset);
         offset += header.storageSize();
 
-        if (header.getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
+        long version = header.getVersion();
+        if (version == DictionaryVersion.SYSTEM_DICT_VERSION || version == DictionaryVersion.USER_DICT_VERSION_2) {
             grammar = new GrammarImpl(bytes, offset);
             offset += grammar.storageSize();
-        } else if (header.getVersion() != DictionaryVersion.USER_DICT_VERSION) {
+        } else if (version == DictionaryVersion.USER_DICT_VERSION_1) {
+            // do nothing
+        } else {
             MMap.unmap(bytes);
             throw new IOException("invalid dictionary");
         }
@@ -58,7 +61,7 @@ public class BinaryDictionary implements Closeable {
 
     public static BinaryDictionary readUserDictionary(String fileName) throws IOException {
         BinaryDictionary dict = new BinaryDictionary(fileName);
-        if (dict.getDictionaryHeader().getVersion() != DictionaryVersion.USER_DICT_VERSION) {
+        if (!DictionaryVersion.isUserDictionary(dict.getDictionaryHeader().getVersion())) {
             dict.close();
             throw new IOException("invalid user dictionary");
         }

@@ -51,13 +51,18 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
         logger.info(() -> String.format(" %,d words%n", entries.size()));
 
         FileChannel outputChannel = output.getChannel();
+        writeGrammar(null, outputChannel);
         writeLexicon(outputChannel);
         outputChannel.close();
     }
 
     @Override
     short getPosId(String... posStrings) {
-        return grammar.getPartOfSpeechId(Arrays.asList(posStrings));
+        short posId = grammar.getPartOfSpeechId(Arrays.asList(posStrings));
+        if (posId < 0) {
+            posId = (short) (super.getPosId(posStrings) + grammar.getPartOfSpeechSize());
+        }
+        return posId;
     }
 
     @Override
@@ -137,7 +142,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
             List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION,
+            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION_2,
                     Instant.now().getEpochSecond(), description);
 
             try (FileOutputStream output = new FileOutputStream(outputPath)) {

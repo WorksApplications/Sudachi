@@ -42,7 +42,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test
-    public void printHeaderWithSystemDict() throws IOException {
+    public void printWithSystemDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "system.dic");
         String[] actuals;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
@@ -54,7 +54,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test
-    public void printHeaderWithUserDict() throws IOException {
+    public void printWithUserDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         File systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
         try (BinaryDictionary systemDict = BinaryDictionary.readSystemDictionary(systemDictFile.getPath())) {
@@ -63,13 +63,14 @@ public class DictionaryPrinterTest {
                 DictionaryPrinter.printDictionary(inputFile.getPath(), systemDict, ps);
                 actuals = output.toString().split("\n");
             }
-            assertThat(actuals.length, is(3));
+            assertThat(actuals.length, is(4));
             assertThat(actuals[2], is("東京府,6,6,2816,東京府,名詞,固有名詞,地名,一般,*,*,トウキョウフ,東京府,*,B,5/U1,*,5/U1"));
+            assertThat(actuals[3], is("すだち,6,6,2816,すだち,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ,スダチ,すだち,*,A,*,*,*"));
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void printHeaderWithUserDictWithoutGrammar() throws IOException {
+    public void printWithUserDictWithoutGrammar() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
             DictionaryPrinter.printDictionary(inputFile.getPath(), null, ps);

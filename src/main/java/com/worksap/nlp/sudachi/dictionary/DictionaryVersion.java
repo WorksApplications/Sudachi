@@ -27,7 +27,13 @@ public class DictionaryVersion {
     /** the version of system dictionries */
     public static final long SYSTEM_DICT_VERSION = 0x7366d3f18bd111e7L;
 
-    /** the version of user dictionries */
-    public static final long USER_DICT_VERSION = 0xa50f31188bd211e7L;
+    /** the first version of user dictionries */
+    public static final long USER_DICT_VERSION_1 = 0xa50f31188bd211e7L;
 
+    /** the second version of user dictionries */
+    public static final long USER_DICT_VERSION_2 = 0x9fdeb5a90168d868L;
+
+    public static boolean isUserDictionary(long version) {
+        return version == USER_DICT_VERSION_1 || version == USER_DICT_VERSION_2;
+    }
 }

@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -55,13 +56,14 @@ public class UserDictionaryTest {
         userDicts.add(USER_DICT2);
         String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
 
-        Dictionary dict = new DictionaryFactory().create(path, settings);
-        Tokenizer tokenizer = dict.create();
-        List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
-        assertThat(morphs.size(), is(1));
-        Morpheme m = morphs.get(0);
-        assertThat(m.getDictionaryId(), is(15));
-        assertThat(m.normalizedForm(), is("ぴさる"));
+        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+            Tokenizer tokenizer = dict.create();
+            List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
+            assertThat(morphs.size(), is(1));
+            Morpheme m = morphs.get(0);
+            assertThat(m.getDictionaryId(), is(15));
+            assertThat(m.normalizedForm(), is("ぴさる"));
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -77,14 +79,40 @@ public class UserDictionaryTest {
     @Test
     public void splitForUserDict() throws IOException {
         String settings = COMMON_SETTINGS + USER_DICT2 + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
-        Dictionary dict = new DictionaryFactory().create(path, settings);
-        Tokenizer tokenizer = dict.create();
-        List<Morpheme> morphs = tokenizer.tokenize("東京府");
-        assertThat(morphs.size(), is(1));
-        Morpheme m = morphs.get(0);
-        List<Morpheme> splits = m.split(Tokenizer.SplitMode.A);
-        assertThat(splits.size(), is(2));
-        assertThat(splits.get(0).surface(), is("東京"));
-        assertThat(splits.get(1).surface(), is("府"));
+        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+            Tokenizer tokenizer = dict.create();
+            List<Morpheme> morphs = tokenizer.tokenize("東京府");
+            assertThat(morphs.size(), is(1));
+            Morpheme m = morphs.get(0);
+            List<Morpheme> splits = m.split(Tokenizer.SplitMode.A);
+            assertThat(splits.size(), is(2));
+            assertThat(splits.get(0).surface(), is("東京"));
+            assertThat(splits.get(1).surface(), is("府"));
+        }
+    }
+
+    @Test
+    public void userDefinedPos() throws IOException {
+        String settings = COMMON_SETTINGS + USER_DICT + ", " + USER_DICT2 + COMMON_SETTINGS_TAIL;
+        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+            Tokenizer tokenizer = dict.create();
+            List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
+            assertThat(morphs.size(), is(2));
+            Morpheme m = morphs.get(0);
+            assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "スダチ"));
+            m = morphs.get(1);
+            assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "カボス"));
+        }
+
+        settings = COMMON_SETTINGS + USER_DICT2 + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
+        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+            Tokenizer tokenizer = dict.create();
+            List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
+            assertThat(morphs.size(), is(2));
+            Morpheme m = morphs.get(0);
+            assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "スダチ"));
+            m = morphs.get(1);
+            assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "カボス"));
+        }
     }
 }
