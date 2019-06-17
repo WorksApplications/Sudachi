@@ -26,14 +26,17 @@ public class LexiconSet implements Lexicon {
     static final int MAX_DICTIONARIES = 16;
 
     List<Lexicon> lexicons = new ArrayList<>();
+    List<Short> posOffsets = new ArrayList<>();
 
     public LexiconSet(Lexicon systemLexicon) {
         lexicons.add(systemLexicon);
+        posOffsets.add((short) 0);
     }
 
-    public void add(Lexicon lexicon) {
+    public void add(Lexicon lexicon, short posOffset) {
         if (!lexicons.contains(lexicon)) {
             lexicons.add(lexicon);
+            posOffsets.add(posOffset);
         }
     }
 
@@ -118,6 +121,10 @@ public class LexiconSet implements Lexicon {
     public WordInfo getWordInfo(int wordId) {
         int dictionaryId = getDictionaryId(wordId);
         WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(getWordId(wordId));
+        short posId = wordInfo.getPOSId();
+        if (dictionaryId > 0 && posId >= posOffsets.get(1)) { // user defined part-of-speech
+            wordInfo.setPOSId((short) (wordInfo.getPOSId() - posOffsets.get(1) + posOffsets.get(dictionaryId)));
+        }
         convertSplit(wordInfo.getAunitSplit(), dictionaryId);
         convertSplit(wordInfo.getBunitSplit(), dictionaryId);
         convertSplit(wordInfo.getWordStructure(), dictionaryId);

@@ -214,13 +214,21 @@ public class DictionaryBuilder {
         buffer.clear();
 
         logger.info("writing the connection matrix...");
-        ByteBuffer matrix = convertMatrix(matrixInput);
-        buffer.flip();
-        output.write(byteBuffer);
-        buffer.clear();
-        output.write(matrix);
-        printSize(matrix.limit() + 4L);
-        matrix = null;
+        if (matrixInput == null) {
+            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short) 0);
+            buffer.flip();
+            output.write(byteBuffer);
+            printSize(byteBuffer.limit());
+            buffer.clear();
+        } else {
+            ByteBuffer matrix = convertMatrix(matrixInput);
+            buffer.flip();
+            output.write(byteBuffer);
+            buffer.clear();
+            output.write(matrix);
+            printSize(matrix.limit() + 4L);
+        }
     }
 
     void convertPOSTable(List<String> posList) {

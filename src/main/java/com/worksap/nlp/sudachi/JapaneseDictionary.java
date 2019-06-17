@@ -28,12 +28,12 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
-import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
 import com.worksap.nlp.sudachi.dictionary.LexiconSet;
 
 class JapaneseDictionary implements Dictionary {
 
-    Grammar grammar;
+    GrammarImpl grammar;
     LexiconSet lexicon;
     List<InputTextPlugin> inputTextPlugins;
     List<OovProviderPlugin> oovProviderPlugins;
@@ -122,7 +122,8 @@ class JapaneseDictionary implements Dictionary {
                 Collections.emptyList());
         userLexicon.calculateCost(tokenizer);
 
-        lexicon.add(userLexicon);
+        lexicon.add(userLexicon, (short) grammar.getPartOfSpeechSize());
+        grammar.addPosList(dictionary.getGrammar());
     }
 
     void readCharacterDefinition(String filename) throws IOException {

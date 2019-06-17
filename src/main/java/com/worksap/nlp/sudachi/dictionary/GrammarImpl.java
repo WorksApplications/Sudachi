@@ -70,6 +70,10 @@ public class GrammarImpl implements Grammar {
         return storageSize;
     }
 
+    public void addPosList(GrammarImpl grammar) {
+        posList.addAll(grammar.posList);
+    }
+
     @Override
     public int getPartOfSpeechSize() {
         return posList.size();

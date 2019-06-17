@@ -59,10 +59,11 @@ public class UserDictionaryBuilderTest {
         systemDict.close();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void parseLineWithInvalidPOS() {
+    @Test
+    public void parseLineWithUserDefinedPOS() {
         UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
         builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n".split(","));
+        assertThat(builder.posTable.getList().size(), is(1));
     }
 
     @Test
@@ -81,7 +82,7 @@ public class UserDictionaryBuilderTest {
 
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
             DictionaryHeader header = dictionary.getDictionaryHeader();
-            assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION));
+            assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION_2));
             assertThat(header.getDescription(), is("test"));
 
             Lexicon lexicon = dictionary.getLexicon();

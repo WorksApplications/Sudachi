@@ -29,7 +29,7 @@ public class DictionaryPrinter {
     }
 
     static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
-        Grammar grammar = null;
+        GrammarImpl grammar = null;
 
         try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
             if (dictionary.getDictionaryHeader().getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
@@ -38,6 +38,9 @@ public class DictionaryPrinter {
                 throw new IllegalArgumentException("the system dictionary is not specified");
             } else {
                 grammar = systemDict.getGrammar();
+                if (dictionary.getDictionaryHeader().getVersion() == DictionaryVersion.USER_DICT_VERSION_2) {
+                    grammar.addPosList(dictionary.getGrammar());
+                }
             }
 
             List<String> posStrings = new ArrayList<>();

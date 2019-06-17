@@ -46,7 +46,7 @@ public class DictionaryHeaderPrinter {
         long version = header.getVersion();
         if (version == DictionaryVersion.SYSTEM_DICT_VERSION) {
             output.println("type: system dictionary");
-        } else if (version == DictionaryVersion.USER_DICT_VERSION) {
+        } else if (DictionaryVersion.isUserDictionary(version)) {
             output.println("type: user dictionary");
         } else {
             output.println("invalid file");

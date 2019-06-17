@@ -60,7 +60,7 @@ public class JapaneseDictionaryTest {
 
     @Test
     public void getPartOfSpeechSize() {
-        assertThat(dict.getPartOfSpeechSize(), is(8));
+        assertThat(dict.getPartOfSpeechSize(), is(9));
     }
 
     @Test
