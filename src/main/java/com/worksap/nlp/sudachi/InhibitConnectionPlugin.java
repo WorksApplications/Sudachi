@@ -40,7 +40,8 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  * </pre>
  *
  * {@code inhibitPair} is a list of lists of two numbers. At each pair, the
- * first number is left-ID and the second is right-ID of a connection.
+ * first number is right-ID of the left node and the second is left-ID of the
+ * right node in a connection.
  */
 class InhibitConnectionPlugin extends EditConnectionCostPlugin {
 

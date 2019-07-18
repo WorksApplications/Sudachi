@@ -70,12 +70,12 @@ public abstract class EditConnectionCostPlugin extends Plugin {
      *
      * @param grammar
      *            the grammar of the system dictionary
-     * @param leftId
-     *            the left-ID of the connection
-     * @param rightId
-     *            the right-ID of the connection
+     * @param left
+     *            the right-ID of the left node
+     * @param right
+     *            the left-ID of the right node
      */
-    public void inhibitConnection(Grammar grammar, short leftId, short rightId) {
-        grammar.setConnectCost(leftId, rightId, Grammar.INHIBITED_CONNECTION);
+    public void inhibitConnection(Grammar grammar, short left, short right) {
+        grammar.setConnectCost(left, right, Grammar.INHIBITED_CONNECTION);
     }
 }

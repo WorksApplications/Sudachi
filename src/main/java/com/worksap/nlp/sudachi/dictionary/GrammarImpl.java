@@ -90,16 +90,16 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public short getConnectCost(short leftId, short rightId) {
-        return connectTableBytes.getShort(connectTableOffset + leftId * 2 + 2 * leftIdSize * rightId);
+    public short getConnectCost(short left, short right) {
+        return connectTableBytes.getShort(connectTableOffset + left * 2 + 2 * leftIdSize * right);
     }
 
     @Override
-    public void setConnectCost(short leftId, short rightId, short cost) {
+    public void setConnectCost(short left, short right, short cost) {
         if (!isCopiedConnectTable) {
             copyConnectTable();
         }
-        connectTableBytes.putShort(connectTableOffset + leftId * 2 + 2 * leftIdSize * rightId, cost);
+        connectTableBytes.putShort(connectTableOffset + left * 2 + 2 * leftIdSize * right, cost);
     }
 
     @Override

@@ -65,13 +65,13 @@ public interface Grammar {
      * <p>
      * When the Id is out of the range, the behavior is undefined.
      *
-     * @param leftId
-     *            the left-ID of the connection
-     * @param rightId
-     *            the right-ID of the connection
+     * @param left
+     *            the right-ID of the left node
+     * @param right
+     *            the left-ID of the right node
      * @return the cost of the connection
      */
-    public short getConnectCost(short leftId, short rightId);
+    public short getConnectCost(short left, short right);
 
     /**
      * Set the connection costs.
@@ -79,14 +79,14 @@ public interface Grammar {
      * <p>
      * When the Id is out of the range, the behavior is undefined.
      *
-     * @param leftId
-     *            the left-ID of the connection
-     * @param rightId
-     *            the right-ID of the connection
+     * @param left
+     *            the right-ID of the left node
+     * @param right
+     *            the left-ID of the right node
      * @param cost
      *            the cost of the connection
      */
-    public void setConnectCost(short leftId, short rightId, short cost);
+    public void setConnectCost(short left, short right, short cost);
 
     /**
      * Returns the parameter of the beginning of sentence.
