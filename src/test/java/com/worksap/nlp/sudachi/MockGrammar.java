@@ -17,12 +17,18 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class MockGrammar implements Grammar {
+
+    Map<Short, Map<Short, Short>> matrix = new HashMap<>();
+
     @Override
     public int getPartOfSpeechSize() {
         return 0;
@@ -39,12 +45,13 @@ public class MockGrammar implements Grammar {
     }
 
     @Override
-    public short getConnectCost(short leftId, short rightId) {
-        return 0;
+    public short getConnectCost(short left, short right) {
+        return matrix.getOrDefault(left, Collections.emptyMap()).getOrDefault(right, (short) 0);
     }
 
     @Override
-    public void setConnectCost(short leftId, short rightId, short cost) {
+    public void setConnectCost(short left, short right, short cost) {
+        matrix.computeIfAbsent(left, k -> new HashMap<>()).put(right, cost);
     }
 
     @Override
