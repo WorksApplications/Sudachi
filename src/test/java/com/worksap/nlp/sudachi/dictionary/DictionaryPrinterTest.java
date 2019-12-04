@@ -47,7 +47,7 @@ public class DictionaryPrinterTest {
         String[] actuals;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
             DictionaryPrinter.printDictionary(inputFile.getPath(), null, ps);
-            actuals = output.toString().split("\n");
+            actuals = output.toString().split("[\r\n]+");
         }
         assertThat(actuals.length, is(37));
         assertThat(actuals[0], is("た,1,1,8729,た,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,た,*,A,*,*,*"));
@@ -61,7 +61,7 @@ public class DictionaryPrinterTest {
             String[] actuals;
             try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
                 DictionaryPrinter.printDictionary(inputFile.getPath(), systemDict, ps);
-                actuals = output.toString().split("\n");
+                actuals = output.toString().split("[\r\n]+");
             }
             assertThat(actuals.length, is(4));
             assertThat(actuals[2], is("東京府,6,6,2816,東京府,名詞,固有名詞,地名,一般,*,*,トウキョウフ,東京府,*,B,5/U1,*,5/U1"));
