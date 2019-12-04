@@ -114,15 +114,19 @@ class JapaneseTokenizer implements Tokenizer {
                 continue;
             }
             Iterator<int[]> iterator = lexicon.lookup(bytes, i);
-            boolean hasWords = iterator.hasNext();
+            boolean hasWords = false;
             while (iterator.hasNext()) {
                 int[] r = iterator.next();
                 int wordId = r[0];
                 int end = r[1];
 
+                if (end < bytes.length && !input.canBow(end)) {
+                    continue;
+                }
                 LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
                         lexicon.getCost(wordId), wordId);
                 lattice.insert(i, end, n);
+                hasWords = true;
             }
 
             // OOV
