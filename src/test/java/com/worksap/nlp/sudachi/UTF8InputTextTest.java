@@ -256,6 +256,15 @@ public class UTF8InputTextTest {
         assertTrue(input.canBow(23)); // ア
     }
 
+    @Test
+    public void getWordCandidateLength() {
+        input = builder.build();
+        assertThat(input.getWordCandidateLength(0), is(6));
+        assertThat(input.getWordCandidateLength(6), is(1));
+        assertThat(input.getWordCandidateLength(19), is(4));
+        assertThat(input.getWordCandidateLength(29), is(3));
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {

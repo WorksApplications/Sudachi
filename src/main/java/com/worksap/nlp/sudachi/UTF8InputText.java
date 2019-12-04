@@ -134,6 +134,16 @@ class UTF8InputText implements InputText {
         return isCharAlignment(index) && canBowList.get(byteIndexes[index]);
     }
 
+    @Override
+    public int getWordCandidateLength(int index) {
+        for (int i = index + 1; i < bytes.length; i++) {
+            if (canBow(i)) {
+                return i - index;
+            }
+        }
+        return bytes.length - index;
+    }
+
     private boolean isCharAlignment(int index) {
         return (bytes[index] & 0xC0) != 0x80;
     }
