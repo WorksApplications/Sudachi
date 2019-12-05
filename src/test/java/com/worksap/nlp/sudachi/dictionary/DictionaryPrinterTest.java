@@ -49,7 +49,7 @@ public class DictionaryPrinterTest {
             DictionaryPrinter.printDictionary(inputFile.getPath(), null, ps);
             actuals = output.toString().split("[\r\n]+");
         }
-        assertThat(actuals.length, is(37));
+        assertThat(actuals.length, is(38));
         assertThat(actuals[0], is("た,1,1,8729,た,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,た,*,A,*,*,*"));
     }
 

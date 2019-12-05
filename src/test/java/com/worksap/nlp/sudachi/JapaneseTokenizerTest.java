@@ -93,4 +93,12 @@ public class JapaneseTokenizerTest {
         assertThat(ms.size(), is(1));
         assertTrue(ms.get(0).getDictionaryId() < 0);
     }
+
+    @Test
+    public void tokenizeKanjiAlphabetWord() {
+        assertThat(tokenizer.tokenize("特a").size(), is(1));
+        assertThat(tokenizer.tokenize("ab").size(), is(1));
+        assertThat(tokenizer.tokenize("特ab").size(), is(2));
+    }
+
 }

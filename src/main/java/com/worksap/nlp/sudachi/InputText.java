@@ -161,4 +161,18 @@ public interface InputText {
      * @return {@code true} if, and only if character can begin a word
      */
     public boolean canBow(int index);
+
+    /**
+     * Returns the shortest length of the word candidates that start with the
+     * character at the specified {@code index}.
+     *
+     * The length equals to the distance between the specified character and the
+     * nearest character where {@link #canBow(int)} is {@code true}.
+     *
+     * @param index
+     *            the index of the character
+     * @return the shortest length of the word candidates
+     */
+    public int getWordCandidateLength(int index);
+
 }

@@ -103,4 +103,9 @@ class MockInputText implements InputText {
     public boolean canBow(int index) {
         return true;
     }
+
+    @Override
+    public int getWordCandidateLength(int index) {
+        return 1;
+    }
 }
