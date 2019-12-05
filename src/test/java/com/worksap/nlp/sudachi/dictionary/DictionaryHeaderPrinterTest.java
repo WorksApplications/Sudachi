@@ -48,7 +48,7 @@ public class DictionaryHeaderPrinterTest {
         String[] actuals;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
             DictionaryHeaderPrinter.printHeader(inputFile.getPath(), ps);
-            actuals = output.toString().split("[\r\n]+");
+            actuals = output.toString().split(System.lineSeparator());
         }
         assertThat(actuals.length, is(4));
         assertThat(actuals[0], is("filename: " + inputFile.getPath()));
@@ -63,7 +63,7 @@ public class DictionaryHeaderPrinterTest {
         String[] actuals;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
             DictionaryHeaderPrinter.printHeader(inputFile.getPath(), ps);
-            actuals = output.toString().split("[\r\n]+");
+            actuals = output.toString().split(System.lineSeparator());
         }
         assertThat(actuals.length, is(4));
         assertThat(actuals[0], is("filename: " + inputFile.getPath()));
@@ -78,7 +78,7 @@ public class DictionaryHeaderPrinterTest {
         String[] actuals;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
             DictionaryHeaderPrinter.printHeader(inputFile.getPath(), ps);
-            actuals = output.toString().split("[\r\n]+");
+            actuals = output.toString().split(System.lineSeparator());
         }
         assertThat(actuals.length, is(2));
         assertThat(actuals[0], is("filename: " + inputFile.getPath().replaceAll("\r", "")));
