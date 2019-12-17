@@ -41,7 +41,7 @@ public class BinaryDictionary implements Closeable {
             grammar = new GrammarImpl(bytes, offset);
             offset += grammar.storageSize();
         } else if (version == DictionaryVersion.USER_DICT_VERSION_1) {
-            // do nothing
+            grammar = new GrammarImpl();
         } else {
             MMap.unmap(bytes);
             throw new IOException("invalid dictionary");
