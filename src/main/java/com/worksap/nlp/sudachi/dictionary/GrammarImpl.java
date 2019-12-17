@@ -66,6 +66,12 @@ public class GrammarImpl implements Grammar {
         storageSize = (offset - originalOffset) + 2 * leftIdSize * rightIdSize;
     }
 
+    public GrammarImpl() {
+        bytes = ByteBuffer.allocate(0);
+        posList = Collections.emptyList();
+        leftIdSize = rightIdSize = 0;
+    }
+
     public int storageSize() {
         return storageSize;
     }
