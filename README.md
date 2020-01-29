@@ -38,11 +38,11 @@ Sudachi has the following features.
 Sudachi has three types of dictionaries.
 
 - Small: includes only the vocabulary of UniDic
-    + [sudachi-dictionary-20191224-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-small.zip)
+    + [sudachi-dictionary-20200127-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-small.zip)
 - Core: includes basic vocabulary (default)
-    + [sudachi-dictionary-20191224-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-core.zip)
+    + [sudachi-dictionary-20200127-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-core.zip)
 - Full: includes miscellaneous proper nouns
-    + [sudachi-dictionary-20191224-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-full.zip)
+    + [sudachi-dictionary-20200127-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-full.zip)
 
 For more details, see [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
@@ -353,11 +353,11 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 Sudachi には3種類の辞書があります。
 
 - Small: UniDic の収録語とその正規化表記、分割単位を収録
-    + [sudachi-dictionary-20191224-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-small.zip)
+    + [sudachi-dictionary-20200127-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-small.zip)
 - Core: 基本的な語彙を収録 (デフォルト)
-    + [sudachi-dictionary-20191224-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-core.zip)
+    + [sudachi-dictionary-20200127-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-core.zip)
 - Full: 雑多な固有名詞まで収録
-    + [sudachi-dictionary-20191224-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20191224-full.zip)
+    + [sudachi-dictionary-20200127-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-20200127-full.zip)
 
 くわしくは [SudachiDict](https://github.com/WorksApplications/SudachiDict) をごらんください。
 
