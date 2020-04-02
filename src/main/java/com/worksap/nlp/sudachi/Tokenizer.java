@@ -48,8 +48,36 @@ public interface Tokenizer {
      * @return a result of tokenizing
      * @see #tokenize(SplitMode,String)
      */
-    public default List<Morpheme> tokenize(String text) {
+    public default List<Morpheme> tokenize(final String text) {
         return tokenize(SplitMode.C, text);
+    }
+
+    /**
+     * Tokenize sentences.
+     *
+     * This method divide a input text into sentences and tokenizes them.
+     *
+     * @param mode
+     *            a mode of splitting
+     * @param text
+     *            input text
+     * @return a result of tokenizing
+     */
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text);
+
+    /**
+     * Tokenize sentences.
+     *
+     * This method divide a input text into sentences and tokenizes them with
+     * {@link SplitMode}.C.
+     *
+     * @param text
+     *            input text
+     * @return a result of tokenizing
+     * @see #tokenizeSentences(SplitMode,String)
+     */
+    public default Iterable<List<Morpheme>> tokenizeSentences(String text) {
+        return tokenizeSentences(SplitMode.C, text);
     }
 
     /**

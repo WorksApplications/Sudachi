@@ -58,7 +58,33 @@ class JapaneseTokenizer implements Tokenizer {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
+        UTF8InputText input = buildInputText(text);
+        return tokenizeSentence(mode, input);
+    }
 
+    @Override
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ArrayList<List<Morpheme>> sentences = new ArrayList<>();
+        SentenceDetector detector = new SentenceDetector();
+        int eos;
+        while ((eos = detector.getEOS(text)) != 0) {
+            UTF8InputText input = buildInputText(text.substring(0, eos));
+            sentences.add(tokenizeSentence(mode, input));
+            text = text.substring(eos);
+        }
+        return sentences;
+    }
+
+    @Override
+    public void setDumpOutput(PrintStream output) {
+        dumpOutput = output;
+    }
+
+    UTF8InputText buildInputText(String text) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(builder);
@@ -69,6 +95,10 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println(input.getText());
         }
 
+        return input;
+    }
+
+    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         buildLattice(input);
 
         if (dumpOutput != null) {
@@ -99,11 +129,6 @@ class JapaneseTokenizer implements Tokenizer {
         }
 
         return new MorphemeList(input, grammar, lexicon, path);
-    }
-
-    @Override
-    public void setDumpOutput(PrintStream output) {
-        dumpOutput = output;
     }
 
     LatticeImpl buildLattice(UTF8InputText input) {

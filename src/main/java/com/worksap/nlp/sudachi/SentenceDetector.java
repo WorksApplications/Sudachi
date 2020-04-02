@@ -51,7 +51,7 @@ public class SentenceDetector {
 
     public int getEOS(String input) {
         if (input.isEmpty()) {
-            return 1;
+            return 0;
         }
 
         String s = (input.length() > limit) ? input.substring(0, limit) : input;

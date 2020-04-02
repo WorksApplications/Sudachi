@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
@@ -101,4 +102,13 @@ public class JapaneseTokenizerTest {
         assertThat(tokenizer.tokenize("特ab").size(), is(2));
     }
 
+    @Test
+    public void tokenizeSentences() {
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("京都。東京。").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(false));
+    }
 }
