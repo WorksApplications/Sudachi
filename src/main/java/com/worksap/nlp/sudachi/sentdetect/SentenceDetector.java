@@ -40,7 +40,7 @@ public class SentenceDetector {
 
     private static final String ITEMIZE_HEADER = "(" + ALPHABET_OR_NUMBER + ")" + "(" + DOT + ")";
 
-    private static int DEFAULT_LIMIT = 4096;
+    private static final int DEFAULT_LIMIT = 4096;
 
     private int limit;
 
