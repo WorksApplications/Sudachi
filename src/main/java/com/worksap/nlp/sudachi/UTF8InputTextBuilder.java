@@ -70,16 +70,18 @@ class UTF8InputTextBuilder implements InputTextBuilder {
 
         modifiedText.replace(begin, end, str);
 
-        int offset = modifiedToOriginal.get(begin);
+        int modifiedBegin = modifiedToOriginal.get(begin);
+        int modifiedEnd = modifiedToOriginal.get(end);
         int length = str.length();
         if (end - begin > length) {
             modifiedToOriginal.subList(begin + length, end).clear();
         }
-        for (int i = 0; i < length; i++) {
+        modifiedToOriginal.set(begin, modifiedBegin);
+        for (int i = 1; i < length; i++) {
             if (begin + i < end) {
-                modifiedToOriginal.set(begin + i, offset);
+                modifiedToOriginal.set(begin + i, modifiedEnd);
             } else {
-                modifiedToOriginal.add(begin + i, offset);
+                modifiedToOriginal.add(begin + i, modifiedEnd);
             }
         }
     }

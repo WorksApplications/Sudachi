@@ -93,7 +93,8 @@ public class DefaultInputTextPluginTest {
         assertThat(text.getOriginalIndex(2), is(1));
         assertThat(text.getOriginalIndex(3), is(2));
         assertThat(text.getOriginalIndex(7), is(4));
-        assertThat(text.getOriginalIndex(11), is(4));
+        assertThat(text.getOriginalIndex(8), is(5));
+        assertThat(text.getOriginalIndex(11), is(5));
         assertThat(text.getOriginalIndex(15), is(7));
         assertThat(text.getOriginalIndex(17), is(7));
     }
