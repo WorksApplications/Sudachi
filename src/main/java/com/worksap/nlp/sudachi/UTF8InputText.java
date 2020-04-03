@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -29,21 +31,21 @@ class UTF8InputText implements InputText {
     private final String originalText;
     private final String modifiedText;
     private final byte[] bytes;
-    private final int[] offsets;
-    private final int[] byteIndexes;
+    private final int[] byteToOriginal;
+    private final int[] byteToModified;
     private final List<EnumSet<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     private final List<Boolean> canBowList;
 
-    UTF8InputText(Grammar grammar, String originalText, String modifiedText, byte[] bytes, int[] offsets,
-            int[] byteIndexes, List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
+    UTF8InputText(Grammar grammar, String originalText, String modifiedText, byte[] bytes, int[] byteToOriginal,
+            int[] byteToModified, List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
             List<Boolean> canBowList) {
 
         this.originalText = originalText;
         this.modifiedText = modifiedText;
         this.bytes = bytes;
-        this.offsets = offsets;
-        this.byteIndexes = byteIndexes;
+        this.byteToOriginal = byteToOriginal;
+        this.byteToModified = byteToModified;
         this.charCategories = charCategories;
         this.charCategoryContinuities = charCategoryContinuities;
         this.canBowList = canBowList;
@@ -75,21 +77,49 @@ class UTF8InputText implements InputText {
             throw new StringIndexOutOfBoundsException(end - begin);
         }
 
-        return modifiedText.substring(byteIndexes[begin], byteIndexes[end]);
+        return modifiedText.substring(byteToModified[begin], byteToModified[end]);
+    }
+
+    @Override
+    public UTF8InputText slice(int begin, int end) {
+
+        int byteBegin = modifiedText.substring(0, begin).getBytes(StandardCharsets.UTF_8).length;
+        int byteEnd = byteBegin + modifiedText.substring(begin, end).getBytes(StandardCharsets.UTF_8).length;
+        int length = byteEnd - byteBegin;
+
+        String originalText = this.originalText.substring(byteToOriginal[byteBegin], byteToOriginal[byteEnd]);
+        String modifiedText = this.modifiedText.substring(begin, end);
+        byte[] bytes = Arrays.copyOfRange(this.bytes, byteBegin, byteEnd);
+
+        int[] byteToOriginal = new int[length + 1];
+        for (int i = 0; i < length + 1; i++) {
+            byteToOriginal[i] = this.byteToOriginal[byteBegin + i] - byteToOriginal[byteBegin];
+        }
+        int[] byteToModified = new int[length + 1];
+        for (int i = 0; i < length + 1; i++) {
+            byteToModified[i] = this.byteToModified[byteBegin + i] - begin;
+        }
+
+        List<EnumSet<CategoryType>> charCategories = this.charCategories.subList(begin, end);
+        List<Integer> charCategoryContinuities = this.charCategoryContinuities.subList(byteBegin, byteEnd);
+        List<Boolean> canBowList = this.canBowList.subList(begin, end);
+
+        return new UTF8InputText(null, originalText, modifiedText, bytes, byteToOriginal, byteToModified,
+                charCategories, charCategoryContinuities, canBowList);
     }
 
     int getOffsetTextLength(int index) {
-        return byteIndexes[index];
+        return byteToModified[index];
     }
 
     @Override
     public int getOriginalIndex(int index) {
-        return offsets[index];
+        return byteToOriginal[index];
     }
 
     @Override
     public Set<CategoryType> getCharCategoryTypes(int index) {
-        return charCategories.get(byteIndexes[index]);
+        return charCategories.get(byteToModified[index]);
     }
 
     @Override
@@ -97,8 +127,8 @@ class UTF8InputText implements InputText {
         if (begin + getCharCategoryContinuousLength(begin) < end) {
             return Collections.emptySet();
         }
-        int b = byteIndexes[begin];
-        int e = byteIndexes[end];
+        int b = byteToModified[begin];
+        int e = byteToModified[end];
         Set<CategoryType> continuousCategory = charCategories.get(b).clone();
         for (int i = b + 1; i < e; i++) {
             continuousCategory.retainAll(charCategories.get(i));
@@ -114,9 +144,9 @@ class UTF8InputText implements InputText {
     @Override
     public int getCodePointsOffsetLength(int index, int codePointOffset) {
         int length = 0;
-        int target = byteIndexes[index] + codePointOffset;
+        int target = byteToModified[index] + codePointOffset;
         for (int i = index; i < bytes.length; i++) {
-            if (byteIndexes[i] >= target) {
+            if (byteToModified[i] >= target) {
                 return length;
             }
             length++;
@@ -126,12 +156,12 @@ class UTF8InputText implements InputText {
 
     @Override
     public int codePointCount(int begin, int end) {
-        return byteIndexes[end] - byteIndexes[begin];
+        return byteToModified[end] - byteToModified[begin];
     }
 
     @Override
     public boolean canBow(int index) {
-        return isCharAlignment(index) && canBowList.get(byteIndexes[index]);
+        return isCharAlignment(index) && canBowList.get(byteToModified[index]);
     }
 
     @Override

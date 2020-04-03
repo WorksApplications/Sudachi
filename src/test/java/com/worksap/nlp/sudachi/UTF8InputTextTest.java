@@ -265,6 +265,20 @@ public class UTF8InputTextTest {
         assertThat(input.getWordCandidateLength(29), is(3));
     }
 
+    @Test
+    public void slice() {
+        builder.replace(1, 3, "あ");
+        input = builder.build();
+        input = input.slice(1, 3);
+        assertThat(input.getOriginalText(), is("ｂC1"));
+        assertThat(input.getText(), is("あ1"));
+        assertThat(input.getOffsetTextLength(1), is(0));
+        assertThat(input.getOffsetTextLength(3), is(1));
+        assertThat(input.getOffsetTextLength(4), is(2));
+        assertThat(input.getOriginalIndex(3), is(2));
+        assertThat(input.getOriginalIndex(4), is(3));
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {

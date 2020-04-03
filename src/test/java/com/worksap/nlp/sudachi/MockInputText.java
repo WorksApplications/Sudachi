@@ -59,6 +59,11 @@ class MockInputText implements InputText {
     }
 
     @Override
+    public InputText slice(int begin, int end) {
+        return null;
+    }
+
+    @Override
     public int getOriginalIndex(int index) {
         return index;
     }

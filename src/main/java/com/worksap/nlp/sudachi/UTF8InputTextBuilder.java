@@ -30,7 +30,7 @@ class UTF8InputTextBuilder implements InputTextBuilder {
 
     private final String originalText;
     private StringBuilder modifiedText;
-    private List<Integer> textOffsets;
+    private List<Integer> modifiedToOriginal;
 
     private final Grammar grammar;
 
@@ -39,14 +39,14 @@ class UTF8InputTextBuilder implements InputTextBuilder {
 
         originalText = text;
         modifiedText = new StringBuilder(text);
-        textOffsets = new ArrayList<>(modifiedText.length() + 1);
+        modifiedToOriginal = new ArrayList<>(modifiedText.length() + 1);
         for (int i = 0, j = 0; i < originalText.length(); i++) {
             if (!Character.isLowSurrogate(originalText.charAt(i))) {
                 j = i;
             }
-            textOffsets.add(j);
+            modifiedToOriginal.add(j);
         }
-        textOffsets.add(originalText.length());
+        modifiedToOriginal.add(originalText.length());
     }
 
     @Override
@@ -70,16 +70,16 @@ class UTF8InputTextBuilder implements InputTextBuilder {
 
         modifiedText.replace(begin, end, str);
 
-        int offset = textOffsets.get(begin);
+        int offset = modifiedToOriginal.get(begin);
         int length = str.length();
         if (end - begin > length) {
-            textOffsets.subList(begin + length, end).clear();
+            modifiedToOriginal.subList(begin + length, end).clear();
         }
         for (int i = 0; i < length; i++) {
             if (begin + i < end) {
-                textOffsets.set(begin + i, offset);
+                modifiedToOriginal.set(begin + i, offset);
             } else {
-                textOffsets.add(begin + i, offset);
+                modifiedToOriginal.add(begin + i, offset);
             }
         }
     }
@@ -100,27 +100,27 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         byte[] byteText = modifiedStringText.getBytes(StandardCharsets.UTF_8);
 
         int length = byteText.length;
-        int[] byteIndexes = new int[length + 1];
-        int[] offsets = new int[length + 1];
+        int[] byteToModified = new int[length + 1];
+        int[] byteToOriginal = new int[length + 1];
         for (int i = 0, j = 0; i < modifiedText.length(); i++) {
             if (Character.isLowSurrogate(modifiedText.charAt(i))) {
                 continue;
             }
             for (int k = 0; k < utf8ByteLength(modifiedText.codePointAt(i)); k++) {
-                byteIndexes[j] = i;
-                offsets[j] = textOffsets.get(i);
+                byteToModified[j] = i;
+                byteToOriginal[j] = modifiedToOriginal.get(i);
                 j++;
             }
         }
-        byteIndexes[length] = modifiedStringText.length();
-        offsets[length] = textOffsets.get(textOffsets.size() - 1);
+        byteToModified[length] = modifiedStringText.length();
+        byteToOriginal[length] = modifiedToOriginal.get(modifiedToOriginal.size() - 1);
 
         List<EnumSet<CategoryType>> charCategories = getCharCategoryTypes(modifiedStringText);
         List<Integer> charCategoryContinuities = getCharCategoryContinuities(modifiedStringText, length,
                 charCategories);
         List<Boolean> canBowList = buildCanBowList(modifiedStringText, charCategories);
 
-        return new UTF8InputText(grammar, originalText, modifiedStringText, byteText, offsets, byteIndexes,
+        return new UTF8InputText(grammar, originalText, modifiedStringText, byteText, byteToOriginal, byteToModified,
                 Collections.unmodifiableList(charCategories), Collections.unmodifiableList(charCategoryContinuities),
                 Collections.unmodifiableList(canBowList));
     }
