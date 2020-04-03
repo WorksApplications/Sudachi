@@ -12,7 +12,7 @@ addons:
     token:
       secure: "VN1PUJ18ZeS2ZN9FFMYIYr4z5qMY7fD1kkJP8WFN9led84i2mo506LzyjTmG//7hNooA3r62k4gBAJIaztsjqGKIPzOnqmZw+XRs7rVl1oReoZ0bbUeGei61srBOVUT7GMe3i5cntj9kt+5M8ieuA5JluwGGeHXNdpKQ0oOPhaEHgBADlxNzSEd8kAM+ynZ6DsMIAjCGQPLqquJTEEk5JG15VxIaTul/ARHypOmjmaTDpqyA4d673dvj9ooPNpUioWYne9k9tQMfGvQaT2gc4GgeG7K4gX0p6ToKRTnLGqohrIvG1fOuvLi1bBUQCiHsaAaaVge7SEvvjc1PFxpeFuDdm+Dhq3l9LmBvIJS3uRM2CGVXyCJtbbjymVbjMOhgzdk+UQKy/W1XqjOrZw45Yt73UAG5gAeULaAOY707sJY2bYXV+xOG7R75e2ndnSqPRJKCLTbBN9nbT0f89Jh+K/41ohLIXlT/xSgAAVBQsLgIfYRbzIMIqAoM5NV8unTLhF/XuWiunbDOSOdfAuUuNVOhlMXFaajISzQtbGEhnOeITyAJk4mszwxK+8E2CqhogRW4Uo0EuHO7VLy8kGf4p1ATJZXPPf9dYRG52/NJQZ4POwuibWsvqYFd1CVgvoklCGxsOrxlctxdNZ2+QTe4Gu8BjiSOkY3lxSF37Nj+pRU="
 script:
-  - mvn clean jacoco:prepare-agent test -B
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package org.jacoco:jacoco-maven-plugin:report -B
 after_success:
   - mvn sonar:sonar -B
 deploy:

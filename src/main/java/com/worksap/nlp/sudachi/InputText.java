@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,22 @@ public interface InputText {
      *             {@code end}
      */
     public String getSubstring(int begin, int end);
+
+    /**
+     * Returns the structure of substring. The substring begins at the specified
+     * {@code begin} and extends to the character at index {@code end - 1}.
+     *
+     * @param begin
+     *            the beginning index
+     * @param end
+     *            the ending index
+     * @return the new string
+     * @throws IndexOutOfBoundsException
+     *             if {@code begin} or {@code end} are negative, greater than the
+     *             length of the sequence, or {@code begin} is greater than
+     *             {@code end}
+     */
+    public InputText slice(int begin, int end);
 
     /**
      * Returns the index of the original text mapped to the character at the

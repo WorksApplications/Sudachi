@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
+import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 class JapaneseTokenizer implements Tokenizer {
 
@@ -58,7 +59,40 @@ class JapaneseTokenizer implements Tokenizer {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
+        UTF8InputText input = buildInputText(text);
+        return tokenizeSentence(mode, input);
+    }
 
+    @Override
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+        UTF8InputText input = buildInputText(text);
+        String normalized = input.getText();
+
+        ArrayList<List<Morpheme>> sentences = new ArrayList<>();
+        SentenceDetector detector = new SentenceDetector();
+        int bos = 0;
+        int length;
+        NonBreakChecker checker = new NonBreakChecker(input);
+        checker.setBos(bos);
+        while ((length = detector.getEos(normalized, checker)) != 0) {
+            UTF8InputText sentence = input.slice(bos, bos + length);
+            sentences.add(tokenizeSentence(mode, sentence));
+            normalized = normalized.substring(length);
+            bos += length;
+            checker.setBos(bos);
+        }
+        return sentences;
+    }
+
+    @Override
+    public void setDumpOutput(PrintStream output) {
+        dumpOutput = output;
+    }
+
+    UTF8InputText buildInputText(String text) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(builder);
@@ -69,6 +103,10 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println(input.getText());
         }
 
+        return input;
+    }
+
+    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         buildLattice(input);
 
         if (dumpOutput != null) {
@@ -99,11 +137,6 @@ class JapaneseTokenizer implements Tokenizer {
         }
 
         return new MorphemeList(input, grammar, lexicon, path);
-    }
-
-    @Override
-    public void setDumpOutput(PrintStream output) {
-        dumpOutput = output;
     }
 
     LatticeImpl buildLattice(UTF8InputText input) {
@@ -183,6 +216,36 @@ class JapaneseTokenizer implements Tokenizer {
         for (LatticeNode node : path) {
             dumpOutput.println(String.format("%d: %s", i, node.toString()));
             i++;
+        }
+    }
+
+    class NonBreakChecker implements SentenceDetector.NonBreakCheker {
+        private final UTF8InputText input;
+        private int bos;
+
+        NonBreakChecker(UTF8InputText input) {
+            this.input = input;
+        }
+
+        public void setBos(int bos) {
+            this.bos = bos;
+        }
+
+        @Override
+        public boolean hasNonBreakWord(int length) {
+            int byteEOS = input.getCodePointsOffsetLength(0, bos + length);
+            byte[] bytes = input.getByteText();
+            for (int i = Math.max(0, byteEOS - 64); i < byteEOS; i++) {
+                Iterator<int[]> iterator = lexicon.lookup(bytes, i);
+                while (iterator.hasNext()) {
+                    int[] r = iterator.next();
+                    int l = r[1];
+                    if (l > byteEOS || (l == byteEOS && bos + length - input.getOffsetTextLength(i) > 1)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

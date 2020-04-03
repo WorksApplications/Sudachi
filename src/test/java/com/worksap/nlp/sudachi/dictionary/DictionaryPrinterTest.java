@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class DictionaryPrinterTest {
             DictionaryPrinter.printDictionary(inputFile.getPath(), null, ps);
             actuals = output.toString().split("\n");
         }
-        assertThat(actuals.length, is(38));
+        assertThat(actuals.length, is(39));
         assertThat(actuals[0], is("た,1,1,8729,た,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,た,*,A,*,*,*"));
     }
 

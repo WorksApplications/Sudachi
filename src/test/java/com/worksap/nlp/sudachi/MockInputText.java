@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,11 @@ class MockInputText implements InputText {
     @Override
     public String getSubstring(int begin, int end) {
         return text.substring(begin, end);
+    }
+
+    @Override
+    public InputText slice(int begin, int end) {
+        return null;
     }
 
     @Override

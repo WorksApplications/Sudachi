@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
@@ -101,4 +102,20 @@ public class JapaneseTokenizerTest {
         assertThat(tokenizer.tokenize("特ab").size(), is(2));
     }
 
+    @Test
+    public void tokenizeSentences() {
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("京都。東京.東京都。").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(false));
+
+        it = tokenizer.tokenizeSentences("な。なに。").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(3));
+        assertThat(it.hasNext(), is(false));
+    }
 }

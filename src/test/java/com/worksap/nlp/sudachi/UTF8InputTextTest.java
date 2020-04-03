@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Works Applications Co., Ltd.
+ * Copyright (c) 2020 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,27 @@ public class UTF8InputTextTest {
         assertThat(input.getWordCandidateLength(6), is(1));
         assertThat(input.getWordCandidateLength(19), is(4));
         assertThat(input.getWordCandidateLength(29), is(3));
+    }
+
+    @Test
+    public void slice() {
+        builder.replace(1, 3, "あ");
+        input = builder.build();
+        input = input.slice(1, 3);
+        assertThat(input.getOriginalText(), is("ｂC1"));
+        assertThat(input.getText(), is("あ1"));
+        assertThat(input.getOffsetTextLength(1), is(0));
+        assertThat(input.getOffsetTextLength(3), is(1));
+        assertThat(input.getOffsetTextLength(4), is(2));
+        assertThat(input.getOriginalIndex(3), is(2));
+        assertThat(input.getOriginalIndex(4), is(3));
+    }
+
+    @Test
+    public void sliceWithSameCategory() {
+        input = builder.build();
+        input = input.slice(0, 2);
+        assertThat(input.getCharCategoryContinuousLength(input.getByteText().length - 1), is(1));
     }
 
     class MockGrammar implements Grammar {
