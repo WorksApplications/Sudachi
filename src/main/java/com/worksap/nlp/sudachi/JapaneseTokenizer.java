@@ -25,6 +25,7 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
+import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 class JapaneseTokenizer implements Tokenizer {
 
@@ -74,11 +75,14 @@ class JapaneseTokenizer implements Tokenizer {
         SentenceDetector detector = new SentenceDetector();
         int bos = 0;
         int length;
-        while ((length = detector.getEOS(normalized)) != 0) {
+        NonBreakChecker checker = new NonBreakChecker(input);
+        checker.setBos(bos);
+        while ((length = detector.getEOS(normalized, checker)) != 0) {
             UTF8InputText sentence = input.slice(bos, bos + length);
             sentences.add(tokenizeSentence(mode, sentence));
             normalized = normalized.substring(length);
             bos += length;
+            checker.setBos(bos);
         }
         return sentences;
     }
@@ -212,6 +216,36 @@ class JapaneseTokenizer implements Tokenizer {
         for (LatticeNode node : path) {
             dumpOutput.println(String.format("%d: %s", i, node.toString()));
             i++;
+        }
+    }
+
+    class NonBreakChecker implements SentenceDetector.NonBreakCheker {
+        private final UTF8InputText input;
+        private int bos;
+
+        NonBreakChecker(UTF8InputText input) {
+            this.input = input;
+        }
+
+        public void setBos(int bos) {
+            this.bos = bos;
+        }
+
+        @Override
+        public boolean hasNonBreakWord(int length) {
+            int byteEOS = input.getCodePointsOffsetLength(0, bos + length);
+            byte[] bytes = input.getByteText();
+            for (int i = Math.max(0, byteEOS - 64); i < byteEOS; i++) {
+                Iterator<int[]> iterator = lexicon.lookup(bytes, i);
+                while (iterator.hasNext()) {
+                    int[] r = iterator.next();
+                    int l = r[1];
+                    if (l > byteEOS || (l == byteEOS && bos + length - input.getOffsetTextLength(i) > 1)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

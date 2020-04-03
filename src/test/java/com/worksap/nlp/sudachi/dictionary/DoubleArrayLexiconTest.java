@@ -122,7 +122,7 @@ public class DoubleArrayLexiconTest {
 
     @Test
     public void size() {
-        assertEquals(38, lexicon.size());
+        assertEquals(39, lexicon.size());
     }
 
     static <E> List<E> iteratorToList(Iterator<E> iterator) {

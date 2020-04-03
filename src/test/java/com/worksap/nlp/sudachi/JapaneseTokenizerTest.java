@@ -112,5 +112,10 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(false));
+
+        it = tokenizer.tokenizeSentences("な。なに。").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(3));
+        assertThat(it.hasNext(), is(false));
     }
 }

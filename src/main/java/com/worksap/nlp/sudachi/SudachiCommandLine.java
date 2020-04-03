@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -62,27 +63,29 @@ public class SudachiCommandLine {
 
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 try {
-                    for (Morpheme m : tokenizer.tokenize(mode, line)) {
-                        output.print(m.surface());
-                        output.print("\t");
-                        output.print(String.join(",", m.partOfSpeech()));
-                        output.print("\t");
-                        output.print(m.normalizedForm());
-                        if (printAll) {
+                    for (List<Morpheme> sentence : tokenizer.tokenizeSentences(mode, line)) {
+                        for (Morpheme m : sentence) {
+                            output.print(m.surface());
                             output.print("\t");
-                            output.print(m.dictionaryForm());
+                            output.print(String.join(",", m.partOfSpeech()));
                             output.print("\t");
-                            output.print(m.readingForm());
-                            output.print("\t");
-                            output.print(m.getDictionaryId());
-                            if (m.isOOV()) {
+                            output.print(m.normalizedForm());
+                            if (printAll) {
                                 output.print("\t");
-                                output.print("(OOV)");
+                                output.print(m.dictionaryForm());
+                                output.print("\t");
+                                output.print(m.readingForm());
+                                output.print("\t");
+                                output.print(m.getDictionaryId());
+                                if (m.isOOV()) {
+                                    output.print("\t");
+                                    output.print("(OOV)");
+                                }
                             }
+                            output.println();
                         }
-                        output.println();
+                        output.println("EOS");
                     }
-                    output.println("EOS");
                 } catch (RuntimeException e) {
                     if (ignoreError) {
                         logger.warning(e.getMessage() + "\n");

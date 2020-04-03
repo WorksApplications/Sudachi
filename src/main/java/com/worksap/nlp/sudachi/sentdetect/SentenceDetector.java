@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi;
+package com.worksap.nlp.sudachi.sentdetect;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SentenceDetector {
+
+    public interface NonBreakCheker {
+        boolean hasNonBreakWord(int eos);
+    }
 
     static private String PERIODS = "。|？|！|♪|…|\\?|\\!";
     static private String DOT = "(\\.|．)";
@@ -49,7 +53,7 @@ public class SentenceDetector {
         this.limit = (limit > 0) ? limit : DEFAULT_LIMIT;
     }
 
-    public int getEOS(String input) {
+    public int getEOS(String input, NonBreakCheker checker) {
         if (input.isEmpty()) {
             return 0;
         }
@@ -66,6 +70,9 @@ public class SentenceDetector {
                     continue;
                 }
                 if (eos < s.length() && isContinuousPhrase(s, eos)) {
+                    continue;
+                }
+                if (checker != null && checker.hasNonBreakWord(eos)) {
                     continue;
                 }
                 return eos;
