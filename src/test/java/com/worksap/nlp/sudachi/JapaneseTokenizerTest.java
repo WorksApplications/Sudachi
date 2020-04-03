@@ -118,4 +118,16 @@ public class JapaneseTokenizerTest {
         assertThat(it.next().size(), is(3));
         assertThat(it.hasNext(), is(false));
     }
+
+    @Test
+    public void tokenizerWithDots() {
+        List<Morpheme> s = tokenizer.tokenize("京都…");
+        assertThat(s.size(), is(4));
+        assertThat(s.get(1).surface(), is("…"));
+        assertThat(s.get(1).normalizedForm(), is("."));
+        assertThat(s.get(2).surface(), is(""));
+        assertThat(s.get(2).normalizedForm(), is("."));
+        assertThat(s.get(3).surface(), is(""));
+        assertThat(s.get(1).normalizedForm(), is("."));
+    }
 }

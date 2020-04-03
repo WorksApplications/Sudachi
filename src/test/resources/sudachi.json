@@ -3,7 +3,8 @@
     "userDict" : [ "user.dic" ],
     "characterDefinitionFile" : "char.def",
     "inputTextPlugin" : [
-        { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
+      { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
+      { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
           "prolongedSoundMarks": ["ー", "〜", "〰"],
           "replacementSymbol": "ー"}
     ],

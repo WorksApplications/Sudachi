@@ -147,8 +147,8 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalIndex(12), is(7));
         assertThat(input.getOriginalIndex(13), is(8));
         assertThat(input.getOriginalIndex(15), is(8));
-        assertThat(input.getOriginalIndex(16), is(8));
-        assertThat(input.getOriginalIndex(18), is(8));
+        assertThat(input.getOriginalIndex(16), is(10));
+        assertThat(input.getOriginalIndex(18), is(10));
         assertThat(input.getOriginalIndex(19), is(10));
         assertThat(input.getOriginalIndex(22), is(10));
         assertThat(input.getOriginalIndex(31), is(14));
@@ -181,13 +181,13 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalText(), is(TEXT));
         assertThat(input.getText(), is("âｂC1あ234あああ𡈽アｺﾞ"));
         assertThat(input.getByteText().length, is(35));
-        assertThat(input.getOriginalIndex(0), is(0));
-        assertThat(input.getOriginalIndex(12), is(7));
-        assertThat(input.getOriginalIndex(13), is(8));
-        assertThat(input.getOriginalIndex(21), is(8));
-        assertThat(input.getOriginalIndex(22), is(10));
-        assertThat(input.getOriginalIndex(25), is(10));
-        assertThat(input.getOriginalIndex(34), is(14));
+        assertThat(input.getOriginalIndex(0), is(0)); // â
+        assertThat(input.getOriginalIndex(12), is(7)); // 4
+        assertThat(input.getOriginalIndex(13), is(8)); // >あ< ああ
+        assertThat(input.getOriginalIndex(21), is(10)); // ああ >あ<
+        assertThat(input.getOriginalIndex(22), is(10)); // 𡈽
+        assertThat(input.getOriginalIndex(25), is(10)); // 𡈽
+        assertThat(input.getOriginalIndex(34), is(14)); // ﾞ
     }
 
     @Test
