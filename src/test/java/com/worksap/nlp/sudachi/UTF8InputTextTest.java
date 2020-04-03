@@ -279,6 +279,13 @@ public class UTF8InputTextTest {
         assertThat(input.getOriginalIndex(4), is(3));
     }
 
+    @Test
+    public void sliceWithSameCategory() {
+        input = builder.build();
+        input = input.slice(0, 2);
+        assertThat(input.getCharCategoryContinuousLength(input.getByteText().length - 1), is(1));
+    }
+
     class MockGrammar implements Grammar {
         @Override
         public int getPartOfSpeechSize() {

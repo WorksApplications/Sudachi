@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -92,9 +91,9 @@ class UTF8InputText implements InputText {
             throw new StringIndexOutOfBoundsException(end - begin);
         }
 
-        int byteBegin = modifiedText.substring(0, begin).getBytes(StandardCharsets.UTF_8).length;
-        int byteEnd = byteBegin + modifiedText.substring(begin, end).getBytes(StandardCharsets.UTF_8).length;
-        int length = byteEnd - byteBegin;
+        int byteBegin = getCodePointsOffsetLength(0, begin);
+        int length = getCodePointsOffsetLength(byteBegin, end - begin);
+        int byteEnd = byteBegin + length;
 
         String originalText = this.originalText.substring(byteToOriginal[byteBegin], byteToOriginal[byteEnd]);
         String modifiedText = this.modifiedText.substring(begin, end);
@@ -110,7 +109,16 @@ class UTF8InputText implements InputText {
         }
 
         List<EnumSet<CategoryType>> charCategories = this.charCategories.subList(begin, end);
+
         List<Integer> charCategoryContinuities = this.charCategoryContinuities.subList(byteBegin, byteEnd);
+        if (charCategoryContinuities.get(length - 1) != 1) {
+            int i = length - 1;
+            int len = 1;
+            while (i >= 0 && charCategoryContinuities.get(i) != 1) {
+                charCategoryContinuities.set(i--, len++);
+            }
+        }
+
         List<Boolean> canBowList = this.canBowList.subList(begin, end);
 
         return new UTF8InputText(null, originalText, modifiedText, bytes, byteToOriginal, byteToModified,

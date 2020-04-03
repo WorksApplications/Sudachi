@@ -121,7 +121,7 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         List<Boolean> canBowList = buildCanBowList(modifiedStringText, charCategories);
 
         return new UTF8InputText(grammar, originalText, modifiedStringText, byteText, byteToOriginal, byteToModified,
-                Collections.unmodifiableList(charCategories), Collections.unmodifiableList(charCategoryContinuities),
+                Collections.unmodifiableList(charCategories), charCategoryContinuities,
                 Collections.unmodifiableList(canBowList));
     }
 
