@@ -25,23 +25,22 @@ public class SentenceDetector {
         boolean hasNonBreakWord(int eos);
     }
 
-    static private String PERIODS = "。|？|！|♪|…|\\?|\\!";
-    static private String DOT = "(\\.|．)";
-    static private String CDOT = "・";
-    static private String COMMA = "(,|，|、)";
-    static private String BR_TAG = "(<br>|<BR>){2,}";
-    static private String ALPHABET_OR_NUMBER = "[a-z]|[A-Z]|[0-9]|[ａ-ｚ]|[Ａ-Ｚ]|[０-９]|〇|一|二|三|四|五|六|七|八|九|十|百|千|万|億|兆";
-    static private Pattern SENTENCE_BREAKER = Pattern
+    private static final String PERIODS = "。|？|！|♪|…|\\?|\\!";
+    private static final String DOT = "(\\.|．)";
+    private static final String CDOT = "・";
+    private static final String COMMA = "(,|，|、)";
+    private static final String BR_TAG = "(<br>|<BR>){2,}";
+    private static final String ALPHABET_OR_NUMBER = "[a-z]|[A-Z]|[0-9]|[ａ-ｚ]|[Ａ-Ｚ]|[０-９]|〇|一|二|三|四|五|六|七|八|九|十|百|千|万|億|兆";
+    private static final Pattern SENTENCE_BREAKER = Pattern
             .compile("(" + PERIODS + "|" + CDOT + "{3,}+|((?<!(" + ALPHABET_OR_NUMBER + "))" + DOT + "(?!("
                     + ALPHABET_OR_NUMBER + "|" + COMMA + "))))(" + DOT + "|" + PERIODS + ")*|" + BR_TAG);
 
-    static private String OPEN_PARENTHESIS = "\\(|\\{|｛|\\[|（|「|【|『|［|≪|〔|“";
-    static private String CLOSE_PARENTHESIS = "\\)|\\}|\\]|）|」|｝|】|』|］|〕|≫|”";
-    static private Pattern PARENTHESIS = Pattern.compile("(" + OPEN_PARENTHESIS + ")|(" + CLOSE_PARENTHESIS + ")");
+    private static final String OPEN_PARENTHESIS = "\\(|\\{|｛|\\[|（|「|【|『|［|≪|〔|“";
+    private static final String CLOSE_PARENTHESIS = "\\)|\\}|\\]|）|」|｝|】|』|］|〕|≫|”";
 
-    static private String ITEMIZE_HEADER = "(" + ALPHABET_OR_NUMBER + ")" + "(" + DOT + ")";
+    private static final String ITEMIZE_HEADER = "(" + ALPHABET_OR_NUMBER + ")" + "(" + DOT + ")";
 
-    static final int DEFAULT_LIMIT = 4096;
+    private static int DEFAULT_LIMIT = 4096;
 
     private int limit;
 
@@ -53,7 +52,7 @@ public class SentenceDetector {
         this.limit = (limit > 0) ? limit : DEFAULT_LIMIT;
     }
 
-    public int getEOS(String input, NonBreakCheker checker) {
+    public int getEos(String input, NonBreakCheker checker) {
         if (input.isEmpty()) {
             return 0;
         }
@@ -79,14 +78,17 @@ public class SentenceDetector {
             }
         }
 
-        final Pattern SPACES = Pattern.compile(".+\\s+");
-        Matcher m = SPACES.matcher(s);
+        final Pattern spaces = Pattern.compile(".+\\s+");
+        Matcher m = spaces.matcher(s);
         if (m.find()) {
             return m.end();
         }
 
         return Math.min(input.length(), limit);
     }
+
+    private static final Pattern PARENTHESIS = Pattern
+            .compile("(" + OPEN_PARENTHESIS + ")|(" + CLOSE_PARENTHESIS + ")");
 
     int parenthesisLevel(String s) {
         Matcher matcher = PARENTHESIS.matcher(s);
@@ -104,25 +106,24 @@ public class SentenceDetector {
         return level;
     }
 
+    private static final Pattern PROHIBITED_BOS = Pattern
+            .compile("\\A(" + CLOSE_PARENTHESIS + "|" + COMMA + "|" + PERIODS + ")+");
+
     int prohibitedBOS(String s) {
-        final Pattern PROHIBITED_BOS = Pattern.compile("\\A(" + CLOSE_PARENTHESIS + "|" + COMMA + "|" + PERIODS + ")+");
         Matcher m = PROHIBITED_BOS.matcher(s);
         return (m.find()) ? m.end() : 0;
     }
 
+    private static final Pattern QUOTE_MARKER = Pattern.compile("(！|？|\\!|\\?|" + CLOSE_PARENTHESIS + ")(と|っ|です)");
+    private static final Pattern EOS_ITEMIZE_HEADER = Pattern.compile(ITEMIZE_HEADER + "\\z");
+
     boolean isContinuousPhrase(String s, int eos) {
-        final Pattern QUOTE_MARKER = Pattern.compile("(！|？|\\!|\\?|" + CLOSE_PARENTHESIS + ")(と|っ|です)");
         Matcher m = QUOTE_MARKER.matcher(s);
         if (m.find(eos - 1) && m.start() == eos - 1) {
             return true;
         }
 
-        final Pattern EOS_ITEMIZE_HEADER = Pattern.compile(ITEMIZE_HEADER + "\\z");
         char c = s.charAt(eos);
-        if ((c == 'と' || c == 'や' || c == 'の') && EOS_ITEMIZE_HEADER.matcher(s.substring(0, eos)).find()) {
-            return true;
-        }
-
-        return false;
+        return (c == 'と' || c == 'や' || c == 'の') && EOS_ITEMIZE_HEADER.matcher(s.substring(0, eos)).find();
     }
 }

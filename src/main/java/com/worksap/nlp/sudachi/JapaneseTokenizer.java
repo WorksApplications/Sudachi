@@ -77,7 +77,7 @@ class JapaneseTokenizer implements Tokenizer {
         int length;
         NonBreakChecker checker = new NonBreakChecker(input);
         checker.setBos(bos);
-        while ((length = detector.getEOS(normalized, checker)) != 0) {
+        while ((length = detector.getEos(normalized, checker)) != 0) {
             UTF8InputText sentence = input.slice(bos, bos + length);
             sentences.add(tokenizeSentence(mode, sentence));
             normalized = normalized.substring(length);
