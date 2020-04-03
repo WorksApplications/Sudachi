@@ -67,14 +67,18 @@ class JapaneseTokenizer implements Tokenizer {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
+        UTF8InputText input = buildInputText(text);
+        String normalized = input.getText();
 
         ArrayList<List<Morpheme>> sentences = new ArrayList<>();
         SentenceDetector detector = new SentenceDetector();
-        int eos;
-        while ((eos = detector.getEOS(text)) != 0) {
-            UTF8InputText input = buildInputText(text.substring(0, eos));
-            sentences.add(tokenizeSentence(mode, input));
-            text = text.substring(eos);
+        int bos = 0;
+        int length;
+        while ((length = detector.getEOS(normalized)) != 0) {
+            UTF8InputText sentence = input.slice(bos, bos + length);
+            sentences.add(tokenizeSentence(mode, sentence));
+            normalized = normalized.substring(length);
+            bos += length;
         }
         return sentences;
     }

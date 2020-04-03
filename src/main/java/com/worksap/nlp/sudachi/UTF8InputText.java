@@ -82,6 +82,15 @@ class UTF8InputText implements InputText {
 
     @Override
     public UTF8InputText slice(int begin, int end) {
+        if (begin < 0) {
+            throw new StringIndexOutOfBoundsException(begin);
+        }
+        if (end > modifiedText.length()) {
+            throw new StringIndexOutOfBoundsException(end);
+        }
+        if (begin > end) {
+            throw new StringIndexOutOfBoundsException(end - begin);
+        }
 
         int byteBegin = modifiedText.substring(0, begin).getBytes(StandardCharsets.UTF_8).length;
         int byteEnd = byteBegin + modifiedText.substring(begin, end).getBytes(StandardCharsets.UTF_8).length;
@@ -93,7 +102,7 @@ class UTF8InputText implements InputText {
 
         int[] byteToOriginal = new int[length + 1];
         for (int i = 0; i < length + 1; i++) {
-            byteToOriginal[i] = this.byteToOriginal[byteBegin + i] - byteToOriginal[byteBegin];
+            byteToOriginal[i] = this.byteToOriginal[byteBegin + i] - this.byteToOriginal[byteBegin];
         }
         int[] byteToModified = new int[length + 1];
         for (int i = 0; i < length + 1; i++) {

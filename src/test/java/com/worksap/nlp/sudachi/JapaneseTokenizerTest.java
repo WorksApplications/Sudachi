@@ -104,7 +104,9 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizeSentences() {
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("京都。東京。").iterator();
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("京都。東京.東京都。").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
