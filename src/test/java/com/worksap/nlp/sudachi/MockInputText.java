@@ -113,4 +113,9 @@ class MockInputText implements InputText {
     public int getWordCandidateLength(int index) {
         return 1;
     }
+
+    @Override
+    public int getNextInOriginal(int index) {
+        return index + 1;
+    }
 }

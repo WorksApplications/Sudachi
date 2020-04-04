@@ -266,6 +266,17 @@ public class UTF8InputTextTest {
     }
 
     @Test
+    public void getNextInOriginal() {
+        builder.replace(1, 3, "あああ");
+        input = builder.build();
+        assertThat(input.getNextInOriginal(0), is(1));
+        assertThat(input.getNextInOriginal(1), is(4));
+        assertThat(input.getNextInOriginal(2), is(4));
+        assertThat(input.getNextInOriginal(3), is(4));
+        assertThat(input.getNextInOriginal(4), is(5));
+    }
+
+    @Test
     public void slice() {
         builder.replace(1, 3, "あ");
         input = builder.build();
