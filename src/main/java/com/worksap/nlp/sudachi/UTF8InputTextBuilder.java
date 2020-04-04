@@ -123,8 +123,8 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         List<Boolean> canBowList = buildCanBowList(modifiedStringText, charCategories);
 
         return new UTF8InputText(grammar, originalText, modifiedStringText, byteText, byteToOriginal, byteToModified,
-                Collections.unmodifiableList(charCategories), charCategoryContinuities,
-                Collections.unmodifiableList(canBowList));
+                Collections.unmodifiableList(modifiedToOriginal), Collections.unmodifiableList(charCategories),
+                charCategoryContinuities, Collections.unmodifiableList(canBowList));
     }
 
     private List<EnumSet<CategoryType>> getCharCategoryTypes(String text) {

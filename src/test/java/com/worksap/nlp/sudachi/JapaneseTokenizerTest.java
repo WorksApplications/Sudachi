@@ -130,4 +130,12 @@ public class JapaneseTokenizerTest {
         assertThat(s.get(3).surface(), is(""));
         assertThat(s.get(1).normalizedForm(), is("."));
     }
+
+    @Test
+    public void tokenizerWithModifiedChar() {
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("´´").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(4));
+        assertThat(it.hasNext(), is(false));
+    }
 }

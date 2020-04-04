@@ -191,4 +191,14 @@ public interface InputText {
      */
     public int getWordCandidateLength(int index);
 
+    /**
+     * Returns the index of the character on the modified text corresponding to the
+     * character following the character on the original text corresponding to the
+     * character specified @{code index} in the modified text.
+     *
+     * @param index
+     *            the index of the character
+     * @return the index of the character
+     */
+    public int getNextInOriginal(int index);
 }

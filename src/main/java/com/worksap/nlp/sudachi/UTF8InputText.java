@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -32,19 +33,21 @@ class UTF8InputText implements InputText {
     private final byte[] bytes;
     private final int[] byteToOriginal;
     private final int[] byteToModified;
+    private final List<Integer> modifiedToOriginal;
     private final List<EnumSet<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     private final List<Boolean> canBowList;
 
     UTF8InputText(Grammar grammar, String originalText, String modifiedText, byte[] bytes, int[] byteToOriginal,
-            int[] byteToModified, List<EnumSet<CategoryType>> charCategories, List<Integer> charCategoryContinuities,
-            List<Boolean> canBowList) {
+            int[] byteToModified, List<Integer> modifiedToOriginal, List<EnumSet<CategoryType>> charCategories,
+            List<Integer> charCategoryContinuities, List<Boolean> canBowList) {
 
         this.originalText = originalText;
         this.modifiedText = modifiedText;
         this.bytes = bytes;
         this.byteToOriginal = byteToOriginal;
         this.byteToModified = byteToModified;
+        this.modifiedToOriginal = modifiedToOriginal;
         this.charCategories = charCategories;
         this.charCategoryContinuities = charCategoryContinuities;
         this.canBowList = canBowList;
@@ -107,6 +110,10 @@ class UTF8InputText implements InputText {
         for (int i = 0; i < length + 1; i++) {
             byteToModified[i] = this.byteToModified[byteBegin + i] - begin;
         }
+        List<Integer> modifiedToOriginal = new ArrayList<>();
+        for (int i = 0; i < end + 1; i++) {
+            modifiedToOriginal.add(this.modifiedToOriginal.get(i) - this.modifiedToOriginal.get(begin));
+        }
 
         List<EnumSet<CategoryType>> charCategories = this.charCategories.subList(begin, end);
 
@@ -122,7 +129,7 @@ class UTF8InputText implements InputText {
         List<Boolean> canBowList = this.canBowList.subList(begin, end);
 
         return new UTF8InputText(null, originalText, modifiedText, bytes, byteToOriginal, byteToModified,
-                charCategories, charCategoryContinuities, canBowList);
+                modifiedToOriginal, charCategories, charCategoryContinuities, canBowList);
     }
 
     int getOffsetTextLength(int index) {
@@ -193,5 +200,14 @@ class UTF8InputText implements InputText {
 
     private boolean isCharAlignment(int index) {
         return (bytes[index] & 0xC0) != 0x80;
+    }
+
+    @Override
+    public int getNextInOriginal(int index) {
+        int o = modifiedToOriginal.get(index + 1);
+        while (index + 1 < modifiedText.length() + 1 && modifiedToOriginal.get(index + 1) == o) {
+            index++;
+        }
+        return index;
     }
 }
