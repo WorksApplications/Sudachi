@@ -19,9 +19,23 @@ package com.worksap.nlp.sudachi.sentdetect;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A sentence boundary detector.
+ */
 public class SentenceDetector {
 
+    /**
+     * A checher for words that cross boundaries.
+     */
     public interface NonBreakCheker {
+        /**
+         * Returns whether there is a word that crosses the boundary.
+         *
+         * @param eos
+         *            the index of the detected boundary
+         * @return {@code true} if, and only if there is a word that crosses the
+         *         boundary
+         */
         boolean hasNonBreakWord(int eos);
     }
 
@@ -40,18 +54,41 @@ public class SentenceDetector {
 
     private static final String ITEMIZE_HEADER = "(" + ALPHABET_OR_NUMBER + ")" + "(" + DOT + ")";
 
-    private static final int DEFAULT_LIMIT = 4096;
+    /** the default maximum length of a sentence */
+    public static final int DEFAULT_LIMIT = 4096;
 
     private int limit;
 
+    /**
+     * Initialize a newly created {@code SentenceDetector} object.
+     */
     public SentenceDetector() {
         this(-1);
     }
 
+    /**
+     * Constructs a new {@code SentenceDetector} with length limitation of sentence.
+     *
+     * @param limit
+     *            the maximum length of a sentence
+     */
     public SentenceDetector(int limit) {
         this.limit = (limit > 0) ? limit : DEFAULT_LIMIT;
     }
 
+    /**
+     * Returns the index of the detected end of the sentence.
+     *
+     * If {@code checker} is not @{code null}, it is used to determine if there is a
+     * word that crosses the detected boundary, and if so, the next boundary is
+     * returned.
+     *
+     * @param input
+     *            text
+     * @param checker
+     *            a checher for words that cross boundaries
+     * @return the index of the end of the sentence
+     */
     public int getEos(String input, NonBreakCheker checker) {
         if (input.isEmpty()) {
             return 0;
