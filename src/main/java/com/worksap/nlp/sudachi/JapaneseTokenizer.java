@@ -16,7 +16,10 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Reader;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -78,6 +81,9 @@ class JapaneseTokenizer implements Tokenizer {
         NonBreakChecker checker = new NonBreakChecker(input);
         checker.setBos(bos);
         while ((length = detector.getEos(normalized, checker)) != 0) {
+            if (length < 0) {
+                length = -length;
+            }
             int eos = bos + length;
             if (eos < normalized.length()) {
                 eos = input.getNextInOriginal(eos - 1);
@@ -93,11 +99,52 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
+        ArrayList<List<Morpheme>> sentences = new ArrayList<>();
+        CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
+        SentenceDetector detector = new SentenceDetector();
+
+        while (reader.read(buffer) > 0) {
+            buffer.flip();
+
+            UTF8InputText input = buildInputText(buffer);
+            String normalized = input.getText();
+
+            int bos = 0;
+            int length;
+            NonBreakChecker checker = new NonBreakChecker(input);
+            checker.setBos(bos);
+            while ((length = detector.getEos(normalized, checker)) > 0) {
+                int eos = bos + length;
+                if (eos < normalized.length()) {
+                    eos = input.getNextInOriginal(eos - 1);
+                    length = eos - bos;
+                }
+                UTF8InputText sentence = input.slice(bos, eos);
+                sentences.add(tokenizeSentence(mode, sentence));
+                normalized = normalized.substring(length);
+                bos = eos;
+                checker.setBos(bos);
+            }
+            if (length < 0) {
+                buffer.position(bos);
+                buffer.compact();
+            }
+        }
+        buffer.flip();
+        if (buffer.hasRemaining()) {
+            sentences.add(tokenizeSentence(mode, buildInputText(buffer)));
+        }
+
+        return sentences;
+    }
+
+    @Override
     public void setDumpOutput(PrintStream output) {
         dumpOutput = output;
     }
 
-    UTF8InputText buildInputText(String text) {
+    UTF8InputText buildInputText(CharSequence text) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(builder);

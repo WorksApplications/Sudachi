@@ -34,10 +34,10 @@ class UTF8InputTextBuilder implements InputTextBuilder {
 
     private final Grammar grammar;
 
-    public UTF8InputTextBuilder(String text, Grammar grammar) {
+    public UTF8InputTextBuilder(CharSequence text, Grammar grammar) {
         this.grammar = grammar;
 
-        originalText = text;
+        originalText = text.toString();
         modifiedText = new StringBuilder(text);
         modifiedToOriginal = new ArrayList<>(modifiedText.length() + 1);
         for (int i = 0, j = 0; i < originalText.length(); i++) {

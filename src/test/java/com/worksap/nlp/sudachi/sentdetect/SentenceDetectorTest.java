@@ -35,7 +35,7 @@ public class SentenceDetectorTest {
     public void getEOS() {
         assertThat(detector.getEos("あいう。えお。", null), is(4));
         assertThat(detector.getEos("あいう。えお。", null), is(4));
-        assertThat(detector.getEos("あいうえお", null), is(5));
+        assertThat(detector.getEos("あいうえお", null), is(-5));
         assertThat(detector.getEos("", null), is(0));
         assertThat(detector.getEos("あいう。。えお。", null), is(5));
     }
@@ -44,23 +44,23 @@ public class SentenceDetectorTest {
     public void getEOSWithLimit() {
         detector = new SentenceDetector(5);
         assertThat(detector.getEos("あい。うえお。", null), is(3));
-        assertThat(detector.getEos("あいうえおか", null), is(5));
-        assertThat(detector.getEos("あいうえお。", null), is(5));
-        assertThat(detector.getEos("あい うえお", null), is(3));
-        assertThat(detector.getEos("あ い うえお", null), is(4));
+        assertThat(detector.getEos("あいうえおか", null), is(-5));
+        assertThat(detector.getEos("あいうえお。", null), is(-5));
+        assertThat(detector.getEos("あい うえお", null), is(-3));
+        assertThat(detector.getEos("あ い うえお", null), is(-4));
     }
 
     @Test
     public void getEOSWithPeriod() {
         assertThat(detector.getEos("あいう.えお", null), is(4));
-        assertThat(detector.getEos("3.141", null), is(5));
-        assertThat(detector.getEos("四百十．〇", null), is(5));
+        assertThat(detector.getEos("3.141", null), is(-5));
+        assertThat(detector.getEos("四百十．〇", null), is(-5));
     }
 
     @Test
     public void getEOSWithParenthesis() {
-        assertThat(detector.getEos("あ（いう。え）お", null), is(8));
-        assertThat(detector.getEos("（あ（いう）。え）お", null), is(10));
+        assertThat(detector.getEos("あ（いう。え）お", null), is(-8));
+        assertThat(detector.getEos("（あ（いう）。え）お", null), is(-10));
         assertThat(detector.getEos("あ（いう）。えお", null), is(6));
     }
 

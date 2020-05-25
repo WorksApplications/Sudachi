@@ -16,7 +16,9 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.List;
 
 /**
@@ -78,6 +80,39 @@ public interface Tokenizer {
      */
     public default Iterable<List<Morpheme>> tokenizeSentences(String text) {
         return tokenizeSentences(SplitMode.C, text);
+    }
+
+    /**
+     * Tokenize sentences.
+     *
+     * This method reads a input text from {@code input} and divides it into
+     * sentences and tokenizes them.
+     *
+     * @param mode
+     *            a mode of splitting
+     * @param input
+     *            a reader of input text
+     * @return a result of tokenizing
+     * @throws IOException
+     *             if reading a stream is failed
+     */
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
+
+    /**
+     * Tokenize sentences.
+     *
+     * This method reads a input text from {@code input} and divides it into
+     * sentences and tokenizes them with {@link SplitMode}.C.
+     *
+     * @param input
+     *            a reader of input text
+     * @return a result of tokenizing
+     * @throws IOException
+     *             if reading a stream is failed
+     * @see #tokenizeSentences(SplitMode,Reader)
+     */
+    public default Iterable<List<Morpheme>> tokenizeSentences(Reader input) throws IOException {
+        return tokenizeSentences(SplitMode.C, input);
     }
 
     /**
