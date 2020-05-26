@@ -23,8 +23,11 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
+
+import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -136,6 +139,39 @@ public class JapaneseTokenizerTest {
         Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("´´").iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(4));
+        assertThat(it.hasNext(), is(false));
+    }
+
+    @Test
+    public void tokenizerWithReader() throws IOException {
+        StringReader reader = new StringReader("京都。東京.東京都。京都");
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(2));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(1));
+        assertThat(it.hasNext(), is(false));
+    }
+
+    @Test
+    public void tokenizerWithLongReader() throws IOException {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
+            sb.append("京都。");
+        }
+        sb.append("京都");
+        StringReader reader = new StringReader(sb.toString());
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
+            assertThat(it.hasNext(), is(true));
+            assertThat(it.next().size(), is(2));
+        }
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(1));
         assertThat(it.hasNext(), is(false));
     }
 }
