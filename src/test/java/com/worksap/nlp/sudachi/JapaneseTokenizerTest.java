@@ -174,4 +174,25 @@ public class JapaneseTokenizerTest {
         assertThat(it.next().size(), is(1));
         assertThat(it.hasNext(), is(false));
     }
+
+    @Test
+    public void tokenizerWithReaderAndNormalization() throws IOException {
+        StringBuffer sb = new StringBuffer();
+        sb.append("東京都…。");
+        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
+            sb.append("京都。");
+        }
+        StringReader reader = new StringReader(sb.toString());
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(5));
+        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
+            assertThat(it.hasNext(), is(true));
+            List<Morpheme> ms = it.next();
+            assertThat(ms.size(), is(2));
+            assertThat(ms.get(0).surface(), is("京都"));
+            assertThat(ms.get(1).surface(), is("。"));
+        }
+        assertThat(it.hasNext(), is(false));
+    }
 }
