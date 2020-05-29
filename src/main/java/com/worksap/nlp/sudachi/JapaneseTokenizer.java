@@ -127,7 +127,7 @@ class JapaneseTokenizer implements Tokenizer {
                 checker.setBos(bos);
             }
             if (length < 0) {
-                buffer.position(bos);
+                buffer.position(input.textIndexToOriginalTextIndex(bos));
                 buffer.compact();
             }
         }

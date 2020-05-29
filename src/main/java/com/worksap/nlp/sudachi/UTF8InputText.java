@@ -210,4 +210,8 @@ class UTF8InputText implements InputText {
         }
         return index;
     }
+
+    int textIndexToOriginalTextIndex(int index) {
+        return modifiedToOriginal.get(index);
+    }
 }
