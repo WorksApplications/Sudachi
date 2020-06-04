@@ -40,11 +40,24 @@ class UTF8InputTextBuilder implements InputTextBuilder {
         originalText = text.toString();
         modifiedText = new StringBuilder(text);
         modifiedToOriginal = new ArrayList<>(modifiedText.length() + 1);
-        for (int i = 0, j = 0; i < originalText.length(); i++) {
-            if (!Character.isLowSurrogate(originalText.charAt(i))) {
-                j = i;
+        boolean isSurrogate = false;
+        for (int i = 0; i < originalText.length(); i++) {
+            char ch = originalText.charAt(i);
+            if (isSurrogate) {
+                if (Character.isLowSurrogate(ch)) {
+                    modifiedToOriginal.add(i + 1);
+                    isSurrogate = false;
+                } else {
+                    throw new IllegalArgumentException("invalid UTF-16 surrogate detected");
+                }
+            } else {
+                if (Character.isHighSurrogate(ch)) {
+                    isSurrogate = true;
+                } else if (Character.isLowSurrogate(ch)) {
+                    throw new IllegalArgumentException("invalid UTF-16 surrogate detected");
+                }
+                modifiedToOriginal.add(i);
             }
-            modifiedToOriginal.add(j);
         }
         modifiedToOriginal.add(originalText.length());
     }

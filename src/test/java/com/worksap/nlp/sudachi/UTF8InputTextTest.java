@@ -49,17 +49,7 @@ public class UTF8InputTextTest {
 
     @Before
     public void setUp() {
-        grammar = new MockGrammar();
-        CharacterCategory charCategory = new CharacterCategory();
-        try {
-            charCategory.readCharacterDefinition(
-                    UTF8InputTextTest.class.getClassLoader().getResource("char.def").getPath());
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        grammar.setCharacterCategory(charCategory);
-
-        builder = new UTF8InputTextBuilder(TEXT, grammar);
+        builder = builder(TEXT);
     }
 
     @Test
@@ -277,6 +267,19 @@ public class UTF8InputTextTest {
     }
 
     @Test
+    public void getNextInOriginalWithSurrogatePair() {
+        input = builder.build();
+        assertThat(input.getNextInOriginal(9), is(10)); // High
+        assertThat(input.getNextInOriginal(10), is(12)); // Low
+        assertThat(input.getNextInOriginal(11), is(12));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getNextInOriginalWithInvalidSurrogate() {
+        input = builder("a\ude00c").build();
+    }
+
+    @Test
     public void slice() {
         builder.replace(1, 3, "あ");
         input = builder.build();
@@ -295,6 +298,20 @@ public class UTF8InputTextTest {
         input = builder.build();
         input = input.slice(0, 2);
         assertThat(input.getCharCategoryContinuousLength(input.getByteText().length - 1), is(1));
+    }
+
+    private UTF8InputTextBuilder builder(String text) {
+        grammar = new MockGrammar();
+        CharacterCategory charCategory = new CharacterCategory();
+        try {
+            charCategory.readCharacterDefinition(
+                    UTF8InputTextTest.class.getClassLoader().getResource("char.def").getPath());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        grammar.setCharacterCategory(charCategory);
+
+        return new UTF8InputTextBuilder(text, grammar);
     }
 
     class MockGrammar implements Grammar {

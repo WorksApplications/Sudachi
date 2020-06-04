@@ -143,6 +143,16 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
+    public void tokenizeSentencesWithSurrogatePair() {
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("。😀").iterator();
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(1));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(1));
+        assertThat(it.hasNext(), is(false));
+    }
+
+    @Test
     public void tokenizerWithReader() throws IOException {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
         Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
