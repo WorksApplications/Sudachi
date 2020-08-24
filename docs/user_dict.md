@@ -206,7 +206,7 @@ Sudachiでは、以下の文字正規化を行っています。挙動の詳細�
 
 ユーザー辞書ソースファイルからバイナリ辞書ファイルを作成します。
 
-`$ java -Dfile.encoding=UTF-8 -cp sudachi-XX.jar com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder -o output.dic -s system_core.dic [-d comment] input`
+`$ java -Dfile.encoding=UTF-8 -cp sudachi-XX.jar com.worksap.nlp.sudachi.dictionary.UserDictionaryBuilder -o output.dic -s system_core.dic [-d comment] input.csv`
 
 ### 引数
 
