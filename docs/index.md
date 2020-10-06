@@ -16,7 +16,7 @@ Natural language processing software and language resources provided by [WAP Tok
 
 ## Language Resources
 
-- [SudachiDict](https://github.com/WorksApplications/SudachiDict): Japanese Dictionary for Morphological Analyis
+- [SudachiDict](https://github.com/WorksApplications/SudachiDict): Japanese Dictionary for Morphological Analysis
 - [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): Japansese Synonym Dictionary
 - [chiVe](https://github.com/WorksApplications/chiVe): Japanese Pretrained Word Embedding
 
