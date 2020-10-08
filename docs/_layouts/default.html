@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
+<html>
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% seo %}
+    {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+    <link rel="icon" href=" favicon.ico" />
   </head>
   <body>
     <div class="container-lg px-3 my-5 markdown-body">
@@ -14,7 +15,7 @@
       {{ content }}
 
       <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
-        <a href="https://www.worksap.co.jp/about/csr/nlp/">WAP Tokushima Laboratory of AI and NLP</a>.  
+        Made with &hearts; in Tokushima. <a href="https://www.worksap.co.jp/about/csr/nlp/">©2020 Works Applications Co.,Ltd.</a>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
