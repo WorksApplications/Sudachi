@@ -1,31 +1,55 @@
+---
+title: ワークス徳島NLPリソース
+description: ワークス徳島人工知能NLP研究所による自然言語処理のためのソフトウェアと言語資源 - 形態素解析器Sudachiや単語ベクトルchiVeなど
+image: Sudachi.png
+author: Works Applications
+lang: ja
+---
+
+
 <p align="center"><img width="70" src="./Sudachi.png" alt="Sudachi logo"></p>
 
-# WAP Tokushima NLP Resources
-
-Natural language processing software and language resources provided by [WAP Tokushima Laboratory of AI and NLP](https://www.worksap.co.jp/about/csr/nlp/).
+[English](index.en)
 
 
-## Software
+# ワークス徳島NLPリソース
 
-- [Sudachi](https://github.com/WorksApplications/Sudachi): Japanese Tokenizer (Morphological Analyzer)
-- [SudachiPy](https://github.com/WorksApplications/SudachiPy): Python version of Sudachi
-- [elasticsearch-sudachi](https://github.com/WorksApplications/elasticsearch-sudachi): Sudachi Plugin for Elasticsearch
-- [Kintoki](https://github.com/WorksApplications/kintoki): Dependency Parser
-- [jdartsclone](https://github.com/WorksApplications/jdartsclone): TRIE data structure library using Double-Array
+[ワークス徳島人工知能NLP研究所](https://www.worksap.co.jp/about/csr/nlp/) による自然言語処理のためのソフトウェアと言語資源
 
 
-## Language Resources
+## ソフトウェア
 
-- [SudachiDict](https://github.com/WorksApplications/SudachiDict): Japanese Dictionary for Morphological Analysis
-- [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): Japansese Synonym Dictionary
-- [chiVe](https://github.com/WorksApplications/chiVe): Japanese Pretrained Word Embedding
+- [Sudachi](https://github.com/WorksApplications/Sudachi): 日本語形態素解析器
+- [SudachiPy](https://github.com/WorksApplications/SudachiPy): Python版Sudachi
+- [elasticsearch-sudachi](https://github.com/WorksApplications/elasticsearch-sudachi): Elasticsearch用Sudachiプラグイン
+- [Kintoki](https://github.com/WorksApplications/kintoki): 係り受け解析器
+- [jdartsclone](https://github.com/WorksApplications/jdartsclone): ダブル配列によるTrieデータ構造
 
 
-## Data on AWS
+## 言語資源
 
-SudachiDict and chiVe data are generously hosted by AWS with their [Oepn Data Sponsorship Program](https://aws.amazon.com/opendata/).
+- [SudachiDict](https://github.com/WorksApplications/SudachiDict): 日本語形態素解析辞書
+- [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): 日本語同義語辞書
+- [chiVe](https://github.com/WorksApplications/chiVe): 事前学習済み日本語単語ベクトル
+
+## コミュニティ
+
+開発者やユーザーの方々が質問したり議論するためのSlackワークスペースを用意しています。
+
+- [https://sudachi-dev.slack.com/](https://sudachi-dev.slack.com/)
+- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU)から招待を受けてください)
+
+
+***
+
+
+## Open Data on AWS
+
+SudachiDictとchiVeのデータは、AWSの[Oepn Data Sponsorship Program](https://registry.opendata.aws/sudachi/)によりホストしていただいています。
 
 ### SudachiDict
+
+日本語形態素解析辞書です。詳細は[SudachiDict](https://github.com/WorksApplications/SudachiDict)を参照してください。
 
 - [sudachi-dictionary-20200722-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-small.zip) ([sudachi-dictionary-latest-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-small.zip))
 - [sudachi-dictionary-20200722-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-core.zip) ([sudachi-dictionary-latest-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-core.zip))
@@ -33,35 +57,21 @@ SudachiDict and chiVe data are generously hosted by AWS with their [Oepn Data Sp
 
 ### chiVe
 
-|Version     | Normalized | Min Count | Vocab      | Binary | Text |SudachiDict            | Download |
-|----------|-----|------|---------|-----|--------|---------------------|--------|
-|v1.0 mc5  |x    |5     |3,644,628|4.1GB|12GB    |0.1.1-dictionary-full| [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.0-mc5-20190314.tar.gz) (4.9GB) |
-|v1.1 mc5 |o    |5     |3,196,481|3.6GB|11GB    |20191030-core        | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318.tar.gz) (4.4GB) |
-|v1.1 mc15|o    |15    |1,452,205|1.7GB|4.7GB   |20191030-core        | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318.tar.gz) (2.0GB) |
-|v1.1 mc30|o    |30    |910,424  |1.1GB|3.0GB   |20191030-core        | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318.tar.gz) (1.3GB) |
-|v1.1 mc90|o    |90    |480,443  |0.6GB|1.6GB   |20191030-core        | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318.tar.gz) (0.7GB) |
+事前学習済み日本語単語ベクトルです。詳細は[chiVe](https://github.com/WorksApplications/chiVe)を参照してください。
 
-The format is based on the original word2vec.
+| 版        | 正規化 | 最低頻度 | 語彙数    | Sudachi辞書           | テキスト                                                                                                      | [gensim](https://radimrehurek.com/gensim/)                                                                           | [Magnitude](https://github.com/plasticityai/magnitude) |
+| --------- | ------ | -------- | --------- | --------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| v1.0 mc5  | x      | 5        | 3,644,628 | 0.1.1-dictionary-full | 12GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.0-mc5-20190314.tar.gz), 4.9GB)   | 4.1GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.0-mc5-20190314_gensim.tar.gz))  | coming soon                                            |
+| v1.1 mc5  | o      | 5        | 3,196,481 | 20191030-core         | 11GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318.tar.gz), 4.4GB)   | 3.6GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318_gensim.tar.gz))  | coming soon                                            |
+| v1.1 mc15 | o      | 15       | 1,452,205 | 20191030-core         | 4.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318.tar.gz), 2.0GB) | 1.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318_gensim.tar.gz)) | coming soon                                            |
+| v1.1 mc30 | o      | 30       | 910,424   | 20191030-core         | 3.0GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318.tar.gz), 1.3GB) | 1.1GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318_gensim.tar.gz)) | coming soon                                            |
+| v1.1 mc90 | o      | 90       | 480,443   | 20191030-core         | 1.6GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318.tar.gz), 0.7GB) | 0.6GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318_gensim.tar.gz)) | coming soon                                            |
 
-The training algorithm is the same for both v1.0 and v1.1.
+#### 「A単位語のみ」の資源
 
-"Normalized" indicates if the text is normalized using the tokenizer Sudachi. For example, words `空き缶`, `空缶`, `空き罐`, `空罐`, `空きカン`, `空きかん` will all be normalized to `空き缶`.
-
-"Min Count" indicates the number of minimum appearance count in the training corpus (`min_count` in [gensim](https://radimrehurek.com/gensim/models/word2vec.html)).
-
-Sudachi version: [v0.1.1](https://github.com/WorksApplications/Sudachi/releases/tag/v0.1.1) for chiVe 1.0 and [v0.3.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.3.0) for chiVe1.1.
-
-
-#### "A Unit Only" Resources
-
-These files contain only the [SudachiDict](https://github.com/WorksApplications/SudachiDict) A unit words (Not re-training; Simply excluding B unit words, C unit words, and OOV (Out-of-vocabulary) words from the above original resources).
-
-`v1.1 mc90 a-unit-only` is used for the natural language processing tool [spaCy](https://github.com/explosion/spaCy/)'s Japanese models.
-
-
-| Version               | Normalized  | Min Count | Vocab           | Text  | SudachiDict   | Download                                                                                                                                                                            |
-|-----------------------|-------------|-----------|-----------------|-------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| v1.1 mc5 a-unit-only  | o           |         5 | 322,094 (10.1%) | 1.1GB | 20191030-core | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318-a-unit-only.tar.gz) (465MB)   |
-| v1.1 mc15 a-unit-only | o           |        15 | 276,866 (19.1%) | 952MB | 20191030-core | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318-a-unit-only.tar.gz) (400MB) |
-| v1.1 mc30 a-unit-only | o           |        30 | 242,658 (26.7%) | 833MB | 20191030-core | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318-a-unit-only.tar.gz) (350MB) |
-| v1.1 mc90 a-unit-only | o           |        90 | 189,775 (39.5%) | 652MB | 20191030-core | [tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318-a-unit-only.tar.gz) (274MB) |
+| 版                    | 語彙数          | テキスト                                                                                                                  | [gensim](https://radimrehurek.com/gensim/)                                                                                       | [Magnitude](https://github.com/plasticityai/magnitude) |
+| --------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| v1.1 mc5 a-unit-only  | 322,094 (10.1%) | 1.1GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318-a-unit-only.tar.gz), 465MB)  | 403MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc5-20200318-a-unit-only_gensim.tar.gz))  | coming soon                                            |
+| v1.1 mc15 a-unit-only | 276,866 (19.1%) | 952MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318-a-unit-only.tar.gz), 400MB) | 347MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-20200318-a-unit-only_gensim.tar.gz)) | coming soon                                            |
+| v1.1 mc30 a-unit-only | 242,658 (26.7%) | 833MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318-a-unit-only.tar.gz), 350MB) | 304GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-20200318-a-unit-only_gensim.tar.gz)) | coming soon                                            |
+| v1.1 mc90 a-unit-only | 189,775 (39.5%) | 652MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318-a-unit-only.tar.gz), 274MB) | 237MB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-20200318-a-unit-only_gensim.tar.gz)) | coming soon                                            |
