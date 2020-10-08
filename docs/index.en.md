@@ -3,7 +3,7 @@ title: WAP Tokushima NLP Resources
 description: Natural language processing software and language resources provided by WAP Tokushima Laboratory of AI and NLP - Tokenizer Sudachi, word embedding chiVe, and more!
 image: Sudachi.png
 author: Works Applications
-lang: ja
+lang: en
 ---
 
 
