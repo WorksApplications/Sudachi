@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.isA;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
