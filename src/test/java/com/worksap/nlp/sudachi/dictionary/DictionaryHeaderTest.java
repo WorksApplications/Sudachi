@@ -37,7 +37,7 @@ public class DictionaryHeaderTest {
 
     @Test
     public void getVersion() {
-        assertEquals(DictionaryVersion.SYSTEM_DICT_VERSION, header.getVersion());
+        assertEquals(DictionaryVersion.SYSTEM_DICT_VERSION_2, header.getVersion());
     }
 
     @Test

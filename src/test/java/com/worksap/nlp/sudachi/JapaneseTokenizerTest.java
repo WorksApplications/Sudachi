@@ -99,6 +99,17 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
+    public void getSynonymGroupIds() {
+        List<Morpheme> ms = tokenizer.tokenize("京都");
+        assertThat(ms.size(), is(1));
+        assertThat(ms.get(0).getSynonymGroupIds(), is(new int[] { 1, 5 }));
+
+        ms = tokenizer.tokenize("ぴらる");
+        assertThat(ms.size(), is(1));
+        assertThat(ms.get(0).getSynonymGroupIds().length, is(0));
+    }
+
+    @Test
     public void tokenizeKanjiAlphabetWord() {
         assertThat(tokenizer.tokenize("特a").size(), is(1));
         assertThat(tokenizer.tokenize("ab").size(), is(1));

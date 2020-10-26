@@ -96,14 +96,14 @@ public class DictionaryBuilderTest {
         DictionaryBuilder builder = new DictionaryBuilder();
 
         DictionaryBuilder.WordEntry entry = builder
-                .parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
+                .parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*".split(","));
         assertThat(entry.headword, is("京都"));
         assertThat(entry.parameters, is(new short[] { 6, 6, 5293 }));
         assertThat(entry.wordInfo.getPOSId(), is((short) 0));
         assertThat(entry.aUnitSplitString, is("*"));
         assertThat(entry.bUnitSplitString, is("*"));
 
-        entry = builder.parseLine("京都,-1,-1,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
+        entry = builder.parseLine("京都,-1,-1,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*".split(","));
         assertNull(entry.headword);
         assertThat(entry.wordInfo.getPOSId(), is((short) 0));
     }
@@ -111,13 +111,13 @@ public class DictionaryBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithInvalidColumns() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*".split(","));
+        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithEmptyHeadword() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        builder.parseLine(",6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
+        builder.parseLine(",6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*".split(","));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -125,28 +125,29 @@ public class DictionaryBuilderTest {
         DictionaryBuilder builder = new DictionaryBuilder();
         StringBuilder sb = new StringBuilder();
         sb.setLength(Short.MAX_VALUE + 1);
-        sb.append(",6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*");
+        sb.append(",6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*");
         builder.parseLine(sb.toString().split(","));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithInvalidSplits() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,1/2,1/2,1/2".split(","));
+        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,1/2,1/2,1/2,*".split(","));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithTooManySplits() {
         DictionaryBuilder builder = new DictionaryBuilder();
         builder.parseLine(
-                "京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,B,0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0,*,*"
+                "京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,B,0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0/0/1/2/3/4/5/6/7/8/9/0,*,*,*"
                         .split(","));
     }
 
     @Test
     public void parseLineWithSameReadingForm() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        DictionaryBuilder.WordEntry entry = builder.parseLine("〒,6,6,5293,〒,名詞,普通名詞,一般,*,*,*,〒,〒,*,A,*,*,*".split(","));
+        DictionaryBuilder.WordEntry entry = builder
+                .parseLine("〒,6,6,5293,〒,名詞,普通名詞,一般,*,*,*,〒,〒,*,A,*,*,*,*".split(","));
         assertThat(entry.wordInfo.getReadingForm(), is("〒"));
     }
 
@@ -269,9 +270,9 @@ public class DictionaryBuilderTest {
         }
 
         try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/2\",*,1/2\n");
-            writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*\n");
-            writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*\n");
+            writer.write("東京都,0,0,0,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/2\",*,1/2,1/2\n");
+            writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*,*\n");
+            writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*\n");
         }
 
         DictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-m", matrixFile.getPath(), "-d", "test",
@@ -280,7 +281,7 @@ public class DictionaryBuilderTest {
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
 
             DictionaryHeader header = dictionary.getDictionaryHeader();
-            assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION));
+            assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION_2));
             assertThat(header.getDescription(), is("test"));
 
             Grammar grammar = dictionary.getGrammar();
@@ -302,6 +303,7 @@ public class DictionaryBuilderTest {
             assertThat(info.getPOSId(), is((short) 0));
             assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
             assertThat(info.getBunitSplit().length, is(0));
+            assertThat(info.getSynonymGoupIds(), is(new int[] { 1, 2 }));
             Iterator<int[]> i = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
             assertTrue(i.hasNext());
             assertThat(i.next(), is(new int[] { 0, "東京都".getBytes(StandardCharsets.UTF_8).length }));

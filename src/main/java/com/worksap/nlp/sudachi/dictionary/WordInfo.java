@@ -34,9 +34,11 @@ public class WordInfo {
     private final int[] aUnitSplit;
     private final int[] bUnitSplit;
     private final int[] wordStructure;
+    private final int[] synonymGids;
 
     WordInfo(String surface, short headwordLength, short posId, String normalizedForm, int dictionaryFormWordId,
-            String dictionaryForm, String readingForm, int[] aUnitSplit, int[] bUnitSplit, int[] wordStructure) {
+            String dictionaryForm, String readingForm, int[] aUnitSplit, int[] bUnitSplit, int[] wordStructure,
+            int[] synonymGids) {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
@@ -47,6 +49,7 @@ public class WordInfo {
         this.aUnitSplit = aUnitSplit;
         this.bUnitSplit = bUnitSplit;
         this.wordStructure = wordStructure;
+        this.synonymGids = synonymGids;
     }
 
     /**
@@ -77,6 +80,7 @@ public class WordInfo {
         this.aUnitSplit = new int[0];
         this.bUnitSplit = new int[0];
         this.wordStructure = new int[0];
+        this.synonymGids = new int[0];
     }
 
     /**
@@ -188,5 +192,14 @@ public class WordInfo {
      */
     public int[] getWordStructure() {
         return wordStructure;
+    }
+
+    /**
+     * Returns the array of the synonym groups.
+     *
+     * @return the synonym group IDs of the morpheme
+     */
+    public int[] getSynonymGoupIds() {
+        return synonymGids;
     }
 }

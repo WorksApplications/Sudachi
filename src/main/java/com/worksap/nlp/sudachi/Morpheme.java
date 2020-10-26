@@ -136,4 +136,13 @@ public interface Morpheme {
      * @return the dictionary ID
      */
     public int getDictionaryId();
+
+    /**
+     * Returns the IDs of the synonym groups of the morpheme.
+     *
+     * If the morpheme has synonyms, it returns IDs of the sysnonym groups.
+     *
+     * @return the array of synonym group IDs
+     */
+    public int[] getSynonymGroupIds();
 }

@@ -76,7 +76,7 @@ public class DictionaryHeader {
     /**
      * Returns the version of the dictionary.
      *
-     * The version is {@link DictionaryVersion#SYSTEM_DICT_VERSION} or
+     * The version is {@link DictionaryVersion#SYSTEM_DICT_VERSION_*} or
      * {@code DictionaryVersion#USER_DICT_VERSION_*}. If the file is not a
      * dictionary, returns an other value.
      * 
@@ -102,5 +102,23 @@ public class DictionaryHeader {
      */
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * Resturns {@code true} if, and only if, the file is a system dictionary.
+     * 
+     * @return true if the file is a system dictionary, otherwise false
+     */
+    public boolean isSystemDictionary() {
+        return DictionaryVersion.isSystemDictionary(version);
+    }
+
+    /**
+     * Resturns {@code true} if, and only if, the file is a user dictionary.
+     * 
+     * @return true if the file is a user dictionary, otherwise false
+     */
+    public boolean isUserDictionary() {
+        return DictionaryVersion.isUserDictionary(version);
     }
 }

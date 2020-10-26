@@ -32,7 +32,7 @@ public class DictionaryPrinter {
         GrammarImpl grammar = null;
 
         try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
-            if (dictionary.getDictionaryHeader().getVersion() == DictionaryVersion.SYSTEM_DICT_VERSION) {
+            if (dictionary.getDictionaryHeader().isSystemDictionary()) {
                 grammar = dictionary.getGrammar();
             } else if (systemDict == null) {
                 throw new IllegalArgumentException("the system dictionary is not specified");

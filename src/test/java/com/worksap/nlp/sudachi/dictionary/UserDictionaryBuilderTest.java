@@ -62,7 +62,7 @@ public class UserDictionaryBuilderTest {
     @Test
     public void parseLineWithUserDefinedPOS() {
         UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
-        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*\n".split(","));
+        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*,*".split(","));
         assertThat(builder.posTable.getList().size(), is(1));
     }
 
@@ -73,8 +73,8 @@ public class UserDictionaryBuilderTest {
 
         try (FileWriter writer = new FileWriter(inputFile)) {
             writer.write(
-                    "東京都市,0,0,0,東京都市,名詞,固有名詞,地名,一般,*,*,ヒガシキョウトシ,東京都市,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/3/U1\",*,\"4/3/市,名詞,普通名詞,一般,*,*,*,シ\"\n");
-            writer.write("市,-1,-1,0,市,名詞,普通名詞,一般,*,*,*,シ,市,*,A,*,*,*\n");
+                    "東京都市,0,0,0,東京都市,名詞,固有名詞,地名,一般,*,*,ヒガシキョウトシ,東京都市,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/3/U1\",*,\"4/3/市,名詞,普通名詞,一般,*,*,*,シ\",*\n");
+            writer.write("市,-1,-1,0,市,名詞,普通名詞,一般,*,*,*,シ,市,*,A,*,*,*,*\n");
         }
 
         UserDictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-s", systemDictFile.getPath(), "-d",
