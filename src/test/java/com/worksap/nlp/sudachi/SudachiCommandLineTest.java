@@ -94,7 +94,7 @@ public class SudachiCommandLineTest {
         try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
             Optional<String> first = lines.filter(l -> !l.equals("EOS")).findFirst();
             assertTrue(first.isPresent());
-            assertThat(first.get().split("\\t").length, is(6));
+            assertThat(first.get().split("\\t").length, is(7));
         }
     }
 
