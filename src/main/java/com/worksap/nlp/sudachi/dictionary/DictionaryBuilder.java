@@ -50,7 +50,7 @@ public class DictionaryBuilder {
 
     static final int STRING_MAX_LENGTH = Short.MAX_VALUE;
     static final int ARRAY_MAX_LENGTH = Byte.MAX_VALUE;
-    static final int NUMBER_OF_COLUMNS = 19;
+    static final int MIN_REQUIRED_NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
     static class WordEntry {
@@ -143,7 +143,7 @@ public class DictionaryBuilder {
     }
 
     WordEntry parseLine(String[] cols) {
-        if (cols.length < NUMBER_OF_COLUMNS) {
+        if (cols.length < MIN_REQUIRED_NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
         for (int i = 0; i < 15; i++) {
@@ -186,7 +186,10 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("invalid splitting");
         }
 
-        int[] synonymGids = parseSynonymGids(cols[18]);
+        int[] synonymGids = new int[0];
+        if (cols.length > 18) {
+            synonymGids = parseSynonymGids(cols[18]);
+        }
 
         entry.wordInfo = new WordInfo(cols[4], // headword
                 (short) cols[0].getBytes(StandardCharsets.UTF_8).length, posId, cols[12], // normalizedForm

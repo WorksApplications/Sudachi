@@ -106,12 +106,16 @@ public class DictionaryBuilderTest {
         entry = builder.parseLine("京都,-1,-1,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*".split(","));
         assertNull(entry.headword);
         assertThat(entry.wordInfo.getPOSId(), is((short) 0));
+
+        // Synonym GID field is optional
+        entry = builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
+        assertThat(entry.wordInfo.getSynonymGoupIds().length, is(0));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseLineWithInvalidColumns() {
         DictionaryBuilder builder = new DictionaryBuilder();
-        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*".split(","));
+        builder.parseLine("京都,6,6,5293,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*".split(","));
     }
 
     @Test(expected = IllegalArgumentException.class)
