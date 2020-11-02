@@ -76,7 +76,7 @@ public class DictionaryHeader {
     /**
      * Returns the version of the dictionary.
      *
-     * The version is {@link DictionaryVersion#SYSTEM_DICT_VERSION_*} or
+     * The version is {@code DictionaryVersion#SYSTEM_DICT_VERSION_*} or
      * {@code DictionaryVersion#USER_DICT_VERSION_*}. If the file is not a
      * dictionary, returns an other value.
      * 
