@@ -39,7 +39,7 @@ public class DoubleArrayLexiconTest {
     public void setUp() throws IOException {
         ByteBuffer bytes = DictionaryReader.read("/system.dic");
         DictionaryHeader header = new DictionaryHeader(bytes, 0);
-        lexicon = new DoubleArrayLexicon(bytes, header.storageSize() + GRAMMAR_SIZE);
+        lexicon = new DoubleArrayLexicon(bytes, header.storageSize() + GRAMMAR_SIZE, true);
     }
 
     @Test
@@ -106,6 +106,7 @@ public class DoubleArrayLexiconTest {
         assertArrayEquals(new int[] { 5, 9 }, wi.getAunitSplit());
         assertArrayEquals(new int[0], wi.getBunitSplit());
         assertArrayEquals(new int[] { 5, 9 }, wi.getWordStructure());
+        assertArrayEquals(new int[0], wi.getSynonymGoupIds());
     }
 
     @Test

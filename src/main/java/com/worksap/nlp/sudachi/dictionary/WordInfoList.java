@@ -24,11 +24,13 @@ class WordInfoList {
     private final ByteBuffer bytes;
     private final int offset;
     private final int wordSize;
+    private final boolean hasSynonymGid;
 
-    WordInfoList(ByteBuffer bytes, int offset, int wordSize) {
+    WordInfoList(ByteBuffer bytes, int offset, int wordSize, boolean hasSysnoymGid) {
         this.bytes = bytes;
         this.offset = offset;
         this.wordSize = wordSize;
+        this.hasSynonymGid = hasSysnoymGid;
     }
 
     WordInfo getWordInfo(int wordId) {
@@ -52,6 +54,11 @@ class WordInfoList {
         int[] bUnitSplit = bufferToIntArray(buf);
         int[] wordStructure = bufferToIntArray(buf);
 
+        int[] synonymGids = new int[0];
+        if (hasSynonymGid) {
+            synonymGids = bufferToIntArray(buf);
+        }
+
         String dictionaryForm = surface;
         if (dictionaryFormWordId >= 0 && dictionaryFormWordId != wordId) {
             WordInfo wi = getWordInfo(dictionaryFormWordId);
@@ -59,7 +66,7 @@ class WordInfoList {
         }
 
         return new WordInfo(surface, headwordLength, posId, normalizedForm, dictionaryFormWordId, dictionaryForm,
-                readingForm, aUnitSplit, bUnitSplit, wordStructure);
+                readingForm, aUnitSplit, bUnitSplit, wordStructure, synonymGids);
     }
 
     int size() {

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -77,6 +78,8 @@ public class SudachiCommandLine {
                                 output.print(m.readingForm());
                                 output.print("\t");
                                 output.print(m.getDictionaryId());
+                                output.print("\t");
+                                output.print(Arrays.toString(m.getSynonymGroupIds()));
                                 if (m.isOOV()) {
                                     output.print("\t");
                                     output.print("(OOV)");

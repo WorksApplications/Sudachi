@@ -37,7 +37,7 @@ public class BinaryDictionary implements Closeable {
         offset += header.storageSize();
 
         long version = header.getVersion();
-        if (version == DictionaryVersion.SYSTEM_DICT_VERSION || version == DictionaryVersion.USER_DICT_VERSION_2) {
+        if (header.isSystemDictionary() || version == DictionaryVersion.USER_DICT_VERSION_2) {
             grammar = new GrammarImpl(bytes, offset);
             offset += grammar.storageSize();
         } else if (version == DictionaryVersion.USER_DICT_VERSION_1) {
@@ -47,12 +47,12 @@ public class BinaryDictionary implements Closeable {
             throw new IOException("invalid dictionary");
         }
 
-        lexicon = new DoubleArrayLexicon(bytes, offset);
+        lexicon = new DoubleArrayLexicon(bytes, offset, version == DictionaryVersion.SYSTEM_DICT_VERSION_2);
     }
 
     public static BinaryDictionary readSystemDictionary(String fileName) throws IOException {
         BinaryDictionary dict = new BinaryDictionary(fileName);
-        if (dict.getDictionaryHeader().getVersion() != DictionaryVersion.SYSTEM_DICT_VERSION) {
+        if (!dict.getDictionaryHeader().isSystemDictionary()) {
             dict.close();
             throw new IOException("invalid system dictionary");
         }
@@ -61,7 +61,7 @@ public class BinaryDictionary implements Closeable {
 
     public static BinaryDictionary readUserDictionary(String fileName) throws IOException {
         BinaryDictionary dict = new BinaryDictionary(fileName);
-        if (!DictionaryVersion.isUserDictionary(dict.getDictionaryHeader().getVersion())) {
+        if (!dict.getDictionaryHeader().isUserDictionary()) {
             dict.close();
             throw new IOException("invalid user dictionary");
         }

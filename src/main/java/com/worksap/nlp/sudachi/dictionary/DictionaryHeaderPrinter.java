@@ -43,10 +43,9 @@ public class DictionaryHeaderPrinter {
 
         output.println("filename: " + filename);
 
-        long version = header.getVersion();
-        if (version == DictionaryVersion.SYSTEM_DICT_VERSION) {
+        if (header.isSystemDictionary()) {
             output.println("type: system dictionary");
-        } else if (DictionaryVersion.isUserDictionary(version)) {
+        } else if (header.isUserDictionary()) {
             output.println("type: user dictionary");
         } else {
             output.println("invalid file");

@@ -34,7 +34,7 @@ public class DoubleArrayLexicon implements Lexicon {
     private WordInfoList wordInfos;
     private DoubleArray trie;
 
-    public DoubleArrayLexicon(ByteBuffer bytes, int offset) {
+    public DoubleArrayLexicon(ByteBuffer bytes, int offset, boolean hasSynonymGid) {
         trie = new DoubleArray();
         int size = bytes.getInt(offset);
         offset += 4;
@@ -49,7 +49,7 @@ public class DoubleArrayLexicon implements Lexicon {
         wordParams = new WordParameterList(bytes, offset);
         offset += wordParams.storageSize();
 
-        wordInfos = new WordInfoList(bytes, offset, wordParams.size());
+        wordInfos = new WordInfoList(bytes, offset, wordParams.size(), hasSynonymGid);
     }
 
     /**

@@ -50,7 +50,7 @@ public class DictionaryBuilder {
 
     static final int STRING_MAX_LENGTH = Short.MAX_VALUE;
     static final int ARRAY_MAX_LENGTH = Byte.MAX_VALUE;
-    static final int NUMBER_OF_COLUMNS = 18;
+    static final int MIN_REQUIRED_NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
 
     static class WordEntry {
@@ -143,7 +143,7 @@ public class DictionaryBuilder {
     }
 
     WordEntry parseLine(String[] cols) {
-        if (cols.length != NUMBER_OF_COLUMNS) {
+        if (cols.length < MIN_REQUIRED_NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
         for (int i = 0; i < 15; i++) {
@@ -186,12 +186,17 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("invalid splitting");
         }
 
+        int[] synonymGids = new int[0];
+        if (cols.length > 18) {
+            synonymGids = parseSynonymGids(cols[18]);
+        }
+
         entry.wordInfo = new WordInfo(cols[4], // headword
                 (short) cols[0].getBytes(StandardCharsets.UTF_8).length, posId, cols[12], // normalizedForm
                 (cols[13].equals("*") ? -1 : Integer.parseInt(cols[13])), // dictionaryFormWordId
                 "", // dummy
                 cols[11], // readingForm
-                null, null, null);
+                null, null, null, synonymGids);
 
         return entry;
     }
@@ -375,6 +380,7 @@ public class DictionaryBuilder {
             writeIntArray(parseSplitInfo(entry.aUnitSplitString));
             writeIntArray(parseSplitInfo(entry.bUnitSplitString));
             writeIntArray(parseSplitInfo(entry.wordStructureString));
+            writeIntArray(wi.getSynonymGoupIds());
             buffer.flip();
             output.write(byteBuffer);
             buffer.clear();
@@ -490,6 +496,21 @@ public class DictionaryBuilder {
         }
     }
 
+    int[] parseSynonymGids(String str) {
+        if (str.equals("*")) {
+            return new int[0];
+        }
+        String[] ids = str.split("/");
+        if (ids.length > ARRAY_MAX_LENGTH) {
+            throw new IllegalArgumentException("too many units");
+        }
+        int[] ret = new int[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            ret[i] = Integer.parseInt(ids[i]);
+        }
+        return ret;
+    }
+
     void writeString(String text) {
         writeStringLength((short) text.length());
         for (int i = 0; i < text.length(); i++) {
@@ -580,7 +601,7 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DictionaryHeader header = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION,
+        DictionaryHeader header = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION_2,
                 Instant.now().getEpochSecond(), description);
 
         try (FileInputStream matrixInput = new FileInputStream(matrixPath);

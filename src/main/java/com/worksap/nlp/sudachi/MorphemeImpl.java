@@ -97,6 +97,12 @@ class MorphemeImpl implements Morpheme {
         return list.getDictionaryId(index);
     }
 
+    @Override
+    public int[] getSynonymGroupIds() {
+        WordInfo wi = getWordInfo();
+        return wi.getSynonymGoupIds();
+    }
+
     WordInfo getWordInfo() {
         if (wordInfo == null) {
             wordInfo = list.getWordInfo(index);
