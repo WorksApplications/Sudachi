@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -57,7 +56,7 @@ public class SudachiCommandLine {
     }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, PrintStream output,
-            boolean printAll, boolean ignoreError) throws IOException {
+            MorphemeFormatterPlugin formatter, boolean ignoreError) throws IOException {
 
         try (InputStreamReader inputReader = new InputStreamReader(input);
                 BufferedReader reader = new BufferedReader(inputReader)) {
@@ -65,29 +64,7 @@ public class SudachiCommandLine {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 try {
                     for (List<Morpheme> sentence : tokenizer.tokenizeSentences(mode, line)) {
-                        for (Morpheme m : sentence) {
-                            output.print(m.surface());
-                            output.print("\t");
-                            output.print(String.join(",", m.partOfSpeech()));
-                            output.print("\t");
-                            output.print(m.normalizedForm());
-                            if (printAll) {
-                                output.print("\t");
-                                output.print(m.dictionaryForm());
-                                output.print("\t");
-                                output.print(m.readingForm());
-                                output.print("\t");
-                                output.print(m.getDictionaryId());
-                                output.print("\t");
-                                output.print(Arrays.toString(m.getSynonymGroupIds()));
-                                if (m.isOOV()) {
-                                    output.print("\t");
-                                    output.print("(OOV)");
-                                }
-                            }
-                            output.println();
-                        }
-                        output.println("EOS");
+                        formatter.printSentence(sentence, output);
                     }
                 } catch (RuntimeException e) {
                     if (ignoreError) {
@@ -98,6 +75,19 @@ public class SudachiCommandLine {
                 }
             }
         }
+    }
+
+    static MorphemeFormatterPlugin getFormatter(String path, String jsonString, boolean mergeSettings)
+            throws IOException {
+        Settings settings = JapaneseDictionary.buildSettings(path, jsonString, mergeSettings);
+        List<MorphemeFormatterPlugin> formatters = settings.getPluginList("formatterPlugin");
+        int n = formatters.size();
+        if (n < 1) {
+            throw new IllegalArgumentException("no morpheme formatter");
+        }
+        MorphemeFormatterPlugin formatter = formatters.get(n - 1);
+        formatter.setUp();
+        return formatter;
     }
 
     /**
@@ -118,7 +108,7 @@ public class SudachiCommandLine {
      * <dt>{@code -o file}</dt>
      * <dd>the output file</dd>
      * <dt>{@code -a}</dt>
-     * <dd>print all of the fields</dd>
+     * <dd>show details</dd>
      * <dt>{@code -d}</dt>
      * <dd>print the debug informations</dd>
      * <dt>{@code -h}</dt>
@@ -152,7 +142,7 @@ public class SudachiCommandLine {
         String resourcesDirectory = null;
         String outputFileName = null;
         boolean isEnableDump = false;
-        boolean printAll = false;
+        boolean showDetails = false;
         boolean ignoreError = false;
 
         int i = 0;
@@ -182,7 +172,7 @@ public class SudachiCommandLine {
             } else if (args[i].equals("-o") && i + 1 < args.length) {
                 outputFileName = args[++i];
             } else if (args[i].equals("-a")) {
-                printAll = true;
+                showDetails = true;
             } else if (args[i].equals("-d")) {
                 isEnableDump = true;
             } else if (args[i].equals("-f")) {
@@ -195,13 +185,18 @@ public class SudachiCommandLine {
                 console.printf("\t-p directory\troot directory of resources\n");
                 console.printf("\t-m mode\tmode of splitting\n");
                 console.printf("\t-o file\toutput to file\n");
-                console.printf("\t-a\tprint all fields\n");
+                console.printf("\t-a\tshow details\n");
                 console.printf("\t-f\tignore error\n");
                 console.printf("\t-d\tdebug mode\n");
                 return;
             } else {
                 break;
             }
+        }
+
+        MorphemeFormatterPlugin formatter = getFormatter(resourcesDirectory, settings, mergeSettings);
+        if (showDetails) {
+            formatter.showDetails();
         }
 
         try (PrintStream output = new FileOrStdoutPrintStream(outputFileName);
@@ -214,11 +209,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for (; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output, printAll, ignoreError);
+                        run(tokenizer, mode, input, output, formatter, ignoreError);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output, printAll, ignoreError);
+                run(tokenizer, mode, System.in, output, formatter, ignoreError);
             }
         }
     }
