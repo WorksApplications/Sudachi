@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -41,10 +42,10 @@ import java.util.Arrays;
  */
 public class SimpleMorphemeFormatter extends MorphemeFormatterPlugin {
 
-    String columnDelimiter;
+    protected String columnDelimiter;
 
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
         columnDelimiter = settings.getString("columnDelimiter", "\t");
     }

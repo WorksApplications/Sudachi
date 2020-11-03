@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -40,16 +41,16 @@ import java.util.List;
  */
 public abstract class MorphemeFormatterPlugin extends Plugin {
 
-    String delimiter;
-    String eosString;
-    boolean showDetails;
+    protected String delimiter;
+    protected String eosString;
+    protected boolean showDetails;
 
     /**
      * Set up the plugin.
      *
      * {@link SudachiCommandLine} calls this method for setting up this plugin.
      */
-    public void setUp() {
+    public void setUp() throws IOException {
         delimiter = settings.getString("delimiter", "\n");
         eosString = settings.getString("eos", "\nEOS\n");
         showDetails = false;

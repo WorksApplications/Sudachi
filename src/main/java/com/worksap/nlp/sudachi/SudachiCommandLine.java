@@ -81,11 +81,10 @@ public class SudachiCommandLine {
             throws IOException {
         Settings settings = JapaneseDictionary.buildSettings(path, jsonString, mergeSettings);
         List<MorphemeFormatterPlugin> formatters = settings.getPluginList("formatterPlugin");
-        int n = formatters.size();
-        if (n < 1) {
+        if (formatters.isEmpty()) {
             throw new IllegalArgumentException("no morpheme formatter");
         }
-        MorphemeFormatterPlugin formatter = formatters.get(n - 1);
+        MorphemeFormatterPlugin formatter = formatters.get(0);
         formatter.setUp();
         return formatter;
     }
