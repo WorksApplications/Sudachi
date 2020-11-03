@@ -21,5 +21,8 @@
           "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],
           "minLength" : 3
         }
+    ],
+    "formatterPlugin" : [
+      { "class" : "com.worksap.nlp.sudachi.SimpleMorphemeFormatter" }
     ]
 }

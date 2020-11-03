@@ -83,7 +83,7 @@ class JapaneseDictionary implements Dictionary {
         }
     }
 
-    Settings buildSettings(String path, String jsonString, boolean mergeSettings) throws IOException {
+    static Settings buildSettings(String path, String jsonString, boolean mergeSettings) throws IOException {
         Settings defaultSettings;
         try (InputStream input = SudachiCommandLine.class.getResourceAsStream("/sudachi.json")) {
             defaultSettings = Settings.parseSettings(path, readAll(input));

@@ -14,5 +14,8 @@
           "leftId" : 8,
           "rightId" : 8,
           "cost" : 6000 }
+    ],
+    "formatterPlugin" : [
+      { "class" : "com.worksap.nlp.sudachi.SimpleMorphemeFormatter" }
     ]
 }
