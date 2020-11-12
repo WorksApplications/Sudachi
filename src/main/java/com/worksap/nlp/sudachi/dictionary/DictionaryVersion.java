@@ -36,11 +36,22 @@ public class DictionaryVersion {
     /** the second version of user dictionries */
     public static final long USER_DICT_VERSION_2 = 0x9fdeb5a90168d868L;
 
+    /** the third version of user dictionries */
+    public static final long USER_DICT_VERSION_3 = 0xca9811756ff64fb0L;
+
     public static boolean isSystemDictionary(long version) {
         return version == SYSTEM_DICT_VERSION_1 || version == SYSTEM_DICT_VERSION_2;
     }
 
     public static boolean isUserDictionary(long version) {
-        return version == USER_DICT_VERSION_1 || version == USER_DICT_VERSION_2;
+        return version == USER_DICT_VERSION_1 || version == USER_DICT_VERSION_2 || version == USER_DICT_VERSION_3;
+    }
+
+    static boolean hasGrammar(long version) {
+        return isSystemDictionary(version) || version == USER_DICT_VERSION_2 || version == USER_DICT_VERSION_3;
+    }
+
+    static boolean hasSynonymGroupIds(long version) {
+        return version == SYSTEM_DICT_VERSION_2 || version == USER_DICT_VERSION_3;
     }
 }
