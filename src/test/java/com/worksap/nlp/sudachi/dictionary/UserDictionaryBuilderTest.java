@@ -82,7 +82,7 @@ public class UserDictionaryBuilderTest {
 
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
             DictionaryHeader header = dictionary.getDictionaryHeader();
-            assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION_2));
+            assertThat(header.getVersion(), is(DictionaryVersion.USER_DICT_VERSION_3));
             assertThat(header.getDescription(), is("test"));
 
             Lexicon lexicon = dictionary.getLexicon();

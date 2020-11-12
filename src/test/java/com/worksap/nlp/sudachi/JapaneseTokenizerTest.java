@@ -107,6 +107,10 @@ public class JapaneseTokenizerTest {
         ms = tokenizer.tokenize("ぴらる");
         assertThat(ms.size(), is(1));
         assertThat(ms.get(0).getSynonymGroupIds().length, is(0));
+
+        ms = tokenizer.tokenize("東京府");
+        assertThat(ms.size(), is(1));
+        assertThat(ms.get(0).getSynonymGroupIds(), is(new int[] { 1, 3 }));
     }
 
     @Test

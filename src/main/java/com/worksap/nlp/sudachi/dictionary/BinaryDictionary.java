@@ -37,17 +37,17 @@ public class BinaryDictionary implements Closeable {
         offset += header.storageSize();
 
         long version = header.getVersion();
-        if (header.isSystemDictionary() || version == DictionaryVersion.USER_DICT_VERSION_2) {
+        if (DictionaryVersion.hasGrammar(version)) {
             grammar = new GrammarImpl(bytes, offset);
             offset += grammar.storageSize();
-        } else if (version == DictionaryVersion.USER_DICT_VERSION_1) {
+        } else if (header.isUserDictionary()) {
             grammar = new GrammarImpl();
         } else {
             MMap.unmap(bytes);
             throw new IOException("invalid dictionary");
         }
 
-        lexicon = new DoubleArrayLexicon(bytes, offset, version == DictionaryVersion.SYSTEM_DICT_VERSION_2);
+        lexicon = new DoubleArrayLexicon(bytes, offset, DictionaryVersion.hasSynonymGroupIds(version));
     }
 
     public static BinaryDictionary readSystemDictionary(String fileName) throws IOException {

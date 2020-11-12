@@ -142,7 +142,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
             List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION_2,
+            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION_3,
                     Instant.now().getEpochSecond(), description);
 
             try (FileOutputStream output = new FileOutputStream(outputPath)) {

@@ -38,7 +38,7 @@ public class DictionaryPrinter {
                 throw new IllegalArgumentException("the system dictionary is not specified");
             } else {
                 grammar = systemDict.getGrammar();
-                if (dictionary.getDictionaryHeader().getVersion() == DictionaryVersion.USER_DICT_VERSION_2) {
+                if (DictionaryVersion.hasGrammar(dictionary.getDictionaryHeader().getVersion())) {
                     grammar.addPosList(dictionary.getGrammar());
                 }
             }
