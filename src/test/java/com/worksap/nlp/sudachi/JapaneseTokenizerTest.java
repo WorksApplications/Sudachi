@@ -220,4 +220,44 @@ public class JapaneseTokenizerTest {
         }
         assertThat(it.hasNext(), is(false));
     }
+
+    @Test
+    public void zeroLengthMorpheme() {
+        List<Morpheme> s = tokenizer.tokenize("…");
+        assertThat(s.size(), is(3));
+        assertThat(s.get(0).surface(), is("…"));
+        assertThat(s.get(0).normalizedForm(), is("."));
+        assertThat(s.get(0).begin(), is(0));
+        assertThat(s.get(0).end(), is(1));
+        assertThat(s.get(1).surface(), is(""));
+        assertThat(s.get(1).normalizedForm(), is("."));
+        assertThat(s.get(1).begin(), is(1));
+        assertThat(s.get(1).end(), is(1));
+        assertThat(s.get(2).surface(), is(""));
+        assertThat(s.get(2).normalizedForm(), is("."));
+        assertThat(s.get(2).begin(), is(1));
+        assertThat(s.get(2).end(), is(1));
+    }
+
+    @Test
+    public void disableEmptyMorpheme() throws IOException {
+        String path = temporaryFolder.getRoot().getPath();
+        dict = new DictionaryFactory().create(path, "{\"allowEmptyMorpheme\":false}", true);
+        tokenizer = (JapaneseTokenizer) dict.create();
+
+        List<Morpheme> s = tokenizer.tokenize("…");
+        assertThat(s.size(), is(3));
+        assertThat(s.get(0).surface(), is("…"));
+        assertThat(s.get(0).normalizedForm(), is("."));
+        assertThat(s.get(0).begin(), is(0));
+        assertThat(s.get(0).end(), is(1));
+        assertThat(s.get(1).surface(), is("…"));
+        assertThat(s.get(1).normalizedForm(), is("."));
+        assertThat(s.get(1).begin(), is(0));
+        assertThat(s.get(1).end(), is(1));
+        assertThat(s.get(2).surface(), is("…"));
+        assertThat(s.get(2).normalizedForm(), is("."));
+        assertThat(s.get(2).begin(), is(0));
+        assertThat(s.get(2).end(), is(1));
+    }
 }

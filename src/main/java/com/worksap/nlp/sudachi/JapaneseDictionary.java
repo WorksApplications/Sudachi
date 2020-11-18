@@ -39,6 +39,7 @@ class JapaneseDictionary implements Dictionary {
     List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
     List<BinaryDictionary> dictionaries;
+    boolean allowEmptyMorpheme;
 
     JapaneseDictionary() throws IOException {
         this(null, null, false);
@@ -81,6 +82,8 @@ class JapaneseDictionary implements Dictionary {
         for (String filename : settings.getPathList("userDict")) {
             readUserDictionary(filename);
         }
+
+        allowEmptyMorpheme = settings.getBoolean("allowEmptyMorpheme", true);
     }
 
     static Settings buildSettings(String path, String jsonString, boolean mergeSettings) throws IOException {
@@ -146,7 +149,12 @@ class JapaneseDictionary implements Dictionary {
 
     @Override
     public Tokenizer create() {
-        return new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins, pathRewritePlugins);
+        JapaneseTokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
+                pathRewritePlugins);
+        if (!allowEmptyMorpheme) {
+            tokenizer.disableEmptyMorpheme();
+        }
+        return tokenizer;
     }
 
     @Override
