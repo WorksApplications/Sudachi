@@ -31,12 +31,15 @@ public class MorphemeList extends AbstractList<Morpheme> {
     final Grammar grammar;
     final Lexicon lexicon;
     final List<LatticeNode> path;
+    final boolean allowEmptyMorpheme;
 
-    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path) {
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path,
+            boolean allowEmptyMorpheme) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
         this.path = path;
+        this.allowEmptyMorpheme = allowEmptyMorpheme;
     }
 
     @Override
@@ -50,11 +53,25 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     int getBegin(int index) {
-        return inputText.getOriginalIndex(path.get(index).getBegin());
+        int begin = inputText.getOriginalIndex(path.get(index).getBegin());
+        if (!allowEmptyMorpheme) {
+            int end = inputText.getOriginalIndex(path.get(index).getEnd());
+            if (begin == end && index != 0) {
+                return getBegin(index - 1);
+            }
+        }
+        return begin;
     }
 
     int getEnd(int index) {
-        return inputText.getOriginalIndex(path.get(index).getEnd());
+        int end = inputText.getOriginalIndex(path.get(index).getEnd());
+        if (!allowEmptyMorpheme) {
+            int begin = inputText.getOriginalIndex(path.get(index).getBegin());
+            if (begin == end && index != 0) {
+                return getEnd(index - 1);
+            }
+        }
+        return end;
     }
 
     String getSurface(int index) {
@@ -93,7 +110,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
             nodes.add(n);
         }
 
-        return new MorphemeList(inputText, grammar, lexicon, nodes);
+        return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme);
     }
 
     boolean isOOV(int index) {

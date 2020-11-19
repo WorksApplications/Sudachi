@@ -39,6 +39,7 @@ class JapaneseTokenizer implements Tokenizer {
     List<PathRewritePlugin> pathRewritePlugins;
     OovProviderPlugin defaultOovProvider;
     PrintStream dumpOutput;
+    boolean allowEmptyMorpheme;
 
     LatticeImpl lattice;
 
@@ -51,6 +52,7 @@ class JapaneseTokenizer implements Tokenizer {
         this.oovProviderPlugins = oovProviderPlugins;
         this.pathRewritePlugins = pathRewritePlugins;
         this.lattice = new LatticeImpl(grammar);
+        allowEmptyMorpheme = true;
 
         if (!oovProviderPlugins.isEmpty()) {
             defaultOovProvider = oovProviderPlugins.get(oovProviderPlugins.size() - 1);
@@ -188,7 +190,7 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println("===");
         }
 
-        return new MorphemeList(input, grammar, lexicon, path);
+        return new MorphemeList(input, grammar, lexicon, path, allowEmptyMorpheme);
     }
 
     LatticeImpl buildLattice(UTF8InputText input) {
@@ -269,6 +271,10 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println(String.format("%d: %s", i, node.toString()));
             i++;
         }
+    }
+
+    void disableEmptyMorpheme() {
+        allowEmptyMorpheme = false;
     }
 
     class NonBreakChecker implements SentenceDetector.NonBreakCheker {
