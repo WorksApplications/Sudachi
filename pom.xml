@@ -126,6 +126,11 @@
                 <configuration>
                   <descriptor>src/assembly/bin.xml</descriptor>
                   <finalName>sudachi-${project.version}</finalName>
+                  <archiverConfig>
+                    <directoryMode>0755</directoryMode>
+                    <defaultDirectoryMode>0755</defaultDirectoryMode>
+                    <fileMode>0644</fileMode>
+                  </archiverConfig>
                 </configuration>
               </execution>
             </executions>
