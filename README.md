@@ -103,7 +103,7 @@ To compile an application with Sudachi API, declare a dependency on Sudachi in m
 <dependency>
   <groupId>com.worksap.nlp</groupId>
   <artifactId>sudachi</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
 </dependency>
 ```
 
@@ -418,7 +418,7 @@ Maven プロジェクトで利用する場合は以下の dependency を追加�
 <dependency>
   <groupId>com.worksap.nlp</groupId>
   <artifactId>sudachi</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
 </dependency>
 ```
 
