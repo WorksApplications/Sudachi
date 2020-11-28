@@ -38,12 +38,10 @@ Sudachi has the following features.
 Sudachi has three types of dictionaries.
 
 - Small: includes only the vocabulary of UniDic
-    + [sudachi-dictionary-latest-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-small.zip)
 - Core: includes basic vocabulary (default)
-    + [sudachi-dictionary-latest-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-core.zip)
 - Full: includes miscellaneous proper nouns
-    + [sudachi-dictionary-latest-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-full.zip)
 
+Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) for pre-built dictionaries.
 For more details, see [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
 ### How to use the small / full dictionary
@@ -353,12 +351,10 @@ Sudachi は従来の形態素解析器とくらべ、以下のような特長が
 Sudachi には3種類の辞書があります。
 
 - Small: UniDic の収録語とその正規化表記、分割単位を収録
-    + [sudachi-dictionary-latest-small.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-small.zip)
 - Core: 基本的な語彙を収録 (デフォルト)
-    + [sudachi-dictionary-latest-core.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-core.zip)
 - Full: 雑多な固有名詞まで収録
-    + [sudachi-dictionary-latest-full.zip](https://object-storage.tyo2.conoha.io/v1/nc_2520839e1f9641b08211a5c85243124a/sudachi/sudachi-dictionary-latest-full.zip)
 
+ビルド済みの辞書は[こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/)で配布しています。
 くわしくは [SudachiDict](https://github.com/WorksApplications/SudachiDict) をごらんください。
 
 ### スモール/フル辞書の利用方法
