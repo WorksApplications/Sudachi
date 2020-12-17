@@ -17,6 +17,10 @@ mainly of the following tasks.
 - Part-of-speech tagging
 - Normalization
 
+## Tutorial
+
+Please refer to the [tutorial](/docs/tutorial.md).
+Only Japanese is available.
 
 ## Features
 
@@ -330,6 +334,9 @@ Sudachi は日本語形態素解析器です。形態素解析はおもに以下
 - 品詞付与
 - 正規化処理
 
+## チュートリアル
+
+Sudachi の[チュートリアル](/docs/tutorial.md)を参照ください。
 
 ## Sudachi の特長
 
