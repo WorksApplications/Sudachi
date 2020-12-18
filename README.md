@@ -20,7 +20,6 @@ mainly of the following tasks.
 ## Tutorial
 
 Please refer to the [tutorial](/docs/tutorial.md).
-Only Japanese is available.
 
 ## Features
 
