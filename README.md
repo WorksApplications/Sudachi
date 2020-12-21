@@ -19,7 +19,9 @@ mainly of the following tasks.
 
 ## Tutorial
 
-Please refer to the [tutorial](/docs/tutorial.md).
+For a tutorial on installation, please refer to the [tutorial page](/docs/tutorial.md).
+
+For a tutorial on the plugin, please refer to the [plugin tutorial page](/docs/tutorial_plugin.md).
 
 ## Features
 
@@ -335,7 +337,10 @@ Sudachi は日本語形態素解析器です。形態素解析はおもに以下
 
 ## チュートリアル
 
-Sudachi の[チュートリアル](/docs/tutorial.md)を参照ください。
+インストールのチュートリアルは、[インストールのチュートリアル](/docs/tutorial.md)を参照ください。
+
+プラグインのチュートリアルは、[プラグインのチュートリアル](/docs/tutorial_plugin.md)を参照ください。<br>
+プラグイン機構を用いて、分かち書きを実現しています。
 
 ## Sudachi の特長
 
