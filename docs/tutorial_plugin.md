@@ -185,7 +185,7 @@ $ cat input.txt
 今日は散歩に行く
 明日は明日の風が吹く
 
-$ cat input.txt | java -jar target/sudachi-0.5.2-SNAPSHOT.jar -s '{"formatterPlugin":[{"class":"com.worksap.nlp.sudachi.SurfaceFormatter"}]}'
+$ java -jar target/sudachi-0.5.2-SNAPSHOT.jar -s '{"formatterPlugin":[{"class":"com.worksap.nlp.sudachi.SurfaceFormatter"}]}' input.txt
 今日 は 散歩 に 行く
 明日 は 明日 の 風 が 吹く
 ```
