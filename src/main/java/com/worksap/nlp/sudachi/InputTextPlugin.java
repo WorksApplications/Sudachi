@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 /**
  * A plugin that rewrites the characters of input texts.
@@ -27,7 +28,7 @@ import java.io.IOException;
  *
  * <p>
  * The following is an example of settings.
- * 
+ *
  * <pre>
  * {@code
  *   {
@@ -44,10 +45,12 @@ public abstract class InputTextPlugin extends Plugin {
      *
      * {@link Tokenizer} calls this method for setting up this plugin.
      *
+     * @param grammar
+     *            the grammar of the system dictionary
      * @throws IOException
      *             if reading something is failed
      */
-    public void setUp() throws IOException {
+    public void setUp(Grammar grammar) throws IOException {
     }
 
     /**

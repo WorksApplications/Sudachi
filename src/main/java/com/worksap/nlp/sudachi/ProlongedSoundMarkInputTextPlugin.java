@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
+import com.worksap.nlp.sudachi.dictionary.Grammar;
+
 /**
  * A plugin that rewrites the Katakana-Hiragana Prolonged Sound Mark (Chōonpu)
  * and similar symbols.
@@ -35,7 +37,7 @@ import java.util.List;
  *
  * <p>
  * The following is an example of settings.
- * 
+ *
  * <pre>
  * {@code
  *   {
@@ -60,7 +62,7 @@ class ProlongedSoundMarkInputTextPlugin extends InputTextPlugin {
     private String replacementSymbol;
 
     @Override
-    public void setUp() throws IOException {
+    public void setUp(Grammar Grammar) throws IOException {
         List<String> prolongedSoundMarkStrings = settings.getStringList("prolongedSoundMarks");
         for (String s : prolongedSoundMarkStrings) {
             prolongedSoundMarkSet.add(s.codePointAt(0));
