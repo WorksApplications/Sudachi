@@ -51,9 +51,8 @@ SudachiDict and chiVe data are generously hosted by AWS with their [Oepn Data Sp
 
 Japanese dictionaries for morphological analysis. Please refer to [SudachiDict](https://github.com/WorksApplications/SudachiDict) for the detail.
 
-- [sudachi-dictionary-20200722-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-small.zip) ([sudachi-dictionary-latest-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-small.zip))
-- [sudachi-dictionary-20200722-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-core.zip) ([sudachi-dictionary-latest-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-core.zip))
-- [sudachi-dictionary-20200722-full.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-full.zip) ([sudachi-dictionary-latest-full.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-full.zip))
+Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) for pre-built dictionaries.
+
 
 ### chiVe
 

@@ -51,9 +51,8 @@ SudachiDictとchiVeのデータは、AWSの[Oepn Data Sponsorship Program](https
 
 日本語形態素解析辞書です。詳細は[SudachiDict](https://github.com/WorksApplications/SudachiDict)を参照してください。
 
-- [sudachi-dictionary-20200722-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-small.zip) ([sudachi-dictionary-latest-small.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-small.zip))
-- [sudachi-dictionary-20200722-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-core.zip) ([sudachi-dictionary-latest-core.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-core.zip))
-- [sudachi-dictionary-20200722-full.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-20200722-full.zip) ([sudachi-dictionary-latest-full.zip](https://sudachi.s3-ap-northeast-1.amazonaws.com/sudachidict/sudachi-dictionary-latest-full.zip))
+ビルド済みの辞書ファイルは[こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/)からダウンロードできます。
+
 
 ### chiVe
 
