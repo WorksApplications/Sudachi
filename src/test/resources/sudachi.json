@@ -6,7 +6,10 @@
       { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
       { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
           "prolongedSoundMarks": ["ー", "〜", "〰"],
-          "replacementSymbol": "ー"}
+          "replacementSymbol": "ー"},
+      { "class" : "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
+          "leftBrackets": ["(", "（"],
+          "rightBrackets": [")", "）"]}
     ],
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
