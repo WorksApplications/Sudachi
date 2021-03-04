@@ -39,7 +39,8 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
  *       "leftBrackets": ["(", "（"],
- *       "rightBrackets": [")", "）"]
+ *       "rightBrackets": [")", "）"],
+ *       "maxYomiganaLength": 4
  *   }
  * }
  * </pre>
@@ -55,6 +56,7 @@ class IgnoreYomiganaPlugin extends InputTextPlugin {
 
     private Set<Integer> leftBracketSet = new HashSet<>();
     private Set<Integer> rightBracketSet = new HashSet<>();
+    private int maxYomiganaLength;
     private Grammar grammar;
 
     @Override
@@ -68,6 +70,7 @@ class IgnoreYomiganaPlugin extends InputTextPlugin {
         for (String s : rightBracketString) {
             rightBracketSet.add(s.codePointAt(0));
         }
+        maxYomiganaLength = settings.getInt("maxYomiganaLength");
     }
 
     @Override
@@ -90,7 +93,7 @@ class IgnoreYomiganaPlugin extends InputTextPlugin {
                 startBracketPoint = -1;
                 hasYomigana = false;
             } else if (startBracketPoint != -1) {
-                if (isHiragana(cp) || isKatakana(cp)) {
+                if ((isHiragana(cp) || isKatakana(cp)) && i - startBracketPoint <= maxYomiganaLength) {
                     hasYomigana = true;
                 } else {
                     startBracketPoint = -1;

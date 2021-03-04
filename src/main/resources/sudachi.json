@@ -5,9 +5,10 @@
         { "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
           "prolongedSoundMarks": ["ー", "-", "⁓", "〜", "〰"],
           "replacementSymbol": "ー"},
-	{ "class": "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
+	      { "class": "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
           "leftBrackets": ["(", "（"],
-          "rightBrackets": [")", "）"]}
+          "rightBrackets": [")", "）"],
+          "maxYomiganaLength": 4}
     ],
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin" },

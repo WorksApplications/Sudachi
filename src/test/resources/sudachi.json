@@ -9,7 +9,8 @@
           "replacementSymbol": "ー"},
       { "class" : "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
           "leftBrackets": ["(", "（"],
-          "rightBrackets": [")", "）"]}
+          "rightBrackets": [")", "）"],
+          "maxYomiganaLength": 4}
     ],
     "oovProviderPlugin" : [
         { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
