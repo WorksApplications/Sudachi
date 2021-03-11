@@ -70,7 +70,7 @@ class IgnoreYomiganaPlugin extends InputTextPlugin {
         for (String s : rightBracketString) {
             rightBracketSet.add(s.codePointAt(0));
         }
-        maxYomiganaLength = settings.getInt("maxYomiganaLength");
+        maxYomiganaLength = settings.getInt("maxYomiganaLength", 4);
     }
 
     @Override
