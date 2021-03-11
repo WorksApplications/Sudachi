@@ -33,28 +33,27 @@ import org.junit.rules.TemporaryFolder;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
-public class ProlongedSoundMarkInputTextPluginTest {
+public class IgnoreYomiganaPluginTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     UTF8InputTextBuilder builder;
     UTF8InputText text;
-    ProlongedSoundMarkInputTextPlugin plugin;
+    IgnoreYomiganaPlugin plugin;
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/joinnumeric/char.def",
-                "/unk.def");
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
         String path = temporaryFolder.getRoot().getPath();
         String jsonString = Utils.readAllResource("/sudachi.json");
         Dictionary dict = new DictionaryFactory().create(path, jsonString);
-        plugin = new ProlongedSoundMarkInputTextPlugin();
+        plugin = new IgnoreYomiganaPlugin();
 
         Settings settings = Settings.parseSettings(null, jsonString);
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
-            if (p.getString("class").equals("com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin")) {
+            if (p.getString("class").equals("com.worksap.nlp.sudachi.IgnoreYomiganaPlugin")) {
                 plugin.setSettings(new Settings(p, null));
                 break;
             }
@@ -68,9 +67,9 @@ public class ProlongedSoundMarkInputTextPluginTest {
     }
 
     @Test
-    public void combineContinuousProlongedSoundMarks() {
-        final String ORIGINAL_TEXT = "ゴーール";
-        final String NORMALIZED_TEXT = "ゴール";
+    public void ignoreYomiganaAtMiddle() {
+        final String ORIGINAL_TEXT = "徳島（とくしま）に行く";
+        final String NORMALIZED_TEXT = "徳島に行く";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
         text = builder.build();
@@ -78,19 +77,21 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(9));
-        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xB4, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
-                (byte) 0xE3, (byte) 0x83, (byte) 0xAB }, bytes);
+        assertThat(bytes.length, is(15));
+        assertArrayEquals(new byte[] { (byte) 0xE5, (byte) 0xBE, (byte) 0xB3, (byte) 0xE5, (byte) 0xB3, (byte) 0xB6,
+                (byte) 0xE3, (byte) 0x81, (byte) 0xAB, (byte) 0xE8, (byte) 0xA1, (byte) 0x8C, (byte) 0xE3, (byte) 0x81,
+                (byte) 0x8F }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(3));
-        assertThat(text.getOriginalIndex(9), is(4));
+        assertThat(text.getOriginalIndex(6), is(8));
+        assertThat(text.getOriginalIndex(9), is(9));
+        assertThat(text.getOriginalIndex(12), is(10));
     }
 
     @Test
-    public void combineContinuousProlongedSoundMarksAtEnd() {
-        final String ORIGINAL_TEXT = "スーパーー";
-        final String NORMALIZED_TEXT = "スーパー";
+    public void ignoreYomiganaAtMiddleAtEnd() {
+        final String ORIGINAL_TEXT = "徳島（とくしま）";
+        final String NORMALIZED_TEXT = "徳島";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
         text = builder.build();
@@ -98,20 +99,88 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(12));
-        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xB9, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
-                (byte) 0xE3, (byte) 0x83, (byte) 0x91, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
+        assertThat(bytes.length, is(6));
+        assertArrayEquals(new byte[] { (byte) 0xE5, (byte) 0xBE, (byte) 0xB3, (byte) 0xE5, (byte) 0xB3, (byte) 0xB6 },
+                bytes);
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(3), is(1));
+    }
+
+    @Test
+    public void ignoreYomiganaMultipleTimes() {
+        final String ORIGINAL_TEXT = "徳島（とくしま）に行（い）く";
+        final String NORMALIZED_TEXT = "徳島に行く";
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
+        plugin.rewrite(builder);
+        text = builder.build();
+
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(NORMALIZED_TEXT));
+        byte[] bytes = text.getByteText();
+        assertThat(bytes.length, is(15));
+        assertArrayEquals(new byte[] { (byte) 0xE5, (byte) 0xBE, (byte) 0xB3, (byte) 0xE5, (byte) 0xB3, (byte) 0xB6,
+                (byte) 0xE3, (byte) 0x81, (byte) 0xAB, (byte) 0xE8, (byte) 0xA1, (byte) 0x8C, (byte) 0xE3, (byte) 0x81,
+                (byte) 0x8F }, bytes);
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(3), is(1));
+        assertThat(text.getOriginalIndex(6), is(8));
+        assertThat(text.getOriginalIndex(9), is(9));
+        assertThat(text.getOriginalIndex(12), is(13));
+    }
+
+    @Test
+    public void ignoreYomiganaMultipleBracketTypes() {
+        final String ORIGINAL_TEXT = "徳島(とくしま)に行（い）く";
+        final String NORMALIZED_TEXT = "徳島に行く";
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
+        plugin.rewrite(builder);
+        text = builder.build();
+
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(NORMALIZED_TEXT));
+        byte[] bytes = text.getByteText();
+        assertThat(bytes.length, is(15));
+        assertArrayEquals(new byte[] { (byte) 0xE5, (byte) 0xBE, (byte) 0xB3, (byte) 0xE5, (byte) 0xB3, (byte) 0xB6,
+                (byte) 0xE3, (byte) 0x81, (byte) 0xAB, (byte) 0xE8, (byte) 0xA1, (byte) 0x8C, (byte) 0xE3, (byte) 0x81,
+                (byte) 0x8F }, bytes);
+        assertThat(text.getOriginalIndex(0), is(0));
+        assertThat(text.getOriginalIndex(3), is(1));
+        assertThat(text.getOriginalIndex(6), is(8));
+        assertThat(text.getOriginalIndex(9), is(9));
+        assertThat(text.getOriginalIndex(12), is(13));
+    }
+
+    @Test
+    public void doNotIgnoreIfNotYomigana() {
+        final String ORIGINAL_TEXT = "徳島に（よく）行く";
+        final String NORMALIZED_TEXT = "徳島に（よく）行く";
+        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
+        plugin.rewrite(builder);
+        text = builder.build();
+
+        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
+        assertThat(text.getText(), is(NORMALIZED_TEXT));
+        byte[] bytes = text.getByteText();
+        assertThat(bytes.length, is(27));
+        assertArrayEquals(new byte[] { (byte) 0xE5, (byte) 0xBE, (byte) 0xB3, (byte) 0xE5, (byte) 0xB3, (byte) 0xB6,
+                (byte) 0xE3, (byte) 0x81, (byte) 0xAB, (byte) 0xEF, (byte) 0xBC, (byte) 0x88, (byte) 0xE3, (byte) 0x82,
+                (byte) 0x88, (byte) 0xE3, (byte) 0x81, (byte) 0x8F, (byte) 0xEF, (byte) 0xBC, (byte) 0x89, (byte) 0xE8,
+                (byte) 0xA1, (byte) 0x8C, (byte) 0xE3, (byte) 0x81, (byte) 0x8F }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
         assertThat(text.getOriginalIndex(6), is(2));
         assertThat(text.getOriginalIndex(9), is(3));
-        assertThat(text.getOriginalIndex(12), is(5));
+        assertThat(text.getOriginalIndex(12), is(4));
+        assertThat(text.getOriginalIndex(15), is(5));
+        assertThat(text.getOriginalIndex(18), is(6));
+        assertThat(text.getOriginalIndex(21), is(7));
+        assertThat(text.getOriginalIndex(24), is(8));
     }
 
     @Test
-    public void combineContinuousProlongedSoundMarksMultipleTimes() {
-        final String ORIGINAL_TEXT = "エーービーーーシーーーー";
-        final String NORMALIZED_TEXT = "エービーシー";
+    public void doNotIgnoreTooLong() {
+        final String ORIGINAL_TEXT = "明日（いっしょに）行く";
+        final String NORMALIZED_TEXT = "明日（いっしょに）行く";
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin.rewrite(builder);
         text = builder.build();
@@ -119,65 +188,24 @@ public class ProlongedSoundMarkInputTextPluginTest {
         assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
         assertThat(text.getText(), is(NORMALIZED_TEXT));
         byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(18));
-        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
-                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
-                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
+        assertThat(bytes.length, is(33));
+        assertArrayEquals(new byte[] { (byte) 0xE6, (byte) 0x98, (byte) 0x8E, (byte) 0xE6, (byte) 0x97, (byte) 0xA5,
+                (byte) 0xEF, (byte) 0xBC, (byte) 0x88, (byte) 0xE3, (byte) 0x81, (byte) 0x84, (byte) 0xE3, (byte) 0x81,
+                (byte) 0xA3, (byte) 0xE3, (byte) 0x81, (byte) 0x97, (byte) 0xE3, (byte) 0x82, (byte) 0x87, (byte) 0xE3,
+                (byte) 0x81, (byte) 0xAB, (byte) 0xEF, (byte) 0xBC, (byte) 0x89, (byte) 0xE8, (byte) 0xA1, (byte) 0x8C,
+                (byte) 0xE3, (byte) 0x81, (byte) 0x8F }, bytes);
         assertThat(text.getOriginalIndex(0), is(0));
         assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(3));
-        assertThat(text.getOriginalIndex(9), is(4));
-        assertThat(text.getOriginalIndex(12), is(7));
-        assertThat(text.getOriginalIndex(15), is(8));
-        assertThat(text.getOriginalIndex(18), is(12));
-    }
-
-    @Test
-    public void combineContinuousProlongedSoundMarksMultipleSymbolTypes() {
-        final String ORIGINAL_TEXT = "エーービ〜〜〜シ〰〰〰〰";
-        final String NORMALIZED_TEXT = "エービーシー";
-        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
-        plugin.rewrite(builder);
-        text = builder.build();
-
-        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
-        assertThat(text.getText(), is(NORMALIZED_TEXT));
-        byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(18));
-        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
-                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
-                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
-        assertThat(text.getOriginalIndex(0), is(0));
-        assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(3));
-        assertThat(text.getOriginalIndex(9), is(4));
-        assertThat(text.getOriginalIndex(12), is(7));
-        assertThat(text.getOriginalIndex(15), is(8));
-        assertThat(text.getOriginalIndex(18), is(12));
-    }
-
-    @Test
-    public void combineContinuousProlongedSoundMarksMultipleMixedSymbolTypes() {
-        final String ORIGINAL_TEXT = "エー〜ビ〜〰ーシ〰ー〰〜";
-        final String NORMALIZED_TEXT = "エービーシー";
-        builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
-        plugin.rewrite(builder);
-        text = builder.build();
-
-        assertThat(text.getOriginalText(), is(ORIGINAL_TEXT));
-        assertThat(text.getText(), is(NORMALIZED_TEXT));
-        byte[] bytes = text.getByteText();
-        assertThat(bytes.length, is(18));
-        assertArrayEquals(new byte[] { (byte) 0xE3, (byte) 0x82, (byte) 0xA8, (byte) 0xE3, (byte) 0x83, (byte) 0xBC,
-                (byte) 0xE3, (byte) 0x83, (byte) 0x93, (byte) 0xE3, (byte) 0x83, (byte) 0xBC, (byte) 0xE3, (byte) 0x82,
-                (byte) 0xB7, (byte) 0xE3, (byte) 0x83, (byte) 0xBC }, bytes);
-        assertThat(text.getOriginalIndex(0), is(0));
-        assertThat(text.getOriginalIndex(3), is(1));
-        assertThat(text.getOriginalIndex(6), is(3));
-        assertThat(text.getOriginalIndex(9), is(4));
-        assertThat(text.getOriginalIndex(12), is(7));
-        assertThat(text.getOriginalIndex(15), is(8));
-        assertThat(text.getOriginalIndex(18), is(12));
+        assertThat(text.getOriginalIndex(6), is(2));
+        assertThat(text.getOriginalIndex(9), is(3));
+        assertThat(text.getOriginalIndex(12), is(4));
+        assertThat(text.getOriginalIndex(15), is(5));
+        assertThat(text.getOriginalIndex(18), is(6));
+        assertThat(text.getOriginalIndex(21), is(7));
+        assertThat(text.getOriginalIndex(24), is(8));
+        assertThat(text.getOriginalIndex(27), is(9));
+        assertThat(text.getOriginalIndex(30), is(10));
+        assertThat(text.getOriginalIndex(33), is(11));
     }
 
     class MockGrammar implements Grammar {

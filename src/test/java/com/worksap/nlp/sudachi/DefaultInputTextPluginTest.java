@@ -44,7 +44,7 @@ public class DefaultInputTextPluginTest {
         plugin = new DefaultInputTextPlugin();
         try {
             plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite.def").getPath();
-            plugin.setUp();
+            plugin.setUp(new MockGrammar());
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -103,7 +103,7 @@ public class DefaultInputTextPluginTest {
     public void setUpWithNull() throws IOException {
         plugin = new DefaultInputTextPlugin();
         plugin.setSettings(new Settings(Json.createObjectBuilder().build(), null));
-        plugin.setUp();
+        plugin.setUp(new MockGrammar());
         assertThat(plugin.rewriteDef, is(nullValue()));
     }
 
@@ -112,7 +112,7 @@ public class DefaultInputTextPluginTest {
         plugin = new DefaultInputTextPlugin();
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
                 .getResource("rewrite_error_ignorelist.def").getPath();
-        plugin.setUp();
+        plugin.setUp(new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -120,7 +120,7 @@ public class DefaultInputTextPluginTest {
         plugin = new DefaultInputTextPlugin();
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
                 .getResource("rewrite_error_replacelist.def").getPath();
-        plugin.setUp();
+        plugin.setUp(new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -128,6 +128,6 @@ public class DefaultInputTextPluginTest {
         plugin = new DefaultInputTextPlugin();
         plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite_error_dup.def")
                 .getPath();
-        plugin.setUp();
+        plugin.setUp(new MockGrammar());
     }
 }

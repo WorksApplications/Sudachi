@@ -65,7 +65,7 @@ class JapaneseDictionary implements Dictionary {
 
         inputTextPlugins = settings.getPluginList("inputTextPlugin");
         for (InputTextPlugin p : inputTextPlugins) {
-            p.setUp();
+            p.setUp(grammar);
         }
         oovProviderPlugins = settings.getPluginList("oovProviderPlugin");
         if (oovProviderPlugins.isEmpty()) {

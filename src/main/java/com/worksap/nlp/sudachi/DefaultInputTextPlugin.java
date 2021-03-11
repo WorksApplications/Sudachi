@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.worksap.nlp.sudachi.dictionary.Grammar;
+
 /**
  * A plugin that rewrites the characters of input texts.
  *
@@ -43,7 +45,7 @@ import java.util.Set;
  *
  * <p>
  * The following is an example of settings.
- * 
+ *
  * <pre>
  * {@code
  *   {
@@ -58,7 +60,7 @@ import java.util.Set;
  *
  * <p>
  * The following is an example of rewriting rules.
- * 
+ *
  * <pre>
  * {@code
  * # single code point: this character is skipped in character normalization
@@ -84,7 +86,7 @@ class DefaultInputTextPlugin extends InputTextPlugin {
      *             if the file is not available.
      */
     @Override
-    public void setUp() throws IOException {
+    public void setUp(Grammar grammar) throws IOException {
         if (rewriteDef == null) {
             rewriteDef = settings.getPath("rewriteDef");
         }
