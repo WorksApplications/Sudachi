@@ -30,9 +30,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.Grammar;
-
 public class IgnoreYomiganaPluginTest {
 
     @Rule
@@ -206,57 +203,5 @@ public class IgnoreYomiganaPluginTest {
         assertThat(text.getOriginalIndex(27), is(9));
         assertThat(text.getOriginalIndex(30), is(10));
         assertThat(text.getOriginalIndex(33), is(11));
-    }
-
-    class MockGrammar implements Grammar {
-        @Override
-        public int getPartOfSpeechSize() {
-            return 0;
-        }
-
-        @Override
-        public List<String> getPartOfSpeechString(short posId) {
-            return null;
-        }
-
-        @Override
-        public short getPartOfSpeechId(List<String> pos) {
-            return 0;
-        }
-
-        @Override
-        public short getConnectCost(short leftId, short rightId) {
-            return 0;
-        }
-
-        @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {
-        }
-
-        @Override
-        public short[] getBOSParameter() {
-            return null;
-        }
-
-        @Override
-        public short[] getEOSParameter() {
-            return null;
-        }
-
-        @Override
-        public CharacterCategory getCharacterCategory() {
-            CharacterCategory charCategory = new CharacterCategory();
-            try {
-                charCategory.readCharacterDefinition(
-                        DefaultInputTextPluginTest.class.getClassLoader().getResource("char.def").getPath());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            return charCategory;
-        }
-
-        @Override
-        public void setCharacterCategory(CharacterCategory charCategory) {
-        }
     }
 }
