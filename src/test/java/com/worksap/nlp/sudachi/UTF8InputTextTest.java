@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Works Applications Co., Ltd.
+ * Copyright (c) 2021 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class UTF8InputTextTest {
 
@@ -312,57 +310,5 @@ public class UTF8InputTextTest {
         grammar.setCharacterCategory(charCategory);
 
         return new UTF8InputTextBuilder(text, grammar);
-    }
-
-    class MockGrammar implements Grammar {
-        @Override
-        public int getPartOfSpeechSize() {
-            return 0;
-        }
-
-        @Override
-        public List<String> getPartOfSpeechString(short posId) {
-            return null;
-        }
-
-        @Override
-        public short getPartOfSpeechId(List<String> pos) {
-            return 0;
-        }
-
-        @Override
-        public short getConnectCost(short leftId, short rightId) {
-            return 0;
-        }
-
-        @Override
-        public void setConnectCost(short leftId, short rightId, short cost) {
-        }
-
-        @Override
-        public short[] getBOSParameter() {
-            return null;
-        }
-
-        @Override
-        public short[] getEOSParameter() {
-            return null;
-        }
-
-        @Override
-        public CharacterCategory getCharacterCategory() {
-            CharacterCategory charCategory = new CharacterCategory();
-            try {
-                charCategory.readCharacterDefinition(
-                        UTF8InputTextTest.class.getClassLoader().getResource("char.def").getPath());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            return charCategory;
-        }
-
-        @Override
-        public void setCharacterCategory(CharacterCategory charCategory) {
-        }
     }
 }

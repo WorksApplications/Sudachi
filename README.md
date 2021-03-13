@@ -174,6 +174,7 @@ We prepared following plugins.
 |:----------------|:-------------------------|:-------------------------------|
 |Modify the Inputs| character nomalization   |Full/half-width, Cases, Variants|
 |                 | normalization of prolong symbols| Normalize "~", "ー"s   |
+|                 | Remove yomigana          | Remove yomigana in parentheses |
 |Make OOVs        | Make one character OOVs  | Use as the fallback            |
 |                 | MeCab compatible OOVs    |                                |
 |Connect Words    | Inhibition               | Specified by part-of-speech    |
@@ -498,6 +499,7 @@ Sudachi では形態素解析の各ステップをフックして処理を差し
 |入力テキスト修正 | 文字列正規化             | 全半角、大文字/小文字、異体字  |
 |                 |                          | カスタマイズ可能               |
 |                 | 長音正規化               | 「~」や長音記号連続の正規化    |
+|                 | 読みがな削除             | 括弧内の読み仮名を削除         |
 |未知語処理       | 1文字未知語              | フォールバックとして利用       |
 |                 | MeCab互換                |                                |
 |単語接続処理     | 品詞接続禁制             | カスタマイズ可能               |
