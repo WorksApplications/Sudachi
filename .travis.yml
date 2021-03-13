@@ -1,6 +1,6 @@
 language: java
-jdk: oraclejdk8
-dist: trusty
+jdk: openjdk11
+dist: xenial
 before_install:
   # Decrypt settings.xml and codesigning.asc which is necessary to deploy to Sonatype Maven Repositories
   - if [ -n "$encrypted_df516d7c6f97_key" ]; then openssl aes-256-cbc -K $encrypted_df516d7c6f97_key -iv $encrypted_df516d7c6f97_iv -in .travis/settings_codesigning.tar.enc -out .travis/settings_codesigning.tar -d; tar xf .travis/settings_codesigning.tar -C .travis; fi
