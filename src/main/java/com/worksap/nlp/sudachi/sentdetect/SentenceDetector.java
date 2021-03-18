@@ -39,20 +39,20 @@ public class SentenceDetector {
         boolean hasNonBreakWord(int eos);
     }
 
-    private static final String PERIODS = "。|？|！|♪|…|\\?|\\!";
-    private static final String DOT = "(\\.|．)";
+    private static final String PERIODS = "。？！♪…\\?\\!";
+    private static final String DOT = "\\.．";
     private static final String CDOT = "・";
-    private static final String COMMA = "(,|，|、)";
+    private static final String COMMA = ",，、";
     private static final String BR_TAG = "(<br>|<BR>){2,}";
-    private static final String ALPHABET_OR_NUMBER = "[a-z]|[A-Z]|[0-9]|[ａ-ｚ]|[Ａ-Ｚ]|[０-９]|〇|一|二|三|四|五|六|七|八|九|十|百|千|万|億|兆";
+    private static final String ALPHABET_OR_NUMBER = "a-zA-Z0-9ａ-ｚＡ-Ｚ０-９〇一二三四五六七八九十百千万億兆";
     private static final Pattern SENTENCE_BREAKER_PATTERN = Pattern
-            .compile("(" + PERIODS + "|" + CDOT + "{3,}+|((?<!(" + ALPHABET_OR_NUMBER + "))" + DOT + "(?!("
-                    + ALPHABET_OR_NUMBER + "|" + COMMA + "))))(" + DOT + "|" + PERIODS + ")*|" + BR_TAG);
+            .compile("([" + PERIODS + "]|" + CDOT + "{3,}+|((?<!([" + ALPHABET_OR_NUMBER + "]))[" + DOT + "](?!(["
+                    + ALPHABET_OR_NUMBER + COMMA + "]))))([" + DOT + PERIODS + "])*|" + BR_TAG);
 
-    private static final String OPEN_PARENTHESIS = "\\(|\\{|｛|\\[|（|「|【|『|［|≪|〔|“";
-    private static final String CLOSE_PARENTHESIS = "\\)|\\}|\\]|）|」|｝|】|』|］|〕|≫|”";
+    private static final String OPEN_PARENTHESIS = "\\(\\{｛\\[（「【『［≪〔“";
+    private static final String CLOSE_PARENTHESIS = "\\)\\}\\]）」｝】』］〕≫”";
 
-    private static final String ITEMIZE_HEADER = "(" + ALPHABET_OR_NUMBER + ")" + "(" + DOT + ")";
+    private static final String ITEMIZE_HEADER = "([" + ALPHABET_OR_NUMBER + "])" + "([" + DOT + "])";
     private static final Pattern ITEMIZE_HEADER_PATTERN = Pattern.compile(ITEMIZE_HEADER);
 
     /** the default maximum length of a sentence */
@@ -83,7 +83,7 @@ public class SentenceDetector {
      * If {@code checker} is not @{code null}, it is used to determine if there is a
      * word that crosses the detected boundary, and if so, the next boundary is
      * returned.
-     * 
+     *
      * If there is no boundary, it returns a relatively harmless boundary as a
      * negative value.
      *
@@ -129,7 +129,7 @@ public class SentenceDetector {
     }
 
     private static final Pattern PARENTHESIS_PATTERN = Pattern
-            .compile("(" + OPEN_PARENTHESIS + ")|(" + CLOSE_PARENTHESIS + ")");
+            .compile("([" + OPEN_PARENTHESIS + "])|([" + CLOSE_PARENTHESIS + "])");
 
     int parenthesisLevel(CharSequence s) {
         Matcher matcher = PARENTHESIS_PATTERN.matcher(s);
@@ -147,16 +147,16 @@ public class SentenceDetector {
         return level;
     }
 
-    private static final Pattern PROHIBITED_BOS_PETTERN = Pattern
-            .compile("\\A(" + CLOSE_PARENTHESIS + "|" + COMMA + "|" + PERIODS + ")+");
+    private static final Pattern PROHIBITED_BOS_PATTERN = Pattern
+            .compile("\\A([" + CLOSE_PARENTHESIS + COMMA + PERIODS + "])+");
 
     int prohibitedBOS(CharSequence s) {
-        Matcher m = PROHIBITED_BOS_PETTERN.matcher(s);
+        Matcher m = PROHIBITED_BOS_PATTERN.matcher(s);
         return (m.find()) ? m.end() : 0;
     }
 
     private static final Pattern QUOTE_MARKER_PATTERN = Pattern
-            .compile("(！|？|\\!|\\?|" + CLOSE_PARENTHESIS + ")(と|っ|です)");
+            .compile("(！|？|\\!|\\?|[" + CLOSE_PARENTHESIS + "])(と|っ|です)");
     private static final Pattern EOS_ITEMIZE_HEADER_PATTERN = Pattern.compile(ITEMIZE_HEADER + "\\z");
 
     boolean isContinuousPhrase(CharSequence s, int eos) {
