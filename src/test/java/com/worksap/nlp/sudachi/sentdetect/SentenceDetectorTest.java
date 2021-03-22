@@ -22,6 +22,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
+
 public class SentenceDetectorTest {
 
     private SentenceDetector detector;
@@ -55,6 +57,12 @@ public class SentenceDetectorTest {
         assertThat(detector.getEos("あいう.えお", null), is(4));
         assertThat(detector.getEos("3.141", null), is(-5));
         assertThat(detector.getEos("四百十．〇", null), is(-5));
+    }
+
+    @Test
+    public void getEOSWithManyPeriods() {
+        String sentence = "あいうえお" + String.join("", Collections.nCopies(4000, "！"));
+        assertThat(detector.getEos(sentence, null), is(4005));
     }
 
     @Test
