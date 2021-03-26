@@ -278,6 +278,14 @@ Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, V
    See the License for the specific language governing permissions and
    limitations under the License.
 
+### Logo
+
+![Sudachi Logo](docs/Sudachi.png)
+
+This logo or a modified version may be used by anyone to refer to the morphological analyzer Sudachi, but does not indicate endorsement by Works Applications Co., Ltd.
+
+Copyright (c) 2017 Works Applications Co., Ltd.
+
 
 ## Elasticsearch
 
