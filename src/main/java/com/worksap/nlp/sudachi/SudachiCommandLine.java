@@ -62,9 +62,9 @@ public class SudachiCommandLine {
     }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, PrintStream output,
-            MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFile) throws IOException {
+            MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFileInput) throws IOException {
 
-        try (InputStreamReader inputReader = isFile ? new InputStreamReader(input, "UTF-8")
+        try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, "UTF-8")
                 : new InputStreamReader(input); BufferedReader reader = new BufferedReader(inputReader)) {
 
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -215,11 +215,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for (; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output, formatter, ignoreError, outputFileName != null);
+                        run(tokenizer, mode, input, output, formatter, ignoreError, false);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output, formatter, ignoreError, outputFileName != null);
+                run(tokenizer, mode, System.in, output, formatter, ignoreError, true);
             }
         }
     }
