@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,9 +41,14 @@ public class SudachiCommandLine {
 
         private boolean isFile;
 
-        FileOrStdoutPrintStream(String fileName) throws FileNotFoundException {
-            super(fileName == null ? System.out : new FileOutputStream(fileName), fileName == null);
-            isFile = fileName != null;
+        FileOrStdoutPrintStream() {
+            super(System.out, true);
+            isFile = false;
+        }
+
+        FileOrStdoutPrintStream(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
+            super(new FileOutputStream(fileName), false, "UTF-8");
+            isFile = true;
         }
 
         @Override
@@ -56,10 +62,10 @@ public class SudachiCommandLine {
     }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, PrintStream output,
-            MorphemeFormatterPlugin formatter, boolean ignoreError) throws IOException {
+            MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFile) throws IOException {
 
-        try (InputStreamReader inputReader = new InputStreamReader(input);
-                BufferedReader reader = new BufferedReader(inputReader)) {
+        try (InputStreamReader inputReader = isFile ? new InputStreamReader(input, "UTF-8")
+                : new InputStreamReader(input); BufferedReader reader = new BufferedReader(inputReader)) {
 
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 try {
@@ -198,7 +204,8 @@ public class SudachiCommandLine {
             formatter.showDetails();
         }
 
-        try (PrintStream output = new FileOrStdoutPrintStream(outputFileName);
+        try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
+                : new FileOrStdoutPrintStream(outputFileName);
                 Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings, mergeSettings)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
@@ -208,11 +215,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for (; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output, formatter, ignoreError);
+                        run(tokenizer, mode, input, output, formatter, ignoreError, outputFileName != null);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output, formatter, ignoreError);
+                run(tokenizer, mode, System.in, output, formatter, ignoreError, outputFileName != null);
             }
         }
     }
