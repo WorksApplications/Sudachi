@@ -31,4 +31,4 @@ jobs:
           MAVEN_USER_PASSWORD: ${{ secrets.MAVEN_USER_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: maven clean deploy -P release -B
+        run: mvn clean deploy -P release -B
