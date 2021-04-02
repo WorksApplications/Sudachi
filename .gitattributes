@@ -1,3 +1,0 @@
-dictionary/sudachi_lex.csv filter=lfs diff=lfs merge=lfs -text
-dictionary/core_lex.csv filter=lfs diff=lfs merge=lfs -text
-dictionary/notcore_lex.csv filter=lfs diff=lfs merge=lfs -text
