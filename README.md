@@ -72,6 +72,8 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - -a outputs the dictionary form and the reading form
 - -d dump the debug outputs
 - -o specifies output file (default: the standard output)
+- -t separate words with spaces
+- -ts separate words with spaces, and break line for each sentence
 - -f ignore errors
 
 ### Examples
@@ -95,6 +97,8 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く
     EOS
 
+    $ echo 東京都へ行く | java -jar target/sudachi.jar -t
+    東京都 へ 行く
 
 ## How to use the API
 
@@ -153,7 +157,7 @@ The followings are examples in the full dictionary.
     B：カンヌ/国際/映画祭
     C：カンヌ国際映画祭
 
-In full-text searching, to use A and B can imrove precision and recall.
+In full-text searching, to use A and B can improve precision and recall.
 
 ## Plugins
 
@@ -161,7 +165,7 @@ You can use or make plugins which modify the behavior of Sudachi.
 
 |Type of Plugins  | Example                                     |
 |:----------------|:--------------------------------------------|
-|Modify the Inputs| Character nomalization                      |
+|Modify the Inputs| Character normalization                     |
 |Make OOVs        | Considering script styles                   |
 |Connect Words    | Inhibition, Overwrite costs                 |
 |Modify the Path  | Fix  Person names, Equalization of splitting|
@@ -172,7 +176,7 @@ We prepared following plugins.
 
 |Type of Plugins  | Plugin                   |                                |
 |:----------------|:-------------------------|:-------------------------------|
-|Modify the Inputs| character nomalization   |Full/half-width, Cases, Variants|
+|Modify the Inputs| character normalization  |Full/half-width, Cases, Variants|
 |                 | normalization of prolong symbols| Normalize "~", "ー"s   |
 |                 | Remove yomigana          | Remove yomigana in parentheses |
 |Make OOVs        | Make one character OOVs  | Use as the fallback            |
@@ -305,7 +309,7 @@ An implementation of Sudachi in Python
 We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
 
 - https://sudachi-dev.slack.com/
-- (Please get an invite from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
+- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
 
 
 ## Citing Sudachi
@@ -400,6 +404,8 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - -a 読み、辞書形も出力
 - -d デバッグ情報の出力
 - -o 出力ファイル (指定がない場合は標準出力)
+- -t 単語をスペース区切りで出力
+- -ts 単語をスペース区切りで出力、文末で改行を出力
 - -f エラーを無視して処理を続行する
 
 ### 出力例
@@ -422,6 +428,9 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     へ      助詞,格助詞,*,*,*,*     へ
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く
     EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar -t
+    東京都 へ 行く
 
 
 ## ライブラリの利用

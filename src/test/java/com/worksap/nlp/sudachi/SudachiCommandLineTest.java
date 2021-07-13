@@ -127,6 +127,32 @@ public class SudachiCommandLineTest {
     }
 
     @Test
+    public void commandLineWithTOption() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-t", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(2L));
+        }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            Optional<String> first = lines.filter(l -> !l.equals("\n")).findFirst();
+            assertTrue(first.isPresent());
+            assertThat(first.get().split(" ").length, is(4));
+        }
+    }
+
+    @Test
+    public void commandLineWithTsOption() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-ts", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(4L));
+        }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            Optional<String> first = lines.filter(l -> !l.equals("\n")).findFirst();
+            assertTrue(first.isPresent());
+            assertThat(first.get().split(" ").length, is(4));
+        }
+    }
+
+    @Test
     public void commandLineWithTwoFiles() throws IOException {
         SudachiCommandLine
                 .main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, inputFileName, inputFileName });
