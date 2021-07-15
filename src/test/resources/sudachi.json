@@ -20,6 +20,10 @@
           "cost" : 6000 }
     ],
     "formatterPlugin" : [
-      { "class" : "com.worksap.nlp.sudachi.SimpleMorphemeFormatter" }
+      { "class" : "com.worksap.nlp.sudachi.SimpleMorphemeFormatter" },
+      { "class" : "com.worksap.nlp.sudachi.WordSegmentationFormatter",
+        "eos" : "\n" },
+      { "class" : "com.worksap.nlp.sudachi.WordSegmentationFormatter",
+        "eos" :  " " }
     ]
 }

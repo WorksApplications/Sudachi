@@ -62,7 +62,8 @@ public class SudachiCommandLine {
     }
 
     static void run(Tokenizer tokenizer, Tokenizer.SplitMode mode, InputStream input, PrintStream output,
-            MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFileInput) throws IOException {
+            MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFileInput, boolean isWordSegmentation)
+            throws IOException {
 
         try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, "UTF-8")
                 : new InputStreamReader(input); BufferedReader reader = new BufferedReader(inputReader)) {
@@ -71,6 +72,9 @@ public class SudachiCommandLine {
                 try {
                     for (List<Morpheme> sentence : tokenizer.tokenizeSentences(mode, line)) {
                         formatter.printSentence(sentence, output);
+                    }
+                    if (isWordSegmentation) {
+                        output.print("\n");
                     }
                 } catch (RuntimeException e) {
                     if (ignoreError) {
@@ -83,14 +87,24 @@ public class SudachiCommandLine {
         }
     }
 
-    static MorphemeFormatterPlugin getFormatter(String path, String jsonString, boolean mergeSettings)
-            throws IOException {
+    static MorphemeFormatterPlugin getFormatter(String path, String jsonString, boolean mergeSettings,
+            boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation) throws IOException {
         Settings settings = JapaneseDictionary.buildSettings(path, jsonString, mergeSettings);
         List<MorphemeFormatterPlugin> formatters = settings.getPluginList("formatterPlugin");
         if (formatters.isEmpty()) {
             throw new IllegalArgumentException("no morpheme formatter");
         }
-        MorphemeFormatterPlugin formatter = formatters.get(0);
+        MorphemeFormatterPlugin formatter;
+        if (isWordSegmentation) {
+            if (isLineBreakAtEosInWordSegmentation) {
+                formatter = formatters.get(1);
+            } else {
+                formatter = formatters.get(2);
+            }
+        } else {
+            formatter = formatters.get(0);
+        }
+
         formatter.setUp();
         return formatter;
     }
@@ -112,6 +126,10 @@ public class SudachiCommandLine {
      * <dd>the mode of splitting</dd>
      * <dt>{@code -o file}</dt>
      * <dd>the output file</dd>
+     * <dt>{@code -t}</dt>
+     * <dd>separate words with spaces</dd>
+     * <dt>{@code -ts}</dt>
+     * <dd>separate words with spaces, and break line for each sentence</dd>
      * <dt>{@code -a}</dt>
      * <dd>show details</dd>
      * <dt>{@code -d}</dt>
@@ -149,6 +167,8 @@ public class SudachiCommandLine {
         boolean isEnableDump = false;
         boolean showDetails = false;
         boolean ignoreError = false;
+        boolean isWordSegmentation = false;
+        boolean isLineBreakAtEosInWordSegmentation = true;
 
         int i = 0;
         for (i = 0; i < args.length; i++) {
@@ -182,6 +202,12 @@ public class SudachiCommandLine {
                 isEnableDump = true;
             } else if (args[i].equals("-f")) {
                 ignoreError = true;
+            } else if (args[i].equals("-t")) {
+                isWordSegmentation = true;
+                isLineBreakAtEosInWordSegmentation = false;
+            } else if (args[i].equals("-ts")) {
+                isWordSegmentation = true;
+                isLineBreakAtEosInWordSegmentation = true;
             } else if (args[i].equals("-h")) {
                 Console console = System.console();
                 console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
@@ -190,6 +216,8 @@ public class SudachiCommandLine {
                 console.printf("\t-p directory\troot directory of resources\n");
                 console.printf("\t-m mode\tmode of splitting\n");
                 console.printf("\t-o file\toutput to file\n");
+                console.printf("\t-t\tseparate words with spaces\n");
+                console.printf("\t-ts\tseparate words with spaces, and break line for each sentence\n");
                 console.printf("\t-a\tshow details\n");
                 console.printf("\t-f\tignore error\n");
                 console.printf("\t-d\tdebug mode\n");
@@ -199,7 +227,8 @@ public class SudachiCommandLine {
             }
         }
 
-        MorphemeFormatterPlugin formatter = getFormatter(resourcesDirectory, settings, mergeSettings);
+        MorphemeFormatterPlugin formatter = getFormatter(resourcesDirectory, settings, mergeSettings,
+                isWordSegmentation, isLineBreakAtEosInWordSegmentation);
         if (showDetails) {
             formatter.showDetails();
         }
@@ -215,11 +244,11 @@ public class SudachiCommandLine {
             if (i < args.length) {
                 for (; i < args.length; i++) {
                     try (FileInputStream input = new FileInputStream(args[i])) {
-                        run(tokenizer, mode, input, output, formatter, ignoreError, false);
+                        run(tokenizer, mode, input, output, formatter, ignoreError, false, isWordSegmentation);
                     }
                 }
             } else {
-                run(tokenizer, mode, System.in, output, formatter, ignoreError, true);
+                run(tokenizer, mode, System.in, output, formatter, ignoreError, true, isWordSegmentation);
             }
         }
     }
