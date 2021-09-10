@@ -119,10 +119,12 @@ public class SentenceDetector {
             }
         }
 
-        final Pattern spaces = Pattern.compile(".+\\s+");
-        Matcher m = spaces.matcher(s);
-        if (m.find()) {
-            return -m.end();
+        if (input.length() > limit) {
+            final Pattern spaces = Pattern.compile(".+\\s+");
+            Matcher m = spaces.matcher(s);
+            if (m.find()) {
+                return -m.end();
+            }
         }
 
         return -Math.min(input.length(), limit);
