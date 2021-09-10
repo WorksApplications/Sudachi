@@ -36,10 +36,10 @@ public class SentenceDetectorTest {
     @Test
     public void getEOS() {
         assertThat(detector.getEos("あいう。えお。", null), is(4));
-        assertThat(detector.getEos("あいう。えお。", null), is(4));
         assertThat(detector.getEos("あいうえお", null), is(-5));
         assertThat(detector.getEos("", null), is(0));
         assertThat(detector.getEos("あいう。。えお。", null), is(5));
+        assertThat(detector.getEos("あ い うえお", null), is(-7));
     }
 
     @Test
