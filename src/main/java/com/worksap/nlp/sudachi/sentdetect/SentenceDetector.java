@@ -98,8 +98,7 @@ public class SentenceDetector {
             return 0;
         }
 
-        Boolean input_exceeds_limit = input.length() > limit;
-        CharSequence s = input_exceeds_limit ? input.subSequence(0, limit) : input;
+        CharSequence s = (input.length() > limit) ? input.subSequence(0, limit) : input;
         Matcher matcher = SENTENCE_BREAKER_PATTERN.matcher(s);
         while (matcher.find()) {
             int eos = matcher.end();
@@ -120,7 +119,7 @@ public class SentenceDetector {
             }
         }
 
-        if (input_exceeds_limit) {
+        if (input.length() > limit) {
             final Pattern spaces = Pattern.compile(".+\\s+");
             Matcher m = spaces.matcher(s);
             if (m.find()) {
