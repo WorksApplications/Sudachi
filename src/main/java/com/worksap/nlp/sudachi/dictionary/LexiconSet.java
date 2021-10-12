@@ -16,10 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class LexiconSet implements Lexicon {
 
@@ -46,36 +43,46 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public Iterator<int[]> lookup(byte[] text, int offset) {
+        if (lexicons.isEmpty()) {
+            return Collections.emptyIterator();
+        }
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
         }
-        return new Itr(text, offset);
+        return new Itr(text, offset, lexicons.size() - 1);
     }
 
+    /**
+     * Traverses Dictionaries in the reverse order.
+     * <ul>
+     * <li>First, user dictionaries, starting from the last one</li>
+     * <li>Finally, the system dictionary</li>
+     * </ul>
+     *
+     * Dictionaries have their word weights prioritized in the same manner
+     */
     private class Itr implements Iterator<int[]> {
         byte[] text;
         int offset;
         int dictId;
         Iterator<int[]> iterator;
 
-        Itr(byte[] text, int offset) {
+        Itr(byte[] text, int offset, int start) {
             this.text = text;
             this.offset = offset;
-            dictId = 1;
+            dictId = start;
             iterator = lexicons.get(dictId).lookup(text, offset);
         }
 
         @Override
         public boolean hasNext() {
             while (!iterator.hasNext()) {
-                if (dictId == 0) {
+                int nextId = dictId - 1;
+                if (nextId < 0) {
                     return false;
                 }
-                dictId++;
-                if (dictId >= lexicons.size()) {
-                    dictId = 0;
-                }
-                iterator = lexicons.get(dictId).lookup(text, offset);
+                iterator = lexicons.get(nextId).lookup(text, offset);
+                dictId = nextId;
             }
             return true;
         }
