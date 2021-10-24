@@ -9,14 +9,17 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [11, 17]
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 11
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
         with:
-          java-version: 11
+          java-version: ${{ matrix.java-version }}
           distribution: temurin
           cache: maven
       - name: Cache SonarCloud packages
@@ -31,4 +34,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report -B
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.skip=${{ matrix.java-version != 11 }}
