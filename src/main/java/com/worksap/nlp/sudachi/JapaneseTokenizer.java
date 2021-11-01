@@ -19,11 +19,17 @@ package com.worksap.nlp.sudachi;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -39,6 +45,7 @@ class JapaneseTokenizer implements Tokenizer {
     List<PathRewritePlugin> pathRewritePlugins;
     OovProviderPlugin defaultOovProvider;
     PrintStream dumpOutput;
+    JsonObjectBuilder jsonBuilder;
     boolean allowEmptyMorpheme;
 
     LatticeImpl lattice;
@@ -146,6 +153,18 @@ class JapaneseTokenizer implements Tokenizer {
         dumpOutput = output;
     }
 
+    @Override
+    public String dumpInternalStructures(String text) {
+        jsonBuilder = Json.createObjectBuilder();
+        tokenize(SplitMode.C, text);
+
+        StringWriter stringWriter = new StringWriter();
+        try (JsonWriter writer = Json.createWriter(stringWriter)) {
+            writer.writeObject(jsonBuilder.build());
+        }
+        return stringWriter.toString();
+    }
+
     UTF8InputText buildInputText(CharSequence text) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
@@ -155,6 +174,10 @@ class JapaneseTokenizer implements Tokenizer {
         if (dumpOutput != null) {
             dumpOutput.println("=== Input dump:");
             dumpOutput.println(input.getText());
+        }
+        if (jsonBuilder != null) {
+            jsonBuilder.add("inputText", Json.createObjectBuilder().add("originalText", input.getOriginalText())
+                    .add("modifiedText", input.getText()));
         }
 
         return input;
@@ -167,12 +190,18 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println("=== Lattice dump:");
             lattice.dump(dumpOutput);
         }
+        if (jsonBuilder != null) {
+            jsonBuilder.add("lattice", lattice.toJson());
+        }
 
         List<LatticeNode> path = lattice.getBestPath();
 
         if (dumpOutput != null) {
             dumpOutput.println("=== Before rewriting:");
             dumpPath(path);
+        }
+        if (jsonBuilder != null) {
+            jsonBuilder.add("bestPath", pathToJson(path, lattice));
         }
 
         for (PathRewritePlugin plugin : pathRewritePlugins) {
@@ -188,6 +217,9 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println("=== After rewriting:");
             dumpPath(path);
             dumpOutput.println("===");
+        }
+        if (jsonBuilder != null) {
+            jsonBuilder.add("rewrittenPath", pathToJson(path, lattice));
         }
 
         return new MorphemeList(input, grammar, lexicon, path, allowEmptyMorpheme);
@@ -271,6 +303,14 @@ class JapaneseTokenizer implements Tokenizer {
             dumpOutput.println(String.format("%d: %s", i, node.toString()));
             i++;
         }
+    }
+
+    JsonArrayBuilder pathToJson(List<LatticeNode> path, LatticeImpl lattice) {
+        JsonArrayBuilder builder = Json.createArrayBuilder();
+        for (LatticeNode node : path) {
+            builder.add(lattice.nodeToJson((LatticeNodeImpl) node));
+        }
+        return builder;
     }
 
     void disableEmptyMorpheme() {

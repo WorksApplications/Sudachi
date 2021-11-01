@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
@@ -153,26 +158,27 @@ class LatticeImpl implements Lattice {
         return result;
     }
 
+    String getSurface(LatticeNodeImpl node) {
+        return (node.isDefined) ? node.getWordInfo().getSurface() : "(null)";
+    }
+
+    String getPos(LatticeNodeImpl node) {
+        if (!node.isDefined) {
+            return "BOS/EOS";
+        } else {
+            WordInfo wi = node.getWordInfo();
+            short posId = wi.getPOSId();
+            return (posId < 0) ? "(null)" : String.join(",", grammar.getPartOfSpeechString(posId));
+        }
+    }
+
     void dump(PrintStream output) {
         int index = 0;
         for (int i = size + 1; i >= 0; i--) {
             List<LatticeNodeImpl> rNodes = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
             for (LatticeNodeImpl rNode : rNodes) {
-                String surface;
-                String pos;
-                if (!rNode.isDefined) {
-                    surface = "(null)";
-                    pos = "BOS/EOS";
-                } else {
-                    WordInfo wi = rNode.getWordInfo();
-                    surface = wi.getSurface();
-                    short posId = wi.getPOSId();
-                    if (posId < 0) {
-                        pos = "(null)";
-                    } else {
-                        pos = String.join(",", grammar.getPartOfSpeechString(posId));
-                    }
-                }
+                String surface = getSurface(rNode);
+                String pos = getPos(rNode);
 
                 output.print(String.format("%d: %d %d %s(%d) %s %d %d %d: ", index, rNode.getBegin(), rNode.getEnd(),
                         surface, rNode.wordId, pos, rNode.leftId, rNode.rightId, rNode.cost));
@@ -185,5 +191,39 @@ class LatticeImpl implements Lattice {
                 output.println();
             }
         }
+    }
+
+    JsonObjectBuilder nodeToJson(LatticeNodeImpl node) {
+        String surface = getSurface(node);
+        String pos = getPos(node);
+        int begin = node.getBegin();
+        int end = node.getEnd();
+
+        return Json.createObjectBuilder()
+                .add("begin", (begin == end && begin == 0) ? JsonValue.NULL : Json.createValue(begin))
+                .add("end", (begin == end && begin != 0) ? JsonValue.NULL : Json.createValue(end))
+                .add("headword", surface).add("wordId", node.wordId).add("pos", pos).add("leftId", node.leftId)
+                .add("rightId", node.rightId).add("cost", node.cost);
+    }
+
+    JsonArrayBuilder toJson() {
+        JsonArrayBuilder lattice = Json.createArrayBuilder();
+        int nodeId = 0;
+        for (int i = 0; i <= size + 1; i++) {
+            List<LatticeNodeImpl> rNodes = (i <= size) ? endLists.get(i) : Collections.singletonList(eosNode);
+            for (LatticeNodeImpl rNode : rNodes) {
+                JsonObjectBuilder node = nodeToJson(rNode).add("nodeId", nodeId++);
+
+                JsonArrayBuilder connectCosts = Json.createArrayBuilder();
+                for (LatticeNodeImpl lNode : endLists.get(rNode.begin)) {
+                    int cost = grammar.getConnectCost(lNode.rightId, rNode.leftId);
+                    connectCosts.add(cost);
+                }
+                node.add("connectCosts", connectCosts);
+
+                lattice.add(node);
+            }
+        }
+        return lattice;
     }
 }
