@@ -124,6 +124,17 @@ public interface Tokenizer {
     public void setDumpOutput(PrintStream output);
 
     /**
+     * Tokenize a text and dump the internal structures into a JSON string.
+     *
+     * This method tokenizes a input text as a sentence.
+     *
+     * @param text
+     *            input text
+     * @return a JSON string
+     */
+    public String dumpInternalStructures(String text);
+
+    /**
      * A mode of splitting
      */
     public enum SplitMode {

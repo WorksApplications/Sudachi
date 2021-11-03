@@ -27,6 +27,11 @@ import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 import org.junit.Before;
@@ -259,5 +264,88 @@ public class JapaneseTokenizerTest {
         assertThat(s.get(2).normalizedForm(), is("."));
         assertThat(s.get(2).begin(), is(0));
         assertThat(s.get(2).end(), is(1));
+    }
+
+    @Test
+    public void dumpInternalStructures() {
+        String json = tokenizer.dumpInternalStructures("東京都");
+        JsonReader reader = Json.createReader(new StringReader(json));
+        JsonObject root = reader.readObject();
+
+        assertThat(root.getJsonObject("inputText").getString("originalText"), is("東京都"));
+        assertThat(root.getJsonObject("inputText").getString("modifiedText"), is("東京都"));
+
+        JsonArray lattice = root.getJsonArray("lattice");
+        assertThat(lattice.size(), is(7));
+
+        int i = 0;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).isNull("begin"), is(true));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(0));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("(null)"));
+        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(0));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("BOS/EOS"));
+        assertThat(lattice.getJsonObject(i).getInt("rightId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("leftId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("cost"), is(0));
+        assertThat(lattice.getJsonObject(i).getJsonArray("connectCosts").size(), is(1));
+
+        i = 1;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(3));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("東"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,普通名詞,一般,*,*,*"));
+        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(4));
+        assertThat(lattice.getJsonObject(i).getInt("rightId"), is(7));
+        assertThat(lattice.getJsonObject(i).getInt("leftId"), is(7));
+        assertThat(lattice.getJsonObject(i).getInt("cost"), is(4675));
+        assertThat(lattice.getJsonObject(i).getJsonArray("connectCosts").size(), is(1));
+
+        i = 2;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(6));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("東京"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,固有名詞,地名,一般,*,*"));
+
+        i = 3;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(9));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("東京都"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,固有名詞,地名,一般,*,*"));
+
+        i = 4;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(3));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(9));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("京都"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,固有名詞,地名,一般,*,*"));
+
+        i = 5;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(6));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(9));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("都"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,普通名詞,一般,*,*,*"));
+
+        i = 6;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(9));
+        assertThat(lattice.getJsonObject(i).isNull("end"), is(true));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("(null)"));
+        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(0));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("BOS/EOS"));
+        assertThat(lattice.getJsonObject(i).getInt("rightId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("leftId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("cost"), is(0));
+        assertThat(lattice.getJsonObject(i).getJsonArray("connectCosts").size(), is(3));
+
+        assertThat(root.getJsonArray("bestPath").size(), is(1));
+        assertThat(root.getJsonArray("bestPath").getJsonObject(0).getString("headword"), is("東京都"));
+
+        assertThat(root.getJsonArray("rewrittenPath").size(), is(1));
+        assertThat(root.getJsonArray("rewrittenPath").getJsonObject(0).getString("headword"), is("東京都"));
     }
 }
