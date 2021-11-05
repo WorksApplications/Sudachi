@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="500" height="500" viewBox="0 0 500 500" xml:space="preserve">
+<circle cx="250" cy="250" r="200" fill="#007F46" />
+<circle cx="250" cy="250" r="174" fill="#FFFFFF" />
+<linearGradient id="gradation" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" stop-color="#D5FA00" />
+  <stop offset="100%" stop-color="#C1FD00" />
+</linearGradient>
+<circle cx="250" cy="250" r="152" fill="url(#gradation)" />
+<line x1="250" y1="80" x2="250" y2="420" stroke-width="15" stroke="#FFFFFF" transform="rotate(22.5 250 250)" />
+<line x1="250" y1="80" x2="250" y2="420" stroke-width="15" stroke="#FFFFFF" transform="rotate(67.5 250 250)" />
+<line x1="250" y1="80" x2="250" y2="420" stroke-width="15" stroke="#FFFFFF" transform="rotate(112.5 250 250)" />
+<line x1="250" y1="80" x2="250" y2="420" stroke-width="15" stroke="#FFFFFF" transform="rotate(157.5 250 250)" />
+<ellipse cx="320" cy="335" rx="12" ry="22" fill="#FFFFFF" transform="rotate(-22.5 320 335)" />
+</svg>
