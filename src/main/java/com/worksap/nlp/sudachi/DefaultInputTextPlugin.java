@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
@@ -146,15 +147,18 @@ class DefaultInputTextPlugin extends InputTextPlugin {
         }
     }
 
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+
     private void readRewriteLists(InputStream rewriteDef) throws IOException {
         try (InputStreamReader isr = new InputStreamReader(rewriteDef, StandardCharsets.UTF_8);
                 LineNumberReader reader = new LineNumberReader(isr)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.matches("\\s*") || line.startsWith("#")) {
+                if (line.startsWith("#") || PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
                     continue;
                 }
-                String[] cols = line.split("\\s+");
+                String[] cols = PATTERN_SPACES.split(line);
                 // ignored normalize list
                 if (cols.length == 1) {
                     String key = cols[0];
