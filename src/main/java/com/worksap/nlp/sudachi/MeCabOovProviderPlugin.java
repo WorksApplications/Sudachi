@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
@@ -129,15 +130,18 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         return node;
     }
 
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+
     void readCharacterProperty(String charDef) throws IOException {
         try (InputStream input = (charDef == null) ? openFromJar("char.def") : new FileInputStream(charDef);
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
                 LineNumberReader reader = new LineNumberReader(isReader)) {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                if (line.matches("\\s*") || line.startsWith("#") || line.startsWith("0x")) {
+                if (line.startsWith("#") || line.startsWith("0x") || PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
                     continue;
                 }
-                String[] cols = line.split("\\s+");
+                String[] cols = PATTERN_SPACES.split(line);
                 if (cols.length < 4) {
                     throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }

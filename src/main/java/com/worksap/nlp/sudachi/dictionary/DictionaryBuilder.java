@@ -115,10 +115,10 @@ public class DictionaryBuilder {
         }
         logger.info(() -> String.format(" %,d words%n", entries.size()));
 
-        FileChannel outputChannel = output.getChannel();
-        writeGrammar(matrixInput, outputChannel);
-        writeLexicon(outputChannel);
-        outputChannel.close();
+        try (FileChannel outputChannel = output.getChannel()) {
+            writeGrammar(matrixInput, outputChannel);
+            writeLexicon(outputChannel);
+        }
     }
 
     void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
@@ -253,7 +253,7 @@ public class DictionaryBuilder {
             throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
         }
 
-        String[] lr = header.split("\\s+");
+        String[] lr = PATTERN_SPACES.split(header);
         short leftSize = Short.parseShort(lr[0]);
         short rightSize = Short.parseShort(lr[1]);
         byteBuffer.putShort(leftSize);
@@ -267,10 +267,10 @@ public class DictionaryBuilder {
             if (line == null) {
                 break;
             }
-            if (line.matches("\\s*")) {
+            if (PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
                 continue;
             }
-            String[] cols = line.split("\\s+");
+            String[] cols = PATTERN_SPACES.split(line);
             if (cols.length < 3) {
                 logger.warning("invalid format at line " + reader.getLineNumber());
                 continue;
@@ -399,6 +399,9 @@ public class DictionaryBuilder {
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+    private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
 
     static String decode(String text) {
         Matcher m = unicodeLiteral.matcher(text);
@@ -448,7 +451,7 @@ public class DictionaryBuilder {
     }
 
     boolean isId(String text) {
-        return text.matches("U?\\d+");
+        return PATTERN_ID.matcher(text).matches();
     }
 
     int parseId(String text) {

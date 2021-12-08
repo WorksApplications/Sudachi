@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A classifier of the categories of characters.
@@ -74,6 +75,10 @@ public class CharacterCategory {
         return categories;
     }
 
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+    private static final Pattern PATTERN_DOUBLE_PERIODS = Pattern.compile("\\.\\.");
+
     /**
      * Reads the definitions of the character categories from the file which is
      * specified by {@code charDef}. If {@code charDef} is {@code null}, uses the
@@ -103,16 +108,16 @@ public class CharacterCategory {
                 LineNumberReader reader = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.matches("\\s*") || line.startsWith("#")) {
+                if (line.startsWith("#") || PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
                     continue;
                 }
-                String[] cols = line.split("\\s+");
+                String[] cols = PATTERN_SPACES.split(line);
                 if (cols.length < 2) {
                     throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
                 }
                 if (cols[0].startsWith("0x")) {
                     Range range = new Range();
-                    String[] r = cols[0].split("\\.\\.");
+                    String[] r = PATTERN_DOUBLE_PERIODS.split(cols[0]);
                     range.low = range.high = Integer.decode(r[0]);
                     if (r.length > 1) {
                         range.high = Integer.decode(r[1]);
