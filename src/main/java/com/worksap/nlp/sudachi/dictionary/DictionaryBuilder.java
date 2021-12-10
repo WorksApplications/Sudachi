@@ -123,7 +123,7 @@ public class DictionaryBuilder {
 
     void buildLexicon(String filename, FileInputStream lexiconInput) throws IOException {
         int lineno = -1;
-        try (InputStreamReader isr = new InputStreamReader(lexiconInput);
+        try (InputStreamReader isr = new InputStreamReader(lexiconInput, StandardCharsets.UTF_8);
                 LineNumberReader reader = new LineNumberReader(isr);
                 CSVParser parser = new CSVParser(reader)) {
             for (List<String> columns = parser.getNextRecord(); columns != null; columns = parser.getNextRecord()) {
