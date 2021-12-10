@@ -30,12 +30,9 @@ public class GrammarImpl implements Grammar {
     private static final short[] EOS_PARAMETER = new short[] { 0, 0, 0 };
 
     private final ByteBuffer bytes;
-    private List<List<String>> posList;
-    private ByteBuffer connectTableBytes;
+    private final List<List<String>> posList;
     private boolean isCopiedConnectTable;
-    private int connectTableOffset;
-    private final short leftIdSize;
-    private final short rightIdSize;
+    private Connection matrix;
 
     private CharacterCategory charCategory;
 
@@ -44,7 +41,6 @@ public class GrammarImpl implements Grammar {
     public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;
-        this.connectTableBytes = bytes;
         isCopiedConnectTable = false;
         int posSize = bytes.getShort(offset);
         offset += 2;
@@ -57,19 +53,21 @@ public class GrammarImpl implements Grammar {
             }
             posList.add(Collections.unmodifiableList(pos));
         }
-        leftIdSize = bytes.getShort(offset);
+        int leftIdSize = bytes.getShort(offset);
         offset += 2;
-        rightIdSize = bytes.getShort(offset);
+        int rightIdSize = bytes.getShort(offset);
         offset += 2;
-        connectTableOffset = offset;
-
+        ByteBuffer dup = bytes.duplicate();
+        dup.position(offset);
+        dup.order(bytes.order());
+        dup.limit(offset + leftIdSize * rightIdSize * 2);
+        matrix = new Connection(dup.asShortBuffer(), leftIdSize, rightIdSize);
         storageSize = (offset - originalOffset) + 2 * leftIdSize * rightIdSize;
     }
 
     public GrammarImpl() {
         bytes = ByteBuffer.allocate(0);
         posList = Collections.emptyList();
-        leftIdSize = rightIdSize = 0;
     }
 
     public int storageSize() {
@@ -97,15 +95,16 @@ public class GrammarImpl implements Grammar {
 
     @Override
     public short getConnectCost(short left, short right) {
-        return connectTableBytes.getShort(connectTableOffset + left * 2 + 2 * leftIdSize * right);
+        return matrix.cost(left, right);
     }
 
     @Override
     public void setConnectCost(short left, short right, short cost) {
         if (!isCopiedConnectTable) {
-            copyConnectTable();
+            matrix = matrix.clone();
+            isCopiedConnectTable = true;
         }
-        connectTableBytes.putShort(connectTableOffset + left * 2 + 2 * leftIdSize * right, cost);
+        matrix.setCost(left, right, cost);
     }
 
     @Override
@@ -135,18 +134,5 @@ public class GrammarImpl implements Grammar {
             str[i] = bytes.getChar(offset + 2 * i);
         }
         return new String(str);
-    }
-
-    private synchronized void copyConnectTable() {
-        ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
-        newBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        ByteBuffer srcBuffer = connectTableBytes.duplicate();
-        Buffer buffer = srcBuffer; // a kludge for Java 9
-        buffer.position(connectTableOffset);
-        buffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
-        newBuffer.put(srcBuffer);
-        connectTableBytes = newBuffer;
-        connectTableOffset = 0;
-        isCopiedConnectTable = true;
     }
 }

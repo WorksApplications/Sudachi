@@ -31,7 +31,7 @@ import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
 import com.worksap.nlp.sudachi.dictionary.LexiconSet;
 
-class JapaneseDictionary implements Dictionary {
+public class JapaneseDictionary implements Dictionary {
 
     GrammarImpl grammar;
     LexiconSet lexicon;
