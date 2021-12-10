@@ -60,6 +60,10 @@ local.properties
 # JDT-specific (Eclipse Java Development Tools)		
 .classpath
 
+### IntelliJ-based IDEs
+
+.idea/
+
 ### Java ###
 # Compiled class file
 *.class
