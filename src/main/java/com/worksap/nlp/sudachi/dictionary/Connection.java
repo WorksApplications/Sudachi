@@ -18,7 +18,10 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ShortBuffer;
 
-public final class Connection implements Cloneable {
+/**
+ * CRF weights compressed into 2D u16 matrix in MeCab manner
+ */
+public final class Connection {
     private final ShortBuffer matrix;
     private final int leftSize;
     private final int rightSize;
@@ -35,6 +38,14 @@ public final class Connection implements Cloneable {
         return right * leftSize + left;
     }
 
+    /**
+     *
+     * @param left
+     *            left connection index
+     * @param right
+     *            right connection index
+     * @return connection weight in the matrix
+     */
     public short cost(int left, int right) {
         return matrix.get(ix(left, right));
     }
@@ -51,9 +62,10 @@ public final class Connection implements Cloneable {
         matrix.put(ix(left, right), cost);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public Connection clone() {
+    /**
+     * @return a copy of itself with the buffer owned, instead of slice
+     */
+    public Connection ownedCopy() {
         ShortBuffer copy = ShortBuffer.allocate(matrix.limit());
         copy.put(matrix);
 

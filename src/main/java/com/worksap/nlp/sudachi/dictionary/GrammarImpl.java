@@ -99,7 +99,7 @@ public class GrammarImpl implements Grammar {
     @Override
     public void setConnectCost(short left, short right, short cost) {
         if (!isCopiedConnectTable) {
-            matrix = matrix.clone();
+            matrix = matrix.ownedCopy();
             isCopiedConnectTable = true;
         }
         matrix.setCost(left, right, cost);
