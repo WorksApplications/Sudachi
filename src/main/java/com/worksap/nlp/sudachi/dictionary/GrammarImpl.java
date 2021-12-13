@@ -22,13 +22,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class GrammarImpl implements Grammar {
-
-    private static final int POS_DEPTH = 6;
+    private static final int POS_DEPTH = POS.DEPTH;
     private static final short[] BOS_PARAMETER = new short[] { 0, 0, 0 };
     private static final short[] EOS_PARAMETER = new short[] { 0, 0, 0 };
 
     private final ByteBuffer bytes;
-    private final List<List<String>> posList;
+    private final List<POS> posList;
     private boolean isCopiedConnectTable;
     private Connection matrix;
 
@@ -44,12 +43,12 @@ public class GrammarImpl implements Grammar {
         offset += 2;
         posList = new ArrayList<>(posSize);
         for (int i = 0; i < posSize; i++) {
-            ArrayList<String> pos = new ArrayList<>(POS_DEPTH);
+            String[] pos = new String[POS_DEPTH];
             for (int j = 0; j < POS_DEPTH; j++) {
-                pos.add(bufferToString(offset));
-                offset += 1 + 2 * pos.get(j).length();
+                pos[j] = bufferToString(offset);
+                offset += 1 + 2 * pos[j].length();
             }
-            posList.add(Collections.unmodifiableList(pos));
+            posList.add(new POS(pos));
         }
         int leftIdSize = bytes.getShort(offset);
         offset += 2;
@@ -82,12 +81,14 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public List<String> getPartOfSpeechString(short posId) {
+    public POS getPartOfSpeechString(short posId) {
         return posList.get(posId);
     }
 
     @Override
     public short getPartOfSpeechId(List<String> pos) {
+        // POS.equals() is compatible with List<String>, this is OK
+        // noinspection SuspiciousMethodCalls
         return (short) posList.indexOf(pos);
     }
 

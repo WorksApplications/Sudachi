@@ -37,10 +37,11 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
+import com.worksap.nlp.sudachi.dictionary.build.CsvLexicon;
+import com.worksap.nlp.sudachi.dictionary.build.Strings;
 
 /**
  * A dictionary building tool. This class provide the converter from the source
@@ -395,7 +396,7 @@ public class DictionaryBuilder {
     }
 
     static boolean isValidLength(String text) {
-        return text.length() <= STRING_MAX_LENGTH;
+        return Strings.isValidLength(text);
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
@@ -404,22 +405,7 @@ public class DictionaryBuilder {
     private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
 
     static String decode(String text) {
-        Matcher m = unicodeLiteral.matcher(text);
-        if (!m.find()) {
-            return text;
-        }
-
-        StringBuffer sb = new StringBuffer();
-        m.reset();
-        while (m.find()) {
-            String u = m.group(1);
-            if (u.startsWith("{")) {
-                u = u.substring(1, u.length() - 1);
-            }
-            m.appendReplacement(sb, new String(Character.toChars(Integer.parseInt(u, 16))));
-        }
-        m.appendTail(sb);
-        return sb.toString();
+        return CsvLexicon.unescape(text);
     }
 
     void checkSplitInfoFormat(String info) {

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-public class ConnectionMatrix {
+public class ConnectionMatrix implements WriteDictionary {
     private short numLeft;
     private short numRight;
     private ByteBuffer compiled;
@@ -131,5 +131,10 @@ public class ConnectionMatrix {
         buffer.position(0);
         compiled = buffer;
         return numLines;
+    }
+
+    @Override
+    public void writeTo(ModelOutput output) throws IOException {
+        output.write(compiled);
     }
 }

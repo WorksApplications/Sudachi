@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.json.JsonObject;
 
+import com.worksap.nlp.sudachi.dictionary.POS;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -187,7 +188,7 @@ public class ProlongedSoundMarkInputTextPluginTest {
         }
 
         @Override
-        public List<String> getPartOfSpeechString(short posId) {
+        public POS getPartOfSpeechString(short posId) {
             return null;
         }
 

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.POS;
 
 public class MockGrammar implements Grammar {
 
@@ -35,7 +36,7 @@ public class MockGrammar implements Grammar {
     }
 
     @Override
-    public List<String> getPartOfSpeechString(short posId) {
+    public POS getPartOfSpeechString(short posId) {
         return null;
     }
 
