@@ -26,14 +26,14 @@ import java.nio.ShortBuffer;
  */
 public class Parameters implements WriteDictionary {
     private ByteBuffer data;
-    private ShortBuffer parameters;
+    private ShortBuffer params;
     private int maxLeft = Integer.MAX_VALUE;
     private int maxRight = Integer.MAX_VALUE;
 
     public Parameters(int initialSize) {
         data = ByteBuffer.allocate(initialSize);
         data.order(ByteOrder.LITTLE_ENDIAN);
-        parameters = data.asShortBuffer();
+        params = data.asShortBuffer();
     }
 
     public Parameters() {
@@ -48,9 +48,9 @@ public class Parameters implements WriteDictionary {
         if (right >= maxRight) {
             throw new IllegalArgumentException(String.format("right %d is larger than max value %d", right, maxRight));
         }
-        parameters.put(left);
-        parameters.put(right);
-        parameters.put(cost);
+        params.put(left);
+        params.put(right);
+        params.put(cost);
     }
 
     public void setLimits(int left, int right) {
@@ -59,24 +59,25 @@ public class Parameters implements WriteDictionary {
     }
 
     private void maybeResize() {
-        if (parameters.remaining() < 3) {
+        if (params.remaining() < 3) {
             ByteBuffer newData = ByteBuffer.allocate(data.capacity() * 2);
             newData.order(ByteOrder.LITTLE_ENDIAN);
+            int position = params.position();
             data.position(0);
-            int position = parameters.position();
             data.limit(position * 2);
             newData.put(data);
+            newData.clear();
             data = newData;
-            parameters = newData.asShortBuffer();
-            parameters.position(position);
-            assert parameters.remaining() > 3;
+            params = newData.asShortBuffer();
+            params.position(position);
+            assert params.remaining() > 3;
         }
     }
 
     @Override
     public void writeTo(ModelOutput output) throws IOException {
         output.withPart("word parameters", () -> {
-            data.limit(parameters.position() * 2);
+            data.limit(params.position() * 2);
             output.write(data);
         });
     }
