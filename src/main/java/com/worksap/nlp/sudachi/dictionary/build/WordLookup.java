@@ -22,6 +22,23 @@ import com.worksap.nlp.sudachi.dictionary.LexiconSet;
 import java.util.List;
 
 public class WordLookup {
+    public static class Noop implements WordIdResolver {
+        @Override
+        public int lookup(String headword, short posId, String reading) {
+            return -1;
+        }
+
+        @Override
+        public void validate(int wordId) {
+
+        }
+
+        @Override
+        public boolean isUser() {
+            return false;
+        }
+    }
+
     public static class Csv implements WordIdResolver {
         private final CsvLexicon lexicon;
 
@@ -49,7 +66,8 @@ public class WordLookup {
             }
             List<CsvLexicon.WordEntry> entries = lexicon.getEntries();
             if (wordId >= entries.size()) {
-                throw new IllegalArgumentException("wordId was larger than number of dictionary entries");
+                throw new IllegalArgumentException(String
+                        .format("wordId %d was larger than number of dictionary entries (%d)", wordId, entries.size()));
             }
         }
 

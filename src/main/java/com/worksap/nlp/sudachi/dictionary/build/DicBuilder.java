@@ -63,9 +63,10 @@ public class DicBuilder {
             return (T) this;
         }
 
-        protected final CsvLexicon lexicon = new CsvLexicon(pos, resolver());
+        protected final CsvLexicon lexicon = new CsvLexicon(pos);
 
         public BuildStats build(SeekableByteChannel result) throws IOException {
+            lexicon.setResolver(resolver());
             ModelOutput output = new ModelOutput(result);
             DictionaryHeader header = new DictionaryHeader(version, creationTime, description);
 

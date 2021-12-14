@@ -38,11 +38,14 @@ public class CsvLexicon implements WriteDictionary {
     private final Parameters parameters = new Parameters();
     private final POSTable posTable;
     private final List<WordEntry> entries = new ArrayList<>();
-    private final WordIdResolver widResolver;
+    private WordIdResolver widResolver = new WordLookup.Noop();
 
-    public CsvLexicon(POSTable pos, WordIdResolver resolver) {
+    public CsvLexicon(POSTable pos) {
         posTable = pos;
-        widResolver = resolver;
+    }
+
+    public void setResolver(WordIdResolver widResolver) {
+        this.widResolver = widResolver;
     }
 
     /**
