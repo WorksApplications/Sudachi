@@ -32,7 +32,7 @@ public class DictionaryHeader {
     private static final int DESCRIPTION_SIZE = 256;
     private static final int STORAGE_SIZE = 8 + 8 + DESCRIPTION_SIZE;
 
-    DictionaryHeader(long version, long createTime, String description) {
+    public DictionaryHeader(long version, long createTime, String description) {
         this.version = version;
         this.createTime = createTime;
         this.description = description;
@@ -58,7 +58,7 @@ public class DictionaryHeader {
         return STORAGE_SIZE;
     }
 
-    byte[] toByte() {
+    public byte[] toByte() {
         byte[] output = new byte[STORAGE_SIZE];
         ByteBuffer buffer = ByteBuffer.wrap(output);
         buffer.order(ByteOrder.LITTLE_ENDIAN);

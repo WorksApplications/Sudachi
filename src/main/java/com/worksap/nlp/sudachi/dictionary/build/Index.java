@@ -21,7 +21,6 @@ import com.worksap.nlp.dartsclone.DoubleArray;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Logger;
@@ -29,7 +28,7 @@ import java.util.logging.Logger;
 /**
  * Dictionary Parts: Trie index and entry offsets
  */
-public class Index {
+public class Index implements WriteDictionary {
     private final static Logger logger = Logger.getLogger(Index.class.getName());
 
     private final SortedMap<byte[], List<Integer>> elements = new TreeMap<>((byte[] l, byte[] r) -> {
@@ -56,7 +55,7 @@ public class Index {
         return bytes.length;
     }
 
-    public void write(SeekableByteChannel output) throws IOException {
+    public void writeTo(ModelOutput output) throws IOException {
         DoubleArray trie = new DoubleArray();
 
         int size = this.elements.size();
@@ -78,18 +77,18 @@ public class Index {
             }
         }
 
-        logger.info("building the trie");
+        // logger.info("building the trie");
         trie.build(keys, values, (n, s) -> {
-            if (n % ((s / 10) + 1) == 0) {
-                logger.info(".");
-            }
+            // if (n % ((s / 10) + 1) == 0) {
+            // logger.info(".");
+            // }
         });
-        logger.info("done\n");
+        // logger.info("done\n");
 
         ByteBuffer buffer = ByteBuffer.allocate(64);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        logger.info("writing the trie...");
+        // logger.info("writing the trie...");
         buffer.clear();
         buffer.putInt(trie.size());
         buffer.flip();
@@ -97,9 +96,9 @@ public class Index {
         buffer.clear();
 
         output.write(trie.byteArray());
-        logger.info(() -> String.format("trie size.. %d", trie.size() * 4L + 4L));
+        // logger.info(() -> String.format("trie size.. %d", trie.size() * 4L + 4L));
 
-        logger.info("writing the word-ID table...");
+        // logger.info("writing the word-ID table...");
         buffer.putInt(wordIdTable.position());
         buffer.flip();
         output.write(buffer);
@@ -107,6 +106,7 @@ public class Index {
 
         wordIdTable.flip();
         output.write(wordIdTable);
-        logger.info(() -> String.format("wordid table.. %d", wordIdTable.position() + 4L));
+        // logger.info(() -> String.format("wordid table.. %d", wordIdTable.position() +
+        // 4L));
     }
 }

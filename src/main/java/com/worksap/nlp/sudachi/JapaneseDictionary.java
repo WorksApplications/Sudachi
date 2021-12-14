@@ -25,11 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
-import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
-import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
-import com.worksap.nlp.sudachi.dictionary.LexiconSet;
+import com.worksap.nlp.sudachi.dictionary.*;
 
 public class JapaneseDictionary implements Dictionary {
 
@@ -180,6 +176,14 @@ public class JapaneseDictionary implements Dictionary {
             }
             return sb.toString();
         }
+    }
+
+    public GrammarImpl getGrammar() {
+        return grammar;
+    }
+
+    public LexiconSet getLexicon() {
+        return lexicon;
     }
 
 }

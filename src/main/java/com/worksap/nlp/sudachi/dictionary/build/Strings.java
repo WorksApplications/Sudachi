@@ -28,7 +28,11 @@ public class Strings {
     private final ByteBuffer buffer;
 
     public Strings(int length, int number) {
-        buffer = ByteBuffer.allocate(length * number * 2 + number * 2);
+        this(length * number * 2 + number * 2);
+    }
+
+    public Strings(int size) {
+        buffer = ByteBuffer.allocate(size);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
@@ -66,8 +70,7 @@ public class Strings {
             throw new IllegalArgumentException("can't handle string with length >= " + MAX_LENGTH);
         }
         int addLen = (length > Byte.MAX_VALUE) ? 2 : 1;
-        int maxLen = length + addLen;
-        if (buffer.remaining() < maxLen) {
+        if (wontFit(length + addLen)) {
             return false;
         }
         if (length <= Byte.MAX_VALUE) {
@@ -88,6 +91,33 @@ public class Strings {
 
     public void putShort(short val) {
         buffer.putShort(val);
+    }
+
+    public void putInt(int val) {
+        buffer.putInt(val);
+    }
+
+    public boolean wontFit(int space) {
+        return buffer.remaining() < space;
+    }
+
+    public int position() {
+        return buffer.position();
+    }
+
+    public void putEmptyIfEqual(String field, String surface) {
+        if (field.equals(surface)) {
+            put("");
+        } else {
+            put(field);
+        }
+    }
+
+    public void putInts(int[] data) {
+        buffer.put((byte) data.length);
+        for (int v : data) {
+            buffer.putInt(v);
+        }
     }
 
     @FunctionalInterface

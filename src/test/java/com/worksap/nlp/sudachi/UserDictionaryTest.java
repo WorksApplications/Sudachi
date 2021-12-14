@@ -50,7 +50,7 @@ public class UserDictionaryTest {
     @Test
     public void fullUserDict() throws IOException {
         ArrayList<String> userDicts = new ArrayList<>();
-        for (int i = 0; i < 14; i++) {
+        for (int i = 0; i < 13; i++) {
             userDicts.add(USER_DICT);
         }
         userDicts.add(USER_DICT2);
@@ -61,7 +61,7 @@ public class UserDictionaryTest {
             List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
             assertThat(morphs.size(), is(1));
             Morpheme m = morphs.get(0);
-            assertThat(m.getDictionaryId(), is(15));
+            assertThat(m.getDictionaryId(), is(14));
             assertThat(m.normalizedForm(), is("ぴさる"));
         }
     }

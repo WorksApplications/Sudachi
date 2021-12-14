@@ -134,4 +134,8 @@ public class GrammarImpl implements Grammar {
         }
         return new String(str);
     }
+
+    public Connection getConnection() {
+        return this.matrix;
+    }
 }

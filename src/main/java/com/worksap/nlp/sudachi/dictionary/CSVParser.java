@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class CSVParser implements Closeable {
+public class CSVParser implements Closeable {
 
     static class Token {
 
@@ -58,7 +58,7 @@ class CSVParser implements Closeable {
     private Deque<Token> tokenBuffer = new ArrayDeque<>();
     private boolean hasNextField = false;
 
-    CSVParser(Reader reader) {
+    public CSVParser(Reader reader) {
         this.reader = new BufferedReader(reader);
     }
 
@@ -67,7 +67,7 @@ class CSVParser implements Closeable {
         reader.close();
     }
 
-    List<String> getNextRecord() throws IOException {
+    public List<String> getNextRecord() throws IOException {
         List<String> record = new ArrayList<>();
         hasNextField = false;
         String field;

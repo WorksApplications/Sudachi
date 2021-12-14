@@ -17,25 +17,146 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.JapaneseDictionary;
+import com.worksap.nlp.sudachi.dictionary.CSVParser;
+import com.worksap.nlp.sudachi.dictionary.Connection;
+import com.worksap.nlp.sudachi.dictionary.DictionaryHeader;
+import com.worksap.nlp.sudachi.dictionary.DictionaryVersion;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DicBuilder {
-    public static DicBuilder system(InputStream matrix) throws IOException {
-        throw new IOException();
+    private DicBuilder() {
+        /* instantiations are forbidden */
     }
 
-    public static DicBuilder user(JapaneseDictionary system) {
-        throw new RuntimeException();
+    public static SystemNoMatrix system() throws IOException {
+        return new SystemNoMatrix(new System());
     }
 
-    public DicBuilder lexicon(InputStream data) throws IOException {
-        throw new IOException();
+    public static User user(JapaneseDictionary system) {
+        return new User(system);
     }
 
-    public void build(SeekableByteChannel result) throws IOException {
+    public static abstract class Base<T extends Base<T>> {
+        protected final POSTable pos = new POSTable();
+        protected final ConnectionMatrix connection = new ConnectionMatrix();
+        protected final Index index = new Index();
+        protected String description = "";
+        protected long version;
+        protected long creationTime = java.lang.System.currentTimeMillis();
+        private final List<ModelOutput.Part> inputs = new ArrayList<>();
 
+        protected WordIdResolver resolver() {
+            return new WordLookup.Csv(lexicon);
+        }
+
+        private T self() {
+            // noinspection unchecked
+            return (T) this;
+        }
+
+        protected final CsvLexicon lexicon = new CsvLexicon(pos, resolver());
+
+        public BuildStats build(SeekableByteChannel result) throws IOException {
+            ModelOutput output = new ModelOutput(result);
+            DictionaryHeader header = new DictionaryHeader(version, creationTime, description);
+
+            ByteBuffer headerBuffer = ByteBuffer.wrap(header.toByte());
+
+            output.write(headerBuffer);
+            pos.writeTo(output);
+            connection.writeTo(output);
+            index.writeTo(output);
+            lexicon.writeTo(output);
+            return new BuildStats(inputs, output.getParts());
+        }
+
+        public T lexicon(URL data) throws IOException {
+            try (InputStream is = data.openStream()) {
+                return lexicon(is);
+            }
+        }
+
+        public T lexicon(InputStream data) throws IOException {
+            CSVParser parser = new CSVParser(new InputStreamReader(data, StandardCharsets.UTF_8));
+            int line = 1;
+            while (true) {
+                List<String> fields = parser.getNextRecord();
+                if (fields == null)
+                    break;
+                try {
+                    CsvLexicon.WordEntry e = lexicon.parseLine(fields);
+                    int wordId = lexicon.addEntry(e);
+                    if (e.headword != null) {
+                        index.add(e.headword, wordId);
+                    }
+                    line += 1;
+                } catch (Exception e) {
+                    throw new ReadLexiconException(line, fields.get(0), e);
+                }
+            }
+
+            return self();
+        }
+
+        public T description(String description) {
+            this.description = description;
+            return self();
+        }
+
+    }
+
+    static final class System extends Base<System> {
+        public System() {
+            version = DictionaryVersion.SYSTEM_DICT_VERSION_2;
+        }
+
+        private void readMatrix(InputStream matrix) throws IOException {
+            connection.readEntries(matrix);
+            lexicon.setLimits(connection.getNumLeft(), connection.getNumRight());
+        }
+    }
+
+    static final class User extends Base<User> {
+        final JapaneseDictionary dictionary;
+
+        private User(JapaneseDictionary dictionary) {
+            this.dictionary = dictionary;
+            this.version = DictionaryVersion.USER_DICT_VERSION_3;
+            Connection conn = dictionary.getGrammar().getConnection();
+            lexicon.setLimits(conn.getLeftSize(), conn.getRightSize());
+        }
+
+        @Override
+        protected WordIdResolver resolver() {
+            return new WordLookup.Chain(new WordLookup.Prebuilt(dictionary.getLexicon()), new WordLookup.Csv(lexicon));
+        }
+    }
+
+    public static final class SystemNoMatrix {
+        private final System inner;
+
+        private SystemNoMatrix(System inner) {
+            this.inner = inner;
+        }
+
+        public System matrix(InputStream data) throws IOException {
+            inner.readMatrix(data);
+            return inner;
+        }
+
+        public System matrix(URL data) throws IOException {
+            try (InputStream is = data.openStream()) {
+                return matrix(is);
+            }
+        }
     }
 }

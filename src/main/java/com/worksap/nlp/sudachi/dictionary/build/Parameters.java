@@ -27,6 +27,8 @@ import java.nio.ShortBuffer;
 public class Parameters implements WriteDictionary {
     private ByteBuffer data;
     private ShortBuffer parameters;
+    private int maxLeft = Integer.MAX_VALUE;
+    private int maxRight = Integer.MAX_VALUE;
 
     public Parameters(int initialSize) {
         data = ByteBuffer.allocate(initialSize);
@@ -40,9 +42,20 @@ public class Parameters implements WriteDictionary {
 
     public void add(short left, short right, short cost) {
         maybeResize();
+        if (left >= maxLeft) {
+            throw new IllegalArgumentException(String.format("left %d is larger than max value %d", left, maxLeft));
+        }
+        if (right >= maxRight) {
+            throw new IllegalArgumentException(String.format("right %d is larger than max value %d", right, maxRight));
+        }
         parameters.put(left);
         parameters.put(right);
         parameters.put(cost);
+    }
+
+    public void setLimits(int left, int right) {
+        this.maxLeft = left;
+        this.maxRight = right;
     }
 
     private void maybeResize() {
@@ -62,7 +75,7 @@ public class Parameters implements WriteDictionary {
 
     @Override
     public void writeTo(ModelOutput output) throws IOException {
-        output.withPart("parameters", () -> {
+        output.withPart("word parameters", () -> {
             data.limit(parameters.position() * 2);
             output.write(data);
         });

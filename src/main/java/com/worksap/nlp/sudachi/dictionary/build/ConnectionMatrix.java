@@ -137,4 +137,12 @@ public class ConnectionMatrix implements WriteDictionary {
     public void writeTo(ModelOutput output) throws IOException {
         output.write(compiled);
     }
+
+    public short getNumLeft() {
+        return numLeft;
+    }
+
+    public short getNumRight() {
+        return numRight;
+    }
 }
