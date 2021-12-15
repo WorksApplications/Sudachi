@@ -52,7 +52,7 @@ public class CsvLexicon implements WriteDictionary {
      * Resolve unicode escape sequences in the string
      * <p>
      * Sequences are defined to be \\u0000-\\uFFFF: exactly four hexadecimal
-     * characters preceeded by \\u \\u{...}: a correct unicode character inside
+     * characters preceded by \\u \\u{...}: a correct unicode character inside
      * brackets
      *
      * @param text
@@ -238,7 +238,9 @@ public class CsvLexicon implements WriteDictionary {
         output.withPart("word entries", () -> {
             DicBuffer buffer = new DicBuffer(128 * 1024);
             int offset = (int) output.position();
-            for (WordEntry entry : entries) {
+            int numEntries = entries.size();
+            for (int i = 0; i < numEntries; ++i) {
+                WordEntry entry = entries.get(i);
                 if (buffer.wontFit(16 * 1024)) {
                     offset += buffer.consume(output::write);
                 }
@@ -255,6 +257,7 @@ public class CsvLexicon implements WriteDictionary {
                 buffer.putInts(parseSplitInfo(entry.bUnitSplitString));
                 buffer.putInts(parseSplitInfo(entry.wordStructureString));
                 buffer.putInts(wi.getSynonymGoupIds());
+                output.progress(i, numEntries);
             }
 
             buffer.consume(output::write);
@@ -262,9 +265,7 @@ public class CsvLexicon implements WriteDictionary {
 
         long pos = output.position();
         output.position(offsetsPosition);
-        output.withPart("WordInfo offsets", () -> {
-            offsets.consume(output::write);
-        });
+        output.withPart("WordInfo offsets", () -> offsets.consume(output::write));
         output.position(pos);
     }
 

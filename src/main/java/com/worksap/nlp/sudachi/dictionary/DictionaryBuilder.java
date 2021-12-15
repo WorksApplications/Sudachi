@@ -27,8 +27,12 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +46,8 @@ import java.util.regex.Pattern;
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.dictionary.build.CsvLexicon;
 import com.worksap.nlp.sudachi.dictionary.build.DicBuffer;
+import com.worksap.nlp.sudachi.dictionary.build.DicBuilder;
+import com.worksap.nlp.sudachi.dictionary.build.Progress;
 
 /**
  * A dictionary building tool. This class provide the converter from the source
@@ -53,33 +59,10 @@ public class DictionaryBuilder {
     static final int ARRAY_MAX_LENGTH = Byte.MAX_VALUE;
     static final int MIN_REQUIRED_NUMBER_OF_COLUMNS = 18;
     static final int BUFFER_SIZE = 1024 * 1024;
-
-    static class WordEntry {
-        String headword;
-        short[] parameters;
-        WordInfo wordInfo;
-        String aUnitSplitString;
-        String bUnitSplitString;
-        String wordStructureString;
-    }
-
-    static class POSTable {
-        private List<String> table = new ArrayList<>();
-
-        short getId(String s) {
-            int id = table.indexOf(s);
-            if (id < 0) {
-                id = table.size();
-                table.add(s);
-            }
-            return (short) id;
-        }
-
-        List<String> getList() {
-            return table;
-        }
-    }
-
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+    private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
+    protected Logger logger;
     POSTable posTable = new POSTable();
     SortedMap<byte[], List<Integer>> trieKeys = new TreeMap<>((byte[] l, byte[] r) -> {
         int llen = l.length;
@@ -92,19 +75,97 @@ public class DictionaryBuilder {
         return l.length - r.length;
     });
     List<WordEntry> entries = new ArrayList<>();
-
     boolean isUserDictionary = false;
-
     ByteBuffer byteBuffer;
     Buffer buffer;
-
-    protected Logger logger;
 
     DictionaryBuilder() {
         logger = Logger.getLogger(this.getClass().getName());
         byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer = byteBuffer; // a kludge for Java 9
+    }
+
+    static boolean isValidLength(String text) {
+        return DicBuffer.isValidLength(text);
+    }
+
+    static String decode(String text) {
+        return CsvLexicon.unescape(text);
+    }
+
+    static void printUsage() {
+        Console console = System.console();
+        console.printf("usage: DictionaryBuilder -o file -m file [-d description] files...\n");
+        console.printf("\t-o file\toutput to file\n");
+        console.printf("\t-m file\tmatrix file\n");
+        console.printf("\t-d description\tcomment\n");
+    }
+
+    static void readLoggerConfig() throws IOException {
+        InputStream is = DictionaryBuilder.class.getResourceAsStream("/logger.properties");
+        if (is != null) {
+            LogManager.getLogManager().readConfiguration(is);
+        }
+    }
+
+    /**
+     * Builds the system dictionary.
+     * <p>
+     * This tool requires three arguments.
+     * <ol start="0">
+     * <li>{@code -o file} the path of the output file</li>
+     * <li>{@code -m file} the path of the connection matrix file in MeCab's
+     * matrix.def format</li>
+     * <li>{@code -d string} (optional) the description which is embedded in the
+     * dictionary</li>
+     * <li>the paths of the source files in the CSV format</li>
+     * </ol>
+     *
+     * @param args
+     *            the options and input filenames
+     * @throws IOException
+     *             if IO or parsing is failed
+     */
+    public static void main(String[] args) throws IOException {
+        String description = "";
+        String outputPath = null;
+        String matrixPath = null;
+
+        int i = 0;
+        for (i = 0; i < args.length; i++) {
+            if (args[i].equals("-o") && i + 1 < args.length) {
+                outputPath = args[++i];
+            } else if (args[i].equals("-m") && i + 1 < args.length) {
+                matrixPath = args[++i];
+            } else if (args[i].equals("-d") && i + 1 < args.length) {
+                description = args[++i];
+            } else if (args[i].equals("-h")) {
+                printUsage();
+                return;
+            } else {
+                break;
+            }
+        }
+
+        if (args.length <= i || outputPath == null || matrixPath == null) {
+            printUsage();
+            return;
+        }
+
+        List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
+
+        DicBuilder.System builder = DicBuilder.system().matrix(Paths.get(matrixPath)).description(description)
+                .progress(new Progress(20, new StderrProgress()));
+
+        for (String lexiconPath : lexiconPaths) {
+            builder = builder.lexicon(Paths.get(lexiconPath));
+        }
+
+        try (SeekableByteChannel ch = Files.newByteChannel(Paths.get(outputPath), StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            builder.build(ch);
+        }
     }
 
     void build(List<String> lexiconPaths, FileInputStream matrixInput, FileOutputStream output) throws IOException {
@@ -395,19 +456,6 @@ public class DictionaryBuilder {
         printSize(offsets.position());
     }
 
-    static boolean isValidLength(String text) {
-        return DicBuffer.isValidLength(text);
-    }
-
-    static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");
-    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
-    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
-    private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
-
-    static String decode(String text) {
-        return CsvLexicon.unescape(text);
-    }
-
     void checkSplitInfoFormat(String info) {
         if (info.chars().filter(i -> i == '/').count() + 1 > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
@@ -527,79 +575,64 @@ public class DictionaryBuilder {
         logger.info(() -> String.format(" %,d bytes%n", size));
     }
 
-    static void printUsage() {
-        Console console = System.console();
-        console.printf("usage: DictionaryBuilder -o file -m file [-d description] files...\n");
-        console.printf("\t-o file\toutput to file\n");
-        console.printf("\t-m file\tmatrix file\n");
-        console.printf("\t-d description\tcomment\n");
+    static class WordEntry {
+        String headword;
+        short[] parameters;
+        WordInfo wordInfo;
+        String aUnitSplitString;
+        String bUnitSplitString;
+        String wordStructureString;
     }
 
-    static void readLoggerConfig() throws IOException {
-        InputStream is = DictionaryBuilder.class.getResourceAsStream("/logger.properties");
-        if (is != null) {
-            LogManager.getLogManager().readConfiguration(is);
+    static class POSTable {
+        private List<String> table = new ArrayList<>();
+
+        short getId(String s) {
+            int id = table.indexOf(s);
+            if (id < 0) {
+                id = table.size();
+                table.add(s);
+            }
+            return (short) id;
+        }
+
+        List<String> getList() {
+            return table;
         }
     }
 
-    /**
-     * Builds the system dictionary.
-     *
-     * This tool requires three arguments.
-     * <ol start="0">
-     * <li>{@code -o file} the path of the output file</li>
-     * <li>{@code -m file} the path of the connection matrix file in MeCab's
-     * matrix.def format</li>
-     * <li>{@code -d string} (optional) the description which is embedded in the
-     * dictionary</li>
-     * <li>the paths of the source files in the CSV format</li>
-     * </ol>
-     * 
-     * @param args
-     *            the options and input filenames
-     * @throws IOException
-     *             if IO or parsing is failed
-     */
-    public static void main(String[] args) throws IOException {
-        readLoggerConfig();
+    public static class StderrProgress implements Progress.Callback {
+        float last = 0;
+        String unit = "bytes";
 
-        String description = "";
-        String outputPath = null;
-        String matrixPath = null;
-
-        int i = 0;
-        for (i = 0; i < args.length; i++) {
-            if (args[i].equals("-o") && i + 1 < args.length) {
-                outputPath = args[++i];
-            } else if (args[i].equals("-m") && i + 1 < args.length) {
-                matrixPath = args[++i];
-            } else if (args[i].equals("-d") && i + 1 < args.length) {
-                description = args[++i];
-            } else if (args[i].equals("-h")) {
-                printUsage();
-                return;
-            } else {
+        @Override
+        public void start(String name, Progress.Kind kind) {
+            System.err.printf("%s\t", name);
+            last = 0;
+            switch (kind) {
+            case OUTPUT:
+                unit = "bytes";
+                break;
+            case INPUT:
+                unit = "entries";
                 break;
             }
         }
 
-        if (args.length <= i || outputPath == null || matrixPath == null) {
-            printUsage();
-            return;
+        @Override
+        public void progress(float progress) {
+            while (last < progress) {
+                last += 0.05f;
+                System.err.print(".");
+            }
         }
 
-        List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
+        static final double NANOS_PER_SECOND = 1000_000_000;
 
-        DictionaryHeader header = new DictionaryHeader(DictionaryVersion.SYSTEM_DICT_VERSION_2,
-                Instant.now().getEpochSecond(), description);
-
-        try (FileInputStream matrixInput = new FileInputStream(matrixPath);
-                FileOutputStream output = new FileOutputStream(outputPath)) {
-
-            output.write(header.toByte());
-
-            DictionaryBuilder builder = new DictionaryBuilder();
-            builder.build(lexiconPaths, matrixInput, output);
+        @Override
+        public void end(long size, Duration time) {
+            double seconds = time.getSeconds() + time.getNano() / NANOS_PER_SECOND;
+            System.err.printf("\tDone! (%d %s, %.3f sec)%n", size, unit, seconds);
         }
     }
 }

@@ -23,14 +23,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Dictionary Parts: Trie index and entry offsets
  */
 public class Index implements WriteDictionary {
-    private final static Logger logger = Logger.getLogger(Index.class.getName());
-
     private final SortedMap<byte[], List<Integer>> elements = new TreeMap<>((byte[] l, byte[] r) -> {
         int llen = l.length;
         int rlen = r.length;
@@ -65,48 +62,35 @@ public class Index implements WriteDictionary {
         ByteBuffer wordIdTable = ByteBuffer.allocate(count * (4 + 2));
         wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
 
-        int i = 0;
-        for (Map.Entry<byte[], List<Integer>> entry : this.elements.entrySet()) {
-            keys[i] = entry.getKey();
-            values[i] = wordIdTable.position();
-            i++;
-            List<Integer> wordIds = entry.getValue();
-            wordIdTable.put((byte) wordIds.size());
-            for (int wid : wordIds) {
-                wordIdTable.putInt(wid);
+        output.withSizedPart("WordId table", () -> {
+            int i = 0;
+            int numEntries = this.elements.entrySet().size();
+            for (Map.Entry<byte[], List<Integer>> entry : this.elements.entrySet()) {
+                keys[i] = entry.getKey();
+                values[i] = wordIdTable.position();
+                i++;
+                List<Integer> wordIds = entry.getValue();
+                wordIdTable.put((byte) wordIds.size());
+                for (int wid : wordIds) {
+                    wordIdTable.putInt(wid);
+                }
+                output.progress(i, numEntries);
             }
-        }
-
-        // logger.info("building the trie");
-        trie.build(keys, values, (n, s) -> {
-            // if (n % ((s / 10) + 1) == 0) {
-            // logger.info(".");
-            // }
+            return wordIdTable.position() + 4;
         });
-        // logger.info("done\n");
 
-        ByteBuffer buffer = ByteBuffer.allocate(64);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        DicBuffer buffer = new DicBuffer(4);
+        output.withPart("double array Trie", () -> {
+            trie.build(keys, values, output::progress);
+            buffer.putInt(trie.size());
+            buffer.consume(output::write);
+            output.write(trie.byteArray());
+        });
 
-        // logger.info("writing the trie...");
-        buffer.clear();
-        buffer.putInt(trie.size());
-        buffer.flip();
-        output.write(buffer);
-        buffer.clear();
-
-        output.write(trie.byteArray());
-        // logger.info(() -> String.format("trie size.. %d", trie.size() * 4L + 4L));
-
-        // logger.info("writing the word-ID table...");
         buffer.putInt(wordIdTable.position());
-        buffer.flip();
-        output.write(buffer);
-        buffer.clear();
+        buffer.consume(output::write);
 
         wordIdTable.flip();
         output.write(wordIdTable);
-        // logger.info(() -> String.format("wordid table.. %d", wordIdTable.position() +
-        // 4L));
     }
 }

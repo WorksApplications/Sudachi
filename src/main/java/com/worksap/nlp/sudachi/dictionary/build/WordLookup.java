@@ -51,7 +51,7 @@ public class WordLookup {
             List<CsvLexicon.WordEntry> entries = lexicon.getEntries();
             for (int i = 0; i < entries.size(); ++i) {
                 CsvLexicon.WordEntry entry = entries.get(i);
-                if (entry.headword.equals(headword) && entry.wordInfo.getPOSId() == posId
+                if (entry.wordInfo.getSurface().equals(headword) && entry.wordInfo.getPOSId() == posId
                         && entry.wordInfo.getReadingForm().equals(reading)) {
                     return i;
                 }

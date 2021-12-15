@@ -28,6 +28,11 @@ public class ModelOutput implements SeekableByteChannel {
         void run() throws IOException;
     }
 
+    @FunctionalInterface
+    interface SizedRunnable {
+        long run() throws IOException;
+    }
+
     public static class Part {
         private final String name;
         private final long time;
@@ -54,9 +59,14 @@ public class ModelOutput implements SeekableByteChannel {
 
     private final SeekableByteChannel internal;
     private final List<Part> parts = new ArrayList<>();
+    private Progress progressor;
 
     public ModelOutput(SeekableByteChannel internal) {
         this.internal = internal;
+    }
+
+    public void progressor(Progress progress) {
+        this.progressor = progress;
     }
 
     @Override
@@ -102,13 +112,38 @@ public class ModelOutput implements SeekableByteChannel {
     public void withPart(String name, IORunnable inner) throws IOException {
         long pos = position();
         long start = System.nanoTime();
+        if (progressor != null) {
+            progressor.startBlock(name, start, Progress.Kind.OUTPUT);
+        }
         inner.run();
         long time = System.nanoTime() - start;
         long size = position() - pos;
+        if (progressor != null) {
+            progressor.endBlock(size, time);
+        }
+        parts.add(new Part(name, time, size));
+    }
+
+    public void withSizedPart(String name, SizedRunnable inner) throws IOException {
+        long start = System.nanoTime();
+        if (progressor != null) {
+            progressor.startBlock(name, start, Progress.Kind.OUTPUT);
+        }
+        long size = inner.run();
+        long time = System.nanoTime() - start;
+        if (progressor != null) {
+            progressor.endBlock(size, time);
+        }
         parts.add(new Part(name, time, size));
     }
 
     public List<Part> getParts() {
         return parts;
+    }
+
+    public void progress(long current, long max) {
+        if (progressor != null) {
+            progressor.progress(current, max);
+        }
     }
 }
