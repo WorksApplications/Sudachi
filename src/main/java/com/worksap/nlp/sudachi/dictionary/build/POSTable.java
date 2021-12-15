@@ -54,7 +54,7 @@ public class POSTable implements WriteDictionary {
     @Override
     public void writeTo(ModelOutput output) throws IOException {
         output.withPart("POS table", () -> {
-            Strings buffer = new Strings(256, ownedLength() * POS.DEPTH);
+            DicBuffer buffer = new DicBuffer(256, ownedLength() * POS.DEPTH);
             buffer.putShort((short) ownedLength());
             for (int i = builtin; i < table.size(); ++i) {
                 for (String s : table.get(i)) {

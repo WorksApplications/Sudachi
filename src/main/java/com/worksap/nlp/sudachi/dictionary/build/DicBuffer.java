@@ -21,23 +21,25 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * Buffers Java strings for writing into channels
+ * Buffers dictionary data for writing into channels. Wrapper over a ByteBuffer.
+ *
+ * @see java.nio.ByteBuffer
  */
-public class Strings {
-    public static final int MAX_LENGTH = Short.MAX_VALUE;
+public class DicBuffer {
+    public static final int MAX_STRING = Short.MAX_VALUE;
     private final ByteBuffer buffer;
 
-    public Strings(int length, int number) {
+    public DicBuffer(int length, int number) {
         this(length * number * 2 + number * 2);
     }
 
-    public Strings(int size) {
+    public DicBuffer(int size) {
         buffer = ByteBuffer.allocate(size);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     public static boolean isValidLength(String text) {
-        return text.length() <= MAX_LENGTH;
+        return text.length() <= MAX_STRING;
     }
 
     /**
@@ -66,8 +68,8 @@ public class Strings {
      *         The buffer is not modified in that case.
      */
     public boolean putLength(int length) {
-        if (length >= MAX_LENGTH) {
-            throw new IllegalArgumentException("can't handle string with length >= " + MAX_LENGTH);
+        if (length >= MAX_STRING) {
+            throw new IllegalArgumentException("can't handle string with length >= " + MAX_STRING);
         }
         int addLen = (length > Byte.MAX_VALUE) ? 2 : 1;
         if (wontFit(length + addLen)) {

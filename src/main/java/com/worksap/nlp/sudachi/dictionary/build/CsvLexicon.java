@@ -90,9 +90,9 @@ public class CsvLexicon implements WriteDictionary {
             cols.set(i, unescape(cols.get(i)));
         }
 
-        if (cols.get(0).getBytes(StandardCharsets.UTF_8).length > Strings.MAX_LENGTH
-                || !Strings.isValidLength(cols.get(4)) || !Strings.isValidLength(cols.get(11))
-                || !Strings.isValidLength(cols.get(12))) {
+        if (cols.get(0).getBytes(StandardCharsets.UTF_8).length > DicBuffer.MAX_STRING
+                || !DicBuffer.isValidLength(cols.get(4)) || !DicBuffer.isValidLength(cols.get(11))
+                || !DicBuffer.isValidLength(cols.get(12))) {
             throw new IllegalArgumentException("string is too long");
         }
 
@@ -230,13 +230,13 @@ public class CsvLexicon implements WriteDictionary {
         parameters.writeTo(output);
 
         int offsetsSize = 4 * entries.size();
-        Strings offsets = new Strings(offsetsSize);
+        DicBuffer offsets = new DicBuffer(offsetsSize);
         long offsetsPosition = output.position();
         // make a hole for
         output.position(offsetsPosition + offsetsSize);
 
         output.withPart("word entries", () -> {
-            Strings buffer = new Strings(128 * 1024);
+            DicBuffer buffer = new DicBuffer(128 * 1024);
             int offset = (int) output.position();
             for (WordEntry entry : entries) {
                 if (buffer.wontFit(16 * 1024)) {

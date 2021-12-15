@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.dictionary.build.CsvLexicon;
-import com.worksap.nlp.sudachi.dictionary.build.Strings;
+import com.worksap.nlp.sudachi.dictionary.build.DicBuffer;
 
 /**
  * A dictionary building tool. This class provide the converter from the source
@@ -396,7 +396,7 @@ public class DictionaryBuilder {
     }
 
     static boolean isValidLength(String text) {
-        return Strings.isValidLength(text);
+        return DicBuffer.isValidLength(text);
     }
 
     static final Pattern unicodeLiteral = Pattern.compile("\\\\u([0-9a-fA-F]{4}|\\{[0-9a-fA-F]+\\})");

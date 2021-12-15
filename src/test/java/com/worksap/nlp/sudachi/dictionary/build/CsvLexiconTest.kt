@@ -19,22 +19,22 @@ class CsvLexiconTest {
         val data = "東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*".split(",")
         assertFails {
             val copy = data.toList().toMutableList()
-            copy[0] = "a".repeat(Strings.MAX_LENGTH + 1)
+            copy[0] = "a".repeat(DicBuffer.MAX_STRING + 1)
             clex.parseLine(copy)
         }
         assertFails {
             val copy = data.toList().toMutableList()
-            copy[4] = "a".repeat(Strings.MAX_LENGTH + 1)
+            copy[4] = "a".repeat(DicBuffer.MAX_STRING + 1)
             clex.parseLine(copy)
         }
         assertFails {
             val copy = data.toList().toMutableList()
-            copy[11] = "a".repeat(Strings.MAX_LENGTH + 1)
+            copy[11] = "a".repeat(DicBuffer.MAX_STRING + 1)
             clex.parseLine(copy)
         }
         assertFails {
             val copy = data.toList().toMutableList()
-            copy[12] = "a".repeat(Strings.MAX_LENGTH + 1)
+            copy[12] = "a".repeat(DicBuffer.MAX_STRING + 1)
             clex.parseLine(copy)
         }
     }
