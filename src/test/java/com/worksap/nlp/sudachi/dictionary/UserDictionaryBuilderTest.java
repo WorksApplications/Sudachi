@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,29 +40,11 @@ public class UserDictionaryBuilderTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     File systemDictFile;
-    BinaryDictionary systemDict;
-    Grammar grammar;
-    Lexicon systemLexicon;
 
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
         systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
-        systemDict = new BinaryDictionary(systemDictFile.getPath());
-        grammar = systemDict.getGrammar();
-        systemLexicon = systemDict.getLexicon();
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        systemDict.close();
-    }
-
-    @Test
-    public void parseLineWithUserDefinedPOS() {
-        UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
-        builder.parseLine("田中,0,0,0,田中,存在,しない,品詞,*,*,*,タナカ,田中,*,A,*,*,*,*".split(","));
-        assertThat(builder.posTable.getList().size(), is(1));
     }
 
     @Test

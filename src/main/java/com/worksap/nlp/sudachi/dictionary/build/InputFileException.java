@@ -16,8 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-public class ReadLexiconException extends IllegalArgumentException {
-    public ReadLexiconException(int line, String s, Exception cause) {
+public class InputFileException extends IllegalArgumentException {
+    public InputFileException(int line, String s, Exception cause) {
         super(String.format("line:%d %s", line, s), cause);
     }
 }

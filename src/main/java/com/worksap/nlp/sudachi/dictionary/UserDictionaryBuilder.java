@@ -16,12 +16,16 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.dictionary.build.DicBuilder;
+import com.worksap.nlp.sudachi.dictionary.build.Progress;
+
 import java.io.Console;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.time.Instant;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,60 +33,7 @@ import java.util.List;
  * A user dictionary building tool. This class provide the converter from the
  * source file in the CSV format to the binary format.
  */
-public class UserDictionaryBuilder extends DictionaryBuilder {
-
-    Grammar grammar;
-    Lexicon systemLexicon;
-
-    UserDictionaryBuilder(Grammar grammar, Lexicon systemLexicon) {
-        super();
-        isUserDictionary = true;
-        this.grammar = grammar;
-        this.systemLexicon = systemLexicon;
-    }
-
-    void build(List<String> lexiconPaths, FileOutputStream output) throws IOException {
-        logger.info("reading the source file...");
-        for (String path : lexiconPaths) {
-            try (FileInputStream lexiconInput = new FileInputStream(path)) {
-                buildLexicon(path, lexiconInput);
-            }
-        }
-        logger.info(() -> String.format(" %,d words%n", entries.size()));
-
-        FileChannel outputChannel = output.getChannel();
-        writeGrammar(null, outputChannel);
-        writeLexicon(outputChannel);
-        outputChannel.close();
-    }
-
-    @Override
-    short getPosId(String... posStrings) {
-        short posId = grammar.getPartOfSpeechId(Arrays.asList(posStrings));
-        if (posId < 0) {
-            posId = (short) (super.getPosId(posStrings) + grammar.getPartOfSpeechSize());
-        }
-        return posId;
-    }
-
-    @Override
-    int getWordId(String headword, short posId, String readingForm) {
-        int wid = super.getWordId(headword, posId, readingForm);
-        if (wid >= 0) {
-            return wid | (1 << 28);
-        }
-        return systemLexicon.getWordId(headword, posId, readingForm);
-    }
-
-    @Override
-    void checkWordId(int wordId) {
-        if (wordId >= (1 << 28)) {
-            super.checkWordId(wordId & ((1 << 28) - 1));
-        } else if (wordId < 0 || wordId >= systemLexicon.size()) {
-            throw new IllegalArgumentException("invalid word ID");
-        }
-    }
-
+public class UserDictionaryBuilder {
     static void printUsage() {
         Console console = System.console();
         console.printf("usage: UserDictionaryBuilder -o file -s file [-d description] files...\n");
@@ -93,7 +44,7 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
 
     /**
      * Builds the user dictionary.
-     *
+     * <p>
      * This tool requires three arguments.
      * <ol start="0">
      * <li>{@code -o file} the path of the output file</li>
@@ -102,23 +53,21 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
      * dictionary</li>
      * <li>the paths of the source file in the CSV format</li>
      * </ol>
-     * 
+     *
      * @param args
      *            options and input filenames
      * @throws IOException
      *             if IO or parsing is failed
      */
     public static void main(String[] args) throws IOException {
-        readLoggerConfig();
-
         String description = "";
-        String outputPath = null;
+        Path outputPath = null;
         String sysDictPath = null;
 
-        int i = 0;
+        int i;
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-o") && i + 1 < args.length) {
-                outputPath = args[++i];
+                outputPath = Paths.get(args[++i]);
             } else if (args[i].equals("-s") && i + 1 < args.length) {
                 sysDictPath = args[++i];
             } else if (args[i].equals("-d") && i + 1 < args.length) {
@@ -136,20 +85,19 @@ public class UserDictionaryBuilder extends DictionaryBuilder {
             return;
         }
 
-        try (BinaryDictionary systemDict = BinaryDictionary.readSystemDictionary(sysDictPath)) {
-            Grammar grammar = systemDict.getGrammar();
-            Lexicon systemLexicon = systemDict.getLexicon();
+        List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-            List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
+        try (BinaryDictionary system = new BinaryDictionary(sysDictPath)) {
+            DicBuilder.User builder = DicBuilder.user(system).description(description)
+                    .progress(new Progress(20, new DictionaryBuilder.StderrProgress()));
 
-            DictionaryHeader header = new DictionaryHeader(DictionaryVersion.USER_DICT_VERSION_3,
-                    Instant.now().getEpochSecond(), description);
+            for (String lexicon : lexiconPaths) {
+                builder.lexicon(Paths.get(lexicon));
+            }
 
-            try (FileOutputStream output = new FileOutputStream(outputPath)) {
-                output.write(header.toByte());
-
-                UserDictionaryBuilder builder = new UserDictionaryBuilder(grammar, systemLexicon);
-                builder.build(lexiconPaths, output);
+            try (SeekableByteChannel channel = Files.newByteChannel(outputPath, StandardOpenOption.WRITE,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                builder.build(channel);
             }
         }
     }

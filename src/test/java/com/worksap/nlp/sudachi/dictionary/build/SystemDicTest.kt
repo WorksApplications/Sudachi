@@ -45,15 +45,32 @@ class SystemDicTest {
     }
 
     @Test
-    fun failMatrixSizeValidation() {
+    fun fieldsCompressed() {
         val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
+        val data = BytesChannel()
+        bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,南,南,*,C,*,*,*,*".byteInputStream())
+            .build(data)
+        val dic = BinaryDictionary(data.buffer())
+        assertEquals(1, dic.lexicon.size())
+        assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
+        val wi = dic.lexicon.getWordInfo(0)
+        assertEquals(wi.surface, "南")
+        assertEquals(wi.dictionaryFormWordId, -1)
+        assertEquals(wi.dictionaryForm, "南")
+        assertEquals(wi.normalizedForm, "南")
+        assertEquals(wi.readingForm, "南")
+    }
+
+    @Test
+    fun failMatrixSizeValidation() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
         assertFails { bldr.lexicon("東,4,1,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*".byteInputStream()) }
         assertFails { bldr.lexicon("東,1,4,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*".byteInputStream()) }
     }
 
     @Test
     fun aSplits() {
-        val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
         val data = BytesChannel()
         bldr.lexicon("""東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/2,*,0/2,*
@@ -68,7 +85,7 @@ class SystemDicTest {
 
     @Test
     fun aSplitsInline() {
-        val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
         val data = BytesChannel()
         bldr.lexicon("""東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/2",*,0/2,*
@@ -83,7 +100,7 @@ class SystemDicTest {
 
     @Test
     fun bSplits() {
-        val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
         val data = BytesChannel()
         bldr.lexicon("""東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,0/2,*
@@ -94,5 +111,29 @@ class SystemDicTest {
         val wi = dic.lexicon.getWordInfo(1)
         assertContentEquals(wi.bunitSplit, intArrayOf(0, 2))
         assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    }
+
+    @Test
+    fun systemSplitU() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
+        val data = BytesChannel()
+        bldr.lexicon("""東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
+                        東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,U0/U2,*
+                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent().byteInputStream())
+            .build(data)
+        val dic = BinaryDictionary(data.buffer())
+        assertEquals(3, dic.lexicon.size())
+        val wi = dic.lexicon.getWordInfo(1)
+        assertContentEquals(wi.bunitSplit, intArrayOf(0, 2))
+        assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    }
+
+    @Test
+    fun failSplitBoundsCheck() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
+        bldr.lexicon(
+            """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,1,*,*""".byteInputStream()
+        )
+        assertFails { bldr.build(BytesChannel()) }
     }
 }

@@ -5,10 +5,12 @@ import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.WordId
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
+import com.worksap.nlp.sudachi.dictionary.POS
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 fun <T : Any> T.res(name: String): URL {
     return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
@@ -117,5 +119,55 @@ class UserDicTest {
         val da = dic as DictionaryAccess;
         val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
         assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
+    }
+
+    @Test
+    fun userDefinedPOS() {
+        val dic = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+            .user(
+                """東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,0/1,*,0/1,*""".trimIndent()
+            )
+            .load()
+
+        val da = dic as DictionaryAccess;
+        val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+        assertEquals(dic.partOfSpeechSize, 3)
+        assertEquals(wi.surface, "東京都")
+        assertEquals(wi.posId, 2)
+        assertEquals(da.grammar.getPartOfSpeechString(2), POS("a", "b", "c", "d", "e", "f"))
+    }
+
+    @Test
+    fun failWithNonExistingWordInSystem() {
+        val bldr = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+
+        assertFails {
+            bldr.user(
+                """東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,5/1,*,*,*""".trimIndent()
+            )
+        }
+    }
+
+    @Test
+    fun failWithNonExistingWordInUser() {
+        val bldr = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+
+        assertFails {
+            bldr.user(
+                """東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,0/U1,*,*,*""".trimIndent()
+            )
+        }
     }
 }

@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ConnectionMatrix implements WriteDictionary {
@@ -32,8 +31,6 @@ public class ConnectionMatrix implements WriteDictionary {
     private ByteBuffer compiled;
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     private static final Pattern OPT_WHITESPACE = Pattern.compile("\\s*");
-
-    private static final Logger logger = Logger.getLogger(ConnectionMatrix.class.getName());
 
     public ConnectionMatrix() {
     }
@@ -112,8 +109,8 @@ public class ConnectionMatrix implements WriteDictionary {
             }
             String[] cols = WHITESPACE.split(line);
             if (cols.length < 3) {
-                logger.warning("invalid format at line " + reader.getLineNumber());
-                continue;
+                throw new InputFileException(reader.getLineNumber(), line,
+                        new IllegalArgumentException("not enough entries"));
             }
 
             try {
@@ -122,8 +119,7 @@ public class ConnectionMatrix implements WriteDictionary {
                 short cost = Short.parseShort(cols[2]);
                 conn.setCost(left, right, cost);
             } catch (NumberFormatException e) {
-                logger.warning("invalid format at line " + reader.getLineNumber());
-                continue;
+                throw new InputFileException(reader.getLineNumber(), "", e);
             }
 
             numLines += 1;

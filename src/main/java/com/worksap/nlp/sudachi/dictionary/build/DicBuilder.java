@@ -122,7 +122,7 @@ public class DicBuilder {
                     }
                     line += 1;
                 } catch (Exception e) {
-                    throw new ReadLexiconException(line, fields.get(0), e);
+                    throw new InputFileException(line, fields.get(0), e);
                 }
                 if (progress != null) {
                     progress.progress(tracker.getPosition(), size);
