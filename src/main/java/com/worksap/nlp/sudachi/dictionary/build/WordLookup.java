@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.WordId;
-import com.worksap.nlp.sudachi.dictionary.LexiconSet;
+import com.worksap.nlp.sudachi.dictionary.Lexicon;
 
 import java.util.List;
 
@@ -78,10 +78,10 @@ public class WordLookup {
     }
 
     public static class Prebuilt implements WordIdResolver {
-        private final LexiconSet lexicon;
+        private final Lexicon lexicon;
         private final int prebuiltSize;
 
-        public Prebuilt(LexiconSet lexicon) {
+        public Prebuilt(Lexicon lexicon) {
             this.lexicon = lexicon;
             this.prebuiltSize = lexicon.size();
         }

@@ -128,8 +128,9 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public WordInfo getWordInfo(int wordId) {
-        int dictionaryId = getDictionaryId(wordId);
-        WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(getWordId(wordId));
+        int dictionaryId = WordId.dic(wordId);
+        int internalId = WordId.word(wordId);
+        WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(internalId);
         short posId = wordInfo.getPOSId();
         if (dictionaryId > 0 && posId >= posOffsets.get(1)) { // user defined part-of-speech
             wordInfo.setPOSId((short) (wordInfo.getPOSId() - posOffsets.get(1) + posOffsets.get(dictionaryId)));

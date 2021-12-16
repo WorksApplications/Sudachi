@@ -133,6 +133,15 @@ public class ConnectionMatrix implements WriteDictionary {
         return numLines;
     }
 
+    public void makeEmpty() {
+        ByteBuffer data = ByteBuffer.allocate(4);
+        data.order(ByteOrder.LITTLE_ENDIAN);
+        data.putShort((short) 0);
+        data.putShort((short) 0);
+        data.flip();
+        compiled = data;
+    }
+
     @Override
     public void writeTo(ModelOutput output) throws IOException {
         output.write(compiled);

@@ -16,11 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.JapaneseDictionary;
-import com.worksap.nlp.sudachi.dictionary.CSVParser;
-import com.worksap.nlp.sudachi.dictionary.Connection;
-import com.worksap.nlp.sudachi.dictionary.DictionaryHeader;
-import com.worksap.nlp.sudachi.dictionary.DictionaryVersion;
+import com.worksap.nlp.sudachi.dictionary.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +40,7 @@ public class DicBuilder {
         return new SystemNoMatrix(new System());
     }
 
-    public static User user(JapaneseDictionary system) {
+    public static User user(DictionaryAccess system) {
         return new User(system);
     }
 
@@ -164,13 +160,14 @@ public class DicBuilder {
     }
 
     public static final class User extends Base<User> {
-        final JapaneseDictionary dictionary;
+        final DictionaryAccess dictionary;
 
-        private User(JapaneseDictionary dictionary) {
+        private User(DictionaryAccess dictionary) {
             this.dictionary = dictionary;
             this.version = DictionaryVersion.USER_DICT_VERSION_3;
             Connection conn = dictionary.getGrammar().getConnection();
             lexicon.setLimits(conn.getLeftSize(), conn.getRightSize());
+            connection.makeEmpty();
         }
 
         @Override
