@@ -36,7 +36,7 @@ public class DicBuilder {
         /* instantiations are forbidden */
     }
 
-    public static SystemNoMatrix system() throws IOException {
+    public static SystemNoMatrix system() {
         return new SystemNoMatrix(new System());
     }
 

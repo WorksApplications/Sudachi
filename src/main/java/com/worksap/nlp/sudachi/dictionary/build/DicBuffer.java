@@ -55,7 +55,7 @@ public class DicBuffer {
         if (!putLength(length)) {
             return false;
         }
-        s.chars().forEach((c) -> buffer.putChar((char) c));
+        s.chars().forEach(c -> buffer.putChar((char) c));
         return true;
     }
 

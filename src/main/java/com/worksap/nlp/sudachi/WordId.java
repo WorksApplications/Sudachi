@@ -17,6 +17,9 @@
 package com.worksap.nlp.sudachi;
 
 public class WordId {
+    private WordId() {
+    }
+
     /**
      * Internal word ids can't be larger than this number
      */

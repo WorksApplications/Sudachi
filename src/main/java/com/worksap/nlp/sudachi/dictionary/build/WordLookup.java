@@ -22,6 +22,9 @@ import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import java.util.List;
 
 public class WordLookup {
+    private WordLookup() {
+    }
+
     public static class Noop implements WordIdResolver {
         @Override
         public int lookup(String headword, short posId, String reading) {
@@ -30,7 +33,7 @@ public class WordLookup {
 
         @Override
         public void validate(int wordId) {
-
+            // noop validator always works
         }
 
         @Override

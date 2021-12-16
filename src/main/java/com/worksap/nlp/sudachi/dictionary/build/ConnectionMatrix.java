@@ -32,9 +32,6 @@ public class ConnectionMatrix implements WriteDictionary {
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     private static final Pattern OPT_WHITESPACE = Pattern.compile("\\s*");
 
-    public ConnectionMatrix() {
-    }
-
     /**
      * @return compiled binary matrix representation with header
      */
