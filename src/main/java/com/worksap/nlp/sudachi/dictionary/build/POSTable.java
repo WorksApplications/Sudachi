@@ -16,7 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
+import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class POSTable implements WriteDictionary {
         return (short) id;
     }
 
-    public void preloadFrom(GrammarImpl grammar) {
+    public void preloadFrom(Grammar grammar) {
         int partOfSpeechSize = grammar.getPartOfSpeechSize();
         for (short i = 0; i < partOfSpeechSize; ++i) {
             table.add(grammar.getPartOfSpeechString(i));
@@ -54,7 +54,7 @@ public class POSTable implements WriteDictionary {
     @Override
     public void writeTo(ModelOutput output) throws IOException {
         output.withPart("POS table", () -> {
-            DicBuffer buffer = new DicBuffer(256, ownedLength() * POS.DEPTH);
+            DicBuffer buffer = new DicBuffer(256, ownedLength() * POS.DEPTH + 1);
             buffer.putShort((short) ownedLength());
             for (int i = builtin; i < table.size(); ++i) {
                 for (String s : table.get(i)) {

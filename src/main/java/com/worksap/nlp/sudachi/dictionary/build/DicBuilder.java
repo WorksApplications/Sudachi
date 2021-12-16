@@ -168,6 +168,7 @@ public class DicBuilder {
             Connection conn = dictionary.getGrammar().getConnection();
             lexicon.setLimits(conn.getLeftSize(), conn.getRightSize());
             connection.makeEmpty();
+            pos.preloadFrom(dictionary.getGrammar());
         }
 
         @Override

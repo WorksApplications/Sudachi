@@ -113,9 +113,6 @@ public class CsvLexicon implements WriteDictionary {
         // part of speech
         POS pos = new POS(cols.get(5), cols.get(6), cols.get(7), cols.get(8), cols.get(9), cols.get(10));
         short posId = posTable.getId(pos);
-        if (posId < 0) {
-            throw new IllegalArgumentException("invalid part of speech");
-        }
 
         entry.aUnitSplitString = cols.get(15);
         entry.bUnitSplitString = cols.get(16);
@@ -158,16 +155,13 @@ public class CsvLexicon implements WriteDictionary {
     }
 
     int wordToId(String text) {
-        String[] cols = text.split(",");
+        String[] cols = text.split(",", 8);
         if (cols.length < 8) {
             throw new IllegalArgumentException("too few columns");
         }
         String headword = unescape(cols[0]);
         POS pos = new POS(Arrays.copyOfRange(cols, 1, 7));
         short posId = posTable.getId(pos);
-        if (posId < 0) {
-            throw new IllegalArgumentException("invalid part of speech");
-        }
         String reading = unescape(cols[7]);
         return widResolver.lookup(headword, posId, reading);
     }
@@ -192,12 +186,13 @@ public class CsvLexicon implements WriteDictionary {
         }
         int[] ret = new int[words.length];
         for (int i = 0; i < words.length; i++) {
-            if (isId(words[i])) {
-                ret[i] = parseId(words[i]);
+            String ref = words[i];
+            if (isId(ref)) {
+                ret[i] = parseId(ref);
             } else {
-                ret[i] = wordToId(words[i]);
+                ret[i] = wordToId(ref);
                 if (ret[i] < 0) {
-                    throw new IllegalArgumentException("not found such a word");
+                    throw new IllegalArgumentException("couldn't find " + ref + " in the dictionaries");
                 }
             }
         }

@@ -120,7 +120,7 @@ public class WordLookup {
             if (wid == -1) {
                 return system.lookup(headword, posId, reading);
             }
-            return wid;
+            return WordId.make(1, wid);
         }
 
         @Override
@@ -129,7 +129,7 @@ public class WordLookup {
             if (dic == 0) {
                 system.validate(wordId);
             } else if (dic == 1) {
-                user.validate(wordId);
+                user.validate(WordId.word(wordId));
             } else {
                 throw new IllegalArgumentException("dictionary id can be only 0 or 1 at the build time");
             }

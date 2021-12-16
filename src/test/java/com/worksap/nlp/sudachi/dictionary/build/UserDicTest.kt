@@ -7,6 +7,7 @@ import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import java.net.URL
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 fun <T : Any> T.res(name: String): URL {
@@ -63,7 +64,58 @@ class UserDicTest {
 
         val da = dic as DictionaryAccess;
         val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+        assertEquals(dic.partOfSpeechSize, 2)
         assertEquals(wi.surface, "東京都")
         assertEquals(wi.readingForm, "トウキョウト")
+    }
+
+    @Test
+    fun splitUserRef() {
+        val dic = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent()
+            )
+            .user(
+                """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/U1,0/U1,0/U1,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+            .load()
+        val da = dic as DictionaryAccess;
+        val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+        assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
+        assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.bunitSplit)
+        assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.wordStructure)
+    }
+
+    @Test
+    fun splitUserInlineRefSystem() {
+        val dic = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent()
+            )
+            .user(
+                """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,普通名詞,一般,*,*,*,トウキョウ/U1",*,*,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+            .load()
+        val da = dic as DictionaryAccess;
+        val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+        assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
+    }
+
+    @Test
+    fun splitUserInlineRefUser() {
+        val dic = TestDic()
+            .system(
+                """東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent()
+            )
+            .user(
+                """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"0/都,名詞,普通名詞,一般,*,*,*,ト",*,*,*
+                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent()
+            )
+            .load()
+        val da = dic as DictionaryAccess;
+        val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+        assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
     }
 }
