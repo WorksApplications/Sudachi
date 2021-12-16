@@ -21,28 +21,31 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class POSTable implements WriteDictionary {
-    private int builtin = 0;
     private final List<POS> table = new ArrayList<>();
+    private final HashMap<POS, Short> lookup = new HashMap<>();
+    private int builtin = 0;
 
     short getId(POS s) {
-        int id = table.indexOf(s);
-        if (id < 0) {
-            id = table.size();
-            if (id >= Short.MAX_VALUE) {
+        return lookup.computeIfAbsent(s, p -> {
+            int next = table.size();
+            if (next >= Short.MAX_VALUE) {
                 throw new IllegalArgumentException("maximum POS number exceeded by " + s);
             }
             table.add(s);
-        }
-        return (short) id;
+            return (short) next;
+        });
     }
 
     public void preloadFrom(Grammar grammar) {
         int partOfSpeechSize = grammar.getPartOfSpeechSize();
         for (short i = 0; i < partOfSpeechSize; ++i) {
-            table.add(grammar.getPartOfSpeechString(i));
+            POS pos = grammar.getPartOfSpeechString(i);
+            table.add(pos);
+            lookup.put(pos, i);
         }
         builtin += partOfSpeechSize;
     }
@@ -54,7 +57,7 @@ public class POSTable implements WriteDictionary {
     @Override
     public void writeTo(ModelOutput output) throws IOException {
         output.withPart("POS table", () -> {
-            DicBuffer buffer = new DicBuffer(256, ownedLength() * POS.DEPTH + 1);
+            DicBuffer buffer = new DicBuffer(128 * 1024);
             buffer.putShort((short) ownedLength());
             for (int i = builtin; i < table.size(); ++i) {
                 for (String s : table.get(i)) {

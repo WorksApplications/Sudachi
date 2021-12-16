@@ -27,6 +27,7 @@ import java.util.Arrays;
  */
 public final class POS extends AbstractList<String> {
     public final static int DEPTH = 6;
+    public final static int MAX_COMPONENT_LENGTH = 127;
     private final String[] elems;
 
     /**
@@ -39,6 +40,16 @@ public final class POS extends AbstractList<String> {
         }
         if (elems.length != DEPTH) {
             throw new IllegalArgumentException("pos must have exactly six elements");
+        }
+        for (String e : elems) {
+            if (e == null) {
+                throw new IllegalArgumentException("POS components can't be null");
+            }
+
+            if (e.length() > MAX_COMPONENT_LENGTH) {
+                throw new IllegalArgumentException(
+                        String.format("POS component had length (%d) > %d: %s", e.length(), MAX_COMPONENT_LENGTH, e));
+            }
         }
         this.elems = elems;
     }

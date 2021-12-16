@@ -134,6 +134,8 @@ public class DicBuilder {
                 progress.endBlock(line, time);
             }
 
+            inputs.add(new ModelOutput.Part(name, time, line));
+
             return self();
         }
 

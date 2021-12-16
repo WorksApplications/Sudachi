@@ -41,9 +41,9 @@ class BytesChannel : SeekableByteChannel {
         }
         val newSize = buffer.capacity() * 2;
         val newBuf = ByteBuffer.allocate(newSize)
-        newBuf.put(buffer)
-        newBuf.position(buffer.position())
         newBuf.order(ByteOrder.LITTLE_ENDIAN)
+        buffer.flip()
+        newBuf.put(buffer)
         buffer = newBuf
     }
 

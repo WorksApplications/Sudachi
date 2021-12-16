@@ -2,10 +2,7 @@ package com.worksap.nlp.sudachi.dictionary.build
 
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.POS
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertFails
+import kotlin.test.*
 
 class SystemDicTest {
     @Test
@@ -135,5 +132,57 @@ class SystemDicTest {
             """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,1,*,*""".byteInputStream()
         )
         assertFails { bldr.build(BytesChannel()) }
+    }
+
+    @Test
+    fun failInvalidNumberOfInlineRefFields() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
+        bldr.lexicon(
+            """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"a,b,c,d,e",*,*""".byteInputStream()
+        )
+        assertFails { bldr.build(BytesChannel()) }
+    }
+
+    @Test
+    fun failInlineRefInvalid() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
+        bldr.lexicon(
+            """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
+               東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"東京,名詞,固有名詞,地名,一般,*,*,a",*,*""".trimMargin().byteInputStream()
+        )
+        assertFails { bldr.build(BytesChannel()) }
+    }
+
+    @Test
+    fun enormousEntriesWork() {
+        val bldr = DicBuilder.system().matrix(res("test.matrix"))
+        (0..100).forEach { i ->
+            val istr = String.format("%04x", i)
+            val surf = "a".repeat(1024) + istr
+            val read = "b".repeat(1024) + istr
+            val norm = "c".repeat(1024) + istr
+            bldr.lexicon("$surf,1,1,2816,$surf,名詞,固有名詞,地名,一般,*,*,$read,$norm,*,A,*,*,*,*".byteInputStream())
+        }
+        val ch = BytesChannel()
+        bldr.build(ch)
+        val dic = BinaryDictionary(ch.buffer())
+        assertEquals(dic.lexicon.size(), 101)
+        (0..100).forEach { i ->
+            val istr = String.format("%04x", i)
+            val surf = "a".repeat(1024) + istr
+            val read = "b".repeat(1024) + istr
+            val norm = "c".repeat(1024) + istr
+
+            val surfArray = surf.encodeToByteArray()
+            val iter = dic.lexicon.lookup(surfArray, 0)
+            assertTrue { iter.hasNext() }
+            assertContentEquals(intArrayOf(i, surfArray.size), iter.next())
+            assertFalse { iter.hasNext() }
+
+            val wi = dic.lexicon.getWordInfo(i)
+            assertEquals(wi.surface, surf)
+            assertEquals(wi.readingForm, read)
+            assertEquals(wi.normalizedForm, norm)
+        }
     }
 }

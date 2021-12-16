@@ -72,7 +72,7 @@ public class DicBuffer {
             throw new IllegalArgumentException("can't handle string with length >= " + MAX_STRING);
         }
         int addLen = (length > Byte.MAX_VALUE) ? 2 : 1;
-        if (wontFit(length + addLen)) {
+        if (wontFit(length * 2 + addLen)) {
             return false;
         }
         if (length <= Byte.MAX_VALUE) {
