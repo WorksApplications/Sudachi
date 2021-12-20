@@ -1,0 +1,23 @@
+{
+    "inputTextPlugin" : [
+      { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
+      { "class" : "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",
+          "leftBrackets": ["(", "（"],
+          "rightBrackets": [")", "）"],
+          "maxYomiganaLength": 4}
+    ],
+    "oovProviderPlugin" : [
+        { "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
+          "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],
+          "leftId" : 8,
+          "rightId" : 8,
+          "cost" : 6000 }
+    ],
+    "formatterPlugin" : [
+      { "class" : "com.worksap.nlp.sudachi.SimpleMorphemeFormatter" },
+      { "class" : "com.worksap.nlp.sudachi.WordSegmentationFormatter",
+        "eos" : "\n" },
+      { "class" : "com.worksap.nlp.sudachi.WordSegmentationFormatter",
+        "eos" :  " " }
+    ]
+}

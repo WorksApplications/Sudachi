@@ -36,7 +36,7 @@ public class WordInfo {
     private final int[] wordStructure;
     private final int[] synonymGids;
 
-    WordInfo(String surface, short headwordLength, short posId, String normalizedForm, int dictionaryFormWordId,
+    public WordInfo(String surface, short headwordLength, short posId, String normalizedForm, int dictionaryFormWordId,
             String dictionaryForm, String readingForm, int[] aUnitSplit, int[] bUnitSplit, int[] wordStructure,
             int[] synonymGids) {
         this.surface = surface;

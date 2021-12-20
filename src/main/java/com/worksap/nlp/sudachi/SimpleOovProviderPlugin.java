@@ -63,7 +63,7 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
         }
         oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings);
         if (oovPOSId < 0) {
-            throw new IllegalArgumentException("oovPOS is invalid:" + String.join(",", oovPOSStrings));
+            throw new IllegalArgumentException("oovPOS is invalid: " + String.join(",", oovPOSStrings));
         }
     }
 

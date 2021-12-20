@@ -16,7 +16,12 @@
 
 package com.worksap.nlp.sudachi;
 
+import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
+
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Build a {@link Dictionary} instance from a dictionary file.
@@ -79,5 +84,65 @@ public class DictionaryFactory {
      */
     public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {
         return new JapaneseDictionary(path, settings, mergeSettings);
+    }
+
+    /**
+     * Fluent API for creating dictionaries possibly from preloaded parts.
+     * 
+     * @return builder object
+     */
+    public static Loader loader() {
+        return new Loader();
+    }
+
+    public static class Loader {
+        BinaryDictionary system;
+        List<BinaryDictionary> user;
+        String configString;
+
+        /**
+         * Specifies loaded system dictionary. When the system dictionary is specified,
+         * one from configuration is ignored.
+         *
+         * @param system
+         *            preloaded system dictionary
+         * @return builder object
+         */
+        public Loader system(BinaryDictionary system) {
+            this.system = system;
+            return this;
+        }
+
+        /**
+         * Specifies a single user dictionary. When at least one user dictionary is
+         * specified here, user dictionaries from configuration are ignored.
+         *
+         * @param user
+         *            preloaded user dictionary
+         * @return builder object
+         */
+        public Loader user(BinaryDictionary user) {
+            if (this.user == null) {
+                this.user = new ArrayList<>();
+            }
+            this.user.add(user);
+            return this;
+        }
+
+        public Loader config(URL url) throws IOException {
+            this.configString = StringUtil.readFully(url);
+            return this;
+        }
+
+        /**
+         * Loads the dictionary object
+         * 
+         * @return Sudachi dictionary
+         * @throws IOException
+         *             in case of filesystem errors
+         */
+        public Dictionary load() throws IOException {
+            return new JapaneseDictionary(this);
+        }
     }
 }

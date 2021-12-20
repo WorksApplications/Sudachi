@@ -16,26 +16,20 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class GrammarImpl implements Grammar {
-
-    private static final int POS_DEPTH = 6;
+    private static final int POS_DEPTH = POS.DEPTH;
     private static final short[] BOS_PARAMETER = new short[] { 0, 0, 0 };
     private static final short[] EOS_PARAMETER = new short[] { 0, 0, 0 };
 
     private final ByteBuffer bytes;
-    private List<List<String>> posList;
-    private ByteBuffer connectTableBytes;
+    private final List<POS> posList;
     private boolean isCopiedConnectTable;
-    private int connectTableOffset;
-    private final short leftIdSize;
-    private final short rightIdSize;
+    private Connection matrix;
 
     private CharacterCategory charCategory;
 
@@ -44,32 +38,33 @@ public class GrammarImpl implements Grammar {
     public GrammarImpl(ByteBuffer bytes, int offset) {
         int originalOffset = offset;
         this.bytes = bytes;
-        this.connectTableBytes = bytes;
         isCopiedConnectTable = false;
         int posSize = bytes.getShort(offset);
         offset += 2;
         posList = new ArrayList<>(posSize);
         for (int i = 0; i < posSize; i++) {
-            ArrayList<String> pos = new ArrayList<>(POS_DEPTH);
+            String[] pos = new String[POS_DEPTH];
             for (int j = 0; j < POS_DEPTH; j++) {
-                pos.add(bufferToString(offset));
-                offset += 1 + 2 * pos.get(j).length();
+                pos[j] = bufferToString(offset);
+                offset += 1 + 2 * pos[j].length();
             }
-            posList.add(Collections.unmodifiableList(pos));
+            posList.add(new POS(pos));
         }
-        leftIdSize = bytes.getShort(offset);
+        int leftIdSize = bytes.getShort(offset);
         offset += 2;
-        rightIdSize = bytes.getShort(offset);
+        int rightIdSize = bytes.getShort(offset);
         offset += 2;
-        connectTableOffset = offset;
-
+        ByteBuffer dup = bytes.duplicate();
+        dup.position(offset);
+        dup.order(bytes.order());
+        dup.limit(offset + leftIdSize * rightIdSize * 2);
+        matrix = new Connection(dup.asShortBuffer(), leftIdSize, rightIdSize);
         storageSize = (offset - originalOffset) + 2 * leftIdSize * rightIdSize;
     }
 
     public GrammarImpl() {
         bytes = ByteBuffer.allocate(0);
         posList = Collections.emptyList();
-        leftIdSize = rightIdSize = 0;
     }
 
     public int storageSize() {
@@ -86,26 +81,29 @@ public class GrammarImpl implements Grammar {
     }
 
     @Override
-    public List<String> getPartOfSpeechString(short posId) {
+    public POS getPartOfSpeechString(short posId) {
         return posList.get(posId);
     }
 
     @Override
     public short getPartOfSpeechId(List<String> pos) {
+        // POS.equals() is compatible with List<String>, this is OK
+        // noinspection SuspiciousMethodCalls
         return (short) posList.indexOf(pos);
     }
 
     @Override
     public short getConnectCost(short left, short right) {
-        return connectTableBytes.getShort(connectTableOffset + left * 2 + 2 * leftIdSize * right);
+        return matrix.cost(left, right);
     }
 
     @Override
     public void setConnectCost(short left, short right, short cost) {
         if (!isCopiedConnectTable) {
-            copyConnectTable();
+            matrix = matrix.ownedCopy();
+            isCopiedConnectTable = true;
         }
-        connectTableBytes.putShort(connectTableOffset + left * 2 + 2 * leftIdSize * right, cost);
+        matrix.setCost(left, right, cost);
     }
 
     @Override
@@ -137,16 +135,7 @@ public class GrammarImpl implements Grammar {
         return new String(str);
     }
 
-    private synchronized void copyConnectTable() {
-        ByteBuffer newBuffer = ByteBuffer.allocate(2 * leftIdSize * rightIdSize);
-        newBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        ByteBuffer srcBuffer = connectTableBytes.duplicate();
-        Buffer buffer = srcBuffer; // a kludge for Java 9
-        buffer.position(connectTableOffset);
-        buffer.limit(connectTableOffset + 2 * leftIdSize * rightIdSize);
-        newBuffer.put(srcBuffer);
-        connectTableBytes = newBuffer;
-        connectTableOffset = 0;
-        isCopiedConnectTable = true;
+    public Connection getConnection() {
+        return this.matrix;
     }
 }

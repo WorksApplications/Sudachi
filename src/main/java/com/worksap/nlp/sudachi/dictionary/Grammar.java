@@ -19,7 +19,7 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.util.List;
 
 /**
- * The parameters and grammatical informations.
+ * The parameters and grammatical information.
  */
 public interface Grammar {
 
@@ -44,7 +44,7 @@ public interface Grammar {
      * @throws IndexOutOfBoundsException
      *             if {@code posId} is out of the range
      */
-    public List<String> getPartOfSpeechString(short posId);
+    public POS getPartOfSpeechString(short posId);
 
     /**
      * Returns the the ID corresponding to the part-of-speech name.

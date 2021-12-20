@@ -22,16 +22,20 @@ import java.nio.ByteBuffer;
 
 import com.worksap.nlp.sudachi.MMap;
 
-public class BinaryDictionary implements Closeable {
+public class BinaryDictionary implements Closeable, DictionaryAccess {
 
-    private ByteBuffer bytes;
-    private DictionaryHeader header;
-    private GrammarImpl grammar;
-    private DoubleArrayLexicon lexicon;
+    private final ByteBuffer bytes;
+    private final DictionaryHeader header;
+    private final GrammarImpl grammar;
+    private final DoubleArrayLexicon lexicon;
 
-    BinaryDictionary(String fileName) throws IOException {
-        bytes = MMap.map(fileName);
+    public BinaryDictionary(String fileName) throws IOException {
+        this(MMap.map(fileName));
+    }
+
+    public BinaryDictionary(ByteBuffer dictionary) throws IOException {
         int offset = 0;
+        bytes = dictionary;
 
         header = new DictionaryHeader(bytes, offset);
         offset += header.storageSize();

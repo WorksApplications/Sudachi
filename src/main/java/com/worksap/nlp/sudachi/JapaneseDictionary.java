@@ -22,16 +22,13 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
-import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
-import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
-import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
-import com.worksap.nlp.sudachi.dictionary.LexiconSet;
+import com.worksap.nlp.sudachi.dictionary.*;
 
-class JapaneseDictionary implements Dictionary {
+public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
     GrammarImpl grammar;
     LexiconSet lexicon;
@@ -49,12 +46,21 @@ class JapaneseDictionary implements Dictionary {
         this(null, jsonString, false);
     }
 
+    JapaneseDictionary(DictionaryFactory.Loader loader) throws IOException {
+        this(null, loader.configString, false, loader.system, loader.user);
+    }
+
     JapaneseDictionary(String path, String jsonString, boolean mergeSettings) throws IOException {
+        this(path, jsonString, mergeSettings, null, null);
+    }
+
+    JapaneseDictionary(String path, String jsonString, boolean mergeSettings, BinaryDictionary system,
+            Collection<BinaryDictionary> user) throws IOException {
         Settings settings = buildSettings(path, jsonString, mergeSettings);
 
         dictionaries = new ArrayList<>();
 
-        readSystemDictionary(settings.getPath("systemDict"));
+        readSystemDictionary(system, settings.getPath("systemDict"));
         for (EditConnectionCostPlugin p : settings
                 .<EditConnectionCostPlugin>getPluginList("editConnectionCostPlugin")) {
             p.setUp(grammar);
@@ -79,8 +85,14 @@ class JapaneseDictionary implements Dictionary {
             p.setUp(grammar);
         }
 
-        for (String filename : settings.getPathList("userDict")) {
-            readUserDictionary(filename);
+        if (user == null) {
+            for (String filename : settings.getPathList("userDict")) {
+                readUserDictionary(filename);
+            }
+        } else {
+            for (BinaryDictionary udic : user) {
+                addUserDictionary(udic);
+            }
         }
 
         allowEmptyMorpheme = settings.getBoolean("allowEmptyMorpheme", true);
@@ -101,23 +113,29 @@ class JapaneseDictionary implements Dictionary {
         }
     }
 
-    void readSystemDictionary(String filename) throws IOException {
-        if (filename == null) {
+    void readSystemDictionary(BinaryDictionary dictionary, String filename) throws IOException {
+        if (dictionary == null && filename == null) {
             throw new IllegalArgumentException("system dictionary is not specified");
         }
 
-        BinaryDictionary dictionary = BinaryDictionary.readSystemDictionary(filename);
+        if (dictionary == null) {
+            dictionary = BinaryDictionary.readSystemDictionary(filename);
+        }
         dictionaries.add(dictionary);
         grammar = dictionary.getGrammar();
         lexicon = new LexiconSet(dictionary.getLexicon());
     }
 
     void readUserDictionary(String filename) throws IOException {
+        BinaryDictionary dictionary = BinaryDictionary.readUserDictionary(filename);
+        addUserDictionary(dictionary);
+    }
+
+    void addUserDictionary(BinaryDictionary dictionary) {
         if (lexicon.isFull()) {
             throw new IllegalArgumentException("too many dictionaries");
         }
 
-        BinaryDictionary dictionary = BinaryDictionary.readUserDictionary(filename);
         dictionaries.add(dictionary);
 
         DoubleArrayLexicon userLexicon = dictionary.getLexicon();
@@ -180,6 +198,14 @@ class JapaneseDictionary implements Dictionary {
             }
             return sb.toString();
         }
+    }
+
+    public GrammarImpl getGrammar() {
+        return grammar;
+    }
+
+    public LexiconSet getLexicon() {
+        return lexicon;
     }
 
 }

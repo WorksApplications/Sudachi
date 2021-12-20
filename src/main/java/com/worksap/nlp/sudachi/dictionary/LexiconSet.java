@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.WordId;
+
 import java.util.*;
 
 public class LexiconSet implements Lexicon {
@@ -126,8 +128,9 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public WordInfo getWordInfo(int wordId) {
-        int dictionaryId = getDictionaryId(wordId);
-        WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(getWordId(wordId));
+        int dictionaryId = WordId.dic(wordId);
+        int internalId = WordId.word(wordId);
+        WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(internalId);
         short posId = wordInfo.getPOSId();
         if (dictionaryId > 0 && posId >= posOffsets.get(1)) { // user defined part-of-speech
             wordInfo.setPOSId((short) (wordInfo.getPOSId() - posOffsets.get(1) + posOffsets.get(dictionaryId)));
@@ -140,7 +143,7 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public int getDictionaryId(int wordId) {
-        return wordId >>> 28;
+        return WordId.dic(wordId);
     }
 
     @Override
@@ -148,18 +151,15 @@ public class LexiconSet implements Lexicon {
         return lexicons.stream().mapToInt(Lexicon::size).sum();
     }
 
-    private int getWordId(int wordId) {
-        return 0x0fffffff & wordId;
+    private static int getWordId(int wordId) {
+        return WordId.word(wordId);
     }
 
     private int buildWordId(int dictId, int wordId) {
-        if (wordId > 0x0fffffff) {
-            throw new IndexOutOfBoundsException("wordId is too large: " + wordId);
-        }
         if (dictId >= lexicons.size()) {
             throw new IndexOutOfBoundsException("dictionaryId is too large: " + dictId);
         }
-        return (dictId << 28) | wordId;
+        return WordId.make(dictId, wordId);
     }
 
     private void convertSplit(int[] split, int dictionaryId) {
