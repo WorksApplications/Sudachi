@@ -41,8 +41,8 @@ import java.util.List;
  */
 public abstract class MorphemeFormatterPlugin extends Plugin {
 
-    protected String delimiter;
-    protected String eosString;
+    protected String delimiter = "\n";
+    protected String eosString = "\nEOS\n";
     protected boolean showDetails;
 
     /**
@@ -51,8 +51,6 @@ public abstract class MorphemeFormatterPlugin extends Plugin {
      * {@link SudachiCommandLine} calls this method for setting up this plugin.
      */
     public void setUp() throws IOException {
-        delimiter = settings.getString("delimiter", "\n");
-        eosString = settings.getString("eos", "\nEOS\n");
         showDetails = false;
     }
 
@@ -86,5 +84,17 @@ public abstract class MorphemeFormatterPlugin extends Plugin {
             output.print(formatMorpheme(m));
         }
         output.print(eosString);
+    }
+
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
+    }
+
+    public void setEosString(String eosString) {
+        this.eosString = eosString;
+    }
+
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
     }
 }

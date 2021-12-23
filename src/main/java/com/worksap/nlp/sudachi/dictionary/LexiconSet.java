@@ -21,8 +21,7 @@ import com.worksap.nlp.sudachi.WordId;
 import java.util.*;
 
 public class LexiconSet implements Lexicon {
-
-    static final int MAX_DICTIONARIES = 16;
+    static final int MAX_DICTIONARIES = 15;
 
     List<Lexicon> lexicons = new ArrayList<>();
     List<Short> posOffsets = new ArrayList<>();

@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.Config;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,9 @@ public class CharacterCategory {
         }
     }
 
+    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
+    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
+    private static final Pattern PATTERN_DOUBLE_PERIODS = Pattern.compile("\\.\\.");
     private List<Range> rangeList = new ArrayList<>();
 
     /**
@@ -75,10 +80,6 @@ public class CharacterCategory {
         return categories;
     }
 
-    private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
-    private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
-    private static final Pattern PATTERN_DOUBLE_PERIODS = Pattern.compile("\\.\\.");
-
     /**
      * Reads the definitions of the character categories from the file which is
      * specified by {@code charDef}. If {@code charDef} is {@code null}, uses the
@@ -86,7 +87,7 @@ public class CharacterCategory {
      *
      * <p>
      * The following is the format of definitions.
-     * 
+     *
      * <pre>
      * {@code
      * 0x0020 SPACE              # a white space
@@ -94,7 +95,7 @@ public class CharacterCategory {
      * 0x4E00 KANJINUMERIC KANJI # Kanji numeric and Kanji
      * }
      * </pre>
-     * 
+     * <p>
      * Lines that do not start with "0x" are ignored.
      *
      * @param charDef
@@ -104,43 +105,59 @@ public class CharacterCategory {
      */
     public void readCharacterDefinition(String charDef) throws IOException {
         try (InputStream in = (charDef != null) ? new FileInputStream(charDef)
-                : CharacterCategory.class.getClassLoader().getResourceAsStream("char.def");
-                LineNumberReader reader = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("#") || PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
-                    continue;
+                : CharacterCategory.class.getClassLoader().getResourceAsStream("char.def")) {
+            readCharacterDefinition(in);
+        }
+    }
+
+    public void readCharacterDefinition(InputStream in) throws IOException {
+        LineNumberReader reader = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("#") || PATTERN_EMPTY_OR_SPACES.matcher(line).matches()) {
+                continue;
+            }
+            String[] cols = PATTERN_SPACES.split(line);
+            if (cols.length < 2) {
+                throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
+            }
+            if (cols[0].startsWith("0x")) {
+                Range range = new Range();
+                String[] r = PATTERN_DOUBLE_PERIODS.split(cols[0]);
+                range.low = range.high = Integer.decode(r[0]);
+                if (r.length > 1) {
+                    range.high = Integer.decode(r[1]);
                 }
-                String[] cols = PATTERN_SPACES.split(line);
-                if (cols.length < 2) {
-                    throw new IllegalArgumentException("invalid format at line " + reader.getLineNumber());
+                if (range.low > range.high) {
+                    throw new IllegalArgumentException("invalid range at line " + reader.getLineNumber());
                 }
-                if (cols[0].startsWith("0x")) {
-                    Range range = new Range();
-                    String[] r = PATTERN_DOUBLE_PERIODS.split(cols[0]);
-                    range.low = range.high = Integer.decode(r[0]);
-                    if (r.length > 1) {
-                        range.high = Integer.decode(r[1]);
+                for (int i = 1; i < cols.length; i++) {
+                    if (cols[i].startsWith("#")) {
+                        break;
                     }
-                    if (range.low > range.high) {
-                        throw new IllegalArgumentException("invalid range at line " + reader.getLineNumber());
+                    CategoryType type;
+                    try {
+                        type = CategoryType.valueOf(cols[i]);
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException(
+                                cols[i] + " is invalid type at line " + reader.getLineNumber(), e);
                     }
-                    for (int i = 1; i < cols.length; i++) {
-                        if (cols[i].startsWith("#")) {
-                            break;
-                        }
-                        CategoryType type;
-                        try {
-                            type = CategoryType.valueOf(cols[i]);
-                        } catch (IllegalArgumentException e) {
-                            throw new IllegalArgumentException(
-                                    cols[i] + " is invalid type at line " + reader.getLineNumber(), e);
-                        }
-                        range.categories.add(type);
-                    }
-                    rangeList.add(range);
+                    range.categories.add(type);
                 }
+                rangeList.add(range);
             }
         }
+    }
+
+    public static CharacterCategory load(Config.Resource<CharacterCategory> resource) throws IOException {
+        CharacterCategory result = new CharacterCategory();
+        try (InputStream is = resource.asInputStream()) {
+            result.readCharacterDefinition(is);
+        }
+        return result;
+    }
+
+    public static CharacterCategory load(Config config) throws IOException {
+        return config.getCharacterDefinition().consume(CharacterCategory::load);
     }
 }

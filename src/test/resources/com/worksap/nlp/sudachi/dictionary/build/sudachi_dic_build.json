@@ -1,4 +1,5 @@
 {
+    "characterDefinitionFile" : "char.def",
     "inputTextPlugin" : [
       { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" },
       { "class" : "com.worksap.nlp.sudachi.IgnoreYomiganaPlugin",

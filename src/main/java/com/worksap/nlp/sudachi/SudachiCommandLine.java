@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -87,25 +89,24 @@ public class SudachiCommandLine {
         }
     }
 
-    static MorphemeFormatterPlugin getFormatter(String path, String jsonString, boolean mergeSettings,
-            boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation) throws IOException {
-        Settings settings = JapaneseDictionary.buildSettings(path, jsonString, mergeSettings);
-        List<MorphemeFormatterPlugin> formatters = settings.getPluginList("formatterPlugin");
-        if (formatters.isEmpty()) {
-            throw new IllegalArgumentException("no morpheme formatter");
-        }
+    static MorphemeFormatterPlugin makeFormatter(boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation)
+            throws IOException {
         MorphemeFormatterPlugin formatter;
+        Settings emptySettings = Settings.parseSettings("{}", Settings.NOOP_RESOLVER);
         if (isWordSegmentation) {
+            formatter = new WordSegmentationFormatter();
+            formatter.setSettings(emptySettings);
+            formatter.setUp();
             if (isLineBreakAtEosInWordSegmentation) {
-                formatter = formatters.get(1);
+                formatter.setEosString("\n");
             } else {
-                formatter = formatters.get(2);
+                formatter.setEosString(" ");
             }
         } else {
-            formatter = formatters.get(0);
+            formatter = new SimpleMorphemeFormatter();
+            formatter.setSettings(emptySettings);
+            formatter.setUp();
         }
-
-        formatter.setUp();
         return formatter;
     }
 
@@ -159,10 +160,10 @@ public class SudachiCommandLine {
         }
         logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
+        Config config = Config.fromClasspath();
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        String settings = null;
-        boolean mergeSettings = false;
-        String resourcesDirectory = null;
+        Settings.PathResolver resolver = Settings.NOOP_RESOLVER;
+
         String outputFileName = null;
         boolean isEnableDump = false;
         boolean showDetails = false;
@@ -170,18 +171,19 @@ public class SudachiCommandLine {
         boolean isWordSegmentation = false;
         boolean isLineBreakAtEosInWordSegmentation = true;
 
-        int i = 0;
+        int i;
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
-                try (FileInputStream input = new FileInputStream(args[++i])) {
-                    settings = JapaneseDictionary.readAll(input);
-                    mergeSettings = false;
-                }
+                config = Config.fromFile(Paths.get(args[++i]));
             } else if (args[i].equals("-p") && i + 1 < args.length) {
-                resourcesDirectory = args[++i];
+                String resourcesDirectory = args[++i];
+                resolver = Settings.PathResolver.fileSystem(Paths.get(resourcesDirectory));
+                URL defaultCfg = SudachiCommandLine.class.getClassLoader().getResource("sudachi.json");
+                config = config.merge(Config.fromSettings(Settings.fromClasspath(defaultCfg, resolver)),
+                        Config.MergeMode.REPLACE);
             } else if (args[i].equals("-s") && i + 1 < args.length) {
-                settings = args[++i];
-                mergeSettings = true;
+                Config other = Config.fromJsonString(args[++i], resolver);
+                config = config.merge(other, Config.MergeMode.REPLACE);
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -227,15 +229,14 @@ public class SudachiCommandLine {
             }
         }
 
-        MorphemeFormatterPlugin formatter = getFormatter(resourcesDirectory, settings, mergeSettings,
-                isWordSegmentation, isLineBreakAtEosInWordSegmentation);
+        MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation);
         if (showDetails) {
             formatter.showDetails();
         }
 
         try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
                 : new FileOrStdoutPrintStream(outputFileName);
-                Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings, mergeSettings)) {
+                Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output);

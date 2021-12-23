@@ -22,31 +22,21 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
-import org.junit.rules.TemporaryFolder;
-
 public class JoinNumericPluginTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     JapaneseTokenizer tokenizer;
     JoinNumericPlugin plugin;
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/joinnumeric/char.def",
-                "/unk.def");
-
-        String path = temporaryFolder.getRoot().getPath();
-        String settings = Utils.readAllResource("/sudachi.json");
-        Dictionary dict = new DictionaryFactory().create(path, settings);
+        Config config = Config.fromClasspath()
+                .characterDefinition(getClass().getClassLoader().getResource("joinnumeric/char.def"));
+        Dictionary dict = new DictionaryFactory().create(config);
         tokenizer = (JapaneseTokenizer) dict.create();
 
         plugin = new JoinNumericPlugin();
-        plugin.setSettings(Settings.parseSettings(null, "{}"));
+        plugin.setSettings(Settings.parseSettings("{}", Settings.NOOP_RESOLVER));
         plugin.setUp(((JapaneseDictionary) dict).grammar);
     }
 

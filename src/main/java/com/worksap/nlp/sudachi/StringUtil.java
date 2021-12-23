@@ -23,6 +23,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class StringUtil {
     private StringUtil() {
@@ -35,6 +37,12 @@ public class StringUtil {
         }
     }
 
+    public static String readFully(Path path) throws IOException {
+        try (InputStream is = Files.newInputStream(path)) {
+            return readFully(is);
+        }
+    }
+
     public static String readFully(InputStream stream) throws IOException {
         InputStreamReader isr = new InputStreamReader(stream, StandardCharsets.UTF_8);
         StringBuilder sb = new StringBuilder();
@@ -42,7 +50,7 @@ public class StringUtil {
         while (isr.read(cb) != -1) {
             cb.flip();
             sb.append(cb);
-            cb.compact();
+            cb.clear();
         }
         return sb.toString();
     }

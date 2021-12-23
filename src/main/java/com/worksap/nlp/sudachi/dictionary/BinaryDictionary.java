@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.MMap;
 
 public class BinaryDictionary implements Closeable, DictionaryAccess {
@@ -55,7 +56,15 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
     }
 
     public static BinaryDictionary readSystemDictionary(String fileName) throws IOException {
-        BinaryDictionary dict = new BinaryDictionary(fileName);
+        return loadSystem(MMap.map(fileName));
+    }
+
+    public static BinaryDictionary readUserDictionary(String fileName) throws IOException {
+        return loadSystem(MMap.map(fileName));
+    }
+
+    public static BinaryDictionary loadSystem(ByteBuffer buffer) throws IOException {
+        BinaryDictionary dict = new BinaryDictionary(buffer);
         if (!dict.getDictionaryHeader().isSystemDictionary()) {
             dict.close();
             throw new IOException("invalid system dictionary");
@@ -63,13 +72,21 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
         return dict;
     }
 
-    public static BinaryDictionary readUserDictionary(String fileName) throws IOException {
-        BinaryDictionary dict = new BinaryDictionary(fileName);
+    public static BinaryDictionary loadUser(ByteBuffer buffer) throws IOException {
+        BinaryDictionary dict = new BinaryDictionary(buffer);
         if (!dict.getDictionaryHeader().isUserDictionary()) {
             dict.close();
             throw new IOException("invalid user dictionary");
         }
         return dict;
+    }
+
+    public static BinaryDictionary loadSystem(Config.Resource<BinaryDictionary> resource) throws IOException {
+        return resource.consume(res -> loadSystem(res.asByteBuffer()));
+    }
+
+    public static BinaryDictionary loadUser(Config.Resource<BinaryDictionary> resource) throws IOException {
+        return resource.consume(res -> loadUser(res.asByteBuffer()));
     }
 
     @Override

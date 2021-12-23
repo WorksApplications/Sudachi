@@ -16,15 +16,12 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
@@ -41,12 +38,12 @@ import javax.json.stream.JsonParsingException;
 
 /**
  * A structure of settings.
- *
+ * <p>
  * This class reads a settings written in JSON.
  *
  * <p>
  * The following is an example of settings.
- * 
+ *
  * <pre>
  * {@code
  *   {
@@ -79,18 +76,31 @@ import javax.json.stream.JsonParsingException;
  * base path to make an absolute path from a relative path.
  */
 public class Settings {
-
+    static final PathResolver NOOP_RESOLVER = new PathResolver.Noop();
     JsonObject root;
-    String basePath;
+    PathResolver base;
 
     Settings(JsonObject root, String basePath) {
         this.root = root;
-        this.basePath = basePath;
+        if (basePath == null) {
+            base = NOOP_RESOLVER;
+        } else {
+            base = PathResolver.fileSystem(Paths.get(basePath));
+        }
+    }
+
+    Settings(JsonObject root, PathResolver base) {
+        this.root = root;
+        this.base = base;
+    }
+
+    public static Settings empty() {
+        return new Settings(JsonObject.EMPTY_JSON_OBJECT, NOOP_RESOLVER);
     }
 
     /**
      * Read a settings from a JSON string.
-     *
+     * <p>
      * The root level of JSON must be a Object.
      *
      * @param path
@@ -100,7 +110,9 @@ public class Settings {
      * @return a structure of settings
      * @throws IllegalArgumentException
      *             if the parsing is failed
+     * @deprecated use PathResolver overload, will be removed in 1.0.0
      */
+    @Deprecated
     public static Settings parseSettings(String path, String json) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
@@ -114,6 +126,37 @@ public class Settings {
         } catch (JsonParsingException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public static Settings parseSettings(String json, PathResolver resolver) {
+        try (JsonReader reader = Json.createReader(new StringReader(json))) {
+            JsonStructure rootStr = reader.read();
+            if (rootStr instanceof JsonObject) {
+                JsonObject root = (JsonObject) rootStr;
+                String basePath = root.getString("path", null);
+                if (basePath == null) {
+                    if (resolver == null) {
+                        resolver = NOOP_RESOLVER;
+                    }
+                    return new Settings(root, resolver);
+                } else {
+                    PathResolver pathResolver = PathResolver.fileSystem(Paths.get(basePath));
+                    return new Settings(root, pathResolver);
+                }
+            } else {
+                throw new IllegalArgumentException("root must be an object");
+            }
+        } catch (JsonParsingException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static Settings fromFile(Path path, PathResolver resolver) throws IOException {
+        return parseSettings(StringUtil.readFully(path), resolver);
+    }
+
+    public static Settings fromClasspath(URL url, PathResolver resolver) throws IOException {
+        return parseSettings(StringUtil.readFully(url), resolver);
     }
 
     /**
@@ -272,8 +315,62 @@ public class Settings {
      *             if the value is not a string
      */
     public String getPath(String setting) {
+        Path resource = getPathObject(setting);
+        if (resource == null) {
+            return null;
+        }
+        return resource.toString();
+    }
+
+    /**
+     * Returns the setting value as the file path, or {@code null} if there is no
+     * corresponding setting
+     *
+     * @param setting
+     *            the key
+     * @return the value or {@code null}
+     * @throws IllegalArgumentException
+     *             if the value is not a string
+     */
+    public Path getPathObject(String setting) {
         String path = getString(setting);
-        return (path == null || isAbsolutePath(path) || basePath == null) ? path : Paths.get(basePath, path).toString();
+        if (path == null) {
+            return null;
+        }
+        return base.resolve(path);
+    }
+
+    /**
+     * Get value for setting as {@code Config.Resource}
+     *
+     * @param setting
+     *            key name
+     * @return resource corresponding to the key
+     */
+    public <T> Config.Resource<T> getResource(String setting) {
+        String path = getString(setting);
+        if (path == null) {
+            return null;
+        }
+        return extractResource(path);
+    }
+
+    private <T> Config.Resource<T> extractResource(String path) {
+        Path obj = base.resolve(path);
+        if (base.anchorType() == AnchorType.FILESYSTEM) {
+            return new Config.Resource.Filesystem<>(obj);
+        } else {
+            URL url = getClass().getClassLoader().getResource(obj.toString());
+            return new Config.Resource.Classpath<>(url);
+        }
+    }
+
+    public <T> List<Config.Resource<T>> getResourceList(String setting) {
+        List<String> list = getStringList(setting);
+        if (list == null) {
+            return null;
+        }
+        return list.stream().map(this::<T>extractResource).collect(Collectors.toList());
     }
 
     /**
@@ -297,8 +394,7 @@ public class Settings {
         if (list.isEmpty()) {
             return Collections.emptyList();
         }
-        return list.stream().map(p -> (isAbsolutePath(p) || basePath == null) ? p : Paths.get(basePath, p).toString())
-                .collect(Collectors.toList());
+        return list.stream().map(p -> base.resolve(p).toString()).collect(Collectors.toList());
     }
 
     /**
@@ -310,11 +406,13 @@ public class Settings {
      * @param defaultValue
      *            the default mapping of the key
      * @return the value or {@code defaultValue} if this settings has no mapping
-     * @throws IllegalArgumentException
-     *             if the value is not a boolean
      */
-    public boolean getBoolean(String setting, boolean defaultValue) {
-        return root.getBoolean(setting, defaultValue);
+    public Boolean getBoolean(String setting, Boolean defaultValue) {
+        try {
+            return root.getBoolean(setting);
+        } catch (NullPointerException | ClassCastException e) {
+            return defaultValue;
+        }
     }
 
     <E extends JsonValue> List<E> getList(String setting, Class<E> clazz) {
@@ -325,53 +423,27 @@ public class Settings {
         return array.getValuesAs(clazz);
     }
 
-    <E extends Plugin> List<E> getPluginList(String setting) {
-        List<JsonObject> list;
-        try {
-            list = getList(setting, JsonObject.class);
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException(setting + " is not a array of object", e);
-        }
-        if (list.isEmpty()) {
-            return Collections.emptyList();
+    <P extends Plugin> List<Config.PluginConf<P>> getPlugins(String name, Class<P> cls) {
+        JsonArray array = root.getJsonArray(name);
+        if (array == null) {
+            // must be mutable
+            return null;
         }
 
-        List<E> result = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) {
-            Object o;
-            String classname;
+        ArrayList<Config.PluginConf<P>> result = new ArrayList<>();
 
-            try {
-                classname = list.get(i).getString("class");
-            } catch (NullPointerException e) {
-                throw new IllegalArgumentException(setting + " has a member without a \"class\"", e);
-            } catch (ClassCastException e) {
-                throw new IllegalArgumentException(setting + " has a member with invalid \"class\"", e);
+        for (JsonValue key : array) {
+            JsonObject inner = key.asJsonObject();
+            String className = inner.getString("class");
+            if (className == null) {
+                throw new IllegalArgumentException(String.format("subobject for %s didn't have class key", name));
             }
-
-            try {
-                o = this.getClass().getClassLoader().loadClass(classname).getDeclaredConstructor().newInstance();
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-                    | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new IllegalArgumentException(classname + " in " + setting + " cannot be initialized", e);
-            }
-
-            if (!(o instanceof Plugin)) {
-                throw new IllegalArgumentException(classname + " in " + setting + " is not a plugin");
-            }
-
-            @SuppressWarnings("unchecked")
-            E plugin = (E) o;
-            plugin.setSettings(new Settings(list.get(i), basePath));
-            result.add(plugin);
+            result.add(new Config.PluginConf<>(className, new Settings(inner, base), cls));
         }
         return result;
     }
 
-    void merge(Settings settings) {
-        if (settings.basePath != null) {
-            this.basePath = settings.basePath;
-        }
+    Settings merge(Settings settings) {
         JsonObjectBuilder newRoot = Json.createObjectBuilder();
         for (Map.Entry<String, JsonValue> thisEntry : this.root.entrySet()) {
             String thisKey = thisEntry.getKey();
@@ -393,7 +465,7 @@ public class Settings {
                 newRoot.add(entry.getKey(), entry.getValue());
             }
         }
-        this.root = newRoot.build();
+        return new Settings(newRoot.build(), base);
     }
 
     private JsonArray mergeArray(JsonValue thisValue, JsonValue value) {
@@ -427,8 +499,54 @@ public class Settings {
         return newList.build();
     }
 
-    private boolean isAbsolutePath(String path) {
-        File file = new File(path);
-        return file.isAbsolute();
+    public enum AnchorType {
+        CLASSPATH, FILESYSTEM
+    }
+
+    public abstract static class PathResolver {
+        public static PathResolver classPath() {
+            return new BaseResolver(Paths.get(""), AnchorType.CLASSPATH);
+        }
+
+        public static PathResolver classPath(Class<?> clz) {
+            String name = clz.getName();
+            String path = name.replaceAll("\\.", "/");
+            return new BaseResolver(Paths.get(path), AnchorType.CLASSPATH);
+        }
+
+        public static PathResolver fileSystem(Path p) {
+            return new BaseResolver(p, AnchorType.FILESYSTEM);
+        }
+
+        Path resolve(String part) {
+            return Paths.get(part);
+        }
+
+        AnchorType anchorType() {
+            return AnchorType.FILESYSTEM;
+        }
+
+        static class BaseResolver extends PathResolver {
+            private final Path base;
+            private final AnchorType anchorType;
+
+            public BaseResolver(Path base, AnchorType anchorType) {
+                this.base = base;
+                this.anchorType = anchorType;
+            }
+
+            @Override
+            Path resolve(String part) {
+                return base.resolve(part);
+            }
+
+            @Override
+            AnchorType anchorType() {
+                return this.anchorType;
+            }
+        }
+
+        static private class Noop extends PathResolver {
+        }
     }
 }

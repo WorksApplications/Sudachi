@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,11 +50,10 @@ public class JapaneseTokenizerTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
-
-        String path = temporaryFolder.getRoot().getPath();
-        String settings = Utils.readAllResource("/sudachi.json");
-        dict = new DictionaryFactory().create(path, settings);
+        Path tmpPath = temporaryFolder.getRoot().toPath();
+        Utils.copyResource(tmpPath, "/system.dic", "/user.dic", "/char.def", "/unk.def", "/sudachi.json");
+        Config config = Config.fromFile(tmpPath.resolve("sudachi.json"));
+        dict = new DictionaryFactory().create(config);
         tokenizer = (JapaneseTokenizer) dict.create();
     }
 
