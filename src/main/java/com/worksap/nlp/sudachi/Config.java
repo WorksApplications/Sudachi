@@ -99,7 +99,7 @@ public class Config {
 
     private static <T> List<T> mergeList(MergeMode mode, List<T> dest, List<T> src) {
         if (src != null) {
-            if (mode == MergeMode.REPLACE) {
+            if (mode == MergeMode.REPLACE || dest == null) {
                 return src;
             } else {
                 for (T newItem : src) {
@@ -115,7 +115,7 @@ public class Config {
     private static <T extends Plugin> List<PluginConf<T>> mergePluginList(MergeMode mode, List<PluginConf<T>> dest,
             List<PluginConf<T>> src) {
         if (src != null) {
-            if (mode == MergeMode.REPLACE) {
+            if (mode == MergeMode.REPLACE || dest == null) {
                 return src;
             } else {
                 for (PluginConf<T> newItem : src) {

@@ -61,7 +61,7 @@ class ConfigTest {
               "class": "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
               "cost": 12000
             }]
-        }""".trimIndent(), Settings.PathResolver.fileSystem(Paths.get("")))
+        }""", Settings.PathResolver.fileSystem(Paths.get("")))
         val merged = base.merge(top, Config.MergeMode.REPLACE)
         assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
         assertEquals(merged.userDictionaries.size, 2)
@@ -82,7 +82,7 @@ class ConfigTest {
               "class": "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
               "cost": 12000
             }]
-        }""".trimIndent(), Settings.PathResolver.fileSystem(Paths.get("")))
+        }""", Settings.PathResolver.fileSystem(Paths.get("")))
         val merged = base.merge(top, Config.MergeMode.REPLACE)
         assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
         assertEquals(merged.userDictionaries.size, 2)
@@ -91,6 +91,12 @@ class ConfigTest {
         assertEquals(merged.oovProviderPlugins.size, 1)
         assertEquals(merged.oovProviderPlugins[0].clazzName, "com.worksap.nlp.sudachi.SimpleOovProviderPlugin")
         assertEquals(merged.oovProviderPlugins[0].internal.getInt("cost"), 12000)
+    }
+
+    @Test
+    fun fromClasspathMerged() {
+        val config = Config.fromClasspathMerged("sudachi.json", Config.MergeMode.APPEND)
+        assertEquals(config.oovProviderPlugins.size, 2)
     }
 
 }
