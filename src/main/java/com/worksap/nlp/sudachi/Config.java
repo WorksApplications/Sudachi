@@ -410,7 +410,7 @@ public class Config {
                 if (Objects.equals(url.getProtocol(), "file")) {
                     return MMap.map(url.getPath());
                 }
-                throw new UnsupportedOperationException();
+                return StringUtil.readAllBytes(url);
             }
 
             @Override

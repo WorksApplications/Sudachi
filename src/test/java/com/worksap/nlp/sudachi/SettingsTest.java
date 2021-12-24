@@ -76,7 +76,7 @@ public class SettingsTest {
 
     @Test
     public void getInt() {
-        Settings settings = Settings.parse("{\"foo\":123}", SettingsAnchor.none());
+        Settings settings = Settings.parse("{\"foo\":123}", null);
         assertEquals(123, settings.getInt("foo"));
         assertEquals(0, settings.getInt("baa"));
     }
@@ -89,17 +89,17 @@ public class SettingsTest {
 
     @Test
     public void getIntWithDefaultValue() {
-        Settings settings = Settings.parse("{\"foo\":123}", SettingsAnchor.none());
+        Settings settings = Settings.parse("{\"foo\":123}", null);
         assertEquals(123, settings.getInt("foo", 456));
         assertEquals(456, settings.getInt("bazz", 456));
 
-        settings = Settings.parse("{\"foo\":\"nyaa\"}", SettingsAnchor.none());
+        settings = Settings.parse("{\"foo\":\"nyaa\"}", null);
         assertEquals(456, settings.getInt("foo", 456));
     }
 
     @Test
     public void getIntList() {
-        Settings settings = Settings.parse("{\"foo\":[123,456]}", SettingsAnchor.none());
+        Settings settings = Settings.parse("{\"foo\":[123,456]}", null);
         assertThat(settings.getIntList("foo"), allOf(hasItem(123), hasItem(456)));
         assertTrue(settings.getIntList("baa").isEmpty());
     }
