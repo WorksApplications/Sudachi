@@ -51,7 +51,7 @@ public class IgnoreYomiganaPluginTest {
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.IgnoreYomiganaPlugin")) {
-                plugin.setSettings(new Settings(p, Settings.NOOP_RESOLVER));
+                plugin.setSettings(new Settings(p, SettingsAnchor.none()));
                 break;
             }
         }

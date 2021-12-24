@@ -26,9 +26,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.URL;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -37,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class SudachiCommandLine {
 
-    static Logger logger;
+    static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());;
 
     static class FileOrStdoutPrintStream extends PrintStream {
 
@@ -92,7 +96,7 @@ public class SudachiCommandLine {
     static MorphemeFormatterPlugin makeFormatter(boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation)
             throws IOException {
         MorphemeFormatterPlugin formatter;
-        Settings emptySettings = Settings.parseSettings("{}", Settings.NOOP_RESOLVER);
+        Settings emptySettings = Settings.parse("{}", SettingsAnchor.none());
         if (isWordSegmentation) {
             formatter = new WordSegmentationFormatter();
             formatter.setSettings(emptySettings);
@@ -154,15 +158,26 @@ public class SudachiCommandLine {
      *             if IO is failed
      */
     public static void main(String[] args) throws IOException {
-        InputStream is = SudachiCommandLine.class.getResourceAsStream("/logger.properties");
+        InputStream is = SudachiCommandLine.class.getClassLoader().getResourceAsStream("sudachi.logging.properties");
         if (is != null) {
-            LogManager.getLogManager().readConfiguration(is);
+            LogManager logManager = LogManager.getLogManager();
+            try {
+                // this is available on Java 9+, so going through reflection
+                MethodHandle updateConfiguration = MethodHandles.lookup().findVirtual(LogManager.class,
+                        "updateConfiguration", MethodType.methodType(void.class, InputStream.class, Function.class));
+                updateConfiguration.invoke(logManager, is, null);
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                logManager.readConfiguration(is);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
         }
-        logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
-        Config config = Config.fromClasspath();
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        Settings.PathResolver resolver = Settings.NOOP_RESOLVER;
+        SettingsAnchor anchor = SettingsAnchor.classpath().andThen(SettingsAnchor.none());
+        Settings current = Settings.resolvedBy(anchor)
+                .merge(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
+        Config additional = Config.empty();
 
         String outputFileName = null;
         boolean isEnableDump = false;
@@ -174,16 +189,17 @@ public class SudachiCommandLine {
         int i;
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
-                config = Config.fromFile(Paths.get(args[++i]));
+                Path configPath = Paths.get(args[++i]);
+                anchor = SettingsAnchor.filesystem(configPath.getParent());
+                current = Settings.fromFile(configPath, anchor);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 String resourcesDirectory = args[++i];
-                resolver = Settings.PathResolver.fileSystem(Paths.get(resourcesDirectory));
-                URL defaultCfg = SudachiCommandLine.class.getClassLoader().getResource("sudachi.json");
-                config = config.merge(Config.fromSettings(Settings.fromClasspath(defaultCfg, resolver)),
-                        Config.MergeMode.REPLACE);
+                anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory));
+                // first resolve wrt new directory
+                current = Settings.resolvedBy(anchor).merge(current);
             } else if (args[i].equals("-s") && i + 1 < args.length) {
-                Config other = Config.fromJsonString(args[++i], resolver);
-                config = config.merge(other, Config.MergeMode.REPLACE);
+                Config other = Config.fromJsonString(args[++i], anchor);
+                additional = additional.merge(other, Config.MergeMode.APPEND);
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -228,6 +244,8 @@ public class SudachiCommandLine {
                 break;
             }
         }
+
+        Config config = Config.fromSettings(current).merge(additional, Config.MergeMode.REPLACE);
 
         MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation);
         if (showDetails) {

@@ -102,7 +102,7 @@ public class DefaultInputTextPluginTest {
     @Test
     public void setUpWithNull() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.setSettings(new Settings(Json.createObjectBuilder().build(), Settings.NOOP_RESOLVER));
+        plugin.setSettings(new Settings(Json.createObjectBuilder().build(), SettingsAnchor.none()));
         plugin.setUp(new MockGrammar());
         assertThat(plugin.rewriteDef, is(nullValue()));
     }

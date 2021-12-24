@@ -36,7 +36,7 @@ public class JoinNumericPluginTest {
         tokenizer = (JapaneseTokenizer) dict.create();
 
         plugin = new JoinNumericPlugin();
-        plugin.setSettings(Settings.parseSettings("{}", Settings.NOOP_RESOLVER));
+        plugin.setSettings(Settings.parse("{}", SettingsAnchor.none()));
         plugin.setUp(((JapaneseDictionary) dict).grammar);
     }
 

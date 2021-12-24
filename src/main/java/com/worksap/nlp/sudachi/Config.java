@@ -61,17 +61,17 @@ public class Config {
     }
 
     public static Config fromClasspath(URL resource) throws IOException {
-        String data = StringUtil.readFully(resource);
-        return fromJsonString(data, Settings.PathResolver.classPath());
+        Settings settings = Settings.resolvedBy(SettingsAnchor.classpath()).merge(resource);
+        return fromSettings(settings);
     }
 
     public static Config fromFile(Path path) throws IOException {
         String data = StringUtil.readFully(path);
-        return fromJsonString(data, Settings.PathResolver.fileSystem(path.getParent()));
+        return fromJsonString(data, SettingsAnchor.filesystem(path.getParent()));
     }
 
-    public static Config fromJsonString(String json, Settings.PathResolver anchor) {
-        return fromSettings(Settings.parseSettings(json, anchor));
+    public static Config fromJsonString(String json, SettingsAnchor anchor) {
+        return fromSettings(Settings.parse(json, anchor));
     }
 
     public static Config fromSettings(Settings obj) {
@@ -337,7 +337,7 @@ public class Config {
 
         public PluginConf<T> add(String key, String value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            Settings merged = internal.merge(new Settings(obj, Settings.NOOP_RESOLVER));
+            Settings merged = internal.merge(new Settings(obj, SettingsAnchor.none()));
             return new PluginConf<>(clazzName, merged, parent);
         }
     }

@@ -22,6 +22,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
@@ -76,26 +77,36 @@ import javax.json.stream.JsonParsingException;
  * base path to make an absolute path from a relative path.
  */
 public class Settings {
-    static final PathResolver NOOP_RESOLVER = new PathResolver.Noop();
+    private static final Logger logger = Logger.getLogger(Settings.class.getName());
+
     JsonObject root;
-    PathResolver base;
+    SettingsAnchor base;
 
-    Settings(JsonObject root, String basePath) {
-        this.root = root;
-        if (basePath == null) {
-            base = NOOP_RESOLVER;
-        } else {
-            base = PathResolver.fileSystem(Paths.get(basePath));
-        }
-    }
-
-    Settings(JsonObject root, PathResolver base) {
+    Settings(JsonObject root, SettingsAnchor base) {
         this.root = root;
         this.base = base;
     }
 
     public static Settings empty() {
-        return new Settings(JsonObject.EMPTY_JSON_OBJECT, NOOP_RESOLVER);
+        return resolvedBy(SettingsAnchor.none());
+    }
+
+    public static Settings resolvedBy(SettingsAnchor resolver) {
+        return new Settings(JsonObject.EMPTY_JSON_OBJECT, resolver);
+    }
+
+    public Settings merge(Path file) throws IOException {
+        logger.fine(() -> String.format("reading settings from %s", file));
+        String data = StringUtil.readFully(file);
+        Settings settings = parse(data, this.base);
+        return merge(settings);
+    }
+
+    public Settings merge(URL resource) throws IOException {
+        logger.fine(() -> String.format("reading settings from %s", resource));
+        String data = StringUtil.readFully(resource);
+        Settings settings = parse(data, this.base);
+        return merge(settings);
     }
 
     /**
@@ -114,21 +125,11 @@ public class Settings {
      */
     @Deprecated
     public static Settings parseSettings(String path, String json) {
-        try (JsonReader reader = Json.createReader(new StringReader(json))) {
-            JsonStructure rootStr = reader.read();
-            if (rootStr instanceof JsonObject) {
-                JsonObject root = (JsonObject) rootStr;
-                String basePath = root.getString("path", path);
-                return new Settings(root, basePath);
-            } else {
-                throw new IllegalArgumentException("root must be an object");
-            }
-        } catch (JsonParsingException e) {
-            throw new IllegalArgumentException(e);
-        }
+        SettingsAnchor anchor = path == null ? SettingsAnchor.none() : SettingsAnchor.filesystem(Paths.get(path));
+        return parse(json, anchor);
     }
 
-    public static Settings parseSettings(String json, PathResolver resolver) {
+    public static Settings parse(String json, SettingsAnchor resolver) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
             if (rootStr instanceof JsonObject) {
@@ -136,11 +137,14 @@ public class Settings {
                 String basePath = root.getString("path", null);
                 if (basePath == null) {
                     if (resolver == null) {
-                        resolver = NOOP_RESOLVER;
+                        resolver = SettingsAnchor.none();
                     }
                     return new Settings(root, resolver);
                 } else {
-                    PathResolver pathResolver = PathResolver.fileSystem(Paths.get(basePath));
+                    SettingsAnchor pathResolver = SettingsAnchor.filesystem(Paths.get(basePath));
+                    if (resolver != null) {
+                        pathResolver = pathResolver.andThen(resolver);
+                    }
                     return new Settings(root, pathResolver);
                 }
             } else {
@@ -151,12 +155,12 @@ public class Settings {
         }
     }
 
-    public static Settings fromFile(Path path, PathResolver resolver) throws IOException {
-        return parseSettings(StringUtil.readFully(path), resolver);
+    public static Settings fromFile(Path path, SettingsAnchor resolver) throws IOException {
+        return parse(StringUtil.readFully(path), resolver);
     }
 
-    public static Settings fromClasspath(URL url, PathResolver resolver) throws IOException {
-        return parseSettings(StringUtil.readFully(url), resolver);
+    public static Settings fromClasspath(URL url, SettingsAnchor resolver) throws IOException {
+        return parse(StringUtil.readFully(url), resolver);
     }
 
     /**
@@ -357,12 +361,7 @@ public class Settings {
 
     private <T> Config.Resource<T> extractResource(String path) {
         Path obj = base.resolve(path);
-        if (base.anchorType() == AnchorType.FILESYSTEM) {
-            return new Config.Resource.Filesystem<>(obj);
-        } else {
-            URL url = getClass().getClassLoader().getResource(obj.toString());
-            return new Config.Resource.Classpath<>(url);
-        }
+        return base.toResource(obj);
     }
 
     public <T> List<Config.Resource<T>> getResourceList(String setting) {
@@ -443,7 +442,7 @@ public class Settings {
         return result;
     }
 
-    Settings merge(Settings settings) {
+    public Settings merge(Settings settings) {
         JsonObjectBuilder newRoot = Json.createObjectBuilder();
         for (Map.Entry<String, JsonValue> thisEntry : this.root.entrySet()) {
             String thisKey = thisEntry.getKey();
@@ -454,7 +453,11 @@ public class Settings {
                         || thisValue instanceof JsonObject) {
                     newRoot.add(thisKey, value);
                 } else if (thisValue instanceof JsonArray) {
-                    newRoot.add(thisKey, mergeArray(thisValue, value));
+                    if (value instanceof JsonArray) {
+                        newRoot.add(thisKey, mergeArray((JsonArray) thisValue, (JsonArray) value));
+                    } else {
+                        newRoot.add(thisKey, value);
+                    }
                 }
             } else {
                 newRoot.add(thisKey, thisValue);
@@ -465,88 +468,18 @@ public class Settings {
                 newRoot.add(entry.getKey(), entry.getValue());
             }
         }
-        return new Settings(newRoot.build(), base);
+        return new Settings(newRoot.build(), settings.base.andThen(base));
     }
 
-    private JsonArray mergeArray(JsonValue thisValue, JsonValue value) {
-        if (value instanceof JsonArray && ((JsonArray) value).isEmpty()) {
-            return (JsonArray) value;
+    private JsonArray mergeArray(JsonArray dest, JsonArray src) {
+        if (src.isEmpty()) {
+            return dest;
         }
-        JsonArray thisList = (JsonArray) thisValue;
-        JsonArrayBuilder newList = Json.createArrayBuilder();
-        Map<Integer, JsonValue> replaceItems = new HashMap<>();
-
-        for (JsonValue item : (JsonArray) value) {
-            boolean isReplaced = false;
-            if (item instanceof JsonObject && ((JsonObject) item).containsKey("class")) {
-                JsonValue className = ((JsonObject) item).get("class");
-                for (int i = 0; i < thisList.size(); i++) {
-                    JsonValue thisItem = thisList.get(i);
-                    if (thisItem instanceof JsonObject && ((JsonObject) thisItem).get("class").equals(className)) {
-                        replaceItems.put(i, item);
-                        isReplaced = true;
-                    }
-                }
-            }
-            if (!isReplaced) {
-                newList.add(item);
-            }
-        }
-        for (int i = 0; i < thisList.size(); i++) {
-            JsonValue item = replaceItems.get(i);
-            newList.add(item == null ? thisList.get(i) : item);
+        JsonArrayBuilder newList = Json.createArrayBuilder(dest);
+        for (JsonValue item : src) {
+            newList.add(item);
         }
         return newList.build();
     }
 
-    public enum AnchorType {
-        CLASSPATH, FILESYSTEM
-    }
-
-    public abstract static class PathResolver {
-        public static PathResolver classPath() {
-            return new BaseResolver(Paths.get(""), AnchorType.CLASSPATH);
-        }
-
-        public static PathResolver classPath(Class<?> clz) {
-            String name = clz.getName();
-            String path = name.replaceAll("\\.", "/");
-            return new BaseResolver(Paths.get(path), AnchorType.CLASSPATH);
-        }
-
-        public static PathResolver fileSystem(Path p) {
-            return new BaseResolver(p, AnchorType.FILESYSTEM);
-        }
-
-        Path resolve(String part) {
-            return Paths.get(part);
-        }
-
-        AnchorType anchorType() {
-            return AnchorType.FILESYSTEM;
-        }
-
-        static class BaseResolver extends PathResolver {
-            private final Path base;
-            private final AnchorType anchorType;
-
-            public BaseResolver(Path base, AnchorType anchorType) {
-                this.base = base;
-                this.anchorType = anchorType;
-            }
-
-            @Override
-            Path resolve(String part) {
-                return base.resolve(part);
-            }
-
-            @Override
-            AnchorType anchorType() {
-                return this.anchorType;
-            }
-        }
-
-        static private class Noop extends PathResolver {
-        }
-    }
 }

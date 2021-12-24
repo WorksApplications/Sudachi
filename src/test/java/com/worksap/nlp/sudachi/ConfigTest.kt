@@ -5,6 +5,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 
 class ConfigTest {
@@ -16,7 +17,7 @@ class ConfigTest {
 
     @Test
     fun fromString() {
-        assertNotNull(Config.fromJsonString("{}", Settings.PathResolver.classPath()))
+        assertNotNull(Config.fromJsonString("{}", SettingsAnchor.classpath()))
     }
 
     @Test
@@ -35,7 +36,7 @@ class ConfigTest {
     @Test
     fun resolveFilesystemPath() {
         val cfg =
-            Config.fromJsonString("""{"systemDict": "test"}""", Settings.PathResolver.fileSystem(Paths.get("/usr")))
+            Config.fromJsonString("""{"systemDict": "test"}""", SettingsAnchor.filesystem(Paths.get("/usr")))
         assertEquals(cfg.systemDictionary.repr(), Paths.get("/usr/test"))
     }
 
@@ -61,7 +62,7 @@ class ConfigTest {
               "class": "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
               "cost": 12000
             }]
-        }""", Settings.PathResolver.fileSystem(Paths.get("")))
+        }""", SettingsAnchor.filesystem(Paths.get("")))
         val merged = base.merge(top, Config.MergeMode.REPLACE)
         assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
         assertEquals(merged.userDictionaries.size, 2)
@@ -82,7 +83,7 @@ class ConfigTest {
               "class": "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
               "cost": 12000
             }]
-        }""", Settings.PathResolver.fileSystem(Paths.get("")))
+        }""", SettingsAnchor.filesystem(Paths.get("")))
         val merged = base.merge(top, Config.MergeMode.REPLACE)
         assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
         assertEquals(merged.userDictionaries.size, 2)
@@ -97,6 +98,30 @@ class ConfigTest {
     fun fromClasspathMerged() {
         val config = Config.fromClasspathMerged("sudachi.json", Config.MergeMode.APPEND)
         assertEquals(config.oovProviderPlugins.size, 2)
+    }
+
+
+    @Test
+    fun pluginInvalidClass() {
+        val cfg = Config.fromJsonString("""{            
+            "oovProviderPlugin": [{
+              "class": "java.lang.String"              
+            }]
+        }""", SettingsAnchor.none()
+        )
+        assertFails { cfg.oovProviderPlugins[0].instantiate() }
+    }
+
+
+    @Test
+    fun pluginInvalidClassName() {
+        val cfg = Config.fromJsonString("""{            
+            "oovProviderPlugin": [{
+              "class": "java.lang.SSSSSString"              
+            }]
+        }""", SettingsAnchor.none()
+        )
+        assertFails { cfg.oovProviderPlugins[0].instantiate() }
     }
 
 }
