@@ -155,12 +155,16 @@ public class Settings {
         }
     }
 
+    public static Settings fromFile(Path path) throws IOException {
+        return fromFile(path, SettingsAnchor.filesystem(path.getParent()));
+    }
+
     public static Settings fromFile(Path path, SettingsAnchor resolver) throws IOException {
-        return parse(StringUtil.readFully(path), resolver);
+        return resolvedBy(resolver).merge(path);
     }
 
     public static Settings fromClasspath(URL url, SettingsAnchor resolver) throws IOException {
-        return parse(StringUtil.readFully(url), resolver);
+        return resolvedBy(resolver).merge(url);
     }
 
     /**

@@ -26,7 +26,15 @@ public abstract class SettingsAnchor {
     private static final Logger logger = Logger.getLogger(SettingsAnchor.class.getName());
 
     public static SettingsAnchor classpath() {
-        return new Classpath(Paths.get(""), Settings.class.getClassLoader());
+        return classpath(Settings.class.getClassLoader());
+    }
+
+    public static SettingsAnchor classpath(ClassLoader loader) {
+        return classpath("", loader);
+    }
+
+    public static SettingsAnchor classpath(String prefix, ClassLoader loader) {
+        return new Classpath(Paths.get(prefix), loader);
     }
 
     public static SettingsAnchor classpath(Class<?> clz) {
@@ -86,6 +94,11 @@ public abstract class SettingsAnchor {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(base);
+        }
+
+        @Override
         public String toString() {
             return "Filesystem{" + "base=" + base + '}';
         }
@@ -128,23 +141,17 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        public SettingsAnchor andThen(SettingsAnchor other) {
-            if (other instanceof Classpath) {
-                Classpath o = (Classpath) other;
-                if (Objects.equals(o.prefix, prefix)) {
-                    return this;
-                }
-            }
-            return super.andThen(other);
-        }
-
-        @Override
         public boolean equals(Object obj) {
             if (obj instanceof Classpath) {
                 Classpath c = (Classpath) obj;
                 return prefix.equals(c.prefix) && loader.equals(c.loader);
             }
             return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(prefix, loader);
         }
 
         @Override
@@ -216,6 +223,11 @@ public abstract class SettingsAnchor {
             return false;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(children);
+        }
+
         int count() {
             return children.size();
         }
@@ -223,14 +235,6 @@ public abstract class SettingsAnchor {
 
     private static class None extends SettingsAnchor {
         private None() {
-        }
-
-        @Override
-        public SettingsAnchor andThen(SettingsAnchor other) {
-            if (other instanceof None) {
-                return this;
-            }
-            return super.andThen(other);
         }
 
         static final None INSTANCE = new None();
@@ -243,6 +247,11 @@ public abstract class SettingsAnchor {
         @Override
         public boolean equals(Object obj) {
             return obj instanceof None;
+        }
+
+        @Override
+        public int hashCode() {
+            return 1;
         }
     }
 }
