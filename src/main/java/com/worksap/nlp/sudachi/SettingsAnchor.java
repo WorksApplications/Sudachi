@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class SettingsAnchor {
-    private final static Logger logger = Logger.getLogger(SettingsAnchor.class.getName());
+    private static final Logger logger = Logger.getLogger(SettingsAnchor.class.getName());
 
     public static SettingsAnchor classpath() {
         return new Classpath(Paths.get(""), Settings.class.getClassLoader());
@@ -31,8 +31,8 @@ public abstract class SettingsAnchor {
 
     public static SettingsAnchor classpath(Class<?> clz) {
         String name = clz.getName();
-        String path = name.replaceAll("\\.", "/");
-        return new Classpath(Paths.get(path), clz.getClassLoader());
+        String path = name.replace(".", "/");
+        return new Classpath(Paths.get(path).getParent(), clz.getClassLoader());
     }
 
     public static SettingsAnchor filesystem(Path p) {
@@ -56,6 +56,9 @@ public abstract class SettingsAnchor {
     }
 
     public SettingsAnchor andThen(SettingsAnchor other) {
+        if (this.equals(other)) {
+            return this;
+        }
         return new Chain(this, other);
     }
 
@@ -71,6 +74,15 @@ public abstract class SettingsAnchor {
             Path resolved = base.resolve(part);
             logger.fine(() -> String.format("%s resolved %s to %s", this, part, resolved));
             return resolved;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Filesystem) {
+                Filesystem o = (Filesystem) obj;
+                return base.equals(o.base);
+            }
+            return false;
         }
 
         @Override
@@ -95,24 +107,24 @@ public abstract class SettingsAnchor {
             return resolved;
         }
 
-        private String toResourceName(Path path) {
+        private static String resourceName(Path path) {
             String strPath = path.toString();
             // Windows hack. Can override Filesystem, but that will be much more code
             if ("\\".equals(path.getFileSystem().getSeparator())) {
-                strPath = strPath.replaceAll("\\\\", "/");
+                strPath = strPath.replace("\\", "/");
             }
             return strPath;
         }
 
         @Override
         boolean exists(Path path) {
-            String name = toResourceName(path);
+            String name = resourceName(path);
             return loader.getResource(name) != null;
         }
 
         @Override
         <T> Config.Resource<T> toResource(Path path) {
-            return new Config.Resource.Classpath<>(loader.getResource(toResourceName(path)));
+            return new Config.Resource.Classpath<>(loader.getResource(resourceName(path)));
         }
 
         @Override
@@ -127,6 +139,15 @@ public abstract class SettingsAnchor {
         }
 
         @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Classpath) {
+                Classpath c = (Classpath) obj;
+                return prefix.equals(c.prefix) && loader.equals(c.loader);
+            }
+            return false;
+        }
+
+        @Override
         public String toString() {
             return "Classpath{" + "prefix=" + prefix + '}';
         }
@@ -136,7 +157,21 @@ public abstract class SettingsAnchor {
         private final List<SettingsAnchor> children = new ArrayList<>();
 
         Chain(SettingsAnchor... items) {
-            children.addAll(Arrays.asList(items));
+            for (SettingsAnchor item : items) {
+                if (item instanceof Chain) {
+                    Chain c = (Chain) item;
+                    children.forEach(this::add);
+                    children.addAll(c.children);
+                } else {
+                    add(item);
+                }
+            }
+        }
+
+        private void add(SettingsAnchor item) {
+            if (!children.contains(item)) {
+                children.add(item);
+            }
         }
 
         @Override
@@ -165,12 +200,31 @@ public abstract class SettingsAnchor {
 
         @Override
         public SettingsAnchor andThen(SettingsAnchor other) {
-            children.add(other);
+            if (equals(other)) {
+                return this;
+            }
+            children.forEach(this::add);
             return this;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Chain) {
+                Chain c = (Chain) obj;
+                return children.equals(c.children);
+            }
+            return false;
+        }
+
+        int count() {
+            return children.size();
         }
     }
 
-    static private class None extends SettingsAnchor {
+    private static class None extends SettingsAnchor {
+        private None() {
+        }
+
         @Override
         public SettingsAnchor andThen(SettingsAnchor other) {
             if (other instanceof None) {
@@ -184,6 +238,11 @@ public abstract class SettingsAnchor {
         @Override
         public String toString() {
             return "None{}";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof None;
         }
     }
 }

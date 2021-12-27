@@ -31,6 +31,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * Typed configuration for Sudachi.
+ *
+ * @see Settings untyped configuration which is loaded from a json file
+ */
 public class Config {
     private Resource<BinaryDictionary> systemDictionary;
     private List<Resource<BinaryDictionary>> userDictionary;
@@ -44,14 +49,39 @@ public class Config {
     private Config() {
     }
 
+    /**
+     * Creates an empty configuration. Useful for building configuration manually
+     * instead of loading it from a file.
+     * 
+     * @return empty Config object
+     */
     public static Config empty() {
         return new Config();
     }
 
+    /**
+     * Loads configuration from the first instance of {@code sudachi.json} file
+     * loaded from classpath.
+     * 
+     * @return Config object
+     * @throws IOException
+     *             when IO fails
+     */
     public static Config fromClasspath() throws IOException {
         return fromClasspath("sudachi.json");
     }
 
+    /**
+     * Loads configuration from the first instance of the json file loaded from
+     * classpath. File is loaded by the classloader of the {@code Config} class
+     *
+     * @param name
+     *            json file name
+     * @return Config object
+     * @throws IOException
+     *             when IO fails
+     * @see Settings#fromClasspath(URL, SettingsAnchor)
+     */
     public static Config fromClasspath(String name) throws IOException {
         return fromClasspath(Config.class.getClassLoader(), name);
     }

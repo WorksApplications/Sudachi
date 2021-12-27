@@ -65,6 +65,11 @@ public class SudachiCommandLineTest {
     }
 
     @Test
+    public void commandLineHelp() throws IOException {
+        SudachiCommandLine.main(new String[] { "-h" });
+    }
+
+    @Test
     public void commandLineWithAMode() throws IOException {
         SudachiCommandLine
                 .main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-m", "A", inputFileName });

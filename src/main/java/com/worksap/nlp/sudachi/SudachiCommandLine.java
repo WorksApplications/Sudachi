@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +28,7 @@ import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -40,8 +40,7 @@ import java.util.logging.Logger;
  * A command-line morphological analysis tool.
  */
 public class SudachiCommandLine {
-
-    static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());;
+    static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
     static class FileOrStdoutPrintStream extends PrintStream {
 
@@ -71,7 +70,7 @@ public class SudachiCommandLine {
             MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFileInput, boolean isWordSegmentation)
             throws IOException {
 
-        try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, "UTF-8")
+        try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, StandardCharsets.UTF_8)
                 : new InputStreamReader(input); BufferedReader reader = new BufferedReader(inputReader)) {
 
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -169,7 +168,7 @@ public class SudachiCommandLine {
             } catch (NoSuchMethodException | IllegalAccessException e) {
                 logManager.readConfiguration(is);
             } catch (Throwable t) {
-                t.printStackTrace();
+                t.printStackTrace(System.err);
             }
         }
 
@@ -227,19 +226,25 @@ public class SudachiCommandLine {
                 isWordSegmentation = true;
                 isLineBreakAtEosInWordSegmentation = true;
             } else if (args[i].equals("-h")) {
-                Console console = System.console();
-                console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
-                console.printf("\t-r file\tread settings from file (overrides -s)\n");
-                console.printf("\t-s string\tadditional settings (overrides -r)\n");
-                console.printf("\t-p directory\troot directory of resources\n");
-                console.printf("\t-m mode\tmode of splitting\n");
-                console.printf("\t-o file\toutput to file\n");
-                console.printf("\t-t\tseparate words with spaces\n");
-                console.printf("\t-ts\tseparate words with spaces, and break line for each sentence\n");
-                console.printf("\t-a\tshow details\n");
-                console.printf("\t-f\tignore error\n");
-                console.printf("\t-d\tdebug mode\n");
+                PrintStream stderr = System.err;
+                stderr.print("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
+                stderr.print("\t-r file\tread settings from file (overrides -s)\n");
+                stderr.print("\t-s string\tadditional settings (overrides -r)\n");
+                stderr.print("\t-p directory\troot directory of resources\n");
+                stderr.print("\t-m mode\tmode of splitting\n");
+                stderr.print("\t-o file\toutput to file\n");
+                stderr.print("\t-t\tseparate words with spaces\n");
+                stderr.print("\t-ts\tseparate words with spaces, and break line for each sentence\n");
+                stderr.print("\t-a\tshow details\n");
+                stderr.print("\t-f\tignore error\n");
+                stderr.print("\t-d\tdebug mode\n");
+                stderr.print("\t--systemDict file\tpath to a system dictionary (overrides everything)\n");
+                stderr.print("\t--userDict file\tpath to an additional user dictionary (appended to -s)\n");
                 return;
+            } else if (args[i].equals("--userDict")) {
+                additional = additional.addUserDictionary(Paths.get(args[++i]));
+            } else if (args[i].equals("--systemDict")) {
+                additional = additional.systemDictionary(Paths.get(args[++i]));
             } else {
                 break;
             }
