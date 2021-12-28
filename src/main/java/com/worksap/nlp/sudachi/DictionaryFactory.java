@@ -56,13 +56,13 @@ public class DictionaryFactory {
      * @throws IOException
      *             if reading a file is failed
      *
-     * @deprecated use {@code Config} overload instead. This overload will be
-     *             removed in 1.0.0.
+     * @deprecated use {@link #create(Config)} overload instead. This overload will
+     *             be removed in 1.0.0.
      */
     @Deprecated()
     public Dictionary create(String settings) throws IOException {
         Config defaults = Config.fromClasspath();
-        Config passed = Config.fromSettings(Settings.parseSettings(null, settings));
+        Config passed = Config.fromJsonString(settings, SettingsAnchor.none());
         Config merged = defaults.merge(passed, Config.MergeMode.REPLACE);
         return create(merged);
     }
@@ -77,8 +77,8 @@ public class DictionaryFactory {
      * @return {@link Dictionary}
      * @throws IOException
      *             if reading a file is failed
-     * @deprecated use {@code Config} overload instead. This overload will be
-     *             removed in 1.0.0.
+     * @deprecated use {@link #create(Config)} overload instead. This overload will
+     *             be removed in 1.0.0.
      */
     @Deprecated
     public Dictionary create(String path, String settings) throws IOException {
@@ -99,8 +99,8 @@ public class DictionaryFactory {
      * @return {@link Dictionary}
      * @throws IOException
      *             if reading a file is failed
-     * @deprecated use {@code Config} overload instead. This overload will be
-     *             removed in 1.0.0.
+     * @deprecated use {@link #create(Config)} overload instead. This overload will
+     *             be removed in 1.0.0.
      */
     @Deprecated
     public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {

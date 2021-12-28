@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public class IgnoreYomiganaPluginTest {
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -42,12 +41,12 @@ public class IgnoreYomiganaPluginTest {
     @Before
     public void setUp() throws IOException {
         Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
-        String path = temporaryFolder.getRoot().getPath();
-        String jsonString = Utils.readAllResource("/sudachi.json");
-        Dictionary dict = new DictionaryFactory().create(path, jsonString);
+        String jsonString = StringUtil.readFully(getClass().getResource("/sudachi.json"));
+        Config config = Config.fromClasspath();
+        Dictionary dict = new DictionaryFactory().create(config);
         plugin = new IgnoreYomiganaPlugin();
 
-        Settings settings = Settings.parseSettings(null, jsonString);
+        Settings settings = Settings.parse(jsonString, SettingsAnchor.none());
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.IgnoreYomiganaPlugin")) {

@@ -38,9 +38,17 @@ import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
 
 /**
- * A structure of settings.
+ * An untyped collection of settings. This class handles parsing a JSON object
+ * and using its properties as settings.
+ *
+ * <h3>Paths</h3>
  * <p>
- * This class reads a settings written in JSON.
+ * There are multiple settings which can be paths, and paths are resolved using
+ * {@link SettingsAnchor}s. Paths can be resolved with respect to classpath or
+ * filesystem. SettingsAnchors also can be chained, returning the first existing
+ * path.
+ * </p>
+ *
  *
  * <p>
  * The following is an example of settings.
@@ -71,10 +79,13 @@ import javax.json.stream.JsonParsingException;
  *   }
  * }
  * </pre>
- *
  * <p>
- * {@code path} is a reserved key. Its value is used in {@link #getPath} as the
- * base path to make an absolute path from a relative path.
+ * {@code path} is a reserved key. It prepends an additional filesystem anchor
+ * to the current list of anchors.
+ *
+ *
+ * @see Config
+ * @see SettingsAnchor
  */
 public class Settings {
     private static final Logger logger = Logger.getLogger(Settings.class.getName());
@@ -87,14 +98,36 @@ public class Settings {
         this.base = base;
     }
 
+    /**
+     *
+     * @return empty object
+     */
     public static Settings empty() {
         return resolvedBy(SettingsAnchor.none());
     }
 
+    /**
+     * Returns empty object resolved by the provided {@link SettingsAnchor}
+     * 
+     * @param resolver
+     *            anchor
+     * @return Settings object
+     */
     public static Settings resolvedBy(SettingsAnchor resolver) {
         return new Settings(JsonObject.EMPTY_JSON_OBJECT, resolver);
     }
 
+    /**
+     * Merges the content of the specified file into the current Settings object.
+     * Anchor is not modified.
+     *
+     * @param file
+     *            {@link Path} to the file
+     * @return modified Settings object
+     * @throws IOException
+     *             if IO fails
+     * @see #parse(String, SettingsAnchor)
+     */
     public Settings merge(Path file) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", file));
         String data = StringUtil.readFully(file);
@@ -102,6 +135,17 @@ public class Settings {
         return merge(settings);
     }
 
+    /**
+     * Merges the content of the specified classpath resource into the current
+     * Settings object. Anchor is not modified.
+     *
+     * @param resource
+     *            result of {@link Class#getResource(String)}
+     * @return modified Settings object
+     * @throws IOException
+     *             if IO fails
+     * @see #parse(String, SettingsAnchor)
+     */
     public Settings merge(URL resource) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", resource));
         String data = StringUtil.readFully(resource);
@@ -112,16 +156,17 @@ public class Settings {
     /**
      * Read a settings from a JSON string.
      * <p>
-     * The root level of JSON must be a Object.
      *
      * @param path
-     *            the base path if "path" is undefined in {@code json}
+     *            will add additional {@link SettingsAnchor} to this path if not
+     *            {@code null}
      * @param json
      *            JSON string
-     * @return a structure of settings
+     * @return Settings object
      * @throws IllegalArgumentException
      *             if the parsing is failed
-     * @deprecated use PathResolver overload, will be removed in 1.0.0
+     * @deprecated use {@link #parse(String, SettingsAnchor)}, this method will be
+     *             removed in 1.0.0
      */
     @Deprecated
     public static Settings parseSettings(String path, String json) {
@@ -129,6 +174,21 @@ public class Settings {
         return parse(json, anchor);
     }
 
+    /**
+     * Parse a JSON string into a Settings object. String must contain a JSON
+     * object. If a JSON contains a {@code path} key, its value will be prepended as
+     * an additional filesystem SettingsAnchor.
+     *
+     * @param json
+     *            JSON object as a String
+     * @param resolver
+     *            paths will be resolved against this {@link SettingsAnchor}
+     * @return SettingsObject
+     *
+     * @see SettingsAnchor#none()
+     * @see SettingsAnchor#filesystem(Path)
+     * @see SettingsAnchor#classpath()
+     */
     public static Settings parse(String json, SettingsAnchor resolver) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
@@ -155,25 +215,61 @@ public class Settings {
         }
     }
 
+    /**
+     * Parse a Settings from a filesystem-based file. Paths will be resolved
+     * relative to the directory of the file.
+     *
+     * @param path
+     *            filesystem path to the settings file
+     * @return Settings object
+     * @throws IOException
+     *             if IO fails
+     * @see #parse(String, SettingsAnchor)
+     */
     public static Settings fromFile(Path path) throws IOException {
         return fromFile(path, SettingsAnchor.filesystem(path.getParent()));
     }
 
+    /**
+     * Parse a Settings from a filesystem-based file. Paths will be resolved by the
+     * provided anchor.
+     *
+     * @param path
+     *            filesystem path to the settings file
+     * @param resolver
+     *            paths will be resolved relative to this anchor
+     * @return Settings object
+     * @throws IOException
+     *             if IO fails
+     * @see #parse(String, SettingsAnchor)
+     */
     public static Settings fromFile(Path path, SettingsAnchor resolver) throws IOException {
         return resolvedBy(resolver).merge(path);
     }
 
+    /**
+     * Parse a Settings from a classpath resource
+     * 
+     * @param url
+     *            resource URL
+     * @param resolver
+     *            paths will be resolved relative to this anchor
+     * @return Settings object
+     * @throws IOException
+     *             if IO fails
+     * @see #parse(String, SettingsAnchor)
+     */
     public static Settings fromClasspath(URL url, SettingsAnchor resolver) throws IOException {
         return resolvedBy(resolver).merge(url);
     }
 
     /**
      * Returns the value as the string to which the specified key is mapped, or
-     * {@code null} if this settings contains no mapping for the key.
+     * {@code null} if the Settings object contains no mapping for the key.
      *
      * @param setting
      *            the key
-     * @return the value or {@code null} if this settings has no mapping
+     * @return the value or {@code null} if there is no key
      * @throws IllegalArgumentException
      *             if the value is not a string
      */
@@ -189,7 +285,7 @@ public class Settings {
 
     /**
      * Returns the value as the string to which the specified key is mapped, or
-     * {@code defaultValue} if this settings contains no mapping for the key.
+     * {@code defaultValue} if the Settings object contains no mapping for the key.
      *
      * @param setting
      *            the key
@@ -205,11 +301,12 @@ public class Settings {
 
     /**
      * Returns the value as the list of strings to which the specified key is
-     * mapped, or an empty list if this settings contains no mapping for the key.
+     * mapped, or an empty list if the Settings object contains no mapping for the
+     * key.
      *
      * @param setting
      *            the key
-     * @return the value or a empty list if this settings has no mapping
+     * @return the value or an empty list if there is no key
      * @throws IllegalArgumentException
      *             if the value is not an array of strings
      */
@@ -231,11 +328,11 @@ public class Settings {
 
     /**
      * Returns the value as the integer to which the specified key is mapped, or 0
-     * if this settings contains no mapping for the key.
+     * if the Settings object contains no mapping for the key.
      *
      * @param setting
      *            the key
-     * @return the value or 0 if this settings has no mapping
+     * @return the value or 0 if there is no key
      * @throws IllegalArgumentException
      *             if the value is not an integer
      */
@@ -251,13 +348,13 @@ public class Settings {
 
     /**
      * Returns the value as the string to which the specified key is mapped, or
-     * {@code defaultValue} if this settings contains no mapping for the key.
+     * {@code defaultValue} if the Settings object contains no mapping for the key.
      *
      * @param setting
      *            the key
      * @param defaultValue
      *            the default mapping of the key
-     * @return the value or {@code defaultValue} if this settings has no mapping
+     * @return the value or {@code defaultValue} if there is no key
      * @throws IllegalArgumentException
      *             if the value is not a string
      */
@@ -271,11 +368,12 @@ public class Settings {
 
     /**
      * Returns the value as the list of integers to which the specified key is
-     * mapped, or an empty list if this settings contains no mapping for the key.
+     * mapped, or an empty list if the Settings object contains no mapping for the
+     * key.
      *
      * @param setting
      *            the key
-     * @return the value or a empty list if this settings has no mapping
+     * @return the value or an empty list if there is no mapping
      * @throws IllegalArgumentException
      *             if the value is not an array of integers
      */
@@ -289,11 +387,11 @@ public class Settings {
 
     /**
      * Returns the value as the list of lists of integers to which the specified key
-     * is mapped, or an empty list if this settings contains no mapping for the key.
+     * is mapped, or an empty list if the Settings contains no mapping for the key.
      *
      * @param setting
      *            the key
-     * @return the value or an empty list if this settings has no mapping
+     * @return the value or an empty list if the Settings has no key
      * @throws IllegalArgumentException
      *             if the value is not an array of arrays of integers
      */
@@ -307,18 +405,15 @@ public class Settings {
     }
 
     /**
-     * Returns the value as the file path to which the specified key is mapped, or
-     * {@code null} if this settings contains no mapping for the key.
+     * Returns resolved path mapped by the key, or {@code null} if the Settings
+     * contains no such key. Paths are resolved using {@link SettingsAnchor}.
      *
-     * <p>
-     * If {@code "path"} is specified in the root object and the value is not an
-     * absolute path, this method joins them using the
-     * {@link java.nio.file.FileSystem#getSeparator name-separator} as the
-     * separator.
+     * Strongly prefer using {@link #getResource(String)} over this method, because
+     * this method can't handle classpath resources.
      *
      * @param setting
      *            the key
-     * @return the value or {@code null} if this settings has no mapping
+     * @return the resolved Path or {@code null} if there was no such key
      * @throws IllegalArgumentException
      *             if the value is not a string
      */
@@ -332,11 +427,14 @@ public class Settings {
 
     /**
      * Returns the setting value as the file path, or {@code null} if there is no
-     * corresponding setting
+     * corresponding setting.
+     *
+     * Strongly prefer using {@link #getResource(String)} over this method, because
+     * this method can't handle classpath resources.
      *
      * @param setting
      *            the key
-     * @return the value or {@code null}
+     * @return the resolved Path or {@code null}
      * @throws IllegalArgumentException
      *             if the value is not a string
      */
@@ -349,7 +447,8 @@ public class Settings {
     }
 
     /**
-     * Get value for setting as {@code Config.Resource}
+     * Get value for setting as {@link com.worksap.nlp.sudachi.Config.Resource}.
+     * Original value should be a string, but its value would be resolved as Path.
      *
      * @param setting
      *            key name
@@ -446,6 +545,20 @@ public class Settings {
         return result;
     }
 
+    /**
+     * Merge another Settings object with this object, returning a new Settings
+     * object. Scalar values of this object will be replaced by values of another
+     * object, arrays will be appended.
+     *
+     * The current object will not be modified.
+     *
+     * {@link SettingsAnchor} of the another object will be merged with this one,
+     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method.
+     *
+     * @param settings
+     *            another Settings object to merge
+     * @return new Settings object, containing merge results
+     */
     public Settings merge(Settings settings) {
         JsonObjectBuilder newRoot = Json.createObjectBuilder();
         for (Map.Entry<String, JsonValue> thisEntry : this.root.entrySet()) {
