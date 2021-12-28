@@ -142,7 +142,7 @@ public class Config {
      *             when IO fails
      */
     public static Config fromClasspath(URL resource, ClassLoader loader) throws IOException {
-        Settings settings = Settings.resolvedBy(SettingsAnchor.classpath(loader)).merge(resource);
+        Settings settings = Settings.resolvedBy(SettingsAnchor.classpath(loader)).read(resource);
         return fromSettings(settings);
     }
 

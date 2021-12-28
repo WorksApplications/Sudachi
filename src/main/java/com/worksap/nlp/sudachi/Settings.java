@@ -118,8 +118,8 @@ public class Settings {
     }
 
     /**
-     * Merges the content of the specified file into the current Settings object.
-     * Anchor is not modified.
+     * Reads the content of the specified file and merges it into the current
+     * Settings object. Anchor is not modified.
      *
      * @param file
      *            {@link Path} to the file
@@ -128,7 +128,7 @@ public class Settings {
      *             if IO fails
      * @see #parse(String, SettingsAnchor)
      */
-    public Settings merge(Path file) throws IOException {
+    public Settings read(Path file) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", file));
         String data = StringUtil.readFully(file);
         Settings settings = parse(data, this.base);
@@ -136,8 +136,8 @@ public class Settings {
     }
 
     /**
-     * Merges the content of the specified classpath resource into the current
-     * Settings object. Anchor is not modified.
+     * Reads the content of the specified classpath resource and merges it into the
+     * current Settings object. Anchor is not modified.
      *
      * @param resource
      *            result of {@link Class#getResource(String)}
@@ -146,7 +146,7 @@ public class Settings {
      *             if IO fails
      * @see #parse(String, SettingsAnchor)
      */
-    public Settings merge(URL resource) throws IOException {
+    public Settings read(URL resource) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", resource));
         String data = StringUtil.readFully(resource);
         Settings settings = parse(data, this.base);
@@ -244,7 +244,7 @@ public class Settings {
      * @see #parse(String, SettingsAnchor)
      */
     public static Settings fromFile(Path path, SettingsAnchor resolver) throws IOException {
-        return resolvedBy(resolver).merge(path);
+        return resolvedBy(resolver).read(path);
     }
 
     /**
@@ -260,7 +260,7 @@ public class Settings {
      * @see #parse(String, SettingsAnchor)
      */
     public static Settings fromClasspath(URL url, SettingsAnchor resolver) throws IOException {
-        return resolvedBy(resolver).merge(url);
+        return resolvedBy(resolver).read(url);
     }
 
     /**
@@ -416,7 +416,9 @@ public class Settings {
      * @return the resolved Path or {@code null} if there was no such key
      * @throws IllegalArgumentException
      *             if the value is not a string
+     * @deprecated use {@link #getResource(String)}
      */
+    @Deprecated
     public String getPath(String setting) {
         Path resource = getPathObject(setting);
         if (resource == null) {
@@ -437,7 +439,9 @@ public class Settings {
      * @return the resolved Path or {@code null}
      * @throws IllegalArgumentException
      *             if the value is not a string
+     * @deprecated use {@link #getResource(String)}
      */
+    @Deprecated
     public Path getPathObject(String setting) {
         String path = getString(setting);
         if (path == null) {
@@ -568,9 +572,12 @@ public class Settings {
      * {@link SettingsAnchor} of the another object will be merged with this one,
      * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method.
      *
+     * This is advanced API, in most cases Configs should be merged instead.
+     *
      * @param settings
      *            another Settings object to merge
      * @return new Settings object, containing merge results
+     * @see Config#merge(Config, Config.MergeMode)
      */
     public Settings merge(Settings settings) {
         JsonObjectBuilder newRoot = Json.createObjectBuilder();

@@ -175,7 +175,7 @@ public class SudachiCommandLine {
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
         SettingsAnchor anchor = SettingsAnchor.classpath().andThen(SettingsAnchor.none());
         Settings current = Settings.resolvedBy(anchor)
-                .merge(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
+                .read(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
         Config additional = Config.empty();
 
         String outputFileName = null;
