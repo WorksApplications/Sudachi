@@ -43,7 +43,8 @@ public class DefaultInputTextPluginTest {
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin = new DefaultInputTextPlugin();
         try {
-            plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite.def").getPath();
+            SettingsAnchor anchor = SettingsAnchor.classpath();
+            plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite.def"));
             plugin.setUp(new MockGrammar());
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -110,24 +111,24 @@ public class DefaultInputTextPluginTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidFormatOfIgnoreList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-                .getResource("rewrite_error_ignorelist.def").getPath();
+        SettingsAnchor anchor = SettingsAnchor.classpath();
+        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_ignorelist.def"));
         plugin.setUp(new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidFormatOfReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader()
-                .getResource("rewrite_error_replacelist.def").getPath();
+        SettingsAnchor anchor = SettingsAnchor.classpath();
+        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_replacelist.def"));
         plugin.setUp(new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void duplicatedLinesInReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.rewriteDef = DefaultInputTextPluginTest.class.getClassLoader().getResource("rewrite_error_dup.def")
-                .getPath();
+        SettingsAnchor anchor = SettingsAnchor.classpath();
+        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_dup.def"));
         plugin.setUp(new MockGrammar());
     }
 }

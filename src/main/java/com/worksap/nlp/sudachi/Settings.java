@@ -448,7 +448,8 @@ public class Settings {
 
     /**
      * Get value for setting as {@link com.worksap.nlp.sudachi.Config.Resource}.
-     * Original value should be a string, but its value would be resolved as Path.
+     * Original value should be a string, but its value would be resolved with an
+     * anchor.
      *
      * @param setting
      *            key name
@@ -467,6 +468,18 @@ public class Settings {
         return base.toResource(obj);
     }
 
+    /**
+     * Get list of values for key as a List of
+     * {@link com.worksap.nlp.sudachi.Config.Resource}. Original values for
+     * resources should be strings, but their values would be resolved with an
+     * anchor.
+     * 
+     * @param setting
+     *            key name
+     * @param <T>
+     *            type of resource
+     * @return list of resources corresponding to the key
+     */
     public <T> List<Config.Resource<T>> getResourceList(String setting) {
         List<String> list = getStringList(setting);
         if (list == null) {

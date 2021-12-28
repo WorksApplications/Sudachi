@@ -65,6 +65,30 @@ public class SudachiCommandLineTest {
     }
 
     @Test
+    public void commandLineSystemDict() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "--systemDict",
+                "system.dic", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(10L));
+        }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.filter(l -> l.equals("EOS")).count(), is(2L));
+        }
+    }
+
+    @Test
+    public void commandLineUserDict() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "--userDict",
+                "user.dic", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(10L));
+        }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.filter(l -> l.equals("EOS")).count(), is(2L));
+        }
+    }
+
+    @Test
     public void commandLineHelp() throws IOException {
         SudachiCommandLine.main(new String[] { "-h" });
     }

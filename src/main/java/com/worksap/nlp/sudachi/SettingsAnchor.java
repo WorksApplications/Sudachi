@@ -22,47 +22,139 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Resolves paths of {@link Settings}, when converting them to {@link Config}s.
+ * When creating {@link com.worksap.nlp.sudachi.Config.Resource} objects, paths
+ * will be resolved relative to an anchor, which is bound to Settings.
+ *
+ * <p>
+ * There are three types of anchors:
+ * <ul>
+ * <li>{@link None} which will resolve paths as filesystem, relative to the
+ * CWD</li>
+ * <li>{@link Filesystem} which will resolve paths relative to a provided
+ * directory</li>
+ * <li>{@link Classpath} which will resolve classpath resources</li>
+ * </ul>
+ * Use static methods for their creation.
+ * </p>
+ *
+ * It is also possible to chain anchors using {@link #andThen(SettingsAnchor)}
+ * method, which will resolve the first existing path.
+ */
 public abstract class SettingsAnchor {
     private static final Logger logger = Logger.getLogger(SettingsAnchor.class.getName());
 
+    /**
+     * Create an anchor for the root of classpath, using Settings classloader.
+     * 
+     * @return classpath anchor
+     */
     public static SettingsAnchor classpath() {
         return classpath(Settings.class.getClassLoader());
     }
 
+    /**
+     * Create an anchor for the root of the classpath, using provided classloader
+     * 
+     * @param loader
+     *            provided classloader
+     * @return classpath anchor
+     */
     public static SettingsAnchor classpath(ClassLoader loader) {
         return classpath("", loader);
     }
 
+    /**
+     * Create an anchor for the provided prefix
+     * 
+     * @param prefix
+     *            in the classpath, should be a path
+     * @param loader
+     *            provided classloader
+     * @return classpath anchor
+     */
     public static SettingsAnchor classpath(String prefix, ClassLoader loader) {
         return new Classpath(Paths.get(prefix), loader);
     }
 
+    /**
+     * Create an anchor relative to the provided class
+     * 
+     * @param clz
+     *            provided class
+     * @return classpath anchor
+     */
     public static SettingsAnchor classpath(Class<?> clz) {
         String name = clz.getName();
         String path = name.replace(".", "/");
         return new Classpath(Paths.get(path).getParent(), clz.getClassLoader());
     }
 
-    public static SettingsAnchor filesystem(Path p) {
-        return new Filesystem(p);
+    /**
+     * Create a filesystem anchor relative to the path
+     * 
+     * @param path
+     *            path
+     * @return filesystem anchor
+     */
+    public static SettingsAnchor filesystem(Path path) {
+        return new Filesystem(path);
     }
 
+    /**
+     * Create a filesystem anchor relative to the current directory
+     * 
+     * @return filesystem anchor
+     */
     public static SettingsAnchor none() {
         return None.INSTANCE;
     }
 
+    /**
+     * Resolve a path relative to the anchor
+     * 
+     * @param part
+     *            path suffix
+     * @return full path. It may not be usable for classpath.
+     */
     Path resolve(String part) {
         return Paths.get(part);
     }
 
+    /**
+     * Check whether the path exists.
+     * 
+     * @param path
+     *            fully resolved path
+     * @return true if the path points to an existing file
+     */
     boolean exists(Path path) {
         return Files.exists(path);
     }
 
+    /**
+     * Create a resource for the fully resolved path
+     * 
+     * @param path
+     *            fully resolved path
+     * @param <T>
+     *            type of the resource
+     * @return resource, encapsulating path, works both for filesystem and classpath
+     */
     <T> Config.Resource<T> toResource(Path path) {
         return new Config.Resource.Filesystem<>(path);
     }
 
+    /**
+     * Chain another anchor after the current one. Path will be resolved for the
+     * first anchor, if the pointed file does not exist, path will be resolved by
+     * the second anchor.
+     * 
+     * @param other
+     *            another anchor
+     * @return chained anchor
+     */
     public SettingsAnchor andThen(SettingsAnchor other) {
         if (this.equals(other)) {
             return this;

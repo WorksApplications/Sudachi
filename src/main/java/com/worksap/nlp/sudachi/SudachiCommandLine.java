@@ -242,9 +242,13 @@ public class SudachiCommandLine {
                 stderr.print("\t--userDict file\tpath to an additional user dictionary (appended to -s)\n");
                 return;
             } else if (args[i].equals("--userDict")) {
-                additional = additional.addUserDictionary(Paths.get(args[++i]));
+                Path resolved = anchor.resolve(args[++i]);
+                logger.fine(() -> "using system dict: " + resolved);
+                additional = additional.addUserDictionary(resolved);
             } else if (args[i].equals("--systemDict")) {
-                additional = additional.systemDictionary(Paths.get(args[++i]));
+                Path resolved = anchor.resolve(args[++i]);
+                logger.fine(() -> "using user dict: " + resolved);
+                additional = additional.systemDictionary(resolved);
             } else {
                 break;
             }

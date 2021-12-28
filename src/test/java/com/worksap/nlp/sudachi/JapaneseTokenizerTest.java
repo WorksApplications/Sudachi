@@ -246,8 +246,8 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void disableEmptyMorpheme() throws IOException {
-        String path = temporaryFolder.getRoot().getPath();
-        dict = new DictionaryFactory().create(path, "{\"allowEmptyMorpheme\":false}", true);
+        Path config = temporaryFolder.getRoot().toPath().resolve("sudachi.json");
+        dict = new DictionaryFactory().create(Config.fromFile(config).allowEmptyMorpheme(false));
         tokenizer = (JapaneseTokenizer) dict.create();
 
         List<Morpheme> s = tokenizer.tokenize("…");

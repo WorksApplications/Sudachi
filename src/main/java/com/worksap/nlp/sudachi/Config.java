@@ -732,7 +732,7 @@ public class Config {
         /**
          * Get view of this resource as a ByteBuffer. When it is possible, the data will
          * be memory mapped, if it is not possible, it will be fully read into the
-         * memory. Will not work for files more than 2^32 bytes in size.
+         * memory. Will not work for files more than 2^31 bytes (2 GB) in size.
          *
          * @return ByteBuffer containing the whole contents of the file
          * @throws IOException
