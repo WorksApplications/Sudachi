@@ -152,81 +152,11 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <compilerArgument>${compilerArgument}</compilerArgument>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0-M5</version>
         <configuration>
           <argLine>@{argLine} -Dfile.encoding=UTF-8 -Djava.util.logging.config.class=com.worksap.nlp.sudachi.TestLoggingConfig</argLine>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <executions>
-          <execution>
-            <id>build-system-dict-for-test</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <phase>process-test-resources</phase>
-            <configuration>
-              <mainClass>${dictionary.builder}</mainClass>
-              <arguments>
-                <argument>-o</argument>
-                <argument>${project.build.testOutputDirectory}/system.dic</argument>
-                <argument>-m</argument>
-                <argument>${test.dict.source.directory}/matrix.def</argument>
-                <argument>-d</argument>
-                <argument>the system dictionary for the unit tests</argument>
-                <argument>${test.dict.source.directory}/lex.csv</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>build-user-dict-for-test</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <phase>process-test-resources</phase>
-            <configuration>
-              <mainClass>${userdictionary.builder}</mainClass>
-              <arguments>
-                <argument>-o</argument>
-                <argument>${project.build.testOutputDirectory}/user.dic</argument>
-                <argument>-s</argument>
-                <argument>${project.build.testOutputDirectory}/system.dic</argument>
-                <argument>${test.dict.source.directory}/user.csv</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>build-user2-dict-for-test</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <phase>process-test-resources</phase>
-            <configuration>
-              <mainClass>${userdictionary.builder}</mainClass>
-              <arguments>
-                <argument>-o</argument>
-                <argument>${project.build.testOutputDirectory}/user2.dic</argument>
-                <argument>-s</argument>
-                <argument>${project.build.testOutputDirectory}/system.dic</argument>
-                <argument>${test.dict.source.directory}/user2.csv</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -291,6 +221,42 @@
                 <sourceDir>${project.basedir}/src/test/java</sourceDir>
               </sourceDirs>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <compilerArgument>${compilerArgument}</compilerArgument>
+        </configuration>
+        <executions>
+          <!-- Replacing default-compile as it is treated specially by maven -->
+          <execution>
+            <id>default-compile</id>
+            <phase>none</phase>
+          </execution>
+          <!-- Replacing default-testCompile as it is treated specially by maven -->
+          <execution>
+            <id>default-testCompile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>java-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>java-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

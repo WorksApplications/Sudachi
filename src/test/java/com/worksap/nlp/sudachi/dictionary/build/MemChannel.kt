@@ -3,10 +3,13 @@ package com.worksap.nlp.sudachi.dictionary.build
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
-class BytesChannel : SeekableByteChannel {
-    var buffer: ByteBuffer = ByteBuffer.allocate(1024 * 1024)
-    var size = 0L
+class MemChannel : SeekableByteChannel {
+    private var buffer: ByteBuffer = ByteBuffer.allocate(1024 * 1024)
+    private var size = 0L
 
     init {
         buffer.order(ByteOrder.LITTLE_ENDIAN)
@@ -70,5 +73,14 @@ class BytesChannel : SeekableByteChannel {
         dup.limit(buffer.position())
         dup.order(ByteOrder.LITTLE_ENDIAN)
         return dup
+    }
+
+    fun writeData(path: Path) {
+        Files.newByteChannel(
+            path,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING
+        ).use { it.write(buffer()) }
     }
 }

@@ -216,7 +216,7 @@ public class SudachiCommandLine {
                 String resourcesDirectory = args[++i];
                 anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory));
                 // first resolve wrt new directory
-                current = Settings.resolvedBy(anchor).merge(current);
+                current = current.merge(Settings.resolvedBy(anchor));
             } else if (args[i].equals("-s") && i + 1 < args.length) {
                 Config other = Config.fromJsonString(args[++i], anchor);
                 additional = additional.merge(other, Config.MergeMode.APPEND);

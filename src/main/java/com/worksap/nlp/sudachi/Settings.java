@@ -489,12 +489,13 @@ public class Settings {
         if (list == null) {
             return null;
         }
-        return list.stream().map(this::<T>extractResource).collect(Collectors.toList());
+        return list.stream().map(this::<T>extractResource).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**
      * Returns the value as the list of file paths to which the specified key is
-     * mapped, or an empty list if this settings contains no mapping for the key.
+     * mapped, or an empty list if the settings object contains no mapping for the
+     * key.
      *
      * <p>
      * If {@code "path"} is specified in the root object and the file path is not an
@@ -570,7 +571,8 @@ public class Settings {
      * The current object will not be modified.
      *
      * {@link SettingsAnchor} of the another object will be merged with this one,
-     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method.
+     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method,
+     * using the anchor of the passed Settings object before the current anchor.
      *
      * This is advanced API, in most cases Configs should be merged instead.
      *

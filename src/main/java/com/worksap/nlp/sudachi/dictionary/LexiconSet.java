@@ -32,10 +32,8 @@ public class LexiconSet implements Lexicon {
     }
 
     public void add(Lexicon lexicon, short posOffset) {
-        if (!lexicons.contains(lexicon)) {
-            lexicons.add(lexicon);
-            posOffsets.add(posOffset);
-        }
+        lexicons.add(lexicon);
+        posOffsets.add(posOffset);
     }
 
     public boolean isFull() {

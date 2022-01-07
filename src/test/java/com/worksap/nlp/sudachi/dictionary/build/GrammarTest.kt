@@ -13,7 +13,7 @@ class GrammarTest {
         Res("test.matrix") { cm.readEntries(it) }
         val pos = POSTable()
         assertEquals(0, pos.getId(POS("a", "b", "c", "d", "e", "f")))
-        val outbuf = BytesChannel()
+        val outbuf = MemChannel()
         val out = ModelOutput(outbuf)
         pos.writeTo(out)
         cm.writeTo(out)
@@ -54,7 +54,7 @@ class GrammarTest {
         }
         val cm = ConnectionMatrix()
         Res("test.matrix") { cm.readEntries(it) }
-        val outbuf = BytesChannel()
+        val outbuf = MemChannel()
         val out = ModelOutput(outbuf)
         posTable.writeTo(out)
         cm.writeTo(out)

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import com.worksap.nlp.sudachi.Utils;
 
 import org.junit.Before;
@@ -39,7 +40,9 @@ public class DictionaryHeaderPrinterTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/unk.def");
+        TestDictionary.INSTANCE.getSystemDictData().writeData(temporaryFolder.getRoot().toPath().resolve("system.dic"));
+        TestDictionary.INSTANCE.getUserDict1Data().writeData(temporaryFolder.getRoot().toPath().resolve("user.dic"));
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/unk.def");
     }
 
     @Test

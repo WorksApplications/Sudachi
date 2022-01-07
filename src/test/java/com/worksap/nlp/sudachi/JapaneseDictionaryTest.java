@@ -33,8 +33,7 @@ public class JapaneseDictionaryTest {
 
     @Before
     public void setUp() throws IOException {
-        Config config = Config.fromClasspath("sudachi.json");
-        dict = new DictionaryFactory().create(config);
+        dict = TestDictionary.INSTANCE.user0();
     }
 
     @After
@@ -49,7 +48,7 @@ public class JapaneseDictionaryTest {
 
     @Test
     public void getPartOfSpeechSize() {
-        assertThat(dict.getPartOfSpeechSize(), is(9));
+        assertThat(dict.getPartOfSpeechSize(), is(8));
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -229,7 +230,11 @@ public abstract class SettingsAnchor {
 
         @Override
         <T> Config.Resource<T> toResource(Path path) {
-            return new Config.Resource.Classpath<>(loader.getResource(resourceName(path)));
+            URL resource = loader.getResource(resourceName(path));
+            if (resource == null) {
+                return null;
+            }
+            return new Config.Resource.Classpath<>(resource);
         }
 
         @Override

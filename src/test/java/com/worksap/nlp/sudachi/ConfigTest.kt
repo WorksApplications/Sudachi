@@ -43,10 +43,6 @@ class ConfigTest {
     @Test
     fun resolveClasspathDefault() {
         val cfg = Config.fromClasspath()
-        assert((cfg.systemDictionary.repr() as URL).path.endsWith("system.dic"))
-        val user = cfg.userDictionaries
-        assertEquals(user.size, 1)
-        assert((user[0].repr() as URL).path.endsWith("user.dic"))
         assert((cfg.characterDefinition.repr() as URL).path.endsWith("char.def"))
         assertEquals(cfg.inputTextPlugins.size, 3)
         assertEquals(cfg.oovProviderPlugins.size, 1)

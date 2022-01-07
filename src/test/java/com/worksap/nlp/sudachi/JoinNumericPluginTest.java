@@ -30,7 +30,7 @@ public class JoinNumericPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Config config = Config.fromClasspath()
+        Config config = TestDictionary.INSTANCE.user0Cfg()
                 .characterDefinition(getClass().getClassLoader().getResource("joinnumeric/char.def"));
         Dictionary dict = new DictionaryFactory().create(config);
         tokenizer = (JapaneseTokenizer) dict.create();

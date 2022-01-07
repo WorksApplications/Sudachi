@@ -40,13 +40,9 @@ public class IgnoreYomiganaPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
-        String jsonString = StringUtil.readFully(getClass().getResource("/sudachi.json"));
-        Config config = Config.fromClasspath();
-        Dictionary dict = new DictionaryFactory().create(config);
         plugin = new IgnoreYomiganaPlugin();
 
-        Settings settings = Settings.parse(jsonString, SettingsAnchor.none());
+        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), SettingsAnchor.none());
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.IgnoreYomiganaPlugin")) {
@@ -56,7 +52,7 @@ public class IgnoreYomiganaPluginTest {
         }
 
         try {
-            plugin.setUp(((JapaneseDictionary) dict).grammar);
+            plugin.setUp(TestDictionary.INSTANCE.user0().grammar);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

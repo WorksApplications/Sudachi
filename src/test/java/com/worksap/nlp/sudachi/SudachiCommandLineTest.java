@@ -42,8 +42,9 @@ public class SudachiCommandLineTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/sudachi.json", "/user.dic", "/char.def",
-                "/unk.def");
+        TestDictionary.INSTANCE.getSystemDictData().writeData(temporaryFolder.getRoot().toPath().resolve("system.dic"));
+        TestDictionary.INSTANCE.getUserDict1Data().writeData(temporaryFolder.getRoot().toPath().resolve("user.dic"));
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/sudachi.json", "/char.def", "/unk.def");
         temporaryFolderName = temporaryFolder.getRoot().getPath();
         outputFileName = temporaryFolder.newFile().getPath();
         inputFileName = temporaryFolder.newFile().getPath();

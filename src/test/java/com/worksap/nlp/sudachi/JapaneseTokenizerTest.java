@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,24 +35,15 @@ import javax.json.JsonReader;
 import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class JapaneseTokenizerTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     Dictionary dict;
     JapaneseTokenizer tokenizer;
 
     @Before
     public void setUp() throws IOException {
-        Path tmpPath = temporaryFolder.getRoot().toPath();
-        Utils.copyResource(tmpPath, "/system.dic", "/user.dic", "/char.def", "/unk.def", "/sudachi.json");
-        Config config = Config.fromFile(tmpPath.resolve("sudachi.json"));
-        dict = new DictionaryFactory().create(config);
+        dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
     }
 
@@ -246,8 +236,9 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void disableEmptyMorpheme() throws IOException {
-        Path config = temporaryFolder.getRoot().toPath().resolve("sudachi.json");
-        dict = new DictionaryFactory().create(Config.fromFile(config).allowEmptyMorpheme(false));
+        Config config = TestDictionary.INSTANCE.user1Cfg();
+        dict = new DictionaryFactory()
+                .create(Config.empty().merge(config, Config.MergeMode.REPLACE).allowEmptyMorpheme(false));
         tokenizer = (JapaneseTokenizer) dict.create();
 
         List<Morpheme> s = tokenizer.tokenize("…");

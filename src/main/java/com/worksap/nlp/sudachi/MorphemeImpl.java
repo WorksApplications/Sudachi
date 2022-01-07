@@ -110,4 +110,16 @@ class MorphemeImpl implements Morpheme {
         return wordInfo;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("MorphemeImpl{");
+        sb.append("begin=").append(begin());
+        sb.append(", end=").append(end());
+        sb.append(", surface=").append(surface());
+        sb.append(", pos=").append(partOfSpeechId()).append('/').append(partOfSpeech());
+        int wordId = getWordId();
+        sb.append(", wid=(").append(WordId.dic(wordId)).append(',').append(WordId.word(wordId));
+        sb.append(")}");
+        return sb.toString();
+    }
 }

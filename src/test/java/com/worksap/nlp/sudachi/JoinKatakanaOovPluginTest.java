@@ -31,9 +31,8 @@ public class JoinKatakanaOovPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Dictionary dict = new DictionaryFactory().create(Config.fromClasspath());
+        Dictionary dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
-
         plugin = new JoinKatakanaOovPlugin();
     }
 

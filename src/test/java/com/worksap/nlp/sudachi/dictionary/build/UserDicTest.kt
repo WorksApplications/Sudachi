@@ -30,7 +30,7 @@ class TestDic {
 
     fun system(data: String): TestDic {
         val bldr = DicBuilder.system().matrix(matrixUrl).lexicon(data.byteInputStream())
-        val ch = BytesChannel()
+        val ch = MemChannel()
         bldr.build(ch)
         this.systemDic = BinaryDictionary(ch.buffer())
         return this
@@ -38,7 +38,7 @@ class TestDic {
 
     fun user(data: String): TestDic {
         val bldr = DicBuilder.user(systemDic).lexicon(data.byteInputStream())
-        val ch = BytesChannel()
+        val ch = MemChannel()
         bldr.build(ch)
         this.userDics.add(BinaryDictionary(ch.buffer()))
         return this
