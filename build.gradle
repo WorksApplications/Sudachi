@@ -53,6 +53,12 @@ tasks.withType(Test) {
     systemProperty "file.encoding", "utf-8"
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"

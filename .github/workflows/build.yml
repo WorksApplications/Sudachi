@@ -32,5 +32,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew --no-daemon build --info
+          ./gradlew --no-daemon --info build jacocoTestReport
           ./gradlew --no-daemon sonarqube -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.skip=${{ matrix.java-version != 11 }} --info
