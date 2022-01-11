@@ -21,17 +21,16 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: temurin
-          cache: maven
+          cache: gradle
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report -B
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.skip=${{ matrix.java-version != 11 }}
+          ./gradlew --no-daemon build --info
+          ./gradlew --no-daemon sonarqube -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.skip=${{ matrix.java-version != 11 }} --info

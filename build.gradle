@@ -32,7 +32,7 @@ dependencies {
 }
 
 group = 'com.worksap.nlp'
-version = '0.5.4-SNAPSHOT'
+version = '0.6.0-SNAPSHOT'
 description = 'Sudachi Japanese Morphological Analyzer'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -68,7 +68,8 @@ sonarqube {
 
 // See https://github.com/diffplug/spotless/tree/main/plugin-gradle
 spotless {
-    ratchetFrom 'origin/develop'
+    // triggers https://github.com/diffplug/spotless/issues/911
+    // ratchetFrom 'origin/develop'
     encoding 'UTF-8' // all formats will be interpreted as UTF-8
 
     format 'misc', {
@@ -84,7 +85,6 @@ spotless {
         licenseHeaderFile('.formatter/license-header')
     }
     kotlin {
-        ratchetFrom('origin/develop')
         // by default the target is every '.kt' and '.kts` file in the java sourcesets
         ktfmt('0.30')
         licenseHeaderFile('.formatter/license-header')

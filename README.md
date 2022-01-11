@@ -126,15 +126,15 @@ The followings are examples in the core dictionary.
     A：選挙/管理/委員/会
     B：選挙/管理/委員会
     C：選挙管理委員会
-    
+
     A：客室/乗務/員
     B：客室/乗務員
     C：客室乗務員
-    
+
     A：労働/者/協同/組合
     B：労働者/協同/組合
     C：労働者協同組合
-    
+
     A：機能/性/食品
     B：機能性/食品
     C：機能性食品
@@ -144,15 +144,15 @@ The followings are examples in the full dictionary.
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-    
+
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-    
+
     A：さっぽろ/テレビ/塔
     B：さっぽろ/テレビ塔
     C：さっぽろテレビ塔
-    
+
     A：カンヌ/国際/映画/祭
     B：カンヌ/国際/映画祭
     C：カンヌ国際映画祭
@@ -269,13 +269,13 @@ To create and use your own dictionaries, please refer to [docs/user_dict.md](htt
 Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, Version2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
    Copyright (c) 2017 Works Applications Co., Ltd.
-  
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -314,7 +314,7 @@ We have a Slack workspace for developers and users to ask questions and discuss 
 
 ## Citing Sudachi
 
-We have published a paper about Sudachi and its language resources; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+We have published a paper about Sudachi and its language resources; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018).
 
 When citing Sudachi in papers, books, or services, please use the follow BibTex entry;
 
@@ -459,15 +459,15 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
     A：選挙/管理/委員/会
     B：選挙/管理/委員会
     C：選挙管理委員会
-    
+
     A：客室/乗務/員
     B：客室/乗務員
     C：客室乗務員
-    
+
     A：労働/者/協同/組合
     B：労働者/協同/組合
     C：労働者協同組合
-    
+
     A：機能/性/食品
     B：機能性/食品
     C：機能性食品
@@ -477,15 +477,15 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-    
+
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-    
+
     A：さっぽろ/テレビ/塔
     B：さっぽろ/テレビ塔
     C：さっぽろテレビ塔
-    
+
     A：カンヌ/国際/映画/祭
     B：カンヌ/国際/映画祭
     C：カンヌ国際映画祭
@@ -622,7 +622,7 @@ Python 版も公開しています。
 
 ## Sudachiの引用
 
-Sudachiとその言語資源について、論文を発表しています; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+Sudachiとその言語資源について、論文を発表しています; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018).
 
 Sudachiを論文や書籍、サービスなどで引用される際には、以下のBibTexをご利用ください。
 
