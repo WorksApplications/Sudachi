@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.json.JsonObject;
@@ -45,18 +46,17 @@ public class ProlongedSoundMarkInputTextPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/joinnumeric/char.def",
-                "/unk.def");
-        String path = temporaryFolder.getRoot().getPath();
-        String jsonString = Utils.readAllResource("/sudachi.json");
-        Dictionary dict = new DictionaryFactory().create(path, jsonString);
+        Path folder = temporaryFolder.getRoot().toPath();
+        Utils.copyResource(folder, "/system.dic", "/user.dic", "/joinnumeric/char.def", "/unk.def");
+        Dictionary dict = new DictionaryFactory().create();
         plugin = new ProlongedSoundMarkInputTextPlugin();
 
-        Settings settings = Settings.parseSettings(null, jsonString);
+        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"),
+                SettingsAnchor.filesystem(folder));
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin")) {
-                plugin.setSettings(new Settings(p, null));
+                plugin.setSettings(new Settings(p, SettingsAnchor.none()));
                 break;
             }
         }

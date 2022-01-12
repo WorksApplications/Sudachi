@@ -23,26 +23,15 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
-import org.junit.rules.TemporaryFolder;
-
 public class JoinKatakanaOovPluginTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     JapaneseTokenizer tokenizer;
     JoinKatakanaOovPlugin plugin;
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/char.def", "/unk.def");
-
-        String path = temporaryFolder.getRoot().getPath();
-        String settings = Utils.readAllResource("/sudachi.json");
-        Dictionary dict = new DictionaryFactory().create(path, settings);
+        Dictionary dict = new DictionaryFactory().create(Config.fromClasspath());
         tokenizer = (JapaneseTokenizer) dict.create();
 
         plugin = new JoinKatakanaOovPlugin();

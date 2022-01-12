@@ -17,22 +17,13 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.util.logging.LogManager;
 
-public class Utils {
-    public static void copyResource(Path folder, String... files) throws IOException {
-        for (String file : files) {
-            try {
-                URL src = Utils.class.getResource(file);
-                Path dest = Paths.get(src.toURI()).getFileName();
-                Files.copy(src.openStream(), folder.resolve(dest));
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
-            }
+public class TestLoggingConfig {
+    public TestLoggingConfig() throws IOException {
+        try (InputStream is = TestLoggingConfig.class.getClassLoader().getResourceAsStream("logging.properties")) {
+            LogManager.getLogManager().readConfiguration(is);
         }
     }
 }

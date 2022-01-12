@@ -57,7 +57,7 @@ public class DictionaryPrinterTest {
     public void printWithUserDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         File systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
-        try (BinaryDictionary systemDict = BinaryDictionary.readSystemDictionary(systemDictFile.getPath())) {
+        try (BinaryDictionary systemDict = BinaryDictionary.loadSystem(systemDictFile.getPath())) {
             String[] actuals;
             try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
                 DictionaryPrinter.printDictionary(inputFile.getPath(), systemDict, ps);
@@ -80,6 +80,6 @@ public class DictionaryPrinterTest {
     @Test(expected = IOException.class)
     public void readGrammarWithInvalidFile() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "unk.def");
-        BinaryDictionary.readSystemDictionary(inputFile.getPath());
+        BinaryDictionary.loadSystem(inputFile.getPath());
     }
 }

@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,7 +73,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 class DefaultInputTextPlugin extends InputTextPlugin {
 
     /** the file path of the rules */
-    String rewriteDef;
+    Config.Resource<InputStream> rewriteDef;
 
     private Set<Integer> ignoreNormalizeSet = new HashSet<>();
     private Map<Character, Integer> keyLengths = new HashMap<>();
@@ -89,19 +88,26 @@ class DefaultInputTextPlugin extends InputTextPlugin {
     @Override
     public void setUp(Grammar grammar) throws IOException {
         if (rewriteDef == null) {
-            rewriteDef = settings.getPath("rewriteDef");
+            rewriteDef = settings.getResource("rewriteDef");
         }
 
-        InputStream is;
-        if (rewriteDef != null) {
-            is = new FileInputStream(rewriteDef);
-        } else {
-            is = DefaultInputTextPlugin.class.getClassLoader().getResourceAsStream("rewrite.def");
+        InputStream is = null;
+        try {
+            if (rewriteDef != null) {
+                is = rewriteDef.consume(Config.Resource::asInputStream);
+            } else {
+                is = DefaultInputTextPlugin.class.getClassLoader().getResourceAsStream("rewrite.def");
+            }
+            if (is == null) {
+                throw new IOException("rewriteDef is not defined");
+            }
+            readRewriteLists(is);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
         }
-        if (is == null) {
-            throw new IOException("rewriteDef is not defined");
-        }
-        readRewriteLists(is);
+
     }
 
     @Override

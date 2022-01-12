@@ -17,46 +17,40 @@
 package com.worksap.nlp.sudachi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class UserDictionaryTest {
-
-    static final String COMMON_SETTINGS = "{\"systemDict\":\"system.dic\",\"oovProviderPlugin\":[{\"class\":\"com.worksap.nlp.sudachi.SimpleOovProviderPlugin\",\"oovPOS\":[\"名詞\",\"普通名詞\",\"一般\",\"*\",\"*\",\"*\"],\"leftId\":8,\"rightId\":8,\"cost\":6000}],\"userDict\":[";
-    static final String COMMON_SETTINGS_TAIL = "]}";
-    static final String USER_DICT = "\"user.dic\"";
-    static final String USER_DICT2 = "\"user2.dic\"";
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    String path;
+    URL userDic1;
+    URL userDic2;
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/user2.dic");
-        path = temporaryFolder.getRoot().getPath();
+        ClassLoader classLoader = getClass().getClassLoader();
+        userDic1 = classLoader.getResource("user.dic");
+        userDic2 = classLoader.getResource("user2.dic");
+        assertThat(userDic1, notNullValue());
+        assertThat(userDic2, notNullValue());
     }
 
     @Test
     public void fullUserDict() throws IOException {
-        ArrayList<String> userDicts = new ArrayList<>();
-        for (int i = 0; i < 13; i++) {
-            userDicts.add(USER_DICT);
-        }
-        userDicts.add(USER_DICT2);
-        String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
+        Config config = Config.fromClasspath().clearUserDictionaries();
 
-        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+        for (int i = 0; i < 13; i++) {
+            config.addUserDictionary(userDic1);
+        }
+        config.addUserDictionary(userDic2);
+
+        try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
             assertThat(morphs.size(), is(1));
@@ -68,18 +62,18 @@ public class UserDictionaryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void openTooManyUserDict() throws IOException {
-        ArrayList<String> userDicts = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            userDicts.add(USER_DICT);
+        Config config = Config.fromClasspath();
+        for (int i = 0; i < 14; i++) { // there is one from basic configuration
+            config.addUserDictionary(userDic1);
         }
-        String settings = COMMON_SETTINGS + String.join(",", userDicts) + COMMON_SETTINGS_TAIL;
-        new DictionaryFactory().create(path, settings);
+        new DictionaryFactory().create(config);
     }
 
     @Test
     public void splitForUserDict() throws IOException {
-        String settings = COMMON_SETTINGS + USER_DICT2 + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
-        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+        Config config = Config.fromClasspath().clearUserDictionaries().addUserDictionary(userDic2)
+                .addUserDictionary(userDic1);
+        try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("東京府");
             assertThat(morphs.size(), is(1));
@@ -93,8 +87,8 @@ public class UserDictionaryTest {
 
     @Test
     public void userDefinedPos() throws IOException {
-        String settings = COMMON_SETTINGS + USER_DICT + ", " + USER_DICT2 + COMMON_SETTINGS_TAIL;
-        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+        Config config = Config.fromClasspath().addUserDictionary(userDic2);
+        try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));
@@ -104,8 +98,8 @@ public class UserDictionaryTest {
             assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "カボス"));
         }
 
-        settings = COMMON_SETTINGS + USER_DICT2 + ", " + USER_DICT + COMMON_SETTINGS_TAIL;
-        try (Dictionary dict = new DictionaryFactory().create(path, settings)) {
+        config = Config.fromClasspath().clearUserDictionaries().addUserDictionary(userDic2).addUserDictionary(userDic1);
+        try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));

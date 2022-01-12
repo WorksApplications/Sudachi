@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +25,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -34,8 +41,7 @@ import java.util.logging.Logger;
  * A command-line morphological analysis tool.
  */
 public class SudachiCommandLine {
-
-    static Logger logger;
+    static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
     static class FileOrStdoutPrintStream extends PrintStream {
 
@@ -65,7 +71,7 @@ public class SudachiCommandLine {
             MorphemeFormatterPlugin formatter, boolean ignoreError, boolean isFileInput, boolean isWordSegmentation)
             throws IOException {
 
-        try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, "UTF-8")
+        try (InputStreamReader inputReader = isFileInput ? new InputStreamReader(input, StandardCharsets.UTF_8)
                 : new InputStreamReader(input); BufferedReader reader = new BufferedReader(inputReader)) {
 
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -87,25 +93,43 @@ public class SudachiCommandLine {
         }
     }
 
-    static MorphemeFormatterPlugin getFormatter(String path, String jsonString, boolean mergeSettings,
-            boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation) throws IOException {
-        Settings settings = JapaneseDictionary.buildSettings(path, jsonString, mergeSettings);
-        List<MorphemeFormatterPlugin> formatters = settings.getPluginList("formatterPlugin");
-        if (formatters.isEmpty()) {
-            throw new IllegalArgumentException("no morpheme formatter");
-        }
+    static MorphemeFormatterPlugin makeFormatter(boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation,
+            String formatterKind, Settings settings) throws IOException {
         MorphemeFormatterPlugin formatter;
-        if (isWordSegmentation) {
+        if (settings == null) {
+            settings = Settings.empty();
+        }
+        if (formatterKind != null) {
+            formatter = instantiatePluginClass(formatterKind, settings);
+        } else if (isWordSegmentation) {
+            formatter = new WordSegmentationFormatter();
+            formatter.setSettings(settings);
+            formatter.setUp();
             if (isLineBreakAtEosInWordSegmentation) {
-                formatter = formatters.get(1);
+                formatter.setEosString("\n");
             } else {
-                formatter = formatters.get(2);
+                formatter.setEosString(" ");
             }
         } else {
-            formatter = formatters.get(0);
+            formatter = new SimpleMorphemeFormatter();
+            formatter.setSettings(settings);
+            formatter.setUp();
         }
+        return formatter;
+    }
 
-        formatter.setUp();
+    private static MorphemeFormatterPlugin instantiatePluginClass(String formatterKind, Settings settings)
+            throws IOException {
+        MorphemeFormatterPlugin formatter;
+        try {
+            Class<?> pluginClass = Class.forName(formatterKind);
+            formatter = (MorphemeFormatterPlugin) pluginClass.getDeclaredConstructor().newInstance();
+            formatter.setSettings(settings);
+            formatter.setUp();
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
+                | InvocationTargetException | ClassCastException e) {
+            throw new IllegalArgumentException("failed to instantiate formatter " + formatterKind, e);
+        }
         return formatter;
     }
 
@@ -153,35 +177,49 @@ public class SudachiCommandLine {
      *             if IO is failed
      */
     public static void main(String[] args) throws IOException {
-        InputStream is = SudachiCommandLine.class.getResourceAsStream("/logger.properties");
+        InputStream is = SudachiCommandLine.class.getClassLoader().getResourceAsStream("sudachi.logging.properties");
         if (is != null) {
-            LogManager.getLogManager().readConfiguration(is);
+            LogManager logManager = LogManager.getLogManager();
+            try {
+                // this is available on Java 9+, so going through reflection
+                MethodHandle updateConfiguration = MethodHandles.lookup().findVirtual(LogManager.class,
+                        "updateConfiguration", MethodType.methodType(void.class, InputStream.class, Function.class));
+                updateConfiguration.invoke(logManager, is, null);
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                logManager.readConfiguration(is);
+            } catch (Throwable t) {
+                t.printStackTrace(System.err);
+            }
         }
-        logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        String settings = null;
-        boolean mergeSettings = false;
-        String resourcesDirectory = null;
+        SettingsAnchor anchor = SettingsAnchor.classpath().andThen(SettingsAnchor.none());
+        Settings current = Settings.resolvedBy(anchor)
+                .read(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
+        Config additional = Config.empty();
+
         String outputFileName = null;
         boolean isEnableDump = false;
         boolean showDetails = false;
         boolean ignoreError = false;
         boolean isWordSegmentation = false;
         boolean isLineBreakAtEosInWordSegmentation = true;
+        String formatterKind = null;
 
-        int i = 0;
+        int i;
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
-                try (FileInputStream input = new FileInputStream(args[++i])) {
-                    settings = JapaneseDictionary.readAll(input);
-                    mergeSettings = false;
-                }
+                Path configPath = Paths.get(args[++i]);
+                anchor = SettingsAnchor.filesystem(configPath.getParent());
+                current = Settings.fromFile(configPath, anchor);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
-                resourcesDirectory = args[++i];
+                String resourcesDirectory = args[++i];
+                anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory));
+                // first resolve wrt new directory
+                current = Settings.resolvedBy(anchor).merge(current);
             } else if (args[i].equals("-s") && i + 1 < args.length) {
-                settings = args[++i];
-                mergeSettings = true;
+                Config other = Config.fromJsonString(args[++i], anchor);
+                additional = additional.merge(other, Config.MergeMode.APPEND);
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -209,33 +247,47 @@ public class SudachiCommandLine {
                 isWordSegmentation = true;
                 isLineBreakAtEosInWordSegmentation = true;
             } else if (args[i].equals("-h")) {
-                Console console = System.console();
-                console.printf("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
-                console.printf("\t-r file\tread settings from file (overrides -s)\n");
-                console.printf("\t-s string\tadditional settings (overrides -r)\n");
-                console.printf("\t-p directory\troot directory of resources\n");
-                console.printf("\t-m mode\tmode of splitting\n");
-                console.printf("\t-o file\toutput to file\n");
-                console.printf("\t-t\tseparate words with spaces\n");
-                console.printf("\t-ts\tseparate words with spaces, and break line for each sentence\n");
-                console.printf("\t-a\tshow details\n");
-                console.printf("\t-f\tignore error\n");
-                console.printf("\t-d\tdebug mode\n");
+                PrintStream stderr = System.err;
+                stderr.print("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
+                stderr.print("\t-r file\tread settings from file (overrides -s)\n");
+                stderr.print("\t-s string\tadditional settings (overrides -r)\n");
+                stderr.print("\t-p directory\troot directory of resources\n");
+                stderr.print("\t-m mode\tmode of splitting\n");
+                stderr.print("\t-o file\toutput to file\n");
+                stderr.print("\t-t\tseparate words with spaces\n");
+                stderr.print("\t-ts\tseparate words with spaces, and break line for each sentence\n");
+                stderr.print("\t-a\tshow details\n");
+                stderr.print("\t-f\tignore error\n");
+                stderr.print("\t-d\tdebug mode\n");
+                stderr.print("\t--systemDict file\tpath to a system dictionary (overrides everything)\n");
+                stderr.print("\t--userDict file\tpath to an additional user dictionary (appended to -s)\n");
                 return;
+            } else if (args[i].equals("--userDict")) {
+                Path resolved = anchor.resolve(args[++i]);
+                logger.fine(() -> "using system dict: " + resolved);
+                additional = additional.addUserDictionary(resolved);
+            } else if (args[i].equals("--systemDict")) {
+                Path resolved = anchor.resolve(args[++i]);
+                logger.fine(() -> "using user dict: " + resolved);
+                additional = additional.systemDictionary(resolved);
+            } else if (args[i].equals("--format")) {
+                formatterKind = args[++i];
             } else {
                 break;
             }
         }
 
-        MorphemeFormatterPlugin formatter = getFormatter(resourcesDirectory, settings, mergeSettings,
-                isWordSegmentation, isLineBreakAtEosInWordSegmentation);
+        Config config = Config.fromSettings(current).merge(additional, Config.MergeMode.REPLACE);
+
+        MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation,
+                formatterKind, current);
         if (showDetails) {
             formatter.showDetails();
         }
 
         try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
                 : new FileOrStdoutPrintStream(outputFileName);
-                Dictionary dict = new DictionaryFactory().create(resourcesDirectory, settings, mergeSettings)) {
+                Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output);

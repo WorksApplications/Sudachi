@@ -1,5 +1,6 @@
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.Config
 import com.worksap.nlp.sudachi.Dictionary
 import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.WordId
@@ -44,9 +45,9 @@ class TestDic {
     }
 
     fun load(): Dictionary {
-        val loader = DictionaryFactory.loader().config(config).system(systemDic)
-        userDics.forEach { loader.user(it) }
-        return loader.load()
+        val config = Config.fromClasspath(config).systemDictionary(systemDic)
+        userDics.forEach { config.addUserDictionary(it) }
+        return DictionaryFactory().create(config)
     }
 }
 

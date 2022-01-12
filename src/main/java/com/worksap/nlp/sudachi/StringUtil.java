@@ -20,18 +20,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public class StringUtil {
     private StringUtil() {
     }
 
     public static String readFully(URL url) throws IOException {
-        URLConnection urlConnection = url.openConnection();
-        try (InputStream inputStream = urlConnection.getInputStream()) {
+        try (InputStream inputStream = url.openStream()) {
             return readFully(inputStream);
+        }
+    }
+
+    public static String readFully(Path path) throws IOException {
+        try (InputStream is = Files.newInputStream(path)) {
+            return readFully(is);
         }
     }
 
@@ -42,8 +50,34 @@ public class StringUtil {
         while (isr.read(cb) != -1) {
             cb.flip();
             sb.append(cb);
-            cb.compact();
+            cb.clear();
         }
         return sb.toString();
+    }
+
+    public static ByteBuffer readAllBytes(URL url) throws IOException {
+        try (InputStream is = url.openStream()) {
+            return readAllBytes(is);
+        }
+    }
+
+    public static ByteBuffer readAllBytes(InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[inputStream.available() + 1024];
+        int offset = 0;
+
+        while (true) {
+            int nread = inputStream.read(buffer, offset, buffer.length - offset);
+            if (nread >= 0) {
+                offset += nread;
+                if (offset == buffer.length) {
+                    buffer = Arrays.copyOf(buffer, buffer.length * 2);
+                }
+            } else {
+                break;
+            }
+        }
+        ByteBuffer bbuf = ByteBuffer.wrap(buffer);
+        bbuf.limit(offset);
+        return bbuf;
     }
 }

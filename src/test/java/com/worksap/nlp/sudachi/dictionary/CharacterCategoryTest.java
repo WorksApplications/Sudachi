@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import com.worksap.nlp.sudachi.Config;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -45,8 +46,7 @@ public class CharacterCategoryTest {
 
     @Test
     public void getCategoryTypes() throws IOException {
-        CharacterCategory category = new CharacterCategory();
-        category.readCharacterDefinition(null);
+        CharacterCategory category = CharacterCategory.load(Config.fromClasspath());
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), hasItems(CategoryType.KANJI));
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), not(hasItems(CategoryType.DEFAULT)));
     }
