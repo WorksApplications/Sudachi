@@ -60,7 +60,7 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
     }
 
     public static BinaryDictionary loadUser(String fileName) throws IOException {
-        return loadSystem(MMap.map(fileName));
+        return loadUser(MMap.map(fileName));
     }
 
     public static BinaryDictionary loadSystem(ByteBuffer buffer) throws IOException {
