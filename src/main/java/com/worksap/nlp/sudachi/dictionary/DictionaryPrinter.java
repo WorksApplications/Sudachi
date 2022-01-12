@@ -117,7 +117,7 @@ public class DictionaryPrinter {
             int i = 0;
             for (i = 0; i < args.length; i++) {
                 if (args[i].equals("-s") && i + 1 < args.length) {
-                    systemDict = BinaryDictionary.readSystemDictionary(args[++i]);
+                    systemDict = BinaryDictionary.loadSystem(args[++i]);
                 } else if (args[i].equals("-h")) {
                     System.err.println("usage: PrintDictionary [-s file] file");
                     System.err.println("\t-s file\tsystem dictionary");

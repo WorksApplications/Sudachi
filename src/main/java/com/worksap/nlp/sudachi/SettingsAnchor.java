@@ -259,8 +259,7 @@ public abstract class SettingsAnchor {
             for (SettingsAnchor item : items) {
                 if (item instanceof Chain) {
                     Chain c = (Chain) item;
-                    children.forEach(this::add);
-                    children.addAll(c.children);
+                    c.children.forEach(this::add);
                 } else {
                     add(item);
                 }
@@ -298,15 +297,6 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        public SettingsAnchor andThen(SettingsAnchor other) {
-            if (equals(other)) {
-                return this;
-            }
-            children.forEach(this::add);
-            return this;
-        }
-
-        @Override
         public boolean equals(Object obj) {
             if (obj instanceof Chain) {
                 Chain c = (Chain) obj;
@@ -329,7 +319,7 @@ public abstract class SettingsAnchor {
         private None() {
         }
 
-        static final None INSTANCE = new None();
+        private static final None INSTANCE = new None();
 
         @Override
         public String toString() {

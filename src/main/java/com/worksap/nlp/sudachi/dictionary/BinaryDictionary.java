@@ -55,11 +55,11 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
         lexicon = new DoubleArrayLexicon(bytes, offset, DictionaryVersion.hasSynonymGroupIds(version));
     }
 
-    public static BinaryDictionary readSystemDictionary(String fileName) throws IOException {
+    public static BinaryDictionary loadSystem(String fileName) throws IOException {
         return loadSystem(MMap.map(fileName));
     }
 
-    public static BinaryDictionary readUserDictionary(String fileName) throws IOException {
+    public static BinaryDictionary loadUser(String fileName) throws IOException {
         return loadSystem(MMap.map(fileName));
     }
 
