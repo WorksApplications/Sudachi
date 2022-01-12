@@ -76,6 +76,7 @@ public class SettingsTest {
 
     @Test
     public void getInt() {
+        // using null as anchor to check that codepath
         Settings settings = Settings.parse("{\"foo\":123}", null);
         assertEquals(123, settings.getInt("foo"));
         assertEquals(0, settings.getInt("baa"));
@@ -89,16 +90,19 @@ public class SettingsTest {
 
     @Test
     public void getIntWithDefaultValue() {
+        // using null as anchor to check that codepath
         Settings settings = Settings.parse("{\"foo\":123}", null);
         assertEquals(123, settings.getInt("foo", 456));
         assertEquals(456, settings.getInt("bazz", 456));
 
+        // using null as anchor to check that codepath
         settings = Settings.parse("{\"foo\":\"nyaa\"}", null);
         assertEquals(456, settings.getInt("foo", 456));
     }
 
     @Test
     public void getIntList() {
+        // using null as anchor to check that codepath
         Settings settings = Settings.parse("{\"foo\":[123,456]}", null);
         assertThat(settings.getIntList("foo"), allOf(hasItem(123), hasItem(456)));
         assertTrue(settings.getIntList("baa").isEmpty());
@@ -126,12 +130,14 @@ public class SettingsTest {
         settings.getIntListList("foo");
     }
 
+    @Deprecated
     @Test
     public void getPath() {
         Settings settings = Settings.parse("{\"foo\":\"baa\"}", SettingsAnchor.none());
         assertEquals("baa", settings.getPath("foo"));
         assertNull(settings.getPath("bazz"));
 
+        // using null as anchor to check that codepath
         settings = Settings.parse("{\"path\":\"bazz\",\"foo\":\"baa\"}", null);
         assertEquals(Paths.get("bazz", "baa").toString(), settings.getPath("foo"));
 
@@ -139,6 +145,7 @@ public class SettingsTest {
         assertEquals(Paths.get("maa", "baa").toString(), settings.getPath("foo"));
     }
 
+    @Deprecated
     @Test(expected = IllegalArgumentException.class)
     public void getPathWithError() {
         Settings settings = Settings.parse("{\"foo\":123}", SettingsAnchor.none());
@@ -151,6 +158,7 @@ public class SettingsTest {
         assertThat(settings.getPathList("foo"), allOf(hasItem("baa"), hasItem("bazz")));
         assertTrue(settings.getPathList("baa").isEmpty());
 
+        // using null as anchor to check that codepath
         settings = Settings.parse("{\"path\":\"bazz\",\"foo\":[\"baa\",\"bazz\"]}", null);
         assertThat(settings.getPathList("foo"),
                 allOf(hasItem(Paths.get("bazz", "baa").toString()), hasItem(Paths.get("bazz", "bazz").toString())));
