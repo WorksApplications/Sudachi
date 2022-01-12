@@ -34,12 +34,11 @@ import org.junit.rules.TemporaryFolder;
 
 public class SudachiCommandLineTest {
 
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private String inputFileName;
     private String outputFileName;
     private String temporaryFolderName;
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws IOException {
@@ -191,5 +190,24 @@ public class SudachiCommandLineTest {
         try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
             assertThat(lines.filter(l -> l.equals("EOS")).count(), is(4L));
         }
+    }
+
+    @Test
+    public void formatterClass() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "--format",
+                SimpleMorphemeFormatter.class.getName(), "-o", outputFileName, inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.count(), is(10L));
+        }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.filter(l -> l.equals("EOS")).count(), is(2L));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidFormatterClass() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "--format", "blahblah", "-o", outputFileName,
+                inputFileName });
+
     }
 }

@@ -28,6 +28,7 @@ import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -92,13 +93,17 @@ public class SudachiCommandLine {
         }
     }
 
-    static MorphemeFormatterPlugin makeFormatter(boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation)
-            throws IOException {
+    static MorphemeFormatterPlugin makeFormatter(boolean isWordSegmentation, boolean isLineBreakAtEosInWordSegmentation,
+            String formatterKind, Settings settings) throws IOException {
         MorphemeFormatterPlugin formatter;
-        Settings emptySettings = Settings.parse("{}", SettingsAnchor.none());
-        if (isWordSegmentation) {
+        if (settings == null) {
+            settings = Settings.empty();
+        }
+        if (formatterKind != null) {
+            formatter = instantiatePluginClass(formatterKind, settings);
+        } else if (isWordSegmentation) {
             formatter = new WordSegmentationFormatter();
-            formatter.setSettings(emptySettings);
+            formatter.setSettings(settings);
             formatter.setUp();
             if (isLineBreakAtEosInWordSegmentation) {
                 formatter.setEosString("\n");
@@ -107,8 +112,24 @@ public class SudachiCommandLine {
             }
         } else {
             formatter = new SimpleMorphemeFormatter();
-            formatter.setSettings(emptySettings);
+            formatter.setSettings(settings);
             formatter.setUp();
+        }
+        return formatter;
+    }
+
+    private static MorphemeFormatterPlugin instantiatePluginClass(String formatterKind, Settings settings)
+            throws IOException {
+        MorphemeFormatterPlugin formatter;
+        try {
+            @SuppressWarnings("unchecked")
+            Class<MorphemeFormatterPlugin> pluginClass = (Class<MorphemeFormatterPlugin>) Class.forName(formatterKind);
+            formatter = pluginClass.getDeclaredConstructor().newInstance();
+            formatter.setSettings(settings);
+            formatter.setUp();
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
+                | InvocationTargetException e) {
+            throw new IllegalArgumentException(e);
         }
         return formatter;
     }
@@ -184,6 +205,7 @@ public class SudachiCommandLine {
         boolean ignoreError = false;
         boolean isWordSegmentation = false;
         boolean isLineBreakAtEosInWordSegmentation = true;
+        String formatterKind = null;
 
         int i;
         for (i = 0; i < args.length; i++) {
@@ -249,6 +271,8 @@ public class SudachiCommandLine {
                 Path resolved = anchor.resolve(args[++i]);
                 logger.fine(() -> "using user dict: " + resolved);
                 additional = additional.systemDictionary(resolved);
+            } else if (args[i].equals("--format")) {
+                formatterKind = args[++i];
             } else {
                 break;
             }
@@ -256,7 +280,8 @@ public class SudachiCommandLine {
 
         Config config = Config.fromSettings(current).merge(additional, Config.MergeMode.REPLACE);
 
-        MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation);
+        MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation,
+                formatterKind, current);
         if (showDetails) {
             formatter.showDetails();
         }
