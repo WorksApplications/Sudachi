@@ -122,14 +122,13 @@ public class SudachiCommandLine {
             throws IOException {
         MorphemeFormatterPlugin formatter;
         try {
-            @SuppressWarnings("unchecked")
-            Class<MorphemeFormatterPlugin> pluginClass = (Class<MorphemeFormatterPlugin>) Class.forName(formatterKind);
-            formatter = pluginClass.getDeclaredConstructor().newInstance();
+            Class<?> pluginClass = Class.forName(formatterKind);
+            formatter = (MorphemeFormatterPlugin) pluginClass.getDeclaredConstructor().newInstance();
             formatter.setSettings(settings);
             formatter.setUp();
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
-                | InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
+                | InvocationTargetException | ClassCastException e) {
+            throw new IllegalArgumentException("failed to instantiate formatter " + formatterKind, e);
         }
         return formatter;
     }
