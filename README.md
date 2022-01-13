@@ -23,6 +23,8 @@ For a tutorial on installation, please refer to the [tutorial page](/docs/tutori
 
 For a tutorial on the plugin, please refer to the [plugin tutorial page](/docs/tutorial_plugin.md).
 
+For information on building Sudachi from source or development see [Development page](/docs/development.md).
+
 ## Features
 
 Sudachi has the following features.
