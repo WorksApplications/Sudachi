@@ -65,16 +65,19 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 
 ### Options
 
-- -r conf specifies the setting file (overrids -s)
-- -s json additional settings (overrids -r)
-- -p directory root directory of resources
-- -m {A|B|C} specifies the mode of splitting
-- -a outputs the dictionary form and the reading form
-- -d dump the debug outputs
-- -o specifies output file (default: the standard output)
-- -t separate words with spaces
-- -ts separate words with spaces, and break line for each sentence
-- -f ignore errors
+- `-r conf` specifies the setting file (overrides -s)
+- `-s json` additional settings (overrides -r)
+- `-p directory` root directory of resources
+- `-m {A|B|C}` specifies the mode of splitting
+- `-a` outputs the dictionary form and the reading form
+- `-d` dump the debug outputs
+- `-o file` specifies output file (default: the standard output)
+- `-t` separate words with spaces
+- `-ts` separate words with spaces, and break line for each sentence
+- `-f` ignore errors
+- `--systemDict file` specify path to the system dictionary. Will override other settings.
+- `--userDict file` add a user dictionary. Will not override other settings, but add another user dictionary.
+- `--format class` use the provided class for formatting output instead of default configuration
 
 ### Examples
 
@@ -163,30 +166,30 @@ In full-text searching, to use A and B can improve precision and recall.
 
 You can use or make plugins which modify the behavior of Sudachi.
 
-|Type of Plugins  | Example                                     |
-|:----------------|:--------------------------------------------|
-|Modify the Inputs| Character normalization                     |
-|Make OOVs        | Considering script styles                   |
-|Connect Words    | Inhibition, Overwrite costs                 |
-|Modify the Path  | Fix  Person names, Equalization of splitting|
+| Type of Plugins   | Example                                      |
+|:------------------|:---------------------------------------------|
+| Modify the Inputs | Character normalization                      |
+| Make OOVs         | Considering script styles                    |
+| Connect Words     | Inhibition, Overwrite costs                  |
+| Modify the Path   | Fix  Person names, Equalization of splitting |
 
 ### Prepared Plugins
 
 We prepared following plugins.
 
-|Type of Plugins  | Plugin                   |                                |
-|:----------------|:-------------------------|:-------------------------------|
-|Modify the Inputs| character normalization  |Full/half-width, Cases, Variants|
-|                 | normalization of prolong symbols| Normalize "~", "ー"s   |
-|                 | Remove yomigana          | Remove yomigana in parentheses |
-|Make OOVs        | Make one character OOVs  | Use as the fallback            |
-|                 | MeCab compatible OOVs    |                                |
-|Connect Words    | Inhibition               | Specified by part-of-speech    |
-|Modify the Path  | Join Katakata OOVs       |                                |
-|                 | Join numerics            |                                |
-|                 | Equalization of splitting*| Smooth of OOVs and not OOVs   |
-|                 | Normalize numerics   | Normalize Kanji numerics and scales|
-|                 | Estimate person names*   |                                |
+| Type of Plugins   | Plugin                           |                                     |
+|:------------------|:---------------------------------|:------------------------------------|
+| Modify the Inputs | character normalization          | Full/half-width, Cases, Variants    |
+|                   | normalization of prolong symbols | Normalize "~", "ー"s                 |
+|                   | Remove yomigana                  | Remove yomigana in parentheses      |
+| Make OOVs         | Make one character OOVs          | Use as the fallback                 |
+|                   | MeCab compatible OOVs            |                                     |
+| Connect Words     | Inhibition                       | Specified by part-of-speech         |
+| Modify the Path   | Join Katakata OOVs               |                                     |
+|                   | Join numerics                    |                                     |
+|                   | Equalization of splitting*       | Smooth of OOVs and not OOVs         |
+|                   | Normalize numerics               | Normalize Kanji numerics and scales |
+|                   | Estimate person names*           |                                     |
 
 \* will be released at a later date.
 
@@ -236,15 +239,15 @@ To create and use your own dictionaries, please refer to [docs/user_dict.md](htt
 
 ## Comparison with MeCab and Kuromoji
 
-|                       | Sudachi | MeCab | kuromoji   |
-|:----------------------|:--------|:------|:-----------|
-|Multiple Segmentation  | Yes     | No    | Limited ^a |
-|Normalization          | Yes     | No    | Limited ^b |
-|Joining, Correction    | Yes     | No    | Limited ^b |
-|Use multiple user dictionary| Yes     | Yes   | No    |
-|Saving Memory          | Good ^c | Poor  | Good       |
-|Accuracy               | Good    | Good  | Good       |
-|Speed                  | Good    | Excellent | Good   |
+|                              | Sudachi | MeCab     | kuromoji   |
+|:-----------------------------|:--------|:----------|:-----------|
+| Multiple Segmentation        | Yes     | No        | Limited ^a |
+| Normalization                | Yes     | No        | Limited ^b |
+| Joining, Correction          | Yes     | No        | Limited ^b |
+| Use multiple user dictionary | Yes     | Yes       | No         |
+| Saving Memory                | Good ^c | Poor      | Good       |
+| Accuracy                     | Good    | Good      | Good       |
+| Speed                        | Good    | Excellent | Good       |
 
 - ^a: approximation with n-best
 - ^b: with Lucene filters

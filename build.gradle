@@ -9,6 +9,7 @@ plugins {
     id 'jacoco'
     id 'org.sonarqube' version '3.3'
     id 'com.diffplug.spotless' version '6.1.2'
+    id 'distribution'
 }
 
 repositories {
@@ -94,5 +95,31 @@ spotless {
         // by default the target is every '.kt' and '.kts` file in the java sourcesets
         ktfmt('0.30')
         licenseHeaderFile('.formatter/license-header')
+    }
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": 'com.worksap.nlp.sudachi.SudachiCommandLine'
+        attributes "Class-Path": configurations.runtimeClasspath.collect { it.name }.join(" ")
+    }
+}
+
+distributions {
+    executable {
+        contents {
+            from jar
+            from configurations.runtimeClasspath
+            from fileTree('.') {
+                include "README*"
+                include "LICENSE*"
+                include "licenses/*"
+            }
+            from fileTree("src/main/resources") {
+                include "sudachi.json"
+                include "sudachi_fulldict.json"
+            }
+            into "/"
+        }
     }
 }
