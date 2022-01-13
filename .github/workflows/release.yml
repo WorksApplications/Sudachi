@@ -23,7 +23,7 @@ jobs:
       id: tag
       run: echo "::set-output name=version::$(echo ${{ github.ref }} | sed -e 's/refs\/tags\/v//')"
     - name: Build Distribution Archive
-      run: ./gradlew assembleExecutableDist
+      run: ./gradlew --no-daemon --info --stacktrace assembleExecutableDist
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
