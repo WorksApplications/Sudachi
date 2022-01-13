@@ -19,6 +19,7 @@ jobs:
       with:
         java-version: 11
         distribution: temurin
+        cache: gradle
     - name: Extract tag version
       id: tag
       run: echo "::set-output name=version::$(echo ${{ github.ref }} | sed -e 's/refs\/tags\/v//')"
