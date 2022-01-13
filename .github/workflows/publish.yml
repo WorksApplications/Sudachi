@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - develop
+  pull_request:
+      types: [ opened, synchronize, reopened ]
 jobs:
   publish:
     name: Publish
@@ -12,17 +14,16 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
           java-version: 11
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_USER_PASSWORD
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          distribution: temurin
       - name: Publish Package
         env:
+          GITHUB_USERNAME: GITHUB_ACTOR
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_USER_PASSWORD: ${{ secrets.MAVEN_USER_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        run: mvn clean deploy -P release -B
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        run: ./gradlew publish

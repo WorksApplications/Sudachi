@@ -5,18 +5,16 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'org.jetbrains.kotlin.jvm' version '1.6.10' // only for tests
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10' // only for tests, see gradle.properties
     id 'jacoco'
     id 'org.sonarqube' version '3.3'
     id 'com.diffplug.spotless' version '6.1.2'
     id 'distribution'
+    id 'signing'
 }
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
     mavenCentral()
 }
 
@@ -37,21 +35,13 @@ version = '0.6.0-SNAPSHOT'
 description = 'Sudachi Japanese Morphological Analyzer'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.release = 8
 }
 
 tasks.withType(Test) {
-    systemProperty "file.encoding", "utf-8"
+    systemProperty "file.encoding", "UTF-8"
 }
 
 jacocoTestReport {
@@ -122,4 +112,71 @@ distributions {
             into "/"
         }
     }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/WorksApplications/Sudachi")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+
+        maven {
+            url = version.endsWith('SNAPSHOT') ? uri("https://oss.sonatype.org/content/repositories/snapshots") : uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = project.findProperty("maven.user") ?: System.getenv("MAVEN_USERNAME")
+                password = project.findProperty("maven.password") ?: System.getenv("MAVEN_USER_PASSWORD")
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+
+            pom {
+                url = "https://github.com/WorksApplications/Sudachi"
+                name = 'Sudachi'
+                description = project.description
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'kazuma-t'
+                        name = 'Kazuma TAKAOKA'
+                        email = 'takaoka_k@worksap.co.jp'
+                        timezone = 'Asia/Tokyo'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/WorksApplications/Sudachi.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:WorksApplications/Sudachi.git'
+                    url = 'https://github.com/WorksApplications/Sudachi'
+                }
+
+                issueManagement {
+                    system = 'Github Issues'
+                    url = 'https://github.com/WorksApplications/Sudachi/issues'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = project.findProperty("gpg.key") ?: System.getenv("MAVEN_GPG_PRIVATE_KEY")
+    def signingPassword = project.findProperty("gpg.password") ?: System.getenv("MAVEN_GPG_PASSPHRASE")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.maven
 }
