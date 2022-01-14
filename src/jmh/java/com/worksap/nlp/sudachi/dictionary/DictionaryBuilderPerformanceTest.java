@@ -16,18 +16,13 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.dictionary.build.DicBuilder;
+import org.openjdk.jmh.annotations.*;
+
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
-
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Threads;
 
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
@@ -38,12 +33,16 @@ public class DictionaryBuilderPerformanceTest {
         org.openjdk.jmh.Main.main(args);
     }
 
-    @Benchmark
-    public void smallCase() throws IOException {
-        Path outFile = Files.createTempFile(getClass().getName(), ".dic");
-        Path dict = Paths.get("src", "test", "dict");
+    private final static Path ROOT = Paths.get("src/test/resources/dict");
 
-        DictionaryBuilder.main(new String[] { "-o", outFile.toString(), "-m", dict.resolve("matrix.def").toString(),
-                dict.resolve("lex.csv").toString() });
+    @Benchmark
+    public long smallCase() throws IOException {
+        MemChannelJmh mc = new MemChannelJmh();
+        DicBuilder
+                .system()
+                .matrix(ROOT.resolve("matrix.def"))
+                .lexicon(ROOT.resolve("lex.csv"))
+                .build(mc);
+        return mc.size();
     }
 }

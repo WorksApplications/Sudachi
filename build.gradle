@@ -11,6 +11,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.1.2'
     id 'distribution'
     id 'signing'
+    id "me.champeau.jmh" version "0.6.6"
 }
 
 repositories {
@@ -46,7 +47,7 @@ tasks.withType(Test) {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.required = true
     }
 }
 
@@ -178,4 +179,9 @@ signing {
     def signingPassword = project.findProperty("gpg.password") ?: System.getenv("MAVEN_GPG_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.maven
+}
+
+jmh {
+    jmhVersion = "1.34"
+    includeTests = true
 }
