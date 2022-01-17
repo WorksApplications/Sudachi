@@ -38,11 +38,7 @@ public class DictionaryBuilderPerformanceTest {
     @Benchmark
     public long smallCase() throws IOException {
         MemChannelJmh mc = new MemChannelJmh();
-        DicBuilder
-                .system()
-                .matrix(ROOT.resolve("matrix.def"))
-                .lexicon(ROOT.resolve("lex.csv"))
-                .build(mc);
+        DicBuilder.system().matrix(ROOT.resolve("matrix.def")).lexicon(ROOT.resolve("lex.csv")).build(mc);
         return mc.size();
     }
 }

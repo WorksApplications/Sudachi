@@ -71,4 +71,16 @@ public final class Connection {
 
         return new Connection(copy, leftSize, rightSize);
     }
+
+    public void validate(short leftId) {
+        if (matrix == null) {
+            // should never happen, but elides compiler checks
+            throw new NullPointerException("matrix");
+        }
+
+        if (leftId >= leftSize) {
+            // should never happen, but adds a compiler precondition to the inlined method
+            throw new IllegalArgumentException(String.format("leftId < leftSize: (%d, %d)", leftId, leftSize));
+        }
+    }
 }

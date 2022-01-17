@@ -122,4 +122,8 @@ public interface Grammar {
 
     /** the cost of inhibited connections */
     public static final short INHIBITED_CONNECTION = Short.MAX_VALUE;
+
+    default Connection getConnection() {
+        throw new UnsupportedOperationException();
+    }
 }
