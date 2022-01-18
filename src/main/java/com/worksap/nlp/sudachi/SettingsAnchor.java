@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -229,7 +230,11 @@ public abstract class SettingsAnchor {
 
         @Override
         <T> Config.Resource<T> toResource(Path path) {
-            return new Config.Resource.Classpath<>(loader.getResource(resourceName(path)));
+            URL resource = loader.getResource(resourceName(path));
+            if (resource == null) {
+                return null;
+            }
+            return new Config.Resource.Classpath<>(resource);
         }
 
         @Override

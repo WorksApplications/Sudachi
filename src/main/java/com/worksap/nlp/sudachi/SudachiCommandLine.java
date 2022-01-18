@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,7 +216,7 @@ public class SudachiCommandLine {
                 String resourcesDirectory = args[++i];
                 anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory));
                 // first resolve wrt new directory
-                current = Settings.resolvedBy(anchor).merge(current);
+                current = current.merge(Settings.resolvedBy(anchor));
             } else if (args[i].equals("-s") && i + 1 < args.length) {
                 Config other = Config.fromJsonString(args[++i], anchor);
                 additional = additional.merge(other, Config.MergeMode.APPEND);

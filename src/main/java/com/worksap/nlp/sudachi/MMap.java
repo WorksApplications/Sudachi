@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -26,6 +25,8 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -40,7 +41,7 @@ public class MMap {
     }
 
     /**
-     * Maps a file directly into memory.
+     * Maps a file directly into memory. Will fail if the file is larger than 2GB.
      *
      * @param filename
      *            the filename to open
@@ -49,8 +50,25 @@ public class MMap {
      *             if reading a file is failed
      */
     public static ByteBuffer map(String filename) throws IOException {
-        try (FileInputStream istream = new FileInputStream(filename); FileChannel inputFile = istream.getChannel()) {
-            ByteBuffer buffer = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
+        return map(Paths.get(filename));
+    }
+
+    /**
+     * Maps a file into the memory fully. Will fail if the file is larger than 2GB.
+     * 
+     * @param path
+     *            {@link Path} to the file
+     * @return mapped
+     * @throws IOException
+     *             when IO fails
+     */
+    public static ByteBuffer map(Path path) throws IOException {
+        try (FileChannel fc = FileChannel.open(path)) {
+            long size = fc.size();
+            if (size > Integer.MAX_VALUE) {
+                throw new IOException("impossible to map more than 2GB");
+            }
+            ByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, size);
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             return buffer;
         }

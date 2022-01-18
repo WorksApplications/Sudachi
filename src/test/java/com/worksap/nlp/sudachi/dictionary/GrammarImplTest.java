@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,8 +97,8 @@ public class GrammarImplTest {
     }
 
     @Test
-    public void readFromFile() throws IOException {
-        ByteBuffer bytes = DictionaryReader.read("/system.dic");
+    public void readBytes() {
+        ByteBuffer bytes = TestDictionary.INSTANCE.getSystemDictData().buffer();
         DictionaryHeader header = new DictionaryHeader(bytes, 0);
 
         grammar = new GrammarImpl(bytes, header.storageSize());

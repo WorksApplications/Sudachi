@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class DoubleArrayLexiconTest {
 
     @Before
     public void setUp() throws IOException {
-        ByteBuffer bytes = DictionaryReader.read("/system.dic");
+        ByteBuffer bytes = TestDictionary.INSTANCE.getSystemDictData().buffer();
         DictionaryHeader header = new DictionaryHeader(bytes, 0);
         lexicon = new DoubleArrayLexicon(bytes, header.storageSize() + GRAMMAR_SIZE, true);
     }

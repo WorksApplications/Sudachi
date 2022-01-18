@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.worksap.nlp.sudachi.Utils;
 
 public class UserDictionaryBuilderTest {
 
@@ -43,8 +42,9 @@ public class UserDictionaryBuilderTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic");
-        systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
+        File root = temporaryFolder.getRoot();
+        TestDictionary.INSTANCE.getSystemDictData().writeData(root.toPath().resolve("system.dic"));
+        systemDictFile = new File(root, "system.dic");
     }
 
     @Test

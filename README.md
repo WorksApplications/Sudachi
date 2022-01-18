@@ -23,6 +23,8 @@ For a tutorial on installation, please refer to the [tutorial page](/docs/tutori
 
 For a tutorial on the plugin, please refer to the [plugin tutorial page](/docs/tutorial_plugin.md).
 
+For information on building Sudachi from source or development see [Development page](/docs/development.md).
+
 ## Features
 
 Sudachi has the following features.
@@ -65,16 +67,19 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 
 ### Options
 
-- -r conf specifies the setting file (overrids -s)
-- -s json additional settings (overrids -r)
-- -p directory root directory of resources
-- -m {A|B|C} specifies the mode of splitting
-- -a outputs the dictionary form and the reading form
-- -d dump the debug outputs
-- -o specifies output file (default: the standard output)
-- -t separate words with spaces
-- -ts separate words with spaces, and break line for each sentence
-- -f ignore errors
+- `-r conf` specifies the setting file (overrides -s)
+- `-s json` additional settings (overrides -r)
+- `-p directory` root directory of resources
+- `-m {A|B|C}` specifies the mode of splitting
+- `-a` outputs the dictionary form and the reading form
+- `-d` dump the debug outputs
+- `-o file` specifies output file (default: the standard output)
+- `-t` separate words with spaces
+- `-ts` separate words with spaces, and break line for each sentence
+- `-f` ignore errors
+- `--systemDict file` specify path to the system dictionary. Will override other settings.
+- `--userDict file` add a user dictionary. Will not override other settings, but add another user dictionary.
+- `--format class` use the provided class for formatting output instead of default configuration
 
 ### Examples
 
@@ -126,15 +131,15 @@ The followings are examples in the core dictionary.
     A：選挙/管理/委員/会
     B：選挙/管理/委員会
     C：選挙管理委員会
-    
+
     A：客室/乗務/員
     B：客室/乗務員
     C：客室乗務員
-    
+
     A：労働/者/協同/組合
     B：労働者/協同/組合
     C：労働者協同組合
-    
+
     A：機能/性/食品
     B：機能性/食品
     C：機能性食品
@@ -144,15 +149,15 @@ The followings are examples in the full dictionary.
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-    
+
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-    
+
     A：さっぽろ/テレビ/塔
     B：さっぽろ/テレビ塔
     C：さっぽろテレビ塔
-    
+
     A：カンヌ/国際/映画/祭
     B：カンヌ/国際/映画祭
     C：カンヌ国際映画祭
@@ -163,30 +168,30 @@ In full-text searching, to use A and B can improve precision and recall.
 
 You can use or make plugins which modify the behavior of Sudachi.
 
-|Type of Plugins  | Example                                     |
-|:----------------|:--------------------------------------------|
-|Modify the Inputs| Character normalization                     |
-|Make OOVs        | Considering script styles                   |
-|Connect Words    | Inhibition, Overwrite costs                 |
-|Modify the Path  | Fix  Person names, Equalization of splitting|
+| Type of Plugins   | Example                                      |
+|:------------------|:---------------------------------------------|
+| Modify the Inputs | Character normalization                      |
+| Make OOVs         | Considering script styles                    |
+| Connect Words     | Inhibition, Overwrite costs                  |
+| Modify the Path   | Fix  Person names, Equalization of splitting |
 
 ### Prepared Plugins
 
 We prepared following plugins.
 
-|Type of Plugins  | Plugin                   |                                |
-|:----------------|:-------------------------|:-------------------------------|
-|Modify the Inputs| character normalization  |Full/half-width, Cases, Variants|
-|                 | normalization of prolong symbols| Normalize "~", "ー"s   |
-|                 | Remove yomigana          | Remove yomigana in parentheses |
-|Make OOVs        | Make one character OOVs  | Use as the fallback            |
-|                 | MeCab compatible OOVs    |                                |
-|Connect Words    | Inhibition               | Specified by part-of-speech    |
-|Modify the Path  | Join Katakata OOVs       |                                |
-|                 | Join numerics            |                                |
-|                 | Equalization of splitting*| Smooth of OOVs and not OOVs   |
-|                 | Normalize numerics   | Normalize Kanji numerics and scales|
-|                 | Estimate person names*   |                                |
+| Type of Plugins   | Plugin                           |                                     |
+|:------------------|:---------------------------------|:------------------------------------|
+| Modify the Inputs | character normalization          | Full/half-width, Cases, Variants    |
+|                   | normalization of prolong symbols | Normalize "~", "ー"s                 |
+|                   | Remove yomigana                  | Remove yomigana in parentheses      |
+| Make OOVs         | Make one character OOVs          | Use as the fallback                 |
+|                   | MeCab compatible OOVs            |                                     |
+| Connect Words     | Inhibition                       | Specified by part-of-speech         |
+| Modify the Path   | Join Katakata OOVs               |                                     |
+|                   | Join numerics                    |                                     |
+|                   | Equalization of splitting*       | Smooth of OOVs and not OOVs         |
+|                   | Normalize numerics               | Normalize Kanji numerics and scales |
+|                   | Estimate person names*           |                                     |
 
 \* will be released at a later date.
 
@@ -236,15 +241,15 @@ To create and use your own dictionaries, please refer to [docs/user_dict.md](htt
 
 ## Comparison with MeCab and Kuromoji
 
-|                       | Sudachi | MeCab | kuromoji   |
-|:----------------------|:--------|:------|:-----------|
-|Multiple Segmentation  | Yes     | No    | Limited ^a |
-|Normalization          | Yes     | No    | Limited ^b |
-|Joining, Correction    | Yes     | No    | Limited ^b |
-|Use multiple user dictionary| Yes     | Yes   | No    |
-|Saving Memory          | Good ^c | Poor  | Good       |
-|Accuracy               | Good    | Good  | Good       |
-|Speed                  | Good    | Excellent | Good   |
+|                              | Sudachi | MeCab     | kuromoji   |
+|:-----------------------------|:--------|:----------|:-----------|
+| Multiple Segmentation        | Yes     | No        | Limited ^a |
+| Normalization                | Yes     | No        | Limited ^b |
+| Joining, Correction          | Yes     | No        | Limited ^b |
+| Use multiple user dictionary | Yes     | Yes       | No         |
+| Saving Memory                | Good ^c | Poor      | Good       |
+| Accuracy                     | Good    | Good      | Good       |
+| Speed                        | Good    | Excellent | Good       |
 
 - ^a: approximation with n-best
 - ^b: with Lucene filters
@@ -269,13 +274,13 @@ To create and use your own dictionaries, please refer to [docs/user_dict.md](htt
 Sudachi by Works Applications Co., Ltd. is licensed under the [Apache License, Version2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
    Copyright (c) 2017 Works Applications Co., Ltd.
-  
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -314,7 +319,7 @@ We have a Slack workspace for developers and users to ask questions and discuss 
 
 ## Citing Sudachi
 
-We have published a paper about Sudachi and its language resources; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+We have published a paper about Sudachi and its language resources; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018).
 
 When citing Sudachi in papers, books, or services, please use the follow BibTex entry;
 
@@ -459,15 +464,15 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
     A：選挙/管理/委員/会
     B：選挙/管理/委員会
     C：選挙管理委員会
-    
+
     A：客室/乗務/員
     B：客室/乗務員
     C：客室乗務員
-    
+
     A：労働/者/協同/組合
     B：労働者/協同/組合
     C：労働者協同組合
-    
+
     A：機能/性/食品
     B：機能性/食品
     C：機能性食品
@@ -477,15 +482,15 @@ A は UniDic 短単位相当、C は固有表現相当、B は A, C の中間的
     A：医薬/品/安全/管理/責任/者
     B：医薬品/安全/管理/責任者
     C：医薬品安全管理責任者
-    
+
     A：消費/者/安全/調査/委員/会
     B：消費者/安全/調査/委員会
     C：消費者安全調査委員会
-    
+
     A：さっぽろ/テレビ/塔
     B：さっぽろ/テレビ塔
     C：さっぽろテレビ塔
-    
+
     A：カンヌ/国際/映画/祭
     B：カンヌ/国際/映画祭
     C：カンヌ国際映画祭
@@ -622,7 +627,7 @@ Python 版も公開しています。
 
 ## Sudachiの引用
 
-Sudachiとその言語資源について、論文を発表しています; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018). 
+Sudachiとその言語資源について、論文を発表しています; "[Sudachi: a Japanese Tokenizer for Business](http://www.lrec-conf.org/proceedings/lrec2018/summaries/8884.html)" (Takaoka et al., LREC2018).
 
 Sudachiを論文や書籍、サービスなどで引用される際には、以下のBibTexをご利用ください。
 

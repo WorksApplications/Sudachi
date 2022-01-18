@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,8 @@ public class LexiconSet implements Lexicon {
     }
 
     public void add(Lexicon lexicon, short posOffset) {
-        if (!lexicons.contains(lexicon)) {
-            lexicons.add(lexicon);
-            posOffsets.add(posOffset);
-        }
+        lexicons.add(lexicon);
+        posOffsets.add(posOffset);
     }
 
     public boolean isFull() {

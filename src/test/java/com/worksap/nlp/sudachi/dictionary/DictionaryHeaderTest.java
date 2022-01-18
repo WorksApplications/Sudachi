@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import org.junit.Before;
 import org.junit.Test;
 
 public class DictionaryHeaderTest {
-
     DictionaryHeader header;
 
     @Before
     public void setUp() throws IOException {
-        ByteBuffer bytes = DictionaryReader.read("/system.dic");
-        header = new DictionaryHeader(bytes, 0);
+        header = new DictionaryHeader(TestDictionary.INSTANCE.getSystemDictData().buffer(), 0);
     }
 
     @Test

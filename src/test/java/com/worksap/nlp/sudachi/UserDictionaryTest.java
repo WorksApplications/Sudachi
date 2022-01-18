@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,26 @@
 
 package com.worksap.nlp.sudachi;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
-import org.junit.Before;
 import org.junit.Test;
 
-public class UserDictionaryTest {
-    URL userDic1;
-    URL userDic2;
+import java.io.IOException;
+import java.util.List;
 
-    @Before
-    public void setUp() throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        userDic1 = classLoader.getResource("user.dic");
-        userDic2 = classLoader.getResource("user2.dic");
-        assertThat(userDic1, notNullValue());
-        assertThat(userDic2, notNullValue());
-    }
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+
+public class UserDictionaryTest {
 
     @Test
     public void fullUserDict() throws IOException {
-        Config config = Config.fromClasspath().clearUserDictionaries();
+        TestDictionary instance = TestDictionary.INSTANCE;
+        Config config = instance.user0Cfg();
 
         for (int i = 0; i < 13; i++) {
-            config.addUserDictionary(userDic1);
+            config.addUserDictionary(instance.getUserDict1());
         }
-        config.addUserDictionary(userDic2);
+        config.addUserDictionary(instance.getUserDict2());
 
         try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
@@ -62,17 +49,18 @@ public class UserDictionaryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void openTooManyUserDict() throws IOException {
-        Config config = Config.fromClasspath();
-        for (int i = 0; i < 14; i++) { // there is one from basic configuration
-            config.addUserDictionary(userDic1);
+        TestDictionary instance = TestDictionary.INSTANCE;
+        Config config = instance.user0Cfg();
+        for (int i = 0; i < 15; i++) {
+            config.addUserDictionary(instance.getUserDict1());
         }
         new DictionaryFactory().create(config);
     }
 
     @Test
     public void splitForUserDict() throws IOException {
-        Config config = Config.fromClasspath().clearUserDictionaries().addUserDictionary(userDic2)
-                .addUserDictionary(userDic1);
+        TestDictionary td = TestDictionary.INSTANCE;
+        Config config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
         try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("東京府");
@@ -87,7 +75,7 @@ public class UserDictionaryTest {
 
     @Test
     public void userDefinedPos() throws IOException {
-        Config config = Config.fromClasspath().addUserDictionary(userDic2);
+        Config config = TestDictionary.INSTANCE.user2Cfg();
         try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
@@ -98,7 +86,8 @@ public class UserDictionaryTest {
             assertThat(m.partOfSpeech(), contains("被子植物門", "双子葉植物綱", "ムクロジ目", "ミカン科", "ミカン属", "カボス"));
         }
 
-        config = Config.fromClasspath().clearUserDictionaries().addUserDictionary(userDic2).addUserDictionary(userDic1);
+        TestDictionary td = TestDictionary.INSTANCE;
+        config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
         try (Dictionary dict = new DictionaryFactory().create(config)) {
             Tokenizer tokenizer = dict.create();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");

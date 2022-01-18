@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi.dictionary.build
+package com.worksap.nlp.sudachi
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ParametersTest {
+class MorphemeImplTest {
   @Test
-  fun resizeWorks() {
-    val params = Parameters(4)
-    params.add(1, 1, 1)
-    params.add(2, 2, 2)
-    val ch = MemChannel()
-    val out = ModelOutput(ch)
-    params.writeTo(out)
-    assertEquals(ch.position(), 12)
-    val b = ch.buffer()
-    assertEquals(b.short, 1)
-    assertEquals(b.short, 1)
-    assertEquals(b.short, 1)
-    assertEquals(b.short, 2)
-    assertEquals(b.short, 2)
-    assertEquals(b.short, 2)
-    assertEquals(b.remaining(), 0)
+  fun useToString() {
+    val dic = TestDictionary.user0()
+    val sudachi = dic.create().tokenize("すだち")
+    assertEquals(
+        "MorphemeImpl{begin=0, end=1, surface=す, pos=4/名詞,普通名詞,一般,*,*,*, wid=(0,0)}",
+        sudachi[0].toString())
   }
 }

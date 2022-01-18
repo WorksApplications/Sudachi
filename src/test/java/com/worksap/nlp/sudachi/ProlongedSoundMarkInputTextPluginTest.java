@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,27 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 import javax.json.JsonObject;
 
 import com.worksap.nlp.sudachi.dictionary.POS;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 
 public class ProlongedSoundMarkInputTextPluginTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     UTF8InputTextBuilder builder;
     UTF8InputText text;
     ProlongedSoundMarkInputTextPlugin plugin;
 
     @Before
     public void setUp() throws IOException {
-        Path folder = temporaryFolder.getRoot().toPath();
-        Utils.copyResource(folder, "/system.dic", "/user.dic", "/joinnumeric/char.def", "/unk.def");
-        Dictionary dict = new DictionaryFactory().create();
         plugin = new ProlongedSoundMarkInputTextPlugin();
 
-        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"),
-                SettingsAnchor.filesystem(folder));
+        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), SettingsAnchor.none());
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin")) {
@@ -62,7 +51,7 @@ public class ProlongedSoundMarkInputTextPluginTest {
         }
 
         try {
-            plugin.setUp(((JapaneseDictionary) dict).grammar);
+            plugin.setUp(TestDictionary.INSTANCE.user0().grammar);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

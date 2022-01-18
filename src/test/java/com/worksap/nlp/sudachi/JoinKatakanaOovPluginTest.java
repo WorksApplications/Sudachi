@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ public class JoinKatakanaOovPluginTest {
 
     @Before
     public void setUp() throws IOException {
-        Dictionary dict = new DictionaryFactory().create(Config.fromClasspath());
+        Dictionary dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
-
         plugin = new JoinKatakanaOovPlugin();
     }
 

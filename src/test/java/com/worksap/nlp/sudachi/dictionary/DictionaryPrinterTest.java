@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
+import com.worksap.nlp.sudachi.TestDictionary;
 import com.worksap.nlp.sudachi.Utils;
 
 import org.junit.Before;
@@ -38,7 +40,11 @@ public class DictionaryPrinterTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/user.dic", "/unk.def");
+        TestDictionary td = TestDictionary.INSTANCE;
+        Path folder = temporaryFolder.getRoot().toPath();
+        td.getSystemDictData().writeData(folder.resolve("system.dic"));
+        td.getUserDict1Data().writeData(folder.resolve("user.dic"));
+        Utils.copyResource(folder, "/unk.def");
     }
 
     @Test

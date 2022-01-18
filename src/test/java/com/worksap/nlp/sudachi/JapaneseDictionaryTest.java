@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ public class JapaneseDictionaryTest {
 
     @Before
     public void setUp() throws IOException {
-        Config config = Config.fromClasspath("sudachi.json");
-        dict = new DictionaryFactory().create(config);
+        dict = TestDictionary.INSTANCE.user0();
     }
 
     @After
@@ -49,7 +48,7 @@ public class JapaneseDictionaryTest {
 
     @Test
     public void getPartOfSpeechSize() {
-        assertThat(dict.getPartOfSpeechSize(), is(9));
+        assertThat(dict.getPartOfSpeechSize(), is(8));
     }
 
     @Test

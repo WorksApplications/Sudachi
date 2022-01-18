@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,9 @@ public class SudachiCommandLineTest {
 
     @Before
     public void setUp() throws IOException {
-        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/system.dic", "/sudachi.json", "/user.dic", "/char.def",
-                "/unk.def");
+        TestDictionary.INSTANCE.getSystemDictData().writeData(temporaryFolder.getRoot().toPath().resolve("system.dic"));
+        TestDictionary.INSTANCE.getUserDict1Data().writeData(temporaryFolder.getRoot().toPath().resolve("user.dic"));
+        Utils.copyResource(temporaryFolder.getRoot().toPath(), "/sudachi.json", "/char.def", "/unk.def");
         temporaryFolderName = temporaryFolder.getRoot().getPath();
         outputFileName = temporaryFolder.newFile().getPath();
         inputFileName = temporaryFolder.newFile().getPath();
