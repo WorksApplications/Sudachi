@@ -107,7 +107,6 @@ distributions {
             }
             from fileTree("src/main/resources") {
                 include "sudachi.json"
-                include "sudachi_fulldict.json"
             }
             into "/"
         }
