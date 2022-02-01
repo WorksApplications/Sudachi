@@ -72,7 +72,7 @@ public final class Connection {
         return new Connection(copy, leftSize, rightSize);
     }
 
-    public void validate(short leftId) {
+    public void validate(int leftId) {
         if (matrix == null) {
             // should never happen, but elides compiler checks
             throw new NullPointerException("matrix");
