@@ -31,13 +31,13 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class LatticeImpl implements Lattice {
 
-    private ArrayList<ArrayList<LatticeNodeImpl>> endLists;
+    private final ArrayList<ArrayList<LatticeNodeImpl>> endLists;
     private int size;
     private int capacity;
     private LatticeNodeImpl eosNode;
 
-    private Grammar grammar;
-    private short[] eosParams;
+    private final Grammar grammar;
+    private final short[] eosParams;
 
     LatticeImpl(Grammar grammar) {
         this.grammar = grammar;
@@ -49,7 +49,7 @@ class LatticeImpl implements Lattice {
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
         bosNode.isConnectedToBOS = true;
-        // endLists should not contain anythin except ArrayLists
+        // endLists should not contain anything except ArrayLists
         // it is crucial to have monomorphic dispatch here
         ArrayList<LatticeNodeImpl> bos = new ArrayList<>();
         bos.add(bosNode);
@@ -138,7 +138,9 @@ class LatticeImpl implements Lattice {
         LatticeNodeImpl bestPrevNode = null;
         int minLeftCost = Integer.MAX_VALUE;
 
-        // Using a plain loop decrases the code footprint of this method
+        // Using a plain loop decreases the code footprint of this method
+        // Do not use iterator-based for-loop here
+        // noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < endNodes.size(); ++i) {
             LatticeNodeImpl lNode = endNodes.get(i);
             if (!lNode.isConnectedToBOS) {
