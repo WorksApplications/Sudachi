@@ -17,10 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
@@ -28,12 +25,13 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import com.worksap.nlp.sudachi.dictionary.Connection;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class LatticeImpl implements Lattice {
 
-    private ArrayList<List<LatticeNodeImpl>> endLists;
+    private ArrayList<ArrayList<LatticeNodeImpl>> endLists;
     private int size;
     private int capacity;
     private LatticeNodeImpl eosNode;
@@ -51,7 +49,11 @@ class LatticeImpl implements Lattice {
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
         bosNode.isConnectedToBOS = true;
-        endLists.add(Collections.singletonList(bosNode));
+        // endLists should not contain anythin except ArrayLists
+        // it is crucial to have monomorphic dispatch here
+        ArrayList<LatticeNodeImpl> bos = new ArrayList<>();
+        bos.add(bosNode);
+        endLists.add(bos);
     }
 
     void resize(int size) {
@@ -76,7 +78,7 @@ class LatticeImpl implements Lattice {
     void expand(int newSize) {
         endLists.ensureCapacity(newSize + 1);
         for (int i = size + 1; i < newSize + 1; i++) {
-            endLists.add(new ArrayList<LatticeNodeImpl>());
+            endLists.add(new ArrayList<>());
         }
         capacity = newSize;
     }
@@ -93,7 +95,8 @@ class LatticeImpl implements Lattice {
 
     @Override
     public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
-        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin)).min((l, r) -> l.cost - r.cost);
+        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin))
+                .min(Comparator.comparingInt(l -> l.cost));
     }
 
     @Override
@@ -122,23 +125,39 @@ class LatticeImpl implements Lattice {
 
     void connectNode(LatticeNodeImpl rNode) {
         int begin = rNode.begin;
-        rNode.totalCost = Integer.MAX_VALUE;
-        for (LatticeNodeImpl lNode : endLists.get(begin)) {
+
+        // connection matrix needs to be in the current stack frame to elide field
+        // accesses in the hot loop
+        final Connection conn = grammar.getConnection();
+        int leftId = rNode.leftId;
+        conn.validate(leftId); // elide some compiler checks by calling this method
+
+        // all heavy accessed variables must be on stack
+        // and written to fields only at the end of the function
+        ArrayList<LatticeNodeImpl> endNodes = endLists.get(begin);
+        LatticeNodeImpl bestPrevNode = null;
+        int minLeftCost = Integer.MAX_VALUE;
+
+        // Using a plain loop decrases the code footprint of this method
+        for (int i = 0; i < endNodes.size(); ++i) {
+            LatticeNodeImpl lNode = endNodes.get(i);
             if (!lNode.isConnectedToBOS) {
                 continue;
             }
-            short connectCost = grammar.getConnectCost(lNode.rightId, rNode.leftId);
+
+            int connectCost = conn.cost(lNode.rightId, leftId);
             if (connectCost == Grammar.INHIBITED_CONNECTION) {
                 continue; // this connection is not allowed
             }
             int cost = lNode.totalCost + connectCost;
-            if (cost < rNode.totalCost) {
-                rNode.totalCost = cost;
-                rNode.bestPreviousNode = lNode;
+            if (cost < minLeftCost) {
+                minLeftCost = cost;
+                bestPrevNode = lNode;
             }
         }
-        rNode.isConnectedToBOS = (rNode.bestPreviousNode != null);
-        rNode.totalCost += rNode.cost;
+        rNode.isConnectedToBOS = (bestPrevNode != null);
+        rNode.totalCost = minLeftCost + rNode.cost;
+        rNode.bestPreviousNode = bestPrevNode;
     }
 
     void connectEosNode() {
@@ -180,13 +199,13 @@ class LatticeImpl implements Lattice {
                 String surface = getSurface(rNode);
                 String pos = getPos(rNode);
 
-                output.print(String.format("%d: %d %d %s(%d) %s %d %d %d: ", index, rNode.getBegin(), rNode.getEnd(),
-                        surface, rNode.wordId, pos, rNode.leftId, rNode.rightId, rNode.cost));
+                output.printf("%d: %d %d %s(%d) %s %d %d %d: ", index, rNode.getBegin(), rNode.getEnd(), surface,
+                        rNode.wordId, pos, rNode.leftId, rNode.rightId, rNode.cost);
                 index++;
 
                 for (LatticeNodeImpl lNode : endLists.get(rNode.begin)) {
                     int cost = grammar.getConnectCost(lNode.rightId, rNode.leftId);
-                    output.print(String.format("%d ", cost));
+                    output.printf("%d ", cost);
                 }
                 output.println();
             }
