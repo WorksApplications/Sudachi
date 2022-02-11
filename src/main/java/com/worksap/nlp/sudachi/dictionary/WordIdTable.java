@@ -48,7 +48,7 @@ class WordIdTable {
 
     /**
      * Reads the word IDs to the passed WordLookup object
-     * 
+     *
      * @param index
      *            index in the word array
      * @param lookup

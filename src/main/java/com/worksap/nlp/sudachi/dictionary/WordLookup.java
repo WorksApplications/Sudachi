@@ -48,7 +48,7 @@ public final class WordLookup {
 
     /**
      * Start the search for new key
-     * 
+     *
      * @param key
      *            utf-8 bytes corresponding to the trie key
      * @param offset
@@ -65,7 +65,7 @@ public final class WordLookup {
     /**
      * This is not public API. Returns the array for wordIds with the length at
      * least equal to the passed parameter
-     * 
+     *
      * @param length
      *            minimum requested length
      * @return WordId array
@@ -79,7 +79,7 @@ public final class WordLookup {
 
     /**
      * Sets the wordIds, numWords, endOffset to the
-     * 
+     *
      * @return true if there was an entry in any of binary dictionaries
      */
     public boolean next() {
@@ -98,7 +98,7 @@ public final class WordLookup {
 
     /**
      * Returns trie key end offset
-     * 
+     *
      * @return number of utf-8 bytes corresponding to the end of key
      */
     public int getEndOffset() {
@@ -116,7 +116,7 @@ public final class WordLookup {
     /**
      * Returns array of word ids. Number of correct entries is specified by
      * {@link #getNumWords()}. WordIds have their dictionary part set.
-     * 
+     *
      * @return array consisting word ids for the current index entry
      * @see WordId
      */
