@@ -31,15 +31,13 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
-import com.worksap.nlp.sudachi.dictionary.CategoryType;
-import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.Lexicon;
+import com.worksap.nlp.sudachi.dictionary.*;
 import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 class JapaneseTokenizer implements Tokenizer {
 
     Grammar grammar;
-    Lexicon lexicon;
+    LexiconSet lexicon;
     List<InputTextPlugin> inputTextPlugins;
     List<OovProviderPlugin> oovProviderPlugins;
     List<PathRewritePlugin> pathRewritePlugins;
@@ -54,7 +52,7 @@ class JapaneseTokenizer implements Tokenizer {
             List<OovProviderPlugin> oovProviderPlugins, List<PathRewritePlugin> pathRewritePlugins) {
 
         this.grammar = grammar;
-        this.lexicon = lexicon;
+        this.lexicon = (LexiconSet) lexicon;
         this.inputTextPlugins = inputTextPlugins;
         this.oovProviderPlugins = oovProviderPlugins;
         this.pathRewritePlugins = pathRewritePlugins;
@@ -229,42 +227,42 @@ class JapaneseTokenizer implements Tokenizer {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
         ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>(64);
-
-        for (int i = 0; i < bytes.length; i++) {
-            if (!input.canBow(i) || !lattice.hasPreviousNode(i)) {
+        WordLookup wordLookup = lexicon.makeLookup();
+        for (int byteBoundary = 0; byteBoundary < bytes.length; byteBoundary++) {
+            if (!input.canBow(byteBoundary) || !lattice.hasPreviousNode(byteBoundary)) {
                 continue;
             }
-            unkNodes.clear();
-            Iterator<int[]> iterator = lexicon.lookup(bytes, i);
+            wordLookup.reset(bytes, byteBoundary, bytes.length);
             long wordMask = 0L;
-
-            while (iterator.hasNext()) {
-                int[] r = iterator.next();
-                int wordId = r[0];
-                int end = r[1];
-
+            while (wordLookup.next()) {
+                int end = wordLookup.getEndOffset();
                 if (end < bytes.length && !input.canBow(end)) {
                     continue;
                 }
-                LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
-                        lexicon.getCost(wordId), wordId);
-                lattice.insert(i, end, n);
-                unkNodes.add(n);
-                wordMask = WordMask.addNth(wordMask, end - i);
+                int numWords = wordLookup.getNumWords();
+                int[] wordIds = wordLookup.getWordsIds();
+                for (int word = 0; word < numWords; ++word) {
+                    int wordId = wordIds[word];
+                    LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
+                            lexicon.getCost(wordId), wordId);
+                    lattice.insert(byteBoundary, end, n);
+                    unkNodes.add(n);
+                    wordMask = WordMask.addNth(wordMask, end - i);
+                }
             }
             long wordMaskWithOov = wordMask;
 
             // OOV
-            if (!input.getCharCategoryTypes(i).contains(CategoryType.NOOOVBOW)) {
+            if (!input.getCharCategoryTypes(byteBoundary).contains(CategoryType.NOOOVBOW)) {
                 for (OovProviderPlugin plugin : oovProviderPlugins) {
-                    wordMaskWithOov = provideOovs(plugin, input, unkNodes, i, wordMaskWithOov);
+                    wordMaskWithOov = provideOovs(plugin, input, unkNodes, byteBoundary, wordMaskWithOov);
                 }
             }
             if (wordMaskWithOov == 0 && defaultOovProvider != null) {
-                wordMaskWithOov = provideOovs(defaultOovProvider, input, unkNodes, i, wordMaskWithOov);
+                wordMaskWithOov = provideOovs(defaultOovProvider, input, unkNodes, byteBoundary, wordMaskWithOov);
             }
             if (wordMaskWithOov == 0) {
-                throw new IllegalStateException("failed to found any morpheme candidate at boundary " + i);
+                throw new IllegalStateException("failed to found any morpheme candidate at boundary " + byteBoundary);
             }
         }
         lattice.connectEosNode();

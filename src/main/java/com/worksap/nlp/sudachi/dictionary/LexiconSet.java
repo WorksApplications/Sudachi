@@ -23,16 +23,17 @@ import java.util.*;
 public class LexiconSet implements Lexicon {
     static final int MAX_DICTIONARIES = 15;
 
-    List<Lexicon> lexicons = new ArrayList<>();
+    List<DoubleArrayLexicon> lexicons = new ArrayList<>();
     List<Short> posOffsets = new ArrayList<>();
 
     public LexiconSet(Lexicon systemLexicon) {
-        lexicons.add(systemLexicon);
-        posOffsets.add((short) 0);
+        add(systemLexicon, (short) 0);
     }
 
     public void add(Lexicon lexicon, short posOffset) {
-        lexicons.add(lexicon);
+        DoubleArrayLexicon daLexicon = (DoubleArrayLexicon) lexicon;
+        daLexicon.setDictionaryId(lexicons.size());
+        lexicons.add(daLexicon);
         posOffsets.add(posOffset);
     }
 
@@ -165,5 +166,9 @@ public class LexiconSet implements Lexicon {
                 split[i] = buildWordId(dictionaryId, getWordId(split[i]));
             }
         }
+    }
+
+    public WordLookup makeLookup() {
+        return new WordLookup(this.lexicons);
     }
 }
