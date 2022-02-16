@@ -18,6 +18,12 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.IntBuffer;
 
+/**
+ * This class implements common prefix lookup in the double array with a
+ * different API. It uses fields to return current values of end offset and a
+ * value stored in trie to reduce GC pressure. It also modifies the hot loop to
+ * reduce the number of non-elidable field writes.
+ */
 public final class DoubleArrayLookup {
     private IntBuffer array;
     private byte[] key;
