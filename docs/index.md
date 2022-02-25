@@ -1,6 +1,6 @@
 ---
 title: ワークス徳島NLPリソース
-description: ワークス徳島人工知能NLP研究所による自然言語処理のためのソフトウェアと言語資源 - 形態素解析器Sudachiや単語ベクトルchiVeなど
+description: ワークス徳島人工知能NLP研究所による自然言語処理のためのソフトウェアと言語資源 - 形態素解析器Sudachiや単語ベクトルchiVe、言語モデルchiTraなど
 image: Sudachi.png
 author: Works Applications
 lang: ja
@@ -31,6 +31,7 @@ lang: ja
 - [SudachiDict](https://github.com/WorksApplications/SudachiDict): 日本語形態素解析辞書
 - [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): 日本語同義語辞書
 - [chiVe](https://github.com/WorksApplications/chiVe): 事前学習済み日本語単語ベクトル
+- [chiTra](https://github.com/WorksApplications/sudachiTra): 事前学習済み日本語言語モデル
 
 ## コミュニティ
 
@@ -45,18 +46,18 @@ lang: ja
 
 ## Open Data on AWS
 
-SudachiDictとchiVeのデータは、AWSの[Oepn Data Sponsorship Program](https://registry.opendata.aws/sudachi/)によりホストしていただいています。
+SudachiDictとchiVe、chiTraのデータは、AWSの[Oepn Data Sponsorship Program](https://registry.opendata.aws/sudachi/) によりホストしていただいています。
 
 ### SudachiDict
 
-日本語形態素解析辞書です。詳細は[SudachiDict](https://github.com/WorksApplications/SudachiDict)を参照してください。
+日本語形態素解析辞書です。詳細は [SudachiDict](https://github.com/WorksApplications/SudachiDict) を参照してください。
 
-ビルド済みの辞書ファイルは[こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/)からダウンロードできます。
+ビルド済みの辞書ファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) からダウンロードできます。
 
 
 ### chiVe
 
-事前学習済み日本語単語ベクトルです。詳細は[chiVe](https://github.com/WorksApplications/chiVe)を参照してください。
+事前学習済み日本語単語ベクトルです。詳細は [chiVe](https://github.com/WorksApplications/chiVe) を参照してください。
 
 | 版        | 正規化 | 最低頻度 | 語彙数    | Sudachi | Sudachi辞書           | テキスト                                                                                      | [gensim](https://radimrehurek.com/gensim/)                                                           | [Magnitude](https://github.com/plasticityai/magnitude)                                               |
 | --------- | ------ | -------- | --------- | ------- | --------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -78,3 +79,14 @@ SudachiDictとchiVeのデータは、AWSの[Oepn Data Sponsorship Program](https
 | v1.1 mc15 aunit | 276,866 (19.1%) | 1.0GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit.tar.gz)) | 0.3GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit_gensim.tar.gz)) | 0.4GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit.magnitude)) |
 | v1.1 mc30 aunit | 242,658 (26.7%) | 0.8GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit.tar.gz)) | 0.3GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit_gensim.tar.gz)) | 0.4GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit.magnitude)) |
 | v1.1 mc90 aunit | 189,775 (39.5%) | 0.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.tar.gz)) | 0.2GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit_gensim.tar.gz)) | 0.3GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.magnitude)) |
+
+
+### chiTra
+
+日本語形態素解析器 [SudachiPy](https://github.com/WorksApplications/sudachi.rs/tree/develop/python) で事前学習済みの大規模な言語モデルを利用するためのライブラリです。
+詳細は [chiTra](https://github.com/WorksApplications/SudachiTra) を参照ください。
+
+| 版      | 正規化                 | SudachiTra | Sudachi | Sudachi辞書    | テキスト     | 事前学習済みモデル                                                                           |
+| ------- | ---------------------- | ---------- | ------- | ------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| v1.0    | normalized_and_surface | v0.1.7     | 0.6.2   | 20211220-core | NWJC (148GB) | 395 MB ([tar.gz](https://sudachi.s3.ap-northeast-1.amazonaws.com/chitra/chiTra-1.0.tar.gz)) | 
+

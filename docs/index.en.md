@@ -1,6 +1,6 @@
 ---
 title: WAP Tokushima NLP Resources
-description: Natural language processing software and language resources provided by WAP Tokushima Laboratory of AI and NLP - Tokenizer Sudachi, word embedding chiVe, and more!
+description: Natural language processing software and language resources provided by WAP Tokushima Laboratory of AI and NLP - Tokenizer Sudachi, word embedding chiVe, language model chiTra, and more!
 image: Sudachi.png
 author: Works Applications
 lang: en
@@ -29,15 +29,16 @@ Natural language processing software and language resources provided by [WAP Tok
 ## Language Resources
 
 - [SudachiDict](https://github.com/WorksApplications/SudachiDict): Japanese Dictionary for Morphological Analysis
-- [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): Japansese Synonym Dictionary
-- [chiVe](https://github.com/WorksApplications/chiVe): Japanese Pretrained Word Embedding
+- [SudachiDict Synonym](https://github.com/WorksApplications/SudachiDict/blob/develop/docs/synonyms.md): Japanese Synonym Dictionary
+- [chiVe](https://github.com/WorksApplications/chiVe): Japanese Pretrained Word Embeddings
+- [chiTra](https://github.com/WorksApplications/sudachiTra): Japanese Pretrained language models
 
 ## Community
 
 We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
 
 - [https://sudachi-dev.slack.com/](https://sudachi-dev.slack.com/)
-- (Please get an invite from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
+- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
   
 
 ***
@@ -45,7 +46,7 @@ We have a Slack workspace for developers and users to ask questions and discuss 
 
 ## Open Data on AWS
 
-SudachiDict and chiVe data are generously hosted by AWS with their [Oepn Data Sponsorship Program](https://registry.opendata.aws/sudachi/).
+SudachiDict and chiVe, chiTra data are generously hosted by AWS with their [Oepn Data Sponsorship Program](https://registry.opendata.aws/sudachi/).
 
 ### SudachiDict
 
@@ -78,3 +79,15 @@ Japanese pretrained word embedding. Please refer to [chiVe](https://github.com/W
 | v1.1 mc15 aunit | 276,866 (19.1%) | 1.0GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit.tar.gz)) | 0.3GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit_gensim.tar.gz)) | 0.4GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc15-aunit.magnitude)) |
 | v1.1 mc30 aunit | 242,658 (26.7%) | 0.8GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit.tar.gz)) | 0.3GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit_gensim.tar.gz)) | 0.4GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc30-aunit.magnitude)) |
 | v1.1 mc90 aunit | 189,775 (39.5%) | 0.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.tar.gz)) | 0.2GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit_gensim.tar.gz)) | 0.3GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.magnitude)) |
+
+
+### chiTra
+
+The library for using large-scale pre-trained language models with the Japanese tokenizer [SudachiPy](https://github.com/WorksApplications/sudachi.rs/tree/develop/python).
+Please refer to [chiTra](https://github.com/WorksApplications/SudachiTra) for the detail.
+
+| Version | Normalized             | SudachiTra | Sudachi | SudachiDict   | Text         | Pretrained Model                                                                            |
+| ------- | ---------------------- | ---------- | ------- | ------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| v1.0    | normalized_and_surface | v0.1.7     | 0.6.2   | 20211220-core | NWJC (148GB) | 395 MB ([tar.gz](https://sudachi.s3.ap-northeast-1.amazonaws.com/chitra/chiTra-1.0.tar.gz)) | 
+
+
