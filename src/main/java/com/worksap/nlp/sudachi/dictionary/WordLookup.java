@@ -70,7 +70,7 @@ public final class WordLookup {
      *            minimum requested length
      * @return WordId array
      */
-    public int[] prepare(int length) {
+    public int[] outputBuffer(int length) {
         if (wordIds.length < length) {
             wordIds = Arrays.copyOf(wordIds, Math.max(length, wordIds.length * 2));
         }
@@ -92,7 +92,7 @@ public final class WordLookup {
             currentLexicon = nextLexicon;
         }
         int wordGroupId = lookup.getValue();
-        numWords = words.fillBuffer(wordGroupId, this);
+        numWords = words.readWordIds(wordGroupId, this);
         return true;
     }
 

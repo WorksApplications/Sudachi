@@ -46,12 +46,21 @@ class WordIdTable {
         return result;
     }
 
-    int fillBuffer(int index, WordLookup lookup) {
+    /**
+     * Reads the word IDs to the passed WordLookup object
+     * 
+     * @param index
+     *            index in the word array
+     * @param lookup
+     *            object to read word IDs into
+     * @return number of read IDs
+     */
+    int readWordIds(int index, WordLookup lookup) {
         int offset = this.offset + index;
         ByteBuffer bytes = this.bytes;
         int length = Byte.toUnsignedInt(bytes.get(offset));
         offset += 1;
-        int[] result = lookup.prepare(length);
+        int[] result = lookup.outputBuffer(length);
         int dicIdMask = this.dicIdMask;
         for (int i = 0; i < length; i++) {
             int wordId = bytes.getInt(offset);
