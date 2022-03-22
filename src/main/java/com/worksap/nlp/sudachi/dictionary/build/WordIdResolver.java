@@ -16,10 +16,14 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.dictionary.Ints;
+
 public interface WordIdResolver {
     int lookup(String headword, short posId, String reading);
-
     void validate(int wordId);
-
     boolean isUser();
+
+    default byte parseList(String data, Ints result) {
+        return 0;
+    }
 }

@@ -120,8 +120,8 @@ settings.xml
 
 ### GRADLE ###
 
-build/
-.gradle/
+/build/
+/.gradle/
 !gradle/wrapper/gradle-wrapper.jar
 out/
 

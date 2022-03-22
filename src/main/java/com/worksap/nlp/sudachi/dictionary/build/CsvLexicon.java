@@ -108,7 +108,13 @@ public class CsvLexicon implements WriteDictionary {
         }
 
         // left-id, right-id, cost
-        parameters.add(Short.parseShort(cols.get(1)), Short.parseShort(cols.get(2)), Short.parseShort(cols.get(3)));
+        short leftId = Short.parseShort(cols.get(1));
+        short rightId = Short.parseShort(cols.get(2));
+        short cost = Short.parseShort(cols.get(3));
+        parameters.add(leftId, rightId, cost);
+        entry.leftId = leftId;
+        entry.rightId = rightId;
+        entry.cost = cost;
 
         // part of speech
         POS pos = new POS(cols.get(5), cols.get(6), cols.get(7), cols.get(8), cols.get(9), cols.get(10));
@@ -279,6 +285,34 @@ public class CsvLexicon implements WriteDictionary {
         WordInfo wordInfo;
         String aUnitSplitString;
         String bUnitSplitString;
+        String cUnitSplitString;
+        String userData;
         String wordStructureString;
+        short leftId;
+        short rightId;
+        short cost;
+        short surfaceUtf8Length;
+        int expectedSize = 0;
+
+        private int countSplits(String data) {
+            return (int)data.chars().filter(c -> c == '/').count();
+        }
+
+        public int computeExpectedSize() {
+            if (expectedSize != 0) {
+                return expectedSize;
+            }
+
+            int size = 32;
+
+            size += countSplits(aUnitSplitString) * 4;
+            size += countSplits(bUnitSplitString) * 4;
+            size += countSplits(cUnitSplitString) * 4;
+            size += countSplits(wordStructureString) * 4;
+            size += wordInfo.getSynonymGoupIds().length * 4;
+
+            expectedSize = size;
+            return size;
+        }
     }
 }
