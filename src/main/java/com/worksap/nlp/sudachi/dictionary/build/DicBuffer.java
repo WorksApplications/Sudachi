@@ -122,8 +122,4 @@ public class DicBuffer {
         }
     }
 
-    @FunctionalInterface
-    public interface IOConsumer<T> {
-        T accept(ByteBuffer arg) throws IOException;
-    }
 }
