@@ -1,6 +1,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
+import com.worksap.nlp.sudachi.dictionary.StringPtr;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.*;
 public class UniqueStrings {
     private final HashMap<String, Item> strings = new HashMap<>();
     private final HashMap<String, Item> candidates = new HashMap<>();
+    private final WordLayout layout = new WordLayout();
 
     void add(String data) {
         strings.put(data, null);
@@ -40,19 +42,29 @@ public class UniqueStrings {
         int[] offsets = new int[length + 1];
         int numOffsets = computeOffsets(str, offsets);
 
+        Item full = new Item(str, 0, length);
+        StringPtr ptr = layout.add(full);
+        full.root = full;
+        full.ptr = ptr;
+        candidates.put(str, full);
+
         for (int i = 0; i < numOffsets; ++i) {
             int start = offsets[i];
             for (int j = i + 1; j <= numOffsets; ++j) {
                 int end = offsets[j];
                 String sub = str.substring(start, end);
-                if (!candidates.containsKey(sub)) {
+                // Create a possible substring only if
+                // 1. It does not exist yet
+                // 2. Can form a valid pointer to it
+                if (!candidates.containsKey(sub) && ptr.isSubseqValid(start, end)) {
                     Item item = new Item(str, start, end);
+                    item.root = full;
                     candidates.put(sub, item);
                 }
             }
         }
 
-        return candidates.get(str);
+        return full;
     }
 
     private int computeOffsets(String str, int[] offsets) {
@@ -77,14 +89,7 @@ public class UniqueStrings {
     }
 
     public void writeCompact(SeekableByteChannel channel) throws IOException {
-        UnicodeBuffer buffer = new UnicodeBuffer(channel);
-        for (Map.Entry<String, Item> item: strings.entrySet()) {
-            Item value = item.getValue();
-            if (value.start == 0 && value.end == value.data.length()) {
-                buffer.put(value.data);
-            }
-        }
-        buffer.flush();
+        layout.write(channel);
     }
 
     public void writeLengthPrefixedCompact(SeekableByteChannel channel) throws IOException {
@@ -105,6 +110,7 @@ public class UniqueStrings {
         private final int start;
         private final int end;
         private Item root;
+        private StringPtr ptr;
 
         public Item(String data, int start, int end) {
             this.data = data;
@@ -153,5 +159,6 @@ public class UniqueStrings {
         try (SeekableByteChannel chan = Files.newByteChannel(compactName, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
             strings.writeCompact(chan);
         }
+        System.out.printf("wasted bytes=%d, slots=%d%n", strings.layout.wastedBytes(), strings.layout.numSlots());
     }
 }

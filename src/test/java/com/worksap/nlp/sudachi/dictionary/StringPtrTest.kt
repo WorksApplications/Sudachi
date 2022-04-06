@@ -1,7 +1,9 @@
-package com.worksap.nlp.sudachi.dictionary.build
+package com.worksap.nlp.sudachi.dictionary
 
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 
 class StringPtrTest {
@@ -66,5 +68,24 @@ class StringPtrTest {
         checkConversion(19 + 0b00000001_111111111, 0x07ff_ffff xor ((1 shl 9) - 1))
         checkConversion(19 + 0b00000011_111111111, 0x07ff_ffff xor ((1 shl 10) - 1))
         checkConversion(19 + 0b00000111_111111111, 0x07ff_ffff xor ((1 shl 11) - 1))
+    }
+
+    @Test
+    fun isValid() {
+        assertTrue { StringPtr.isValid(0, 0) }
+        assertTrue { StringPtr.isValid(1, 0) }
+        assertTrue { StringPtr.isValid(0, 1) }
+        assertTrue { StringPtr.isValid(1, 1) }
+        assertTrue { StringPtr.isValid(0, 19) }
+        assertTrue { StringPtr.isValid(1, 19) }
+        assertTrue { StringPtr.isValid(0, 20) }
+        assertTrue { StringPtr.isValid(1, 20) }
+        assertTrue { StringPtr.isValid(0, 21) }
+        assertFalse { StringPtr.isValid(1, 21) }
+        assertTrue { StringPtr.isValid(2, 21) }
+        assertTrue { StringPtr.isValid(0, 23) }
+        assertFalse { StringPtr.isValid(1, 23) }
+        assertFalse { StringPtr.isValid(2, 23) }
+        assertTrue { StringPtr.isValid(4, 23) }
     }
 }

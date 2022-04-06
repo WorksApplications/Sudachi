@@ -21,8 +21,12 @@ public class UnicodeBuffer {
     }
 
     public void put(String data) throws IOException {
-        CharBuffer chars = prepare(data.length());
-        chars.put(data);
+        put(data, 0, data.length());
+    }
+
+    public void put(String data, int start, int end) throws IOException {
+        CharBuffer chars = prepare(end - start);
+        chars.put(data, start, end);
     }
 
     private CharBuffer prepare(int numChars) throws IOException {
