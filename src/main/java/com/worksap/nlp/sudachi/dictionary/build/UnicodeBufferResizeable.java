@@ -25,7 +25,7 @@ public class UnicodeBufferResizeable {
     }
 
     private CharBuffer prepare(int offset, int numChars) {
-        buffer.position(offset);
+        buffer.position(offset * 2);
         int remaining = buffer.remaining();
         int byteLength = numChars * 2;
         while (remaining < byteLength) {
@@ -41,8 +41,9 @@ public class UnicodeBufferResizeable {
         return chars;
     }
 
-    public void write(SeekableByteChannel channel) throws IOException {
-        buffer.flip();
+    public void write(WritableByteChannel channel, int limit) throws IOException {
+        buffer.position(0);
+        buffer.limit(limit);
         channel.write(buffer);
         buffer.clear();
     }

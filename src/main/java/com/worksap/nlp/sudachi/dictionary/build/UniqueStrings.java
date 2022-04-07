@@ -6,6 +6,7 @@ import com.worksap.nlp.sudachi.dictionary.StringPtr;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,8 +43,8 @@ public class UniqueStrings {
         int[] offsets = new int[length + 1];
         int numOffsets = computeOffsets(str, offsets);
 
+        StringPtr ptr = layout.add(str, 0, length);
         Item full = new Item(str, 0, length);
-        StringPtr ptr = layout.add(full);
         full.root = full;
         full.ptr = ptr;
         candidates.put(str, full);
@@ -88,7 +89,7 @@ public class UniqueStrings {
         return strings;
     }
 
-    public void writeCompact(SeekableByteChannel channel) throws IOException {
+    public void writeCompact(WritableByteChannel channel) throws IOException {
         layout.write(channel);
     }
 

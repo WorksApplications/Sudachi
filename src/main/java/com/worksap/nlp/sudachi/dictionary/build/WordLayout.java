@@ -3,7 +3,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
 
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -14,11 +14,15 @@ public class WordLayout {
     private int pointer;
     private int maxLength = -1;
 
-    public StringPtr add(UniqueStrings.Item item) {
-        int length = item.getLength();
+    public StringPtr add(String string) {
+        return add(string, 0, string.length());
+    }
+
+    public StringPtr add(String string, int start, int end) {
+        int length = string.length();
         int alignment = StringPtr.requiredAlignment(length);
         int offset = allocate(length, alignment);
-        buffer.put(offset, item.getData(), item.getStart(), item.getEnd());
+        buffer.put(offset, string, start, end);
         return StringPtr.checked(length, offset);
     }
 
@@ -116,8 +120,8 @@ public class WordLayout {
         }
     }
 
-    public void write(SeekableByteChannel channel) throws IOException {
-        buffer.write(channel);
+    public void write(WritableByteChannel channel) throws IOException {
+        buffer.write(channel, pointer * 2);
     }
 
     public static class FreeSpace implements Comparable<FreeSpace> {
