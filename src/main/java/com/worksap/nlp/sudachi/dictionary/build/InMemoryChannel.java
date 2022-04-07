@@ -76,4 +76,12 @@ public final class InMemoryChannel implements SeekableByteChannel {
     public void close() throws IOException {
         // always open
     }
+
+    public ByteBuffer buffer() {
+        ByteBuffer copy = buffer.duplicate();
+        copy.position(0);
+        copy.limit(buffer.position());
+        copy.order(ByteOrder.LITTLE_ENDIAN);
+        return copy;
+    }
 }
