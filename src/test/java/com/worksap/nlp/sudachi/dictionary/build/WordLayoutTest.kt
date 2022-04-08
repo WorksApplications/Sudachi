@@ -4,6 +4,7 @@ import com.worksap.nlp.sudachi.dictionary.StringPtr
 import java.nio.CharBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class WordLayoutTest {
     companion object {
@@ -33,5 +34,66 @@ class WordLayoutTest {
         assertEquals("5".repeat(2), chars.read(p6))
         assert(p5.offset < p2.offset)
         assert(p6.offset < p2.offset)
+    }
+
+    @Test
+    fun alignmentPlacedPlacementLarge() {
+        val layout = WordLayout()
+        val ptrs = ArrayList<StringPtr>()
+        for (i in 0..499) {
+            val char = 500 - i
+            val str = char.toChar().toString().repeat(char)
+            ptrs.add(layout.add(str))
+        }
+        val chan = InMemoryChannel()
+        layout.write(chan)
+        val chars = chan.buffer().asCharBuffer()
+        for (i in 0..499) {
+            val char = 500 - i
+            val expected = char.toChar().toString().repeat(char)
+            val actual = chars.read(ptrs[i])
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun alignmentPlacedPlacementHoles() {
+        val layout = WordLayout()
+        val ptrs = ArrayList<StringPtr>()
+        for (i in 0..3) {
+            val count = 200 - 5 * i
+            val str = i.toChar().toString().repeat(count)
+            ptrs.add(layout.add(str))
+        }
+        for (i in 0..20) {
+            val count = 21 - i
+            val str = (20 + i).toChar().toString().repeat(count)
+            ptrs.add(layout.add(str))
+        }
+        val chan = InMemoryChannel()
+        layout.write(chan)
+        val chars = chan.buffer().asCharBuffer()
+        for (i in 0..3) {
+            val count = 200 - 5 * i
+            val char = i.toChar()
+            val expected = char.toString().repeat(count)
+            val actual = chars.read(ptrs[i])
+            assertEquals(expected, actual)
+        }
+        for (i in 0..20) {
+            val count = 21 - i
+            val char = (20 + i).toChar()
+            val expected = char.toString().repeat(count)
+            val actual = chars.read(ptrs[4 + i])
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun coverage() {
+        val layout = WordLayout()
+        assertEquals(0, layout.wastedBytes())
+        assertEquals(0, layout.numSlots())
+        assertNotNull(layout.toString())
     }
 }
