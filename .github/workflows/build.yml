@@ -5,6 +5,13 @@ on:
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
+
+permissions:
+  checks: write # for SonarQube
+  contents: read # for SonarQube
+  statuses: read # for SonarQube
+  pull-requests: read # for SonarQube
+
 jobs:
   build:
     name: Build
