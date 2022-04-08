@@ -35,3 +35,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         if: matrix.java-version == 11 && env.SONAR_TOKEN != ''
         run: ./gradlew --no-daemon --info --stacktrace sonarqube -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: reports (${{ matrix.java-version }})
+          path: build/reports
