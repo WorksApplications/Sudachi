@@ -81,6 +81,16 @@ SudachiDictとchiVe、chiTraのデータは、AWSの[Oepn Data Sponsorship Progr
 | v1.1 mc90 aunit | 189,775 (39.5%) | 0.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.tar.gz)) | 0.2GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit_gensim.tar.gz)) | 0.3GB ([.magnitude](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.1-mc90-aunit.magnitude)) |
 
 
+#### 追加学習用のフルモデル
+
+| 版        | [gensim](https://radimrehurek.com/gensim/) (full)                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| v1.2 mc5  | 6.7GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.2-mc5_gensim-full.tar.gz))  |
+| v1.2 mc15 | 3.0GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.2-mc15_gensim-full.tar.gz)) |
+| v1.2 mc30 | 1.9GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.2-mc30_gensim-full.tar.gz)) |
+| v1.2 mc90 | 1.0GB ([tar.gz](https://sudachi.s3-ap-northeast-1.amazonaws.com/chive/chive-1.2-mc90_gensim-full.tar.gz)) |
+
+
 ### chiTra
 
 日本語形態素解析器 [SudachiPy](https://github.com/WorksApplications/sudachi.rs/tree/develop/python) で事前学習済みの大規模な言語モデルを利用するためのライブラリです。
