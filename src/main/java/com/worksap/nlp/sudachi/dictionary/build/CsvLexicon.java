@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -173,7 +175,7 @@ public class CsvLexicon implements WriteDictionary {
     }
 
     void checkSplitInfoFormat(String info) {
-        if (info.chars().filter(i -> i == '/').count() + 1 > ARRAY_MAX_LENGTH) {
+        if (StringUtil.count(info, '/') + 1 > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
         }
     }
@@ -280,7 +282,8 @@ public class CsvLexicon implements WriteDictionary {
         parameters.setLimits(left, right);
     }
 
-    public static class WordEntry {
+    public static class WordEntry implements Lookup2.Entry {
+        int pointer;
         String headword;
         WordInfo wordInfo;
         String aUnitSplitString;
@@ -295,7 +298,7 @@ public class CsvLexicon implements WriteDictionary {
         int expectedSize = 0;
 
         private int countSplits(String data) {
-            return (int)data.chars().filter(c -> c == '/').count();
+            return StringUtil.count(data, '/');
         }
 
         public int computeExpectedSize() {
@@ -310,9 +313,31 @@ public class CsvLexicon implements WriteDictionary {
             size += countSplits(cUnitSplitString) * 4;
             size += countSplits(wordStructureString) * 4;
             size += wordInfo.getSynonymGoupIds().length * 4;
+            if (userData.length() != 0) {
+                size += 2 + userData.length() * 2;
+            }
+
+            size = Align.align(size, 8);
 
             expectedSize = size;
             return size;
         }
+
+        @Override
+        public int pointer() {
+            return pointer;
+        }
+
+        @Override
+        public boolean matches(short posId, String reading) {
+            return wordInfo.getPOSId() == posId && Objects.equals(wordInfo.getReadingForm(), reading);
+        }
+
+        @Override
+        public String headword() {
+            return wordInfo.getSurface();
+        }
     }
+
+
 }

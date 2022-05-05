@@ -22,6 +22,11 @@ public class StringPtr {
     }
 
     public static StringPtr checked(int length, int offset) {
+        if (length > MAX_LENGTH) {
+            throw new IllegalArgumentException(
+                    String.format("Maximum possible length is %d, was requested %d", MAX_LENGTH, length)
+            );
+        }
         if (!isValid(offset, length)) {
             throw new IllegalArgumentException(
                     String.format("StringPtr is invalid offset=%08x length=%d alignment=%d", offset, length, requiredAlignment(length)));
@@ -115,5 +120,9 @@ public class StringPtr {
         int realStart = offset + start;
         int length = end - start;
         return isValid(realStart, length);
+    }
+
+    public StringPtr subPtr(int start, int end) {
+        return StringPtr.checked(end - start, offset + start);
     }
 }

@@ -80,4 +80,39 @@ public class StringUtil {
         bbuf.limit(offset);
         return bbuf;
     }
+
+    public static int count(CharSequence sequence, char toFind) {
+        return count(sequence, 0, sequence.length(), toFind);
+    }
+
+    public static int count(CharSequence sequence, int start, int end, char toFind) {
+        int count = 0;
+        for (int i = start; i < end; i++) {
+            char c = sequence.charAt(i);
+            if (c == toFind) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    public static String readLengthPrefixed(ByteBuffer buffer) {
+        // implementation: use the fact that CharBuffers are CharSequences
+        // and the fact that ByteBuffer can be used as CharBuffer
+        // remember buffer state
+        int limit = buffer.limit();
+        int position = buffer.position();
+        // read length
+        short length = buffer.getShort(position);
+        // compute new buffer state
+        int newPosition = position + 2;
+        buffer.position(newPosition);
+        buffer.limit(newPosition + length * 2);
+        // use CharBuffer API
+        String result = buffer.asCharBuffer().toString();
+        // restore previous state
+        buffer.position(position);
+        buffer.limit(limit);
+        return result;
+    }
 }
