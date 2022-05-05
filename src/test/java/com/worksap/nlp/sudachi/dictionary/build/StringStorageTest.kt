@@ -3,11 +3,11 @@ package com.worksap.nlp.sudachi.dictionary.build
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class UniqueStringsTest {
+class StringStorageTest {
 
     @Test
     fun simple() {
-        val strs = UniqueStrings()
+        val strs = StringStorage()
         strs.add("test")
         strs.add("es")
         strs.compile()
@@ -19,7 +19,7 @@ class UniqueStringsTest {
 
     @Test
     fun oneChar() {
-        val strs = UniqueStrings()
+        val strs = StringStorage()
         strs.add("x")
         strs.add("y")
         strs.compile()

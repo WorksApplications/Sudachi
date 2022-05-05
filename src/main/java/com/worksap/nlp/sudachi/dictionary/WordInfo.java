@@ -16,6 +16,10 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.StringUtil;
+
+import java.nio.ByteBuffer;
+
 /**
  * Informations of the morpheme.
  *
@@ -27,6 +31,7 @@ public class WordInfo {
     private final String surface;
     private final short headwordLength;
     private short posId;
+    private final int normalizedFormWordId;
     private final String normalizedForm;
     private final int dictionaryFormWordId;
     private final String dictionaryForm;
@@ -42,6 +47,7 @@ public class WordInfo {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
+        this.normalizedFormWordId = 0;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = dictionaryFormWordId;
         this.dictionaryForm = dictionaryForm;
@@ -73,6 +79,7 @@ public class WordInfo {
         this.surface = surface;
         this.headwordLength = headwordLength;
         this.posId = posId;
+        this.normalizedFormWordId = 0;
         this.normalizedForm = normalizedForm;
         this.dictionaryFormWordId = -1;
         this.dictionaryForm = dictionaryForm;
@@ -198,8 +205,48 @@ public class WordInfo {
      * Returns the array of the synonym groups.
      *
      * @return the synonym group IDs of the morpheme
+     * @deprecated use {@link #getSynonymGroupIds()}, this method has a typo in its name
      */
+    @Deprecated
     public int[] getSynonymGoupIds() {
         return synonymGids;
+    }
+
+    /**
+     * Returns the array of the synonym groups.
+     *
+     * @return the synonym group IDs of the morpheme
+     */
+    public int[] getSynonymGroupIds() {
+        return synonymGids;
+    }
+
+    public static WordInfo read(ByteBuffer buffer) {
+        short leftId = buffer.getShort();
+        short rightId = buffer.getShort();
+        short cost = buffer.getShort();
+        short posId = buffer.getShort();
+        int surfacePtr = buffer.getInt();
+        int readingPtr = buffer.getInt();
+        int normFormPtr = buffer.getInt();
+        int dicFormPtr = buffer.getInt();
+        short utf8Length = buffer.getShort();
+        byte cSplitLen = buffer.get();
+        byte bSplitLen = buffer.get();
+        byte aSplitLen = buffer.get();
+        byte wordStructureLen = buffer.get();
+        byte synonymLen = buffer.get();
+        byte userDataFlag = buffer.get();
+        int[] cSplit = Ints.readArray(buffer, cSplitLen);
+        int[] bSplit = Ints.readArray(buffer, bSplitLen);
+        int[] aSplit = Ints.readArray(buffer, aSplitLen);
+        int[] wordStructure = Ints.readArray(buffer, wordStructureLen);
+        int[] synonyms = Ints.readArray(buffer, synonymLen);
+
+        String userData = "";
+        if (userDataFlag != 0) {
+            userData = StringUtil.readLengthPrefixed(buffer);
+        }
+        throw new IllegalArgumentException();
     }
 }

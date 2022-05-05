@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-public class UniqueStrings {
+public class StringStorage {
     private final HashMap<String, Item> strings = new HashMap<>();
     private final HashMap<String, Item> candidates = new HashMap<>();
     private final WordLayout layout = new WordLayout();
@@ -85,6 +85,11 @@ public class UniqueStrings {
         return count;
     }
 
+    public StringPtr resolve(String data) {
+        Item item = strings.get(data);
+        return item.root.ptr.subPtr(item.start, item.end);
+    }
+
     public HashMap<String, Item> getStrings() {
         return strings;
     }
@@ -138,7 +143,7 @@ public class UniqueStrings {
 
 
     public static void main(String[] args) throws IOException {
-        UniqueStrings strings = new UniqueStrings();
+        StringStorage strings = new StringStorage();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(args[0]))) {
             CSVParser parser = new CSVParser(reader);
             List<String> record;
