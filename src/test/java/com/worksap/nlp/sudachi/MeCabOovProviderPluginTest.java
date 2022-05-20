@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -46,9 +47,6 @@ public class MeCabOovProviderPluginTest {
             return (List<LatticeNode>) nodes;
         }
     }
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     TestPlugin plugin;
     MockInputText inputText;
@@ -177,6 +175,8 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(0));
     }
 
+    @Test
+    @Ignore
     public void provideOOV102() {
         MeCabOovProviderPlugin.CategoryInfo cinfo = new MeCabOovProviderPlugin.CategoryInfo();
         cinfo.type = CategoryType.KANJI;

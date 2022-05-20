@@ -17,6 +17,12 @@
 package com.worksap.nlp.sudachi;
 
 public class WordMask {
+
+    // instance creation is forbidden
+    private WordMask() {
+
+    }
+
     /**
      * Add n-th element to wordMask
      * 
