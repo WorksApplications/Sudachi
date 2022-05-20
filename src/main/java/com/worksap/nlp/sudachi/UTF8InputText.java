@@ -63,7 +63,7 @@ class UTF8InputText implements InputText {
         return modifiedText;
     }
 
-    byte[] getByteText() {
+    public byte[] getByteText() {
         return bytes;
     }
 
@@ -132,7 +132,7 @@ class UTF8InputText implements InputText {
                 modifiedToOriginal, charCategories, charCategoryContinuities, canBowList);
     }
 
-    int getOffsetTextLength(int index) {
+    public int modifiedOffset(int index) {
         return byteToModified[index];
     }
 

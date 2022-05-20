@@ -228,12 +228,15 @@ class JapaneseTokenizer implements Tokenizer {
     LatticeImpl buildLattice(UTF8InputText input) {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
+        ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>();
+
         for (int i = 0; i < bytes.length; i++) {
             if (!input.canBow(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
             Iterator<int[]> iterator = lexicon.lookup(bytes, i);
-            boolean hasWords = false;
+            long wordMask = 0L;
+
             while (iterator.hasNext()) {
                 int[] r = iterator.next();
                 int wordId = r[0];
@@ -245,31 +248,39 @@ class JapaneseTokenizer implements Tokenizer {
                 LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
                         lexicon.getCost(wordId), wordId);
                 lattice.insert(i, end, n);
-                hasWords = true;
+                wordMask = WordMask.addNth(wordMask, end - i);
             }
+            long wordMaskWithOov = wordMask;
 
             // OOV
             if (!input.getCharCategoryTypes(i).contains(CategoryType.NOOOVBOW)) {
                 for (OovProviderPlugin plugin : oovProviderPlugins) {
-                    for (LatticeNode node : plugin.getOOV(input, i, hasWords)) {
-                        hasWords = true;
-                        lattice.insert(node.getBegin(), node.getEnd(), node);
-                    }
+                    wordMaskWithOov = provideOovs(plugin, input, unkNodes, i, wordMaskWithOov);
                 }
             }
-            if (!hasWords && defaultOovProvider != null) {
-                for (LatticeNode node : defaultOovProvider.getOOV(input, i, hasWords)) {
-                    hasWords = true;
-                    lattice.insert(node.getBegin(), node.getEnd(), node);
-                }
+            if (wordMaskWithOov == 0 && defaultOovProvider != null) {
+                wordMaskWithOov = provideOovs(defaultOovProvider, input, unkNodes, i, wordMaskWithOov);
             }
-            if (!hasWords) {
-                throw new IllegalStateException("there is no morpheme at " + i);
+            if (wordMaskWithOov == 0) {
+                throw new IllegalStateException("failed to found any morpheme candidate at boundary " + i);
             }
         }
         lattice.connectEosNode();
 
         return lattice;
+    }
+
+    private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
+            int boundary, long wordMask) {
+        unkNodes.clear();
+        if (plugin.getOOV(input, boundary, wordMask, unkNodes) == 0) {
+            return wordMask;
+        }
+        for (LatticeNodeImpl node : unkNodes) {
+            lattice.insert(node.getBegin(), node.getEnd(), node);
+            wordMask = WordMask.addNth(wordMask, node.getEnd() - node.getBegin());
+        }
+        return wordMask;
     }
 
     List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
@@ -338,7 +349,7 @@ class JapaneseTokenizer implements Tokenizer {
                 while (iterator.hasNext()) {
                     int[] r = iterator.next();
                     int l = r[1];
-                    if (l > byteEOS || (l == byteEOS && bos + length - input.getOffsetTextLength(i) > 1)) {
+                    if (l > byteEOS || (l == byteEOS && bos + length - input.modifiedOffset(i) > 1)) {
                         return true;
                     }
                 }

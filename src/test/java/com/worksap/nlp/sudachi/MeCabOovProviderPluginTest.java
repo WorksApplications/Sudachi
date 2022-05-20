@@ -21,12 +21,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,15 +37,25 @@ import com.worksap.nlp.sudachi.dictionary.CategoryType;
 
 public class MeCabOovProviderPluginTest {
 
+    static class TestPlugin extends MeCabOovProviderPlugin {
+
+        @SuppressWarnings("unchecked")
+        public List<LatticeNode> provideOOV(InputText inputText, int offset, boolean otherWords) {
+            List<? extends LatticeNode> nodes = new ArrayList<>();
+            provideOOV(inputText, offset, otherWords ? 1 : 0, (List<LatticeNodeImpl>) nodes);
+            return (List<LatticeNode>) nodes;
+        }
+    }
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    MeCabOovProviderPlugin plugin;
+    TestPlugin plugin;
     MockInputText inputText;
 
     @Before
     public void setUp() throws IOException {
-        plugin = new MeCabOovProviderPlugin();
+        plugin = new TestPlugin();
 
         MeCabOovProviderPlugin.OOV oov1 = new MeCabOovProviderPlugin.OOV();
         oov1.posId = 1;
@@ -342,14 +351,29 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(0));
     }
 
+    public static class Lines extends Config.Resource<byte[]> {
+        private final byte[] data;
+
+        public Lines(String... data) {
+            String joined = String.join("\n", data);
+            this.data = joined.getBytes(StandardCharsets.UTF_8);
+        }
+
+        @Override
+        public InputStream asInputStream() {
+            return new ByteArrayInputStream(data);
+        }
+
+        @Override
+        public ByteBuffer asByteBuffer() {
+            return ByteBuffer.wrap(data);
+        }
+    }
+
     @Test
     public void readCharacterProperty() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("#\n  \nDEFAULT 0 1 2\nALPHA 1 0 0\n0x0000...0x0002 ALPHA");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
-        plugin.readCharacterProperty(inputFile.getPath());
+        plugin.readCharacterProperty(new Lines("#", "DEFAULT 0 1 2", "ALPHA 1 0 0", "0x0000...0x0002 ALPHA"));
         assertFalse(plugin.categories.get(CategoryType.DEFAULT).isInvoke);
         assertTrue(plugin.categories.get(CategoryType.DEFAULT).isGroup);
         assertThat(plugin.categories.get(CategoryType.DEFAULT).length, is(2));
@@ -357,44 +381,28 @@ public class MeCabOovProviderPluginTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterPropertyWithTooFewColumns() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("DEFAULT 0 1\n");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
-        plugin.readCharacterProperty(inputFile.getPath());
+        plugin.readCharacterProperty(new Lines("DEFAULT 0 1"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterPropertyWithUndefinedType() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("FOO 0 1 2\n");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
-        plugin.readCharacterProperty(inputFile.getPath());
+        plugin.readCharacterProperty(new Lines("FOO 0 1 2"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterPropertyDuplicatedDefinitions() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("DEFAULT 0 1 2\nDEFAULT 1 1 2");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
-        plugin.readCharacterProperty(inputFile.getPath());
+        plugin.readCharacterProperty(new Lines("DEFAULT 0 1 2", "DEFAULT 1 1 2"));
     }
 
     @Test
     public void readOOV() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("DEFAULT,1,2,3,補助記号,一般,*,*,*,*\n");
-            writer.write("DEFAULT,3,4,5,補助記号,一般,*,*,*,*\n");
-        }
+        Lines oovConfig = new Lines("DEFAULT,1,2,3,補助記号,一般,*,*,*,*", "DEFAULT,3,4,5,補助記号,一般,*,*,*,*");
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(inputFile.getPath(), new MockGrammar());
+        plugin.readOOV(oovConfig, new MockGrammar());
         assertThat(plugin.oovList.size(), is(1));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).size(), is(2));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).leftId, is((short) 1));
@@ -405,34 +413,22 @@ public class MeCabOovProviderPluginTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void readOOVWithTooFewColumns() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("DEFAULT,1,2,3\n");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(inputFile.getPath(), new MockGrammar());
+        plugin.readOOV(new Lines("DEFAULT,1,2,3"), new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readOOVWithUndefinedType() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("FOO,1,2,3,補助記号,一般,*,*,*,*\n");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(inputFile.getPath(), new MockGrammar());
+        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readOOVWithCategoryNotInCharacterProperty() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
-            writer.write("ALPHA,1,2,3,補助記号,一般,*,*,*,*\n");
-        }
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(inputFile.getPath(), new MockGrammar());
+        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar());
     }
 }

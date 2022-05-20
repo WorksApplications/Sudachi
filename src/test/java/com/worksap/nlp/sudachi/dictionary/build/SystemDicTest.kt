@@ -38,7 +38,8 @@ class SystemDicTest {
     val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
     val data = MemChannel()
     repeat(10) { bldr.lexicon(javaClass.getResource("one.csv")) }
-    bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7".byteInputStream())
+    bldr
+        .lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7".byteInputStream())
         .build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(11, dic.lexicon.size())
@@ -88,7 +89,8 @@ class SystemDicTest {
   fun aSplits() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     val data = MemChannel()
-    bldr.lexicon(
+    bldr
+        .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/2,*,0/2,*
                         都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
@@ -106,7 +108,8 @@ class SystemDicTest {
   fun aSplitsInline() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     val data = MemChannel()
-    bldr.lexicon(
+    bldr
+        .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/2",*,0/2,*
                         都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
@@ -124,7 +127,8 @@ class SystemDicTest {
   fun bSplits() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     val data = MemChannel()
-    bldr.lexicon(
+    bldr
+        .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,0/2,*
                         都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
@@ -142,7 +146,8 @@ class SystemDicTest {
   fun systemSplitU() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     val data = MemChannel()
-    bldr.lexicon(
+    bldr
+        .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,U0/U2,*
                         都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""

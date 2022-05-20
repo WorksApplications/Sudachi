@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Part-of-Speech
@@ -52,6 +53,16 @@ public final class POS extends AbstractList<String> {
             }
         }
         this.elems = elems;
+    }
+
+    /**
+     * Creates new POS instance from
+     * 
+     * @param elems
+     * @return
+     */
+    public POS(List<String> elems) {
+        this(elems.toArray(new String[0]));
     }
 
     @Override

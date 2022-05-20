@@ -123,6 +123,7 @@ settings.xml
 build/
 .gradle/
 !gradle/wrapper/gradle-wrapper.jar
+out/
 
 ### OSX ###
 *.DS_Store

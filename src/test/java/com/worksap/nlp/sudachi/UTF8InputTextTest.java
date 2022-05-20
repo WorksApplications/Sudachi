@@ -284,9 +284,9 @@ public class UTF8InputTextTest {
         input = input.slice(1, 3);
         assertThat(input.getOriginalText(), is("ｂC1"));
         assertThat(input.getText(), is("あ1"));
-        assertThat(input.getOffsetTextLength(1), is(0));
-        assertThat(input.getOffsetTextLength(3), is(1));
-        assertThat(input.getOffsetTextLength(4), is(2));
+        assertThat(input.modifiedOffset(1), is(0));
+        assertThat(input.modifiedOffset(3), is(1));
+        assertThat(input.modifiedOffset(4), is(2));
         assertThat(input.getOriginalIndex(3), is(2));
         assertThat(input.getOriginalIndex(4), is(3));
     }

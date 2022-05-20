@@ -201,4 +201,21 @@ public interface InputText {
      * @return the index of the character
      */
     public int getNextInOriginal(int index);
+
+    /**
+     * Returns utf-16 code unit offset in the modified sequence based on byte
+     * offset.
+     * 
+     * @param index
+     *            offset in utf-8 bytes
+     * @return offset in utf-16 code units
+     */
+    int modifiedOffset(int index);
+
+    /**
+     * Get utf-8 representation of input text
+     * 
+     * @return bytes of utf-8 representation
+     */
+    byte[] getByteText();
 }

@@ -64,30 +64,37 @@ public abstract class OovProviderPlugin extends Plugin {
      *            the input text
      * @param offset
      *            the index of insertion
-     * @param hasOtherWords
-     *            if {@code true}, the lattice has other words beginning at
-     *            {@code offset}.
-     * @return the nodes of OOV morphemes
+     * @param otherWords
+     *            bitmask that contains information nodes on which boundaries were
+     *            already created. For example, a mask of 0b1001 means that there
+     *            were already created two nodes: of length 1 and 4. If the highest
+     *            bit is set, it means that a node of length of 64 <b>or greater</b>
+     *            was created.
+     * @param result
+     *            OOV provider plugins need to add nodes here
+     * @return the number of created nodes. Values outside that range will be
+     *         ignored.
      */
-    public abstract List<LatticeNode> provideOOV(InputText inputText, int offset, boolean hasOtherWords);
+    public abstract int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result);
 
-    List<LatticeNode> getOOV(UTF8InputText inputText, int offset, boolean hasOtherWords) {
-        List<LatticeNode> nodes = provideOOV(inputText, offset, hasOtherWords);
-        for (LatticeNode node : nodes) {
-            LatticeNodeImpl n = (LatticeNodeImpl) node;
+    int getOOV(UTF8InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result) {
+        int oldSize = result.size();
+        int numCreated = provideOOV(inputText, offset, otherWords, result);
+        for (int i = 0; i < numCreated; i++) {
+            LatticeNodeImpl n = result.get(oldSize + i);
             n.begin = offset;
-            n.end = offset + node.getWordInfo().getLength();
+            n.end = offset + n.getWordInfo().getLength();
         }
-        return nodes;
+        return numCreated;
     }
 
     /**
-     * Returns a new node of OOV.
+     * Returns a new node which represents an OOV word.
      *
-     * @return a node of OOV
+     * @return a new OOV node
      */
-    public LatticeNode createNode() {
-        LatticeNode node = new LatticeNodeImpl();
+    protected LatticeNodeImpl createNode() {
+        LatticeNodeImpl node = new LatticeNodeImpl();
         node.setOOV();
         return node;
     }
