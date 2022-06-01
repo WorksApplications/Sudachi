@@ -228,12 +228,13 @@ class JapaneseTokenizer implements Tokenizer {
     LatticeImpl buildLattice(UTF8InputText input) {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
-        ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>();
+        ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>(64);
 
         for (int i = 0; i < bytes.length; i++) {
             if (!input.canBow(i) || !lattice.hasPreviousNode(i)) {
                 continue;
             }
+            unkNodes.clear();
             Iterator<int[]> iterator = lexicon.lookup(bytes, i);
             long wordMask = 0L;
 
@@ -245,9 +246,10 @@ class JapaneseTokenizer implements Tokenizer {
                 if (end < bytes.length && !input.canBow(end)) {
                     continue;
                 }
-                LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
+                LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
                         lexicon.getCost(wordId), wordId);
                 lattice.insert(i, end, n);
+                unkNodes.add(n);
                 wordMask = WordMask.addNth(wordMask, end - i);
             }
             long wordMaskWithOov = wordMask;
@@ -272,11 +274,13 @@ class JapaneseTokenizer implements Tokenizer {
 
     private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
             int boundary, long wordMask) {
-        unkNodes.clear();
-        if (plugin.getOOV(input, boundary, wordMask, unkNodes) == 0) {
+        int initialSize = unkNodes.size();
+        int created = plugin.getOOV(input, boundary, wordMask, unkNodes);
+        if (created == 0) {
             return wordMask;
         }
-        for (LatticeNodeImpl node : unkNodes) {
+        for (int i = initialSize; i < initialSize + created; ++i) {
+            LatticeNodeImpl node = unkNodes.get(i);
             lattice.insert(node.getBegin(), node.getEnd(), node);
             wordMask = WordMask.addNth(wordMask, node.getEnd() - node.getBegin());
         }
@@ -311,7 +315,7 @@ class JapaneseTokenizer implements Tokenizer {
     void dumpPath(List<LatticeNode> path) {
         int i = 0;
         for (LatticeNode node : path) {
-            dumpOutput.println(String.format("%d: %s", i, node.toString()));
+            dumpOutput.printf("%d: %s\n", i, node.toString());
             i++;
         }
     }
