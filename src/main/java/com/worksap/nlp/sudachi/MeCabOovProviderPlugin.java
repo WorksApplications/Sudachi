@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -132,7 +133,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     <T> void readCharacterProperty(Config.Resource<T> charDef) throws IOException {
         if (charDef == null) {
-            charDef = settings.getResource("char.def");
+            charDef = settings.base.toResource(Paths.get("char.def"));
         }
         try (InputStream input = charDef.asInputStream();
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
@@ -168,7 +169,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar) throws IOException {
         if (unkDef == null) {
-            unkDef = settings.getResource("unk.def");
+            unkDef = settings.base.toResource(Paths.get("unk.def"));
         }
         try (InputStream input = unkDef.asInputStream();
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);

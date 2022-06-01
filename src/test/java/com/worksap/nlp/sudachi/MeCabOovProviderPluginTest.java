@@ -16,25 +16,26 @@
 
 package com.worksap.nlp.sudachi;
 
+import com.worksap.nlp.sudachi.MeCabOovProviderPlugin.CategoryInfo;
+import com.worksap.nlp.sudachi.dictionary.CategoryType;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import com.worksap.nlp.sudachi.MeCabOovProviderPlugin.CategoryInfo;
-import com.worksap.nlp.sudachi.dictionary.CategoryType;
 
 public class MeCabOovProviderPluginTest {
 

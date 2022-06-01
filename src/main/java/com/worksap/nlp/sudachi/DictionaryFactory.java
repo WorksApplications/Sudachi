@@ -62,7 +62,7 @@ public class DictionaryFactory {
     @Deprecated()
     public Dictionary create(String settings) throws IOException {
         Config defaults = Config.fromClasspath();
-        Config passed = Config.fromJsonString(settings, SettingsAnchor.none());
+        Config passed = Config.fromJsonString(settings, SettingsAnchor.classpath().andThen(SettingsAnchor.none()));
         Config merged = defaults.merge(passed, Config.MergeMode.REPLACE);
         return create(merged);
     }

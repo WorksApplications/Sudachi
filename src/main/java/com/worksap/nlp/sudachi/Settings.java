@@ -171,6 +171,7 @@ public class Settings {
     @Deprecated
     public static Settings parseSettings(String path, String json) {
         SettingsAnchor anchor = path == null ? SettingsAnchor.none() : SettingsAnchor.filesystem(Paths.get(path));
+        anchor = anchor.andThen(SettingsAnchor.classpath());
         return parse(json, anchor);
     }
 
