@@ -97,8 +97,7 @@ public class RegexOovProvider extends OovProviderPlugin {
 
             LatticeNodeImpl node = new LatticeNodeImpl(null, leftId, rightId, cost, -1);
             node.setOOV();
-            node.setRange(offset, matcher.end());
-            String oov = inputText.getSubstring(matcher.start(), matcher.end());
+            String oov = text.substring(matcher.start(), matcher.end());
             WordInfo info = new WordInfo(oov, (short) oovLength, posId, oov, oov, "");
             node.setWordInfo(info);
             nodes.add(node);

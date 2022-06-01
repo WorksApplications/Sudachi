@@ -51,8 +51,10 @@ class RegexOovProviderTest {
 
   @Test
   fun hasOtherConflictingWords() {
-    val tokens = analyzer.tokenize("2つXAG-2F")
+    val tokens = analyzer.tokenize("２つXＡＧ-2F")
     assertEquals(3, tokens.size)
-    assertEquals("XAG-2F", tokens[2].surface())
+    assertEquals("XＡＧ-2F", tokens[2].surface())
+    assertEquals("xag-2f", tokens[2].normalizedForm())
+    assertEquals("", tokens[2].readingForm())
   }
 }
