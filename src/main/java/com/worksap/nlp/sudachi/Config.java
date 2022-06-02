@@ -205,15 +205,13 @@ public class Config {
      *
      * @param name
      *            classpath resource name
-     * @param mode
-     *            how to merge Config objects
      * @return merged Config
      * @throws IOException
      *             when IO fails
      * @see #withFallback(Config)
      */
-    public static Config fromClasspathMerged(String name, MergeMode mode) throws IOException {
-        return fromClasspathMerged(Config.class.getClassLoader(), name, mode);
+    public static Config fromClasspathMerged(String name) throws IOException {
+        return fromClasspathMerged(Config.class.getClassLoader(), name);
     }
 
     /**
@@ -224,14 +222,12 @@ public class Config {
      *            it will be used to load resources
      * @param name
      *            classpath resource name
-     * @param mode
-     *            how to merge Config objects
      * @return merged Config
      * @throws IOException
      *             when IO fails
      * @see #withFallback(Config)
      */
-    public static Config fromClasspathMerged(ClassLoader classLoader, String name, MergeMode mode) throws IOException {
+    public static Config fromClasspathMerged(ClassLoader classLoader, String name) throws IOException {
         Enumeration<URL> resources = classLoader.getResources(name);
         Config result = Config.empty();
         long count = 0;
@@ -585,20 +581,6 @@ public class Config {
         pathRewrite = mergePluginList(pathRewrite, other.pathRewrite);
         allowEmptyMorpheme = mergeOne(allowEmptyMorpheme, other.allowEmptyMorpheme);
         return this;
-    }
-
-    /**
-     * Specifies mode for Config merging
-     */
-    public enum MergeMode {
-        /**
-         * List contents will be appended
-         */
-        APPEND,
-        /**
-         * Present list will replace existing lists
-         */
-        REPLACE
     }
 
     @FunctionalInterface
