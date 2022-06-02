@@ -66,7 +66,7 @@ class ConfigTest {
   }
 
   @Test
-  fun mergeReplace() {
+  fun merge() {
     val base = Config.fromClasspath()
     val top =
         Config.fromJsonString(
@@ -79,7 +79,7 @@ class ConfigTest {
             }]
         }""",
             SettingsAnchor.filesystem(Paths.get("")))
-    val merged = base.merge(top, Config.MergeMode.REPLACE)
+    val merged = top.withFallback(base)
     assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
     assertEquals(merged.userDictionaries.size, 2)
     assert((merged.userDictionaries[0].repr() as Path).endsWith("test2.dic"))
@@ -88,31 +88,8 @@ class ConfigTest {
     assertEquals(
         merged.oovProviderPlugins[0].clazzName, "com.worksap.nlp.sudachi.SimpleOovProviderPlugin")
     assertEquals(merged.oovProviderPlugins[0].internal.getInt("cost"), 12000)
-  }
-
-  @Test
-  fun mergeAppend() {
-    val base = Config.fromClasspath()
-    val top =
-        Config.fromJsonString(
-            """{
-            "systemDict": "test1.dic",
-            "userDict": ["test2.dic", "test3.dic"],
-            "oovProviderPlugin": [{
-              "class": "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
-              "cost": 12000
-            }]
-        }""",
-            SettingsAnchor.none())
-    val merged = base.merge(top, Config.MergeMode.REPLACE)
-    assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
-    assertEquals(merged.userDictionaries.size, 2)
-    assert((merged.userDictionaries[0].repr() as Path).endsWith("test2.dic"))
-    assert((merged.userDictionaries[1].repr() as Path).endsWith("test3.dic"))
-    assertEquals(merged.oovProviderPlugins.size, 1)
-    assertEquals(
-        merged.oovProviderPlugins[0].clazzName, "com.worksap.nlp.sudachi.SimpleOovProviderPlugin")
-    assertEquals(merged.oovProviderPlugins[0].internal.getInt("cost"), 12000)
+    assertEquals(merged.oovProviderPlugins[0].internal.getInt("leftId"), 8)
+    assertEquals(merged.oovProviderPlugins[0].internal.getInt("rightId"), 8)
   }
 
   @Test

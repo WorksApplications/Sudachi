@@ -125,7 +125,7 @@ public class Settings {
         logger.fine(() -> String.format("reading settings from %s", file));
         String data = StringUtil.readFully(file);
         Settings settings = parse(data, this.base);
-        return merge(settings);
+        return settings.withFallback(this);
     }
 
     /**
@@ -143,7 +143,7 @@ public class Settings {
         logger.fine(() -> String.format("reading settings from %s", resource));
         String data = StringUtil.readFully(resource);
         Settings settings = parse(data, this.base);
-        return merge(settings);
+        return settings.withFallback(this);
     }
 
     /**
@@ -575,11 +575,34 @@ public class Settings {
      * @param settings
      *            another Settings object to merge
      * @return new Settings object, containing merge results
-     * @see Config#merge(Config, Config.MergeMode)
+     * @deprecated use {@link Settings#withFallback(Settings)} instead
      */
+    @Deprecated
     public Settings merge(Settings settings) {
-        JsonObject merged = mergeObject(settings.root, this.root);
-        return new Settings(merged, settings.base.andThen(base));
+        return settings.withFallback(this);
+    }
+
+    /**
+     * Merge another Settings object with this object, returning a new Settings
+     * object. Scalar values and arrays of another object will be added to the
+     * config if they are not present yet.
+     *
+     * The current object will not be modified.
+     *
+     * {@link SettingsAnchor} of the another object will be merged with this one,
+     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method,
+     * using the anchor of the passed Settings object after the current anchor.
+     *
+     * This is advanced API, in most cases Configs should be merged instead.
+     *
+     * @param other
+     *            another Settings object to merge
+     * @return new Settings object, containing merge results
+     * @see Config#withFallback(Config)
+     */
+    public Settings withFallback(Settings other) {
+        JsonObject merged = mergeObject(other.root, this.root);
+        return new Settings(merged, base.andThen(other.base));
     }
 
     private static JsonObject mergeObject(JsonObject left, JsonObject right) {

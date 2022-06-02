@@ -39,7 +39,7 @@ class JapaneseTokenizerMaskTest {
     val cfg0 = Config.empty()
     cfg0.addOovProviderPlugin(CaptureOtherWords::class.java)
     cfg0.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
-    val cfg = cfg0.merge(TestDictionary.user0Cfg(), Config.MergeMode.APPEND)
+    val cfg = cfg0.withFallback(TestDictionary.user0Cfg())
     val dic = DictionaryFactory().create(cfg) as JapaneseDictionary
     val tokenizer = dic.create()
 

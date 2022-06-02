@@ -210,7 +210,7 @@ public class Config {
      * @return merged Config
      * @throws IOException
      *             when IO fails
-     * @see #merge(Config, MergeMode)
+     * @see #withFallback(Config)
      */
     public static Config fromClasspathMerged(String name, MergeMode mode) throws IOException {
         return fromClasspathMerged(Config.class.getClassLoader(), name, mode);
@@ -229,7 +229,7 @@ public class Config {
      * @return merged Config
      * @throws IOException
      *             when IO fails
-     * @see #merge(Config, MergeMode)
+     * @see #withFallback(Config)
      */
     public static Config fromClasspathMerged(ClassLoader classLoader, String name, MergeMode mode) throws IOException {
         Enumeration<URL> resources = classLoader.getResources(name);
@@ -237,7 +237,7 @@ public class Config {
         long count = 0;
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            result = result.merge(Config.fromClasspath(resource), mode);
+            result = result.withFallback(Config.fromClasspath(resource));
             count += 1;
         }
         if (count == 0) {
@@ -246,45 +246,36 @@ public class Config {
         return result;
     }
 
-    private static <T> List<T> mergeList(MergeMode mode, List<T> dest, List<T> src) {
-        if (src != null) {
-            if (mode == MergeMode.REPLACE || dest == null) {
-                return src;
-            } else {
-                for (T newItem : src) {
-                    if (!dest.contains(newItem)) {
-                        dest.add(newItem);
-                    }
+    private static <T> List<T> mergeList(List<T> self, List<T> other) {
+        if (self == null) {
+            return other;
+        }
+        return self;
+    }
+
+    private static <T extends Plugin> List<PluginConf<T>> mergePluginList(List<PluginConf<T>> self,
+            List<PluginConf<T>> other) {
+        if (other != null) {
+            if (self == null) {
+                return other;
+            }
+            for (PluginConf<T> selfConf : self) {
+                Optional<PluginConf<T>> first = other.stream()
+                        .filter(p -> Objects.equals(p.clazzName, selfConf.clazzName)).findFirst();
+                if (first.isPresent()) {
+                    PluginConf<T> otherConf = first.get();
+                    selfConf.internal = selfConf.internal.withFallback(otherConf.internal);
                 }
             }
         }
-        return dest;
+        return self;
     }
 
-    private static <T extends Plugin> List<PluginConf<T>> mergePluginList(MergeMode mode, List<PluginConf<T>> dest,
-            List<PluginConf<T>> src) {
-        if (src != null) {
-            if (dest == null) {
-                return src;
-            } else {
-                for (PluginConf<T> newItem : dest) {
-                    Optional<PluginConf<T>> first = src.stream()
-                            .filter(p -> Objects.equals(p.clazzName, newItem.clazzName)).findFirst();
-                    if (first.isPresent()) {
-                        PluginConf<T> pconf = first.get();
-                        newItem.internal = pconf.internal.merge(newItem.internal);
-                    }
-                }
-            }
+    private static <T> T mergeOne(T self, T other) {
+        if (self == null) {
+            return other;
         }
-        return dest;
-    }
-
-    private static <T> T mergeOne(T dest, T src) {
-        if (src != null) {
-            return src;
-        }
-        return dest;
+        return self;
     }
 
     private Config fallbackSettings(Settings settings) {
@@ -570,34 +561,28 @@ public class Config {
 
     /**
      * Merges this Config with another Config. Compared to
-     * {@link Settings#merge(Settings)}, merging is done for already resolved
+     * {@link Settings#withFallback(Settings)}, merging is done for already resolved
      * Configs and has no path resolution complexity.
      * <p>
-     * Generally, non-empty properties of the provided config will replace
-     * properties of the current Config. For lists, the behavior depends on
-     * mergeMode parameter. When using {@code MergeMode.REPLACE}, the behavior is
-     * the same as with scalar fields. When using {@code MergeMode.APPEND}, new
-     * values of the provided config will be appended to the current config.
-     * <p>
-     * Prefer merging Configs over merging Settings.
+     * Values of the current config will be preferred over values of the underlying
+     * config. Plugin configurations are always overridden. Prefer merging Configs
+     * over merging Settings.
      * <p>
      * Can also be used to create a copy of a config as
-     * {@code Config.empty().merge(config)}.
+     * {@code Config.empty().withFallback(config)}.
      *
      * @param other
      *            Config to merge with the current one
-     * @param mergeMode
-     *            how to merge lists (plugins, user dictionaries)
      * @return modified Config
      */
-    public Config merge(Config other, MergeMode mergeMode) {
+    public Config withFallback(Config other) {
         systemDictionary = mergeOne(systemDictionary, other.systemDictionary);
-        userDictionary = mergeList(mergeMode, userDictionary, other.userDictionary);
+        userDictionary = mergeList(userDictionary, other.userDictionary);
         characterDefinition = mergeOne(characterDefinition, other.characterDefinition);
-        editConnectionCost = mergePluginList(mergeMode, editConnectionCost, other.editConnectionCost);
-        inputText = mergePluginList(mergeMode, inputText, other.inputText);
-        oovProviders = mergePluginList(mergeMode, oovProviders, other.oovProviders);
-        pathRewrite = mergePluginList(mergeMode, pathRewrite, other.pathRewrite);
+        editConnectionCost = mergePluginList(editConnectionCost, other.editConnectionCost);
+        inputText = mergePluginList(inputText, other.inputText);
+        oovProviders = mergePluginList(oovProviders, other.oovProviders);
+        pathRewrite = mergePluginList(pathRewrite, other.pathRewrite);
         allowEmptyMorpheme = mergeOne(allowEmptyMorpheme, other.allowEmptyMorpheme);
         return this;
     }
@@ -696,7 +681,7 @@ public class Config {
          */
         public PluginConf<T> add(String key, String value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
         }
 
@@ -711,7 +696,7 @@ public class Config {
          */
         public PluginConf<T> add(String key, int value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
         }
 
@@ -727,7 +712,7 @@ public class Config {
         public PluginConf<T> addList(String key, String... values) {
             JsonArrayBuilder builder = Json.createArrayBuilder(Arrays.asList(values));
             JsonObject obj = Json.createObjectBuilder().add(key, builder).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
         }
 

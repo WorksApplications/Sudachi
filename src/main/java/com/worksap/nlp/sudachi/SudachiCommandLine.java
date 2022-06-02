@@ -212,15 +212,15 @@ public class SudachiCommandLine {
                 Path configPath = Paths.get(args[++i]);
                 SettingsAnchor curAnchor = SettingsAnchor.filesystem(configPath.getParent())
                         .andThen(SettingsAnchor.classpath());
-                additional = Config.fromFile(configPath, curAnchor).merge(additional, Config.MergeMode.APPEND);
+                additional = Config.fromFile(configPath, curAnchor).withFallback(additional);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 String resourcesDirectory = args[++i];
                 anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory)).andThen(SettingsAnchor.classpath());
                 // first resolve wrt new directory
-                current = current.merge(Settings.resolvedBy(anchor));
+                current = Settings.resolvedBy(anchor).withFallback(current);
             } else if (args[i].equals("-s") && i + 1 < args.length) {
                 Config other = Config.fromJsonString(args[++i], anchor);
-                additional = additional.merge(other, Config.MergeMode.APPEND);
+                additional = other.withFallback(additional);
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 switch (args[++i]) {
                 case "A":
@@ -278,7 +278,7 @@ public class SudachiCommandLine {
             }
         }
 
-        Config config = Config.fromSettings(current).merge(additional, Config.MergeMode.REPLACE);
+        Config config = additional.withFallback(Config.fromSettings(current));
 
         MorphemeFormatterPlugin formatter = makeFormatter(isWordSegmentation, isLineBreakAtEosInWordSegmentation,
                 formatterKind, current);

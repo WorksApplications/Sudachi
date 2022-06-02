@@ -180,11 +180,9 @@ public class SettingsTest {
         Settings settings = Settings.parse("{\"baa\":\"bazz\",\"list\":[1,2]}", SettingsAnchor.none());
         Settings settings2 = Settings.parse("{\"baa\":\"boo\",\"list\":[5],\"list2\":[0]}",
                 SettingsAnchor.filesystem(Paths.get("path")));
-        Settings merged = settings2.merge(settings);
-
-        assertThat(merged.getString("baa"), is("boo"));
-
-        assertThat(merged.getIntList("list"), contains(5));
+        Settings merged = settings.withFallback(settings2);
+        assertThat(merged.getString("baa"), is("bazz"));
+        assertThat(merged.getIntList("list"), contains(1, 2));
         assertThat(merged.getIntList("list2"), contains(0));
     }
 
