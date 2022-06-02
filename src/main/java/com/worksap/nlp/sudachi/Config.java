@@ -20,6 +20,7 @@ import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -680,18 +681,49 @@ public class Config {
         }
 
         /**
-         * Add untyped key-value configuration to the plugin
+         * Add a string value to the plugin configuration
          * 
          * @param key
          *            setting key
          * @param value
          *            setting value
-         * @return modified plugin
+         * @return current plugin instance
          */
         public PluginConf<T> add(String key, String value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            Settings merged = internal.merge(new Settings(obj, SettingsAnchor.none()));
-            return new PluginConf<>(clazzName, merged, parent);
+            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            return this;
+        }
+
+        /**
+         * Add an int value to the plugin configuration
+         * 
+         * @param key
+         *            setting key
+         * @param value
+         *            setting value
+         * @return current plugin instance
+         */
+        public PluginConf<T> add(String key, int value) {
+            JsonObject obj = Json.createObjectBuilder().add(key, value).build();
+            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            return this;
+        }
+
+        /**
+         * Add a string list value to the plugin configuration
+         * 
+         * @param key
+         *            setting key
+         * @param values
+         *            setting value as a string array
+         * @return current plugin instance
+         */
+        public PluginConf<T> addList(String key, String... values) {
+            JsonArrayBuilder builder = Json.createArrayBuilder(Arrays.asList(values));
+            JsonObject obj = Json.createObjectBuilder().add(key, builder).build();
+            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            return this;
         }
     }
 

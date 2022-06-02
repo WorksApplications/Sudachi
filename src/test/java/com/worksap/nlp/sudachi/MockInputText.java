@@ -118,4 +118,14 @@ class MockInputText implements InputText {
     public int getNextInOriginal(int index) {
         return index + 1;
     }
+
+    @Override
+    public int modifiedOffset(int index) {
+        return 0;
+    }
+
+    @Override
+    public byte[] getByteText() {
+        return new byte[0];
+    }
 }
