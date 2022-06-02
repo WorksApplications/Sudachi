@@ -16,26 +16,19 @@
 
 package com.worksap.nlp.sudachi;
 
+import javax.json.*;
+import javax.json.stream.JsonParsingException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
-import javax.json.stream.JsonParsingException;
 
 /**
  * An untyped collection of settings. This class handles parsing a JSON object
@@ -292,7 +285,8 @@ public class Settings {
      *            the key
      * @param defaultValue
      *            the default mapping of the key
-     * @return the value or {@code defaultValue} if this settings has no mapping
+     * @return the value or {@code defaultValue} if this settings object has no
+     *         mapping
      * @throws IllegalArgumentException
      *             if the value is not a string
      */
@@ -506,7 +500,7 @@ public class Settings {
      *
      * @param setting
      *            the key
-     * @return the value or an empty list if this settings has no mapping
+     * @return the value or an empty list if this settings object has no mapping
      * @throws IllegalArgumentException
      *             if the value is not an array of strings
      */
@@ -520,13 +514,14 @@ public class Settings {
 
     /**
      * Returns the value as the boolean to which the specified key is mapped, or
-     * {@code defaultValue} if this settings contains no mapping for the key.
+     * {@code defaultValue} if this settings object contains no mapping for the key.
      *
      * @param setting
      *            the key
      * @param defaultValue
      *            the default mapping of the key
-     * @return the value or {@code defaultValue} if this settings has no mapping
+     * @return the value or {@code defaultValue} if this settings object has no
+     *         mapping
      */
     public Boolean getBoolean(String setting, Boolean defaultValue) {
         try {
@@ -557,7 +552,7 @@ public class Settings {
             JsonObject inner = key.asJsonObject();
             String className = inner.getString("class");
             if (className == null) {
-                throw new IllegalArgumentException(String.format("subobject for %s didn't have class key", name));
+                throw new IllegalArgumentException(String.format("sub-object for %s didn't have class key", name));
             }
             result.add(new Config.PluginConf<>(className, new Settings(inner, base), cls));
         }
@@ -566,8 +561,8 @@ public class Settings {
 
     /**
      * Merge another Settings object with this object, returning a new Settings
-     * object. Scalar values of this object will be replaced by values of another
-     * object, arrays will be appended.
+     * object. Scalar values and arrays of this object will be replaced by values of
+     * another object.
      *
      * The current object will not be modified.
      *
@@ -583,43 +578,28 @@ public class Settings {
      * @see Config#merge(Config, Config.MergeMode)
      */
     public Settings merge(Settings settings) {
-        JsonObjectBuilder newRoot = Json.createObjectBuilder();
-        for (Map.Entry<String, JsonValue> thisEntry : this.root.entrySet()) {
-            String thisKey = thisEntry.getKey();
-            JsonValue thisValue = thisEntry.getValue();
-            if (settings.root.containsKey(thisKey)) {
-                JsonValue value = settings.root.get(thisKey);
-                if (thisValue instanceof JsonString || thisValue instanceof JsonNumber
-                        || thisValue instanceof JsonObject) {
-                    newRoot.add(thisKey, value);
-                } else if (thisValue instanceof JsonArray) {
-                    if (value instanceof JsonArray) {
-                        newRoot.add(thisKey, mergeArray((JsonArray) thisValue, (JsonArray) value));
-                    } else {
-                        newRoot.add(thisKey, value);
-                    }
-                }
-            } else {
-                newRoot.add(thisKey, thisValue);
-            }
-        }
-        for (Map.Entry<String, JsonValue> entry : settings.root.entrySet()) {
-            if (!this.root.containsKey(entry.getKey())) {
-                newRoot.add(entry.getKey(), entry.getValue());
-            }
-        }
-        return new Settings(newRoot.build(), settings.base.andThen(base));
+        JsonObject merged = mergeObject(settings.root, this.root);
+        return new Settings(merged, settings.base.andThen(base));
     }
 
-    private JsonArray mergeArray(JsonArray dest, JsonArray src) {
-        if (src.isEmpty()) {
-            return dest;
+    private static JsonObject mergeObject(JsonObject left, JsonObject right) {
+        if (left.isEmpty()) {
+            return right;
         }
-        JsonArrayBuilder newList = Json.createArrayBuilder(dest);
-        for (JsonValue item : src) {
-            newList.add(item);
+        if (right.isEmpty()) {
+            return left;
         }
-        return newList.build();
+        JsonObjectBuilder builder = Json.createObjectBuilder(right);
+        for (String leftKey : left.keySet()) {
+            JsonValue leftValue = left.get(leftKey);
+            JsonValue rightValue = right.get(leftKey);
+            if (rightValue == null) {
+                builder.add(leftKey, leftValue);
+            } else if (leftValue instanceof JsonObject && rightValue instanceof JsonObject) {
+                builder.add(leftKey, mergeObject((JsonObject) leftValue, (JsonObject) rightValue));
+            }
+        }
+        return builder.build();
     }
 
 }

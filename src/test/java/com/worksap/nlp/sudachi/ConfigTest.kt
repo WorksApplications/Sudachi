@@ -53,8 +53,8 @@ class ConfigTest {
   fun resolveFilesystemPath() {
     val cfg =
         Config.fromJsonString(
-            """{"systemDict": "test"}""", SettingsAnchor.filesystem(Paths.get("/usr")))
-    assertEquals(cfg.systemDictionary.repr(), Paths.get("/usr/test"))
+            """{"systemDict": "main"}""", SettingsAnchor.filesystem(Paths.get("src")))
+    assertEquals(cfg.systemDictionary.repr(), Paths.get("src/main"))
   }
 
   @Test
@@ -103,7 +103,7 @@ class ConfigTest {
               "cost": 12000
             }]
         }""",
-            SettingsAnchor.filesystem(Paths.get("")))
+            SettingsAnchor.none())
     val merged = base.merge(top, Config.MergeMode.REPLACE)
     assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
     assertEquals(merged.userDictionaries.size, 2)
@@ -113,12 +113,6 @@ class ConfigTest {
     assertEquals(
         merged.oovProviderPlugins[0].clazzName, "com.worksap.nlp.sudachi.SimpleOovProviderPlugin")
     assertEquals(merged.oovProviderPlugins[0].internal.getInt("cost"), 12000)
-  }
-
-  @Test
-  fun fromClasspathMerged() {
-    val config = Config.fromClasspathMerged("sudachi.json", Config.MergeMode.APPEND)
-    assertEquals(config.oovProviderPlugins.size, 2)
   }
 
   @Test

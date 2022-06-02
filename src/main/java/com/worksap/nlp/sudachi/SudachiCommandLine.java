@@ -210,11 +210,12 @@ public class SudachiCommandLine {
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
                 Path configPath = Paths.get(args[++i]);
-                anchor = SettingsAnchor.filesystem(configPath.getParent()).andThen(SettingsAnchor.classpath());
-                current = Settings.fromFile(configPath, anchor);
+                SettingsAnchor curAnchor = SettingsAnchor.filesystem(configPath.getParent())
+                        .andThen(SettingsAnchor.classpath());
+                additional = Config.fromFile(configPath, curAnchor).merge(additional, Config.MergeMode.APPEND);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 String resourcesDirectory = args[++i];
-                anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory));
+                anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory)).andThen(SettingsAnchor.classpath());
                 // first resolve wrt new directory
                 current = current.merge(Settings.resolvedBy(anchor));
             } else if (args[i].equals("-s") && i + 1 < args.length) {

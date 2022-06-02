@@ -151,7 +151,7 @@ public class SudachiCommandLineTest {
         SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-r", settingsPath,
                 "-s", "{\"userDict\":[]}", inputFileName });
         try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
-            assertThat(lines.count(), is(11L));
+            assertThat(lines.count(), is(10L));
         }
     }
 
