@@ -73,8 +73,6 @@ public class RegexOovProvider extends OovProviderPlugin {
         leftId = checkedShort(settings, "leftId");
         rightId = checkedShort(settings, "rightId");
         pattern = checkPattern(settings.getString("regex"));
-        // force compilation of the pattern here
-        pattern.matcher("test").reset();
     }
 
     @Override

@@ -57,4 +57,12 @@ class RegexOovProviderTest {
     assertEquals("xag-2f", tokens[2].normalizedForm())
     assertEquals("", tokens[2].readingForm())
   }
+
+  @Test
+  fun singleMultibyte() {
+    val tokens = analyzer.tokenize("２つＧ")
+    assertEquals(3, tokens.size)
+    assertEquals("Ｇ", tokens[2].surface())
+    assertEquals("g", tokens[2].normalizedForm())
+  }
 }
