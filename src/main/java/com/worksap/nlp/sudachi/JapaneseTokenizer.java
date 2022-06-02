@@ -243,11 +243,11 @@ class JapaneseTokenizer implements Tokenizer {
                 int[] wordIds = wordLookup.getWordsIds();
                 for (int word = 0; word < numWords; ++word) {
                     int wordId = wordIds[word];
-                    LatticeNode n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId), lexicon.getRightId(wordId),
-                            lexicon.getCost(wordId), wordId);
+                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId),
+                            lexicon.getRightId(wordId), lexicon.getCost(wordId), wordId);
                     lattice.insert(byteBoundary, end, n);
                     unkNodes.add(n);
-                    wordMask = WordMask.addNth(wordMask, end - i);
+                    wordMask = WordMask.addNth(wordMask, end - byteBoundary);
                 }
             }
             long wordMaskWithOov = wordMask;

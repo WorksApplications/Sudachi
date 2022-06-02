@@ -58,8 +58,8 @@ public class DicBuilder {
             return new WordLookup.Csv(lexicon);
         }
 
+        @SuppressWarnings("unchecked")
         private T self() {
-            // noinspection unchecked
             return (T) this;
         }
 
