@@ -31,7 +31,7 @@ public class WordId {
     public static final int MAX_DIC_ID = 0xe;
 
     public static int makeUnchecked(int dic, int word) {
-        int dicPart = dic << 28;
+        int dicPart = dicIdMask(dic);
         return dicPart | word;
     }
 
@@ -75,5 +75,13 @@ public class WordId {
      */
     public static int word(int wordId) {
         return wordId & MAX_WORD_ID;
+    }
+
+    public static int dicIdMask(int dicId) {
+        return dicId << 28;
+    }
+
+    public static int applyMask(int wordId, int dicIdMask) {
+        return (wordId & MAX_WORD_ID) | dicIdMask;
     }
 }

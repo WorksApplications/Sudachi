@@ -29,10 +29,10 @@ public class DoubleArrayLexicon implements Lexicon {
 
     static final int USER_DICT_COST_PAR_MORPH = -20;
 
-    private WordIdTable wordIdTable;
-    private WordParameterList wordParams;
-    private WordInfoList wordInfos;
-    private DoubleArray trie;
+    private final WordIdTable wordIdTable;
+    private final WordParameterList wordParams;
+    private final WordInfoList wordInfos;
+    private final DoubleArray trie;
 
     public DoubleArrayLexicon(ByteBuffer bytes, int offset, boolean hasSynonymGid) {
         trie = new DoubleArray();
@@ -75,6 +75,14 @@ public class DoubleArrayLexicon implements Lexicon {
             return iterator;
         }
         return new Itr(iterator);
+    }
+
+    public IntBuffer getTrieArray() {
+        return trie.array();
+    }
+
+    public WordIdTable getWordIdTable() {
+        return wordIdTable;
     }
 
     private class Itr implements Iterator<int[]> {
@@ -167,4 +175,9 @@ public class DoubleArrayLexicon implements Lexicon {
             wordParams.setCost(wordId, (short) cost);
         }
     }
+
+    public void setDictionaryId(int id) {
+        wordIdTable.setDictionaryId(id);
+    }
+
 }
