@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  * An untyped collection of settings. This class handles parsing a JSON object
  * and using its properties as settings.
  *
- * <h3>Paths</h3>
  * <p>
  * There are multiple settings which can be paths, and paths are resolved using
  * {@link SettingsAnchor}s. Paths can be resolved with respect to classpath or

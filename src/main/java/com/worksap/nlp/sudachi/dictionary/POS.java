@@ -56,10 +56,11 @@ public final class POS extends AbstractList<String> {
     }
 
     /**
-     * Creates new POS instance from
+     * Creates new POS instance from elements. Elements must be 6-length string
+     * list.
      * 
      * @param elems
-     * @return
+     *            POS object elements
      */
     public POS(List<String> elems) {
         this(elems.toArray(new String[0]));

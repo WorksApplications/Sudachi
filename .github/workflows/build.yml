@@ -47,3 +47,5 @@ jobs:
         with:
           name: reports (${{ matrix.java-version }})
           path: build/reports
+      - name: Build javadoc
+        run: ./gradlew --no-daemon --info javadoc

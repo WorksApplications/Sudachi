@@ -38,8 +38,8 @@ import java.util.logging.Logger;
  * <li>{@link Classpath} which will resolve classpath resources</li>
  * </ul>
  * Use static methods for their creation.
- * </p>
  *
+ * <p>
  * It is also possible to chain anchors using {@link #andThen(SettingsAnchor)}
  * method, which will resolve the first existing path.
  */

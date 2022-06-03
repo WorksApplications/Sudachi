@@ -592,6 +592,7 @@ public class Config {
      * Configuration for Sudachi Plugin.
      *
      * @param <T>
+     *            resulting resource type
      */
     public static class PluginConf<T extends Plugin> {
         String clazzName;
@@ -799,6 +800,7 @@ public class Config {
          * Resource which is in Java classpath.
          *
          * @param <T>
+         *            resulting resource type
          */
         public static class Classpath<T> extends Resource<T> {
             private final URL url;
@@ -835,6 +837,7 @@ public class Config {
          * Prebuilt resource.
          *
          * @param <T>
+         *            resulting resource type
          */
         public static class Ready<T> extends Resource<T> {
             private final T object;
