@@ -144,7 +144,10 @@ public abstract class SettingsAnchor {
      * @return resource, encapsulating path, works both for filesystem and classpath
      */
     <T> Config.Resource<T> toResource(Path path) {
-        return new Config.Resource.Filesystem<>(path);
+        if (Files.exists(path)) {
+            return new Config.Resource.Filesystem<>(path);
+        }
+        return new Config.Resource.NotFound<>(path, this);
     }
 
     /**
@@ -232,7 +235,7 @@ public abstract class SettingsAnchor {
         <T> Config.Resource<T> toResource(Path path) {
             URL resource = loader.getResource(resourceName(path));
             if (resource == null) {
-                return null;
+                return new Config.Resource.NotFound<>(path, this);
             }
             return new Config.Resource.Classpath<>(resource);
         }
@@ -297,8 +300,13 @@ public abstract class SettingsAnchor {
 
         @Override
         <T> Config.Resource<T> toResource(Path path) {
-            Optional<SettingsAnchor> first = children.stream().filter(p -> p.exists(path)).findFirst();
-            return first.<Config.Resource<T>>map(resolver -> resolver.toResource(path)).orElse(null);
+            for (SettingsAnchor child : children) {
+                if (child.exists(path)) {
+                    return child.toResource(path);
+                }
+            }
+
+            return new Config.Resource.NotFound<>(path, this);
         }
 
         @Override
@@ -317,6 +325,15 @@ public abstract class SettingsAnchor {
 
         int count() {
             return children.size();
+        }
+
+        @Override
+        public String toString() {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            for (SettingsAnchor anchor : children) {
+                joiner.add(anchor.toString());
+            }
+            return joiner.toString();
         }
     }
 

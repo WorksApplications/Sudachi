@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi
 
+import com.worksap.nlp.sudachi.Config.Resource
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import java.nio.file.Paths
 import kotlin.test.*
@@ -86,5 +87,31 @@ class SettingsAnchorTest {
             .andThen(SettingsAnchor.none())
     assertNotEquals(a.hashCode(), SettingsAnchor.none().hashCode())
     assertNotEquals(a, SettingsAnchor.none())
+  }
+
+  @Test
+  fun notExistFile() {
+    val a = SettingsAnchor.filesystem(Paths.get(""))
+    assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore")))
+    val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore2")))
+    assertFails { x.asByteBuffer() }
+    assertFails { x.asInputStream() }
+    assertFails { x.consume { throw java.lang.RuntimeException() } }
+  }
+
+  @Test
+  fun notExistClasspath() {
+    val a = SettingsAnchor.classpath()
+    assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def")))
+    assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def2")))
+  }
+
+  @Test
+  fun notExistChain() {
+    val a = SettingsAnchor.filesystem(Paths.get("")).andThen(SettingsAnchor.classpath())
+    assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def")))
+    val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def2")))
+    assertFails { x.asByteBuffer() }
+    assertFails { x.asInputStream() }
   }
 }

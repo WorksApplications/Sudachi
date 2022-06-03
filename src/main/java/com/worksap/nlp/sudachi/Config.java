@@ -35,11 +35,11 @@ import java.util.*;
 /**
  * Typed configuration for Sudachi. Should be created by static methods
  * ({@link #empty()} or {@code from*()}).
- *
+ * <p>
  * There are two main configuration modes: parsing json configuration file and
  * specifying resources in code. Resources can be specified from classpath,
  * filesystem or be pre-created.
- *
+ * <p>
  * Resource paths inside the json configuration files will be resolved relative
  * to the configuration file. If the file was in classpath, they will be looked
  * up in classpath or relative to the working directory. If the file was in
@@ -66,7 +66,7 @@ public class Config {
     /**
      * Creates an empty configuration. Useful for building configuration manually
      * instead of loading it from a file.
-     * 
+     *
      * @return empty Config object
      */
     public static Config empty() {
@@ -76,7 +76,7 @@ public class Config {
     /**
      * Loads configuration from the first instance of {@code sudachi.json} file
      * loaded from classpath.
-     * 
+     *
      * @return Config object
      * @throws IOException
      *             when IO fails
@@ -133,7 +133,7 @@ public class Config {
 
     /**
      * Loads the explicit file from the classpath with the provided classloader.
-     * 
+     *
      * @param resource
      *            URL of the classpath resource
      * @param loader
@@ -149,7 +149,7 @@ public class Config {
 
     /**
      * Loads the config from the filesystem.
-     * 
+     *
      * @param path
      *            {@link Path} to the config file
      * @return parsed Config
@@ -161,8 +161,23 @@ public class Config {
     }
 
     /**
+     * Loads the config from the filesystem.
+     *
+     * @param path
+     *            {@link Path} to the config file
+     * @param anchor
+     *            anchor for resolution
+     * @return parsed Config
+     * @throws IOException
+     *             when IO fails
+     */
+    public static Config fromFile(Path path, SettingsAnchor anchor) throws IOException {
+        return fromSettings(Settings.fromFile(path, anchor));
+    }
+
+    /**
      * Parses the config fom the provided json string
-     * 
+     *
      * @param json
      *            configuration as json string
      * @param anchor
@@ -175,54 +190,50 @@ public class Config {
 
     /**
      * Converts untyped {@link Settings} to typed Config
-     * 
+     *
      * @param obj
      *            untyped configuration
      * @return parsed Config
      */
     public static Config fromSettings(Settings obj) {
-        return Config.empty().mergeSettings(obj);
+        return Config.empty().fallbackSettings(obj);
     }
 
     /**
      * Parses all config files with the specified name in the classpath, merging
      * them. Files are loaded with Config classloader.
-     * 
+     *
      * @param name
      *            classpath resource name
-     * @param mode
-     *            how to merge Config objects
      * @return merged Config
      * @throws IOException
      *             when IO fails
-     * @see #merge(Config, MergeMode)
+     * @see #withFallback(Config)
      */
-    public static Config fromClasspathMerged(String name, MergeMode mode) throws IOException {
-        return fromClasspathMerged(Config.class.getClassLoader(), name, mode);
+    public static Config fromClasspathMerged(String name) throws IOException {
+        return fromClasspathMerged(Config.class.getClassLoader(), name);
     }
 
     /**
      * Parses all config files with the specified name in the classpath, merging
      * them. Files are loaded with the provided classloader.
-     * 
+     *
      * @param classLoader
      *            it will be used to load resources
      * @param name
      *            classpath resource name
-     * @param mode
-     *            how to merge Config objects
      * @return merged Config
      * @throws IOException
      *             when IO fails
-     * @see #merge(Config, MergeMode)
+     * @see #withFallback(Config)
      */
-    public static Config fromClasspathMerged(ClassLoader classLoader, String name, MergeMode mode) throws IOException {
+    public static Config fromClasspathMerged(ClassLoader classLoader, String name) throws IOException {
         Enumeration<URL> resources = classLoader.getResources(name);
         Config result = Config.empty();
         long count = 0;
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            result = result.merge(Config.fromClasspath(resource), mode);
+            result = result.withFallback(Config.fromClasspath(resource));
             count += 1;
         }
         if (count == 0) {
@@ -231,50 +242,39 @@ public class Config {
         return result;
     }
 
-    private static <T> List<T> mergeList(MergeMode mode, List<T> dest, List<T> src) {
-        if (src != null) {
-            if (mode == MergeMode.REPLACE || dest == null) {
-                return src;
-            } else {
-                for (T newItem : src) {
-                    if (!dest.contains(newItem)) {
-                        dest.add(newItem);
-                    }
+    private static <T> List<T> mergeList(List<T> self, List<T> other) {
+        if (self == null) {
+            return other;
+        }
+        return self;
+    }
+
+    private static <T extends Plugin> List<PluginConf<T>> mergePluginList(List<PluginConf<T>> self,
+            List<PluginConf<T>> other) {
+        if (other != null) {
+            if (self == null) {
+                return other;
+            }
+            for (PluginConf<T> selfConf : self) {
+                Optional<PluginConf<T>> first = other.stream()
+                        .filter(p -> Objects.equals(p.clazzName, selfConf.clazzName)).findFirst();
+                if (first.isPresent()) {
+                    PluginConf<T> otherConf = first.get();
+                    selfConf.internal = selfConf.internal.withFallback(otherConf.internal);
                 }
             }
         }
-        return dest;
+        return self;
     }
 
-    private static <T extends Plugin> List<PluginConf<T>> mergePluginList(MergeMode mode, List<PluginConf<T>> dest,
-            List<PluginConf<T>> src) {
-        if (src != null) {
-            if (mode == MergeMode.REPLACE || dest == null) {
-                return src;
-            } else {
-                for (PluginConf<T> newItem : src) {
-                    Optional<PluginConf<T>> first = dest.stream()
-                            .filter(p -> Objects.equals(p.clazzName, newItem.clazzName)).findFirst();
-                    if (first.isPresent()) {
-                        PluginConf<T> pconf = first.get();
-                        pconf.internal = pconf.internal.merge(newItem.internal);
-                    } else {
-                        dest.add(newItem);
-                    }
-                }
-            }
+    private static <T> T mergeOne(T self, T other) {
+        if (self == null) {
+            return other;
         }
-        return dest;
+        return self;
     }
 
-    private static <T> T mergeOne(T dest, T src) {
-        if (src != null) {
-            return src;
-        }
-        return dest;
-    }
-
-    private Config mergeSettings(Settings settings) {
+    private Config fallbackSettings(Settings settings) {
 
         systemDictionary = settings.getResource("systemDict");
         characterDefinition = settings.getResource("characterDefinitionFile");
@@ -291,7 +291,7 @@ public class Config {
     /**
      * Set system dictionary to a filesystem one. The dictionary itself will not be
      * loaded, nor its existence will be checked.
-     * 
+     *
      * @param path
      *            Path to the resource
      * @return modified Config
@@ -304,7 +304,7 @@ public class Config {
     /**
      * Set system dictionary to a classpath one. The dictionary itself will not be
      * loaded, nor its existence will be checked.
-     * 
+     *
      * @param url
      *            URL to the resource
      * @return modified Config
@@ -316,7 +316,7 @@ public class Config {
 
     /**
      * Set system dictionary to a prebuilt one
-     * 
+     *
      * @param dic
      *            prebuilt System {@link BinaryDictionary}
      * @return modified Config
@@ -331,7 +331,7 @@ public class Config {
 
     /**
      * Makes the current list of user dictionaries empty.
-     * 
+     *
      * @return modified Config
      */
     public Config clearUserDictionaries() {
@@ -346,7 +346,7 @@ public class Config {
     /**
      * Adds a user dictionary from filesystem. The dictionary itself will not be
      * loaded, nor the file existence will be checked.
-     * 
+     *
      * @param path
      *            Path to the dictionary file
      * @return modified Config
@@ -362,7 +362,7 @@ public class Config {
     /**
      * Adds a user dictionary from classpath. The dictionary itself will not be
      * loaded, nor its existence will be checked.
-     * 
+     *
      * @param url
      *            URL of the classpath resource
      * @return modified Config
@@ -377,7 +377,7 @@ public class Config {
 
     /**
      * Adds a prebuilt user dictionary.
-     * 
+     *
      * @param dic
      *            prebuilt user {@link BinaryDictionary}
      * @return modified Config
@@ -395,7 +395,7 @@ public class Config {
 
     /**
      * Sets the character definition to a filesystem file.
-     * 
+     *
      * @param path
      *            Path to the file.
      * @return modified Config
@@ -407,7 +407,7 @@ public class Config {
 
     /**
      * Sets the character definition file to a classpath resource.
-     * 
+     *
      * @param url
      *            URL to the classpath resource
      * @return modified Config
@@ -419,7 +419,7 @@ public class Config {
 
     /**
      * Sets the character definition file to a prebuilt object
-     * 
+     *
      * @param obj
      *            prebuilt {@link CharacterCategory}
      * @return modified Config
@@ -431,7 +431,7 @@ public class Config {
 
     /**
      * Sets whether empty morphemes are allowed
-     * 
+     *
      * @param allow
      *            whether to allow empty morphemes
      * @return modified Config
@@ -443,7 +443,7 @@ public class Config {
 
     /**
      * Adds one EditConnectionCostPlugin configuration
-     * 
+     *
      * @param clz
      *            plugin class
      * @param <T>
@@ -463,7 +463,7 @@ public class Config {
 
     /**
      * Adds one InputTextPlugin configuration
-     * 
+     *
      * @param clz
      *            plugin class
      * @param <T>
@@ -482,7 +482,7 @@ public class Config {
 
     /**
      * Adds one OovProviderPlugin configuration
-     * 
+     *
      * @param clz
      *            plugin class
      * @param <T>
@@ -500,7 +500,6 @@ public class Config {
     }
 
     /**
-     *
      * @return System dictionary as Resource
      */
     public Resource<BinaryDictionary> getSystemDictionary() {
@@ -508,7 +507,6 @@ public class Config {
     }
 
     /**
-     *
      * @return User dictionaries as a List of Resource
      */
     public List<Resource<BinaryDictionary>> getUserDictionaries() {
@@ -516,7 +514,6 @@ public class Config {
     }
 
     /**
-     *
      * @return Character definition as resource
      */
     public Resource<CharacterCategory> getCharacterDefinition() {
@@ -524,7 +521,6 @@ public class Config {
     }
 
     /**
-     *
      * @return list of EditConnectionCostPlugin configuration
      */
     public List<PluginConf<EditConnectionCostPlugin>> getEditConnectionCostPlugins() {
@@ -532,7 +528,6 @@ public class Config {
     }
 
     /**
-     *
      * @return list of InputTextPlugin configuration
      */
     public List<PluginConf<InputTextPlugin>> getInputTextPlugins() {
@@ -540,7 +535,6 @@ public class Config {
     }
 
     /**
-     *
      * @return list of OovProviderPlugin configuration
      */
     public List<PluginConf<OovProviderPlugin>> getOovProviderPlugins() {
@@ -548,7 +542,6 @@ public class Config {
     }
 
     /**
-     *
      * @return list of PathRewritePlugin configuration
      */
     public List<PluginConf<PathRewritePlugin>> getPathRewritePlugins() {
@@ -556,7 +549,6 @@ public class Config {
     }
 
     /**
-     *
      * @return whether empty morphemes are allowed
      */
     public boolean isAllowEmptyMorpheme() {
@@ -565,50 +557,30 @@ public class Config {
 
     /**
      * Merges this Config with another Config. Compared to
-     * {@link Settings#merge(Settings)}, merging is done for already resolved
+     * {@link Settings#withFallback(Settings)}, merging is done for already resolved
      * Configs and has no path resolution complexity.
-     *
-     * Generally, non-empty properties of the provided config will replace
-     * properties of the current Config. For lists, the behavior depends on
-     * mergeMode parameter. When using {@code MergeMode.REPLACE}, the behavior is
-     * the same as with scalar fields. When using {@code MergeMode.APPEND}, new
-     * values of the provided config will be appended to the current config.
-     *
-     * Prefer merging Configs over merging Settings.
-     *
+     * <p>
+     * Values of the current config will be preferred over values of the underlying
+     * config. Plugin configurations are always overridden. Prefer merging Configs
+     * over merging Settings.
+     * <p>
      * Can also be used to create a copy of a config as
-     * {@code Config.empty().merge(config)}.
+     * {@code Config.empty().withFallback(config)}.
      *
      * @param other
      *            Config to merge with the current one
-     * @param mergeMode
-     *            how to merge lists (plugins, user dictionaries)
      * @return modified Config
      */
-    public Config merge(Config other, MergeMode mergeMode) {
+    public Config withFallback(Config other) {
         systemDictionary = mergeOne(systemDictionary, other.systemDictionary);
-        userDictionary = mergeList(mergeMode, userDictionary, other.userDictionary);
+        userDictionary = mergeList(userDictionary, other.userDictionary);
         characterDefinition = mergeOne(characterDefinition, other.characterDefinition);
-        editConnectionCost = mergePluginList(mergeMode, editConnectionCost, other.editConnectionCost);
-        inputText = mergePluginList(mergeMode, inputText, other.inputText);
-        oovProviders = mergePluginList(mergeMode, oovProviders, other.oovProviders);
-        pathRewrite = mergePluginList(mergeMode, pathRewrite, other.pathRewrite);
+        editConnectionCost = mergePluginList(editConnectionCost, other.editConnectionCost);
+        inputText = mergePluginList(inputText, other.inputText);
+        oovProviders = mergePluginList(oovProviders, other.oovProviders);
+        pathRewrite = mergePluginList(pathRewrite, other.pathRewrite);
         allowEmptyMorpheme = mergeOne(allowEmptyMorpheme, other.allowEmptyMorpheme);
         return this;
-    }
-
-    /**
-     * Specifies mode for Config merging
-     */
-    public enum MergeMode {
-        /**
-         * List contents will be appended
-         */
-        APPEND,
-        /**
-         * Present list will replace existing lists
-         */
-        REPLACE
     }
 
     @FunctionalInterface
@@ -618,7 +590,7 @@ public class Config {
 
     /**
      * Configuration for Sudachi Plugin.
-     * 
+     *
      * @param <T>
      */
     public static class PluginConf<T extends Plugin> {
@@ -637,7 +609,7 @@ public class Config {
 
         /**
          * Create a new empty configuration for a plugin
-         * 
+         *
          * @param clz
          *            plugin class
          * @param <T>
@@ -650,7 +622,7 @@ public class Config {
 
         /**
          * Create the plugin instance
-         * 
+         *
          * @return plugin instance
          * @throws IllegalArgumentException
          *             when instantiation fails
@@ -682,7 +654,7 @@ public class Config {
 
         /**
          * Add a string value to the plugin configuration
-         * 
+         *
          * @param key
          *            setting key
          * @param value
@@ -691,13 +663,13 @@ public class Config {
          */
         public PluginConf<T> add(String key, String value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
         }
 
         /**
          * Add an int value to the plugin configuration
-         * 
+         *
          * @param key
          *            setting key
          * @param value
@@ -706,13 +678,13 @@ public class Config {
          */
         public PluginConf<T> add(String key, int value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
         }
 
         /**
          * Add a string list value to the plugin configuration
-         * 
+         *
          * @param key
          *            setting key
          * @param values
@@ -722,15 +694,20 @@ public class Config {
         public PluginConf<T> addList(String key, String... values) {
             JsonArrayBuilder builder = Json.createArrayBuilder(Arrays.asList(values));
             JsonObject obj = Json.createObjectBuilder().add(key, builder).build();
-            internal = internal.merge(new Settings(obj, SettingsAnchor.none()));
+            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
             return this;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Plugin (%s) class: %s", parent.getSimpleName(), clazzName);
         }
     }
 
     /**
      * A container for the resource, allowing to combine lazy loading with providing
      * prebuilt resources
-     * 
+     *
      * @param <T>
      *            resource type of the built resource
      */
@@ -738,7 +715,7 @@ public class Config {
         /**
          * Create a real resource instance. File loading should be done inside the
          * creator function.
-         * 
+         *
          * @param creator
          *            creator function
          * @return created resource
@@ -785,7 +762,7 @@ public class Config {
 
         /**
          * Filesystem-backed resource
-         * 
+         *
          * @param <T>
          *            resource
          */
@@ -820,7 +797,7 @@ public class Config {
 
         /**
          * Resource which is in Java classpath.
-         * 
+         *
          * @param <T>
          */
         public static class Classpath<T> extends Resource<T> {
@@ -856,7 +833,7 @@ public class Config {
 
         /**
          * Prebuilt resource.
-         * 
+         *
          * @param <T>
          */
         public static class Ready<T> extends Resource<T> {
@@ -874,6 +851,41 @@ public class Config {
             @Override
             Object repr() {
                 return object;
+            }
+        }
+
+        public static class NotFound<T> extends Resource<T> {
+            private final Path path;
+            private final SettingsAnchor anchor;
+
+            public NotFound(Path path, SettingsAnchor anchor) {
+                this.path = path;
+                this.anchor = anchor;
+            }
+
+            @Override
+            public T consume(IOFunction<Resource<T>, T> creator) throws IOException {
+                throw makeException();
+            }
+
+            @Override
+            public InputStream asInputStream() {
+                throw makeException();
+            }
+
+            @Override
+            public ByteBuffer asByteBuffer() {
+                throw makeException();
+            }
+
+            @Override
+            Object repr() {
+                return path;
+            }
+
+            private IllegalArgumentException makeException() {
+                String sb = "Failed to resolve file: " + path.toString() + "\n" + "Tried roots: " + anchor;
+                return new IllegalArgumentException(sb);
             }
         }
     }

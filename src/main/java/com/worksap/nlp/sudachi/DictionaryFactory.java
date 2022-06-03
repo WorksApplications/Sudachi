@@ -63,7 +63,7 @@ public class DictionaryFactory {
     public Dictionary create(String settings) throws IOException {
         Config defaults = Config.fromClasspath();
         Config passed = Config.fromJsonString(settings, SettingsAnchor.classpath().andThen(SettingsAnchor.none()));
-        Config merged = defaults.merge(passed, Config.MergeMode.REPLACE);
+        Config merged = passed.withFallback(defaults);
         return create(merged);
     }
 
@@ -106,7 +106,7 @@ public class DictionaryFactory {
     public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {
         Config config = Config.fromSettings(Settings.parseSettings(path, settings));
         if (mergeSettings) {
-            config = Config.fromClasspath().merge(config, Config.MergeMode.APPEND);
+            config = config.withFallback(Config.fromClasspath());
         }
         return create(config);
     }

@@ -29,10 +29,9 @@ class RegexOovProviderTest {
             .add("leftId", 5)
             .add("rightId", 5)
             .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
+        cfg.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
         // prepend our OOV configuration to the main configuration
-        DictionaryFactory()
-            .create(cfg.merge(TestDictionary.user0Cfg(), Config.MergeMode.APPEND))
-            .create()
+        DictionaryFactory().create(cfg.withFallback(TestDictionary.user0Cfg())).create()
       }
 
   @Test
