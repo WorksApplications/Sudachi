@@ -12,6 +12,7 @@ plugins {
     id 'distribution'
     id 'signing'
     id 'me.champeau.jmh' version "0.6.6"
+    id 'io.github.gradle-nexus.publish-plugin' version "1.1.0"
 }
 
 repositories {
@@ -115,6 +116,11 @@ distributions {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     repositories {
         maven {
@@ -123,14 +129,6 @@ publishing {
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-
-        maven {
-            url = version.endsWith('SNAPSHOT') ? uri("https://oss.sonatype.org/content/repositories/snapshots") : uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = project.findProperty("maven.user") ?: System.getenv("MAVEN_USERNAME")
-                password = project.findProperty("maven.password") ?: System.getenv("MAVEN_USER_PASSWORD")
             }
         }
     }
@@ -175,6 +173,15 @@ publishing {
     }
 }
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = project.findProperty("maven.user") ?: System.getenv("MAVEN_USERNAME")
+            password = project.findProperty("maven.password") ?: System.getenv("MAVEN_USER_PASSWORD")
+        }
+    }
+}
+
 signing {
     def signingKey = project.findProperty("gpg.key") ?: System.getenv("MAVEN_GPG_PRIVATE_KEY")
     def signingPassword = project.findProperty("gpg.password") ?: System.getenv("MAVEN_GPG_PASSPHRASE")
@@ -183,6 +190,6 @@ signing {
 }
 
 jmh {
-    jmhVersion = "1.34"
+    jmhVersion = "1.35"
     includeTests = true
 }
