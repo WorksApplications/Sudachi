@@ -32,7 +32,7 @@ dependencies {
 }
 
 group = 'com.worksap.nlp'
-version = '0.6.0-beta1'
+version = '0.6.0-SNAPSHOT'
 description = 'Sudachi Japanese Morphological Analyzer'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
