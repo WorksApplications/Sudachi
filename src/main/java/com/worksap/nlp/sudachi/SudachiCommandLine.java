@@ -210,8 +210,11 @@ public class SudachiCommandLine {
         for (i = 0; i < args.length; i++) {
             if (args[i].equals("-r") && i + 1 < args.length) {
                 Path configPath = Paths.get(args[++i]);
-                SettingsAnchor curAnchor = SettingsAnchor.filesystem(configPath.getParent())
-                        .andThen(SettingsAnchor.classpath());
+                Path parent = configPath.getParent();
+                if (parent == null) { // parent directory of file.txt unfortunately is null :(
+                    parent = Paths.get("");
+                }
+                SettingsAnchor curAnchor = SettingsAnchor.filesystem(parent).andThen(SettingsAnchor.classpath());
                 additional = Config.fromFile(configPath, curAnchor).withFallback(additional);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 String resourcesDirectory = args[++i];

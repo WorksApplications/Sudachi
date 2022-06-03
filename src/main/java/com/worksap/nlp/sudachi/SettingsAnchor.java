@@ -100,6 +100,9 @@ public abstract class SettingsAnchor {
      * @return filesystem anchor
      */
     public static SettingsAnchor filesystem(Path path) {
+        if (path == null) {
+            throw new NullPointerException("passed path was null");
+        }
         return new Filesystem(path);
     }
 
