@@ -40,7 +40,8 @@ public final class POS extends AbstractList<String> {
             throw new IllegalArgumentException("pos must not be null");
         }
         if (elems.length != DEPTH) {
-            throw new IllegalArgumentException("pos must have exactly six elements");
+            throw new IllegalArgumentException(String.format("pos must have exactly 6 elements, was %s: %s",
+                    elems.length, String.join(",", elems)));
         }
         for (String e : elems) {
             if (e == null) {

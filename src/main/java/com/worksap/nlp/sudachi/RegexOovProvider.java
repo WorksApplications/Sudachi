@@ -65,7 +65,8 @@ public class RegexOovProvider extends OovProviderPlugin {
     public void setUp(Grammar grammar) throws IOException {
         super.setUp(grammar);
         POS stringPos = new POS(settings.getStringList("pos"));
-        posId = grammar.getPartOfSpeechId(stringPos);
+        String userPosType = settings.getString("userPos", "forbid");
+        posId = posIdOf(grammar, stringPos, userPosType);
         if (posId == -1) {
             throw new IllegalArgumentException("POS " + stringPos + " was not present in the dictionary");
         }

@@ -403,7 +403,7 @@ public class MeCabOovProviderPluginTest {
         Lines oovConfig = new Lines("DEFAULT,1,2,3,補助記号,一般,*,*,*,*", "DEFAULT,3,4,5,補助記号,一般,*,*,*,*");
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(oovConfig, new MockGrammar());
+        plugin.readOOV(oovConfig, new MockGrammar(), "forbid");
         assertThat(plugin.oovList.size(), is(1));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).size(), is(2));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).leftId, is((short) 1));
@@ -416,20 +416,20 @@ public class MeCabOovProviderPluginTest {
     public void readOOVWithTooFewColumns() throws IOException {
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(new Lines("DEFAULT,1,2,3"), new MockGrammar());
+        plugin.readOOV(new Lines("DEFAULT,1,2,3"), new MockGrammar(), "forbid");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readOOVWithUndefinedType() throws IOException {
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar());
+        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar(), "forbid");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readOOVWithCategoryNotInCharacterProperty() throws IOException {
         MeCabOovProviderPlugin plugin = new MeCabOovProviderPlugin();
         plugin.categories.put(CategoryType.DEFAULT, new CategoryInfo());
-        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar());
+        plugin.readOOV(new Lines("FOO,1,2,3,補助記号,一般,*,*,*,*"), new MockGrammar(), "forbid");
     }
 }

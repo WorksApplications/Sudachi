@@ -138,4 +138,23 @@ public class GrammarImpl implements Grammar {
     public Connection getConnection() {
         return this.matrix;
     }
+
+    /**
+     * Registers a POS tag in the grammar definition and returns its id. If the POS
+     * tag was already present, return its id. Should be called only during the
+     * setup phase.
+     *
+     * @param pos
+     *            tag to register
+     * @return id of registered tag or id of existing tag
+     */
+    public short registerPOS(POS pos) {
+        int i = posList.indexOf(pos);
+        if (i == -1) {
+            int len = posList.size();
+            posList.add(pos);
+            return (short) len;
+        }
+        return (short) i;
+    }
 }
