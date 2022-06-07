@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         Config.Resource<Object> charDef = settings.getResource("charDef");
         readCharacterProperty(charDef);
         Config.Resource<Object> unkDef = settings.getResource("unkDef");
-        readOOV(unkDef, grammar);
+        readOOV(unkDef, grammar, settings.getString(USER_POS, USER_POS_FORBID));
     }
 
     @Override
@@ -167,7 +168,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         }
     }
 
-    <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar) throws IOException {
+    <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar, String userPosMode) throws IOException {
         if (unkDef == null) {
             unkDef = settings.base.toResource(Paths.get("unk.def"));
         }
@@ -194,8 +195,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 oov.leftId = Short.parseShort(cols[1]);
                 oov.rightId = Short.parseShort(cols[2]);
                 oov.cost = Short.parseShort(cols[3]);
-                List<String> pos = Arrays.asList(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
-                oov.posId = grammar.getPartOfSpeechId(pos);
+                POS pos = new POS(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
+                oov.posId = posIdOf(grammar, pos, userPosMode);
 
                 oovList.computeIfAbsent(type, t -> new ArrayList<>()).add(oov);
             }

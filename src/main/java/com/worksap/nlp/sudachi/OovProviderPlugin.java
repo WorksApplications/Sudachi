@@ -18,8 +18,12 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.GrammarImpl;
+import com.worksap.nlp.sudachi.dictionary.POS;
 
 /**
  * A plugin that provides the nodes of out-of-vocabulary morphemes.
@@ -97,5 +101,32 @@ public abstract class OovProviderPlugin extends Plugin {
         LatticeNodeImpl node = new LatticeNodeImpl();
         node.setOOV();
         return node;
+    }
+
+    /**
+     * Recommended name for user POS mode flag
+     */
+    public static final String USER_POS = "userPOS";
+
+    public static final String USER_POS_FORBID = "forbid";
+    public static final String USER_POS_ALLOW = "allow";
+
+    protected short posIdOf(Grammar grammar, POS pos, String userPosMode) {
+        short posIdPresent = grammar.getPartOfSpeechId(pos);
+        userPosMode = userPosMode.toLowerCase(Locale.ROOT);
+
+        if (Objects.equals(userPosMode, USER_POS_FORBID)) {
+            if (posIdPresent >= 0) {
+                return posIdPresent;
+            }
+            throw new IllegalArgumentException(String.format(
+                    "POS %s WAS NOT present in dictionary and OOV Plugin %s is forbidden to add new POS tags", pos,
+                    this));
+        } else if (!Objects.equals(userPosMode, USER_POS_ALLOW)) {
+            throw new IllegalArgumentException(
+                    "Unknown user POS mode: " + userPosMode + " allowed values are: forbid, allow");
+        }
+        GrammarImpl grammarImpl = (GrammarImpl) grammar;
+        return grammarImpl.registerPOS(pos);
     }
 }

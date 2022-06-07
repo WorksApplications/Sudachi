@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.util.List;
@@ -54,18 +55,12 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
 
     @Override
     public void setUp(Grammar grammar) {
-        List<String> oovPOSStrings = settings.getStringList("oovPOS");
+        POS pos = new POS(settings.getStringList("oovPOS"));
         leftId = (short) settings.getInt("leftId");
         rightId = (short) settings.getInt("rightId");
         cost = (short) settings.getInt("cost");
-
-        if (oovPOSStrings.isEmpty()) {
-            throw new IllegalArgumentException("oovPOS is not specified");
-        }
-        oovPOSId = grammar.getPartOfSpeechId(oovPOSStrings);
-        if (oovPOSId < 0) {
-            throw new IllegalArgumentException("oovPOS is invalid: " + String.join(",", oovPOSStrings));
-        }
+        String userPosMode = settings.getString(USER_POS, USER_POS_FORBID);
+        oovPOSId = posIdOf(grammar, pos, userPosMode);
     }
 
     @Override
