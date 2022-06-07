@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi
 
+import com.worksap.nlp.sudachi.OovProviderPlugin.*
 import com.worksap.nlp.sudachi.dictionary.Grammar
 import com.worksap.nlp.sudachi.dictionary.POS
 import kotlin.test.Test
@@ -35,7 +36,7 @@ class OovProviderPluginTest {
     }
 
     override fun setUp(grammar: Grammar?) {
-      val kind = settings.getString("posKind", "forbid")
+      val kind = settings.getString(USER_POS, USER_POS_FORBID)
       val pos = POS(settings.getStringList("pos"))
       posId = posIdOf(grammar, pos, kind)
     }
@@ -58,7 +59,7 @@ class OovProviderPluginTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
-        .add("posKind", "allow")
+        .add(USER_POS, USER_POS_ALLOW)
     val inst = DictionaryFactory().create(cfg) as JapaneseDictionary
     val plugin = assertIs<FakeOovProvider>(inst.oovProviderPlugins.last())
     assertEquals(8, plugin.posId)
@@ -69,7 +70,7 @@ class OovProviderPluginTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
-        .add("posKind", "test")
+        .add(USER_POS, "test")
     assertFails { DictionaryFactory().create(cfg) }
   }
 
@@ -86,10 +87,10 @@ class OovProviderPluginTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
-        .add("posKind", "allow")
+        .add(USER_POS, USER_POS_ALLOW)
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
-        .add("posKind", "allow")
+        .add(USER_POS, USER_POS_ALLOW)
     val inst = DictionaryFactory().create(cfg) as JapaneseDictionary
     val oovPlugins = inst.oovProviderPlugins
     val p1 = assertIs<FakeOovProvider>(oovPlugins[oovPlugins.size - 2])

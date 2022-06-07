@@ -103,18 +103,26 @@ public abstract class OovProviderPlugin extends Plugin {
         return node;
     }
 
+    /**
+     * Recommended name for user POS flag
+     */
+    public static final String USER_POS = "userPos";
+
+    public static final String USER_POS_FORBID = "forbid";
+    public static final String USER_POS_ALLOW = "allow";
+
     protected short posIdOf(Grammar grammar, POS pos, String userPosMode) {
         short posIdPresent = grammar.getPartOfSpeechId(pos);
         userPosMode = userPosMode.toLowerCase(Locale.ROOT);
 
-        if (Objects.equals(userPosMode, "forbid")) {
+        if (Objects.equals(userPosMode, USER_POS_FORBID)) {
             if (posIdPresent >= 0) {
                 return posIdPresent;
             }
             throw new IllegalArgumentException(String.format(
                     "POS %s WAS NOT present in dictionary and OOV Plugin %s is forbidden to add new POS tags", pos,
                     this));
-        } else if (!Objects.equals(userPosMode, "allow")) {
+        } else if (!Objects.equals(userPosMode, USER_POS_ALLOW)) {
             throw new IllegalArgumentException(
                     "Unknown user POS mode: " + userPosMode + " allowed values are: forbid, allow");
         }

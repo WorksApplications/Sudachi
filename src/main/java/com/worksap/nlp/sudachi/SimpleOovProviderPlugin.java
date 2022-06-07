@@ -59,8 +59,8 @@ class SimpleOovProviderPlugin extends OovProviderPlugin {
         leftId = (short) settings.getInt("leftId");
         rightId = (short) settings.getInt("rightId");
         cost = (short) settings.getInt("cost");
-        String userPosType = settings.getString("userPos", "forbid");
-        oovPOSId = posIdOf(grammar, pos, userPosType);
+        String userPosMode = settings.getString(USER_POS, USER_POS_FORBID);
+        oovPOSId = posIdOf(grammar, pos, userPosMode);
     }
 
     @Override

@@ -77,7 +77,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         Config.Resource<Object> charDef = settings.getResource("charDef");
         readCharacterProperty(charDef);
         Config.Resource<Object> unkDef = settings.getResource("unkDef");
-        readOOV(unkDef, grammar, settings.getString("userPos", "forbid"));
+        readOOV(unkDef, grammar, settings.getString(USER_POS, USER_POS_FORBID));
     }
 
     @Override
@@ -168,7 +168,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         }
     }
 
-    <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar, String userPosType) throws IOException {
+    <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar, String userPosMode) throws IOException {
         if (unkDef == null) {
             unkDef = settings.base.toResource(Paths.get("unk.def"));
         }
@@ -196,7 +196,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                 oov.rightId = Short.parseShort(cols[2]);
                 oov.cost = Short.parseShort(cols[3]);
                 POS pos = new POS(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
-                oov.posId = posIdOf(grammar, pos, userPosType);
+                oov.posId = posIdOf(grammar, pos, userPosMode);
 
                 oovList.computeIfAbsent(type, t -> new ArrayList<>()).add(oov);
             }
