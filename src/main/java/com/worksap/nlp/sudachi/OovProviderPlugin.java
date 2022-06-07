@@ -104,9 +104,9 @@ public abstract class OovProviderPlugin extends Plugin {
     }
 
     /**
-     * Recommended name for user POS flag
+     * Recommended name for user POS mode flag
      */
-    public static final String USER_POS = "userPos";
+    public static final String USER_POS = "userPOS";
 
     public static final String USER_POS_FORBID = "forbid";
     public static final String USER_POS_ALLOW = "allow";
