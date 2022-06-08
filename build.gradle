@@ -190,8 +190,8 @@ signing {
     def signingKey = project.findProperty("gpg.key") ?: System.getenv("MAVEN_GPG_PRIVATE_KEY")
     def signingPassword = project.findProperty("gpg.password") ?: System.getenv("MAVEN_GPG_PASSPHRASE")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
+    required { !project.version.endsWith("-SNAPSHOT") }
+    sign publishing.publications.maven
 }
 
 jmh {
