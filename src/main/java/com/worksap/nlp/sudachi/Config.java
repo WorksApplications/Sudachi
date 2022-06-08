@@ -389,7 +389,7 @@ public class Config {
         if (userDictionary == null) {
             userDictionary = new ArrayList<>();
         }
-        userDictionary.add(new Resource.Ready<>(dic));
+        userDictionary.add(Resource.ready(dic));
         return this;
     }
 
@@ -425,7 +425,7 @@ public class Config {
      * @return modified Config
      */
     public Config characterDefinition(CharacterCategory obj) {
-        this.characterDefinition = new Resource.Ready<>(obj);
+        this.characterDefinition = Resource.ready(obj);
         return this;
     }
 
@@ -707,10 +707,14 @@ public class Config {
 
     /**
      * A container for the resource, allowing to combine lazy loading with providing
-     * prebuilt resources
+     * prebuilt resources. Use {@link SettingsAnchor} to create resources.
      *
      * @param <T>
      *            resource type of the built resource
+     *
+     * @see SettingsAnchor#filesystem(Path)
+     * @see SettingsAnchor#toResource(Path)
+     * @see SettingsAnchor#resource(String)
      */
     public static abstract class Resource<T> {
         /**
@@ -839,7 +843,7 @@ public class Config {
          * @param <T>
          *            resulting resource type
          */
-        public static class Ready<T> extends Resource<T> {
+        static class Ready<T> extends Resource<T> {
             private final T object;
 
             public Ready(T object) {
@@ -890,6 +894,19 @@ public class Config {
                 String sb = "Failed to resolve file: " + path.toString() + "\n" + "Tried roots: " + anchor;
                 return new IllegalArgumentException(sb);
             }
+        }
+
+        /**
+         * Create a resource wrapper for a prebuilt resource
+         * 
+         * @param object
+         *            prebuilt resource
+         * @return wrapper
+         * @param <T>
+         *            type of the prebuilt resource
+         */
+        public static <T> Resource<T> ready(T object) {
+            return new Ready<>(object);
         }
     }
 }

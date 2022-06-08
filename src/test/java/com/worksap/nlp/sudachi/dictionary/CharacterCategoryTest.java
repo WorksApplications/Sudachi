@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import com.worksap.nlp.sudachi.Config;
+import com.worksap.nlp.sudachi.SettingsAnchor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
