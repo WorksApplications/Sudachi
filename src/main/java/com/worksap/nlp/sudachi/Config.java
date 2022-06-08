@@ -46,6 +46,7 @@ import java.util.*;
  * filesystem, they will be resolved relative to the configuration file only.
  *
  * @see Settings Settings: untyped configuration parsed from json file
+ * @see SettingsAnchor
  * @see #empty()
  * @see #fromClasspath()
  * @see #fromFile(Path)
