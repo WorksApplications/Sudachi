@@ -27,5 +27,5 @@ jobs:
           MAVEN_USER_PASSWORD: ${{ secrets.MAVEN_USER_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-        run: ./gradlew --no-daemon --info --stacktrace publish publishToSonatype closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew --no-daemon --info --stacktrace sign publishToSonatype closeAndReleaseSonatypeStagingRepository
         if: env.MAVEN_USERNAME != ''
