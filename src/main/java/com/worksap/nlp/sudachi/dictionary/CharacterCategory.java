@@ -18,11 +18,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import com.worksap.nlp.sudachi.Config;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -57,7 +53,7 @@ public class CharacterCategory {
     private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
     private static final Pattern PATTERN_EMPTY_OR_SPACES = Pattern.compile("\\s*");
     private static final Pattern PATTERN_DOUBLE_PERIODS = Pattern.compile("\\.\\.");
-    private List<Range> rangeList = new ArrayList<>();
+    private final List<Range> rangeList = new ArrayList<>();
 
     /**
      * Returns the set of the category types of the character (Unicode code point).
@@ -102,7 +98,10 @@ public class CharacterCategory {
      *            the file of the definitions of character categories.
      * @throws IOException
      *             if the definition file is not available.
+     * @deprecated use {@link #load(Config.Resource)} instead. Will be removed with
+     *             1.0 release.
      */
+    @Deprecated
     public void readCharacterDefinition(String charDef) throws IOException {
         try (InputStream in = (charDef != null) ? new FileInputStream(charDef)
                 : CharacterCategory.class.getClassLoader().getResourceAsStream("char.def")) {
@@ -150,14 +149,12 @@ public class CharacterCategory {
     }
 
     public static CharacterCategory load(Config.Resource<CharacterCategory> resource) throws IOException {
-        CharacterCategory result = new CharacterCategory();
-        try (InputStream is = resource.asInputStream()) {
-            result.readCharacterDefinition(is);
-        }
-        return result;
-    }
-
-    public static CharacterCategory load(Config config) throws IOException {
-        return config.getCharacterDefinition().consume(CharacterCategory::load);
+        return resource.consume(res -> {
+            CharacterCategory result = new CharacterCategory();
+            try (InputStream is = res.asInputStream()) {
+                result.readCharacterDefinition(is);
+            }
+            return result;
+        });
     }
 }
