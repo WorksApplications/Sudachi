@@ -57,4 +57,14 @@ public class JapaneseDictionaryTest {
         assertThat(pos, notNullValue());
         assertThat(pos.get(0), is("助動詞"));
     }
+
+    @Test
+    public void instantiateConfigWithoutCharDef() throws IOException {
+        Config cfg = Config.fromClasspath("sudachi_minimum.json");
+        cfg.systemDictionary(TestDictionary.INSTANCE.getSystemDict());
+        try (JapaneseDictionary jd = (JapaneseDictionary) new DictionaryFactory().create(cfg)) {
+            assertThat(jd, notNullValue());
+            assertThat(jd.create(), notNullValue());
+        }
+    }
 }

@@ -16,24 +16,19 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import com.worksap.nlp.sudachi.SettingsAnchor;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import com.worksap.nlp.sudachi.Config;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 public class CharacterCategoryTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void rangeContainingLength() {
@@ -46,21 +41,22 @@ public class CharacterCategoryTest {
 
     @Test
     public void getCategoryTypes() throws IOException {
-        CharacterCategory category = CharacterCategory.load(Config.fromClasspath());
+        CharacterCategory category = CharacterCategory.load(SettingsAnchor.classpath().resource("char.def"));
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), hasItems(CategoryType.KANJI));
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), not(hasItems(CategoryType.DEFAULT)));
     }
 
     @Test
     public void readCharacterDefinition() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
             writer.write("#\n \n");
             writer.write("0x0030..0x0039 NUMERIC\n");
             writer.write("0x3007         KANJI\n");
         }
+
         CharacterCategory category = new CharacterCategory();
-        category.readCharacterDefinition(inputFile.getPath());
+        category.readCharacterDefinition(new ByteArrayInputStream(os.toByteArray()));
         assertThat(category.getCategoryTypes(0x0030), hasItems(CategoryType.NUMERIC));
         assertThat(category.getCategoryTypes(0x0039), hasItems(CategoryType.NUMERIC));
         assertThat(category.getCategoryTypes(0x3007), hasItems(CategoryType.KANJI));
@@ -68,31 +64,31 @@ public class CharacterCategoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterDefinitionWithInvalidFormat() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
             writer.write("0x0030..0x0039\n");
         }
         CharacterCategory category = new CharacterCategory();
-        category.readCharacterDefinition(inputFile.getPath());
+        category.readCharacterDefinition(new ByteArrayInputStream(os.toByteArray()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterDefinitionWithInvalidRange() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
             writer.write("0x0030..0x0029 NUMERIC\n");
         }
         CharacterCategory category = new CharacterCategory();
-        category.readCharacterDefinition(inputFile.getPath());
+        category.readCharacterDefinition(new ByteArrayInputStream(os.toByteArray()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void readCharacterDefinitionWithInvalidType() throws IOException {
-        File inputFile = temporaryFolder.newFile();
-        try (FileWriter writer = new FileWriter(inputFile)) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
             writer.write("0x0030..0x0039 FOO\n");
         }
         CharacterCategory category = new CharacterCategory();
-        category.readCharacterDefinition(inputFile.getPath());
+        category.readCharacterDefinition(new ByteArrayInputStream(os.toByteArray()));
     }
 }

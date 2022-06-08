@@ -122,7 +122,7 @@ public abstract class SettingsAnchor {
      *            path suffix
      * @return full path. It may not be usable for classpath.
      */
-    Path resolve(String part) {
+    public Path resolve(String part) {
         return Paths.get(part);
     }
 
@@ -133,7 +133,7 @@ public abstract class SettingsAnchor {
      *            fully resolved path
      * @return true if the path points to an existing file
      */
-    boolean exists(Path path) {
+    public boolean exists(Path path) {
         return Files.exists(path);
     }
 
@@ -146,11 +146,24 @@ public abstract class SettingsAnchor {
      *            type of the resource
      * @return resource, encapsulating path, works both for filesystem and classpath
      */
-    <T> Config.Resource<T> toResource(Path path) {
+    public <T> Config.Resource<T> toResource(Path path) {
         if (Files.exists(path)) {
             return new Config.Resource.Filesystem<>(path);
         }
         return new Config.Resource.NotFound<>(path, this);
+    }
+
+    /**
+     * Create a resource for passed string path
+     * 
+     * @param path
+     *            path to the resource
+     * @return resource, encapsulating the path
+     * @param <T>
+     *            type of resource
+     */
+    public <T> Config.Resource<T> resource(String path) {
+        return toResource(resolve(path));
     }
 
     /**
@@ -177,7 +190,7 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        Path resolve(String part) {
+        public Path resolve(String part) {
             Path resolved = base.resolve(part);
             logger.fine(() -> String.format("%s resolved %s to %s", this, part, resolved));
             return resolved;
@@ -213,7 +226,7 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        Path resolve(String part) {
+        public Path resolve(String part) {
             Path resolved = prefix.resolve(part);
             logger.fine(() -> String.format("%s resolved %s to %s", this, part, resolved));
             return resolved;
@@ -229,13 +242,13 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        boolean exists(Path path) {
+        public boolean exists(Path path) {
             String name = resourceName(path);
             return loader.getResource(name) != null;
         }
 
         @Override
-        <T> Config.Resource<T> toResource(Path path) {
+        public <T> Config.Resource<T> toResource(Path path) {
             URL resource = loader.getResource(resourceName(path));
             if (resource == null) {
                 return new Config.Resource.NotFound<>(path, this);
@@ -284,7 +297,7 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        Path resolve(String part) {
+        public Path resolve(String part) {
             Path path = null;
             for (SettingsAnchor p : children) {
                 path = p.resolve(part);
@@ -297,12 +310,12 @@ public abstract class SettingsAnchor {
         }
 
         @Override
-        boolean exists(Path path) {
+        public boolean exists(Path path) {
             return children.stream().anyMatch(p -> p.exists(path));
         }
 
         @Override
-        <T> Config.Resource<T> toResource(Path path) {
+        public <T> Config.Resource<T> toResource(Path path) {
             for (SettingsAnchor child : children) {
                 if (child.exists(path)) {
                     return child.toResource(path);
