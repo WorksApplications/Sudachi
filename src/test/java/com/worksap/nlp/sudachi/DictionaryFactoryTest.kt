@@ -16,8 +16,8 @@
 
 package com.worksap.nlp.sudachi
 
-import org.junit.Test
 import kotlin.test.assertFails
+import org.junit.Test
 
 class DictionaryFactoryTest {
   @Test
