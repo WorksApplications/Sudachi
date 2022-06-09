@@ -23,13 +23,13 @@ class RegexOovProviderTest {
   private val analyzer =
       kotlin.run {
         val cfg = Config.empty()
+        cfg.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
         cfg.addOovProviderPlugin(RegexOovProvider::class.java)
             .add("regex", """[0-9a-z-]+""")
             .add("cost", 3500)
             .add("leftId", 5)
             .add("rightId", 5)
             .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
-        cfg.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
         // prepend our OOV configuration to the main configuration
         DictionaryFactory().create(cfg.withFallback(TestDictionary.user0Cfg())).create()
       }
@@ -63,5 +63,12 @@ class RegexOovProviderTest {
     assertEquals(3, tokens.size)
     assertEquals("Ｇ", tokens[2].surface())
     assertEquals("g", tokens[2].normalizedForm())
+  }
+
+  @Test
+  fun noOtherWordsWithDigitsInMiddle() {
+    val tokens = analyzer.tokenize("AVX512-F")
+    assertEquals(1, tokens.size)
+    assertEquals("AVX512-F", tokens[0].surface())
   }
 }
