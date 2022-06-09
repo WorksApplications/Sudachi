@@ -78,6 +78,15 @@ public class RegexOovProvider extends OovProviderPlugin {
 
     @Override
     public int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> nodes) {
+        if (offset > 0) {
+            int currentContinuity = inputText.getCharCategoryContinuousLength(offset);
+            int previousContinuity = inputText.getCharCategoryContinuousLength(offset - 1);
+            // if inside single character category
+            if (currentContinuity + 1 == previousContinuity) {
+                return 0;
+            }
+        }
+
         String text = inputText.getText();
         Matcher matcher = pattern.matcher(text);
         byte[] byteText = inputText.getByteText();
