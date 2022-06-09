@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 /**
  * Build a {@link Dictionary} instance from a dictionary file.
@@ -91,7 +92,8 @@ public class DictionaryFactory {
      * @param path
      *            the base path if "path" is undefined in settings
      * @param settings
-     *            settings in JSON string
+     *            settings in JSON string. If null, default settings are used
+     *            instead.
      * @param mergeSettings
      *            if true, settings is merged with the default settings. if false,
      *            returns the same result as {@link #create(String,String)
@@ -104,10 +106,22 @@ public class DictionaryFactory {
      */
     @Deprecated
     public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {
-        Config config = Config.fromSettings(Settings.parseSettings(path, settings));
-        if (mergeSettings) {
-            config = config.withFallback(Config.fromClasspath());
+        Config config;
+        SettingsAnchor defaultAnchor = SettingsAnchor.classpath();
+        if (path != null) {
+            defaultAnchor = SettingsAnchor.filesystem(Paths.get(path)).andThen(defaultAnchor);
         }
+        Config defaultConfig = Config
+                .fromSettings(Settings.fromClasspath(getClass().getResource("/sudachi.json"), defaultAnchor));
+        if (settings == null) {
+            config = defaultConfig;
+        } else {
+            config = Config.fromSettings(Settings.parse(settings, defaultAnchor));
+            if (mergeSettings) {
+                config = config.withFallback(Config.fromClasspath());
+            }
+        }
+
         return create(config);
     }
 }
