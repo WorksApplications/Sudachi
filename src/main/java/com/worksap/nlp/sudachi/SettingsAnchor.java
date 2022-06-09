@@ -20,7 +20,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
 
 /**
@@ -134,7 +137,11 @@ public abstract class SettingsAnchor {
      * @return true if the path points to an existing file
      */
     public boolean exists(Path path) {
-        return Files.exists(path);
+        try {
+            return Files.exists(path);
+        } catch (SecurityException e) {
+            return false;
+        }
     }
 
     /**
