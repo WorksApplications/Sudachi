@@ -78,10 +78,17 @@ class RegexOovProviderTest {
   @Test
   fun maxLength6() {
     val tokenizer = analyzer { _, cfg -> cfg.add("maxLength", 6) }
-    val tokens = tokenizer.tokenize("京都XAG-2FFASD東京")
+    val tokens = tokenizer.tokenize("六三四XAG-2FFASD東京")
     assertEquals(5, tokens.size)
     assertEquals("XAG", tokens[1].surface())
     assertEquals("-", tokens[2].surface())
     assertEquals("2FFASD", tokens[3].surface())
+  }
+
+  @Test
+  fun veryLongAlreadyPresentWord() {
+    val tokens = analyzer { _, cfg -> cfg.add("maxLength", 500) }.tokenize("0123456789".repeat(30))
+    assertEquals(1, tokens.size)
+    assertEquals("数詞", tokens[0].partOfSpeech()[1])
   }
 }
