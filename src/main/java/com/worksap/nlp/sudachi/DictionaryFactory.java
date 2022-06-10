@@ -28,12 +28,17 @@ public class DictionaryFactory {
      * Creates {@code Dictionary} with default configuration, read from
      * classpath-based sudachi.json file.
      *
+     * Caveats: resources will be resolved only inside classpath, this is usually
+     * not what you want.
+     *
      * @return {@link Dictionary}
      * @throws IOException
      *             if reading a file is failed
+     * @deprecated this method won't resolve any resources outside classpath.
      */
+    @Deprecated
     public Dictionary create() throws IOException {
-        return create(Config.fromClasspath());
+        return create(Config.defaultConfig());
     }
 
     /**
@@ -62,8 +67,8 @@ public class DictionaryFactory {
      */
     @Deprecated()
     public Dictionary create(String settings) throws IOException {
-        Config defaults = Config.fromClasspath();
-        Config passed = Config.fromJsonString(settings, SettingsAnchor.classpath().andThen(SettingsAnchor.none()));
+        Config defaults = Config.defaultConfig();
+        Config passed = Config.fromJsonString(settings, PathAnchor.classpath().andThen(PathAnchor.none()));
         Config merged = passed.withFallback(defaults);
         return create(merged);
     }
@@ -107,18 +112,17 @@ public class DictionaryFactory {
     @Deprecated
     public Dictionary create(String path, String settings, boolean mergeSettings) throws IOException {
         Config config;
-        SettingsAnchor defaultAnchor = SettingsAnchor.classpath();
+        PathAnchor anchor = PathAnchor.classpath();
         if (path != null) {
-            defaultAnchor = SettingsAnchor.filesystem(Paths.get(path)).andThen(defaultAnchor);
+            anchor = PathAnchor.filesystem(Paths.get(path)).andThen(anchor);
         }
-        Config defaultConfig = Config
-                .fromSettings(Settings.fromClasspath(getClass().getResource("/sudachi.json"), defaultAnchor));
+        Config defaultConfig = Config.defaultConfig(anchor);
         if (settings == null) {
             config = defaultConfig;
         } else {
-            config = Config.fromSettings(Settings.parse(settings, defaultAnchor));
+            config = Config.fromJsonString(settings, anchor);
             if (mergeSettings) {
-                config = config.withFallback(Config.fromClasspath());
+                config = config.withFallback(defaultConfig);
             }
         }
 

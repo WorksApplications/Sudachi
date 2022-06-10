@@ -40,15 +40,19 @@ import java.util.*;
  * specifying resources in code. Resources can be specified from classpath,
  * filesystem or be pre-created.
  * <p>
+ * {@link URL}s for fromClasspath methods should be provided from
+ * {@link Class#getResource(String)} or {@link ClassLoader#getResource(String)}
+ * methods.
+ * <p>
  * Resource paths inside the json configuration files will be resolved relative
  * to the configuration file. If the file was in classpath, they will be looked
  * up in classpath or relative to the working directory. If the file was in
  * filesystem, they will be resolved relative to the configuration file only.
  *
  * @see Settings Settings: untyped configuration parsed from json file
- * @see SettingsAnchor
+ * @see PathAnchor
  * @see #empty()
- * @see #fromClasspath()
+ * @see #defaultConfig()
  * @see #fromFile(Path)
  */
 public class Config {
@@ -76,14 +80,30 @@ public class Config {
 
     /**
      * Loads configuration from the first instance of {@code sudachi.json} file
-     * loaded from classpath.
+     * loaded from classpath. In-config paths will be resolved only with respect to
+     * classpath.
      *
      * @return Config object
      * @throws IOException
      *             when IO fails
      */
-    public static Config fromClasspath() throws IOException {
-        return fromClasspath("sudachi.json");
+    public static Config defaultConfig() throws IOException {
+        return defaultConfig(PathAnchor.classpath());
+    }
+
+    /**
+     * Loads configuration from the first instance of {@code sudachi.json} in the
+     * classpath. In-config paths will be resolved with respect to the provided
+     * anchor.
+     *
+     * @param anchor
+     *            resolve paths with respect to this anchor
+     * @return Config object
+     * @throws IOException
+     *             when IO fails
+     */
+    public static Config defaultConfig(PathAnchor anchor) throws IOException {
+        return fromClasspath("sudachi.json", anchor);
     }
 
     /**
@@ -95,27 +115,20 @@ public class Config {
      * @return Config object
      * @throws IOException
      *             when IO fails
-     * @see Settings#fromClasspath(URL, SettingsAnchor)
+     * @see Settings#fromClasspath(URL, PathAnchor)
      */
     public static Config fromClasspath(String name) throws IOException {
-        return fromClasspath(name, Config.class.getClassLoader());
+        return fromClasspath(name, PathAnchor.classpath());
     }
 
-    /**
-     * Loads configuration from the first instance of the json file loaded from
-     * classpath. File is loaded by the provided classloader.
-     *
-     * @param name
-     *            json file name
-     * @param loader
-     *            classloader to get the resource
-     * @return parsed Config
-     * @throws IOException
-     *             when IO fails
-     * @see Settings#fromClasspath(URL, SettingsAnchor)
-     */
-    public static Config fromClasspath(String name, ClassLoader loader) throws IOException {
-        return fromClasspath(loader.getResource(name), loader);
+    public static Config fromClasspath(String name, PathAnchor anchor) throws IOException {
+        ClassLoader loader = Config.class.getClassLoader();
+        PathAnchor newAnchor = anchor.andThen(PathAnchor.classpath(loader));
+        URL resource = loader.getResource(name);
+        if (resource == null) {
+            throw new IllegalArgumentException("failed to find resource in classpath: " + name);
+        }
+        return fromClasspath(resource, newAnchor);
     }
 
     /**
@@ -129,27 +142,17 @@ public class Config {
      *             when IO fails
      */
     public static Config fromClasspath(URL resource) throws IOException {
-        return fromClasspath(resource, Config.class.getClassLoader());
+        return fromClasspath(resource, PathAnchor.classpath());
     }
 
-    /**
-     * Loads the explicit file from the classpath with the provided classloader.
-     *
-     * @param resource
-     *            URL of the classpath resource
-     * @param loader
-     *            classloader to load the resource
-     * @return parsed Config
-     * @throws IOException
-     *             when IO fails
-     */
-    public static Config fromClasspath(URL resource, ClassLoader loader) throws IOException {
-        Settings settings = Settings.resolvedBy(SettingsAnchor.classpath(loader)).read(resource);
+    public static Config fromClasspath(URL resource, PathAnchor anchor) throws IOException {
+        Settings settings = Settings.fromClasspath(resource, anchor);
         return fromSettings(settings);
     }
 
     /**
-     * Loads the config from the filesystem.
+     * Loads the config from the filesystem. Paths in the config will NOT be
+     * resolved with respect to classpath.
      *
      * @param path
      *            {@link Path} to the config file
@@ -162,7 +165,8 @@ public class Config {
     }
 
     /**
-     * Loads the config from the filesystem.
+     * Loads the config from the filesystem. Paths in the config will be resolved
+     * with respect to the provided file.
      *
      * @param path
      *            {@link Path} to the config file
@@ -172,7 +176,7 @@ public class Config {
      * @throws IOException
      *             when IO fails
      */
-    public static Config fromFile(Path path, SettingsAnchor anchor) throws IOException {
+    public static Config fromFile(Path path, PathAnchor anchor) throws IOException {
         return fromSettings(Settings.fromFile(path, anchor));
     }
 
@@ -185,7 +189,7 @@ public class Config {
      *            how to resolve paths
      * @return parsed Config
      */
-    public static Config fromJsonString(String json, SettingsAnchor anchor) {
+    public static Config fromJsonString(String json, PathAnchor anchor) {
         return fromSettings(Settings.parse(json, anchor));
     }
 
@@ -665,7 +669,7 @@ public class Config {
          */
         public PluginConf<T> add(String key, String value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
+            internal = new Settings(obj, PathAnchor.none()).withFallback(internal);
             return this;
         }
 
@@ -680,7 +684,7 @@ public class Config {
          */
         public PluginConf<T> add(String key, int value) {
             JsonObject obj = Json.createObjectBuilder().add(key, value).build();
-            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
+            internal = new Settings(obj, PathAnchor.none()).withFallback(internal);
             return this;
         }
 
@@ -696,7 +700,7 @@ public class Config {
         public PluginConf<T> addList(String key, String... values) {
             JsonArrayBuilder builder = Json.createArrayBuilder(Arrays.asList(values));
             JsonObject obj = Json.createObjectBuilder().add(key, builder).build();
-            internal = new Settings(obj, SettingsAnchor.none()).withFallback(internal);
+            internal = new Settings(obj, PathAnchor.none()).withFallback(internal);
             return this;
         }
 
@@ -708,14 +712,14 @@ public class Config {
 
     /**
      * A container for the resource, allowing to combine lazy loading with providing
-     * prebuilt resources. Use {@link SettingsAnchor} to create resources.
+     * prebuilt resources. Use {@link PathAnchor} to create resources.
      *
      * @param <T>
      *            resource type of the built resource
      *
-     * @see SettingsAnchor#filesystem(Path)
-     * @see SettingsAnchor#toResource(Path)
-     * @see SettingsAnchor#resource(String)
+     * @see PathAnchor#filesystem(Path)
+     * @see PathAnchor#toResource(Path)
+     * @see PathAnchor#resource(String)
      */
     public static abstract class Resource<T> {
         /**
@@ -864,9 +868,9 @@ public class Config {
 
         public static class NotFound<T> extends Resource<T> {
             private final Path path;
-            private final SettingsAnchor anchor;
+            private final PathAnchor anchor;
 
-            public NotFound(Path path, SettingsAnchor anchor) {
+            public NotFound(Path path, PathAnchor anchor) {
                 this.path = path;
                 this.anchor = anchor;
             }

@@ -43,7 +43,7 @@ public class DefaultInputTextPluginTest {
         builder = new UTF8InputTextBuilder(ORIGINAL_TEXT, new MockGrammar());
         plugin = new DefaultInputTextPlugin();
         try {
-            SettingsAnchor anchor = SettingsAnchor.classpath();
+            PathAnchor anchor = PathAnchor.classpath();
             plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite.def"));
             plugin.setUp(new MockGrammar());
         } catch (IOException ex) {
@@ -103,7 +103,7 @@ public class DefaultInputTextPluginTest {
     @Test
     public void setUpWithNull() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        plugin.setSettings(new Settings(Json.createObjectBuilder().build(), SettingsAnchor.none()));
+        plugin.setSettings(new Settings(Json.createObjectBuilder().build(), PathAnchor.none()));
         plugin.setUp(new MockGrammar());
         assertThat(plugin.rewriteDef, is(nullValue()));
     }
@@ -111,7 +111,7 @@ public class DefaultInputTextPluginTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidFormatOfIgnoreList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        SettingsAnchor anchor = SettingsAnchor.classpath();
+        PathAnchor anchor = PathAnchor.classpath();
         plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_ignorelist.def"));
         plugin.setUp(new MockGrammar());
     }
@@ -119,7 +119,7 @@ public class DefaultInputTextPluginTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidFormatOfReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        SettingsAnchor anchor = SettingsAnchor.classpath();
+        PathAnchor anchor = PathAnchor.classpath();
         plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_replacelist.def"));
         plugin.setUp(new MockGrammar());
     }
@@ -127,7 +127,7 @@ public class DefaultInputTextPluginTest {
     @Test(expected = IllegalArgumentException.class)
     public void duplicatedLinesInReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
-        SettingsAnchor anchor = SettingsAnchor.classpath();
+        PathAnchor anchor = PathAnchor.classpath();
         plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_dup.def"));
         plugin.setUp(new MockGrammar());
     }

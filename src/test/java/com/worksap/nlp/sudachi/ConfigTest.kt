@@ -33,7 +33,7 @@ class ConfigTest {
 
   @Test
   fun fromString() {
-    assertNotNull(Config.fromJsonString("{}", SettingsAnchor.classpath()))
+    assertNotNull(Config.fromJsonString("{}", PathAnchor.classpath()))
   }
 
   @Test
@@ -52,14 +52,13 @@ class ConfigTest {
   @Test
   fun resolveFilesystemPath() {
     val cfg =
-        Config.fromJsonString(
-            """{"systemDict": "main"}""", SettingsAnchor.filesystem(Paths.get("src")))
+        Config.fromJsonString("""{"systemDict": "main"}""", PathAnchor.filesystem(Paths.get("src")))
     assertEquals(cfg.systemDictionary.repr(), Paths.get("src/main"))
   }
 
   @Test
   fun resolveClasspathDefault() {
-    val cfg = Config.fromClasspath()
+    val cfg = Config.defaultConfig()
     assert((cfg.characterDefinition.repr() as URL).path.endsWith("char.def"))
     assertEquals(cfg.inputTextPlugins.size, 3)
     assertEquals(cfg.oovProviderPlugins.size, 1)
@@ -67,7 +66,7 @@ class ConfigTest {
 
   @Test
   fun merge() {
-    val base = Config.fromClasspath()
+    val base = Config.defaultConfig()
     val top =
         Config.fromJsonString(
             """{
@@ -78,7 +77,7 @@ class ConfigTest {
               "cost": 12000
             }]
         }""",
-            SettingsAnchor.filesystem(Paths.get("")))
+            PathAnchor.filesystem(Paths.get("")))
     val merged = top.withFallback(base)
     assert((merged.systemDictionary.repr() as Path).endsWith("test1.dic"))
     assertEquals(merged.userDictionaries.size, 2)
@@ -101,7 +100,7 @@ class ConfigTest {
               "class": "java.lang.String"              
             }]
         }""",
-            SettingsAnchor.none())
+            PathAnchor.none())
     assertFails { cfg.oovProviderPlugins[0].instantiate() }
   }
 
@@ -114,7 +113,7 @@ class ConfigTest {
               "class": "java.lang.SSSSSString"              
             }]
         }""",
-            SettingsAnchor.none())
+            PathAnchor.none())
     assertFails { cfg.oovProviderPlugins[0].instantiate() }
   }
 }

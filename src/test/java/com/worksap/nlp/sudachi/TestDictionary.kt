@@ -52,7 +52,7 @@ object TestDictionary {
   }
 
   fun user0Cfg(): Config {
-    return Config.fromClasspath().clearUserDictionaries().systemDictionary(systemDict)
+    return Config.defaultConfig().clearUserDictionaries().systemDictionary(systemDict)
   }
 
   fun user1Cfg(): Config {

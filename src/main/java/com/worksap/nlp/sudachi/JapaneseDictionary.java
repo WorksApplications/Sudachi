@@ -108,7 +108,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
         Config.Resource<CharacterCategory> resource = config.getCharacterDefinition();
         if (resource == null) {
-            resource = SettingsAnchor.classpath().resource("char.def");
+            resource = PathAnchor.classpath().resource("char.def");
         }
         CharacterCategory category = CharacterCategory.load(resource);
         grammar.setCharacterCategory(category);
