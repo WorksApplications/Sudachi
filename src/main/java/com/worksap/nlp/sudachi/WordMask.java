@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 public class WordMask {
+    public static final int MAX_LENGTH = 63;
 
     // instance creation is forbidden
     private WordMask() {
@@ -45,7 +46,7 @@ public class WordMask {
      */
     public static long nth(int position) {
         assert position > 0;
-        int fixedPosition = Math.min(position - 1, 63);
+        int fixedPosition = Math.min(position - 1, MAX_LENGTH);
         return 1L << fixedPosition;
     }
 
