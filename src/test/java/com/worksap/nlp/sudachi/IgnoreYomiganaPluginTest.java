@@ -42,11 +42,11 @@ public class IgnoreYomiganaPluginTest {
     public void setUp() throws IOException {
         plugin = new IgnoreYomiganaPlugin();
 
-        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), SettingsAnchor.none());
+        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), PathAnchor.none());
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.IgnoreYomiganaPlugin")) {
-                plugin.setSettings(new Settings(p, SettingsAnchor.none()));
+                plugin.setSettings(new Settings(p, PathAnchor.none()));
                 break;
             }
         }

@@ -25,7 +25,6 @@ import java.util.Map;
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
-import org.jetbrains.annotations.NotNull;
 
 public class MockGrammar implements Grammar {
 
@@ -74,7 +73,7 @@ public class MockGrammar implements Grammar {
 
     public static CharacterCategory defaultCharCategory() {
         try {
-            return CharacterCategory.load(SettingsAnchor.classpath().resource("char.def"));
+            return CharacterCategory.load(PathAnchor.classpath().resource("char.def"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

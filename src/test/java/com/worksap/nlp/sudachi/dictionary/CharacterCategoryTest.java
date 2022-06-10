@@ -16,7 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import com.worksap.nlp.sudachi.SettingsAnchor;
+import com.worksap.nlp.sudachi.PathAnchor;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +41,7 @@ public class CharacterCategoryTest {
 
     @Test
     public void getCategoryTypes() throws IOException {
-        CharacterCategory category = CharacterCategory.load(SettingsAnchor.classpath().resource("char.def"));
+        CharacterCategory category = CharacterCategory.load(PathAnchor.classpath().resource("char.def"));
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), hasItems(CategoryType.KANJI));
         assertThat(category.getCategoryTypes(Character.codePointAt("熙", 0)), not(hasItems(CategoryType.DEFAULT)));
     }

@@ -42,11 +42,11 @@ public class ProlongedSoundMarkInputTextPluginTest {
     public void setUp() throws IOException {
         plugin = new ProlongedSoundMarkInputTextPlugin();
 
-        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), SettingsAnchor.none());
+        Settings settings = Settings.fromClasspath(getClass().getResource("/sudachi.json"), PathAnchor.none());
         List<JsonObject> list = settings.getList("inputTextPlugin", JsonObject.class);
         for (JsonObject p : list) {
             if (p.getString("class").equals("com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin")) {
-                plugin.setSettings(new Settings(p, SettingsAnchor.none()));
+                plugin.setSettings(new Settings(p, PathAnchor.none()));
                 break;
             }
         }

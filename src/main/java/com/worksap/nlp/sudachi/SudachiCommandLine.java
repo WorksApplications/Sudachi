@@ -193,7 +193,7 @@ public class SudachiCommandLine {
         }
 
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        SettingsAnchor anchor = SettingsAnchor.classpath().andThen(SettingsAnchor.none());
+        PathAnchor anchor = PathAnchor.classpath().andThen(PathAnchor.none());
         Settings current = Settings.resolvedBy(anchor)
                 .read(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
         Config additional = Config.empty();
@@ -214,11 +214,11 @@ public class SudachiCommandLine {
                 if (parent == null) { // parent directory of file.txt unfortunately is null :(
                     parent = Paths.get("");
                 }
-                SettingsAnchor curAnchor = SettingsAnchor.filesystem(parent).andThen(SettingsAnchor.classpath());
+                PathAnchor curAnchor = PathAnchor.filesystem(parent).andThen(PathAnchor.classpath());
                 additional = Config.fromFile(configPath, curAnchor).withFallback(additional);
             } else if (args[i].equals("-p") && i + 1 < args.length) {
                 String resourcesDirectory = args[++i];
-                anchor = SettingsAnchor.filesystem(Paths.get(resourcesDirectory)).andThen(SettingsAnchor.classpath());
+                anchor = PathAnchor.filesystem(Paths.get(resourcesDirectory)).andThen(PathAnchor.classpath());
                 // first resolve wrt new directory
                 current = Settings.resolvedBy(anchor).withFallback(current);
             } else if (args[i].equals("-s") && i + 1 < args.length) {

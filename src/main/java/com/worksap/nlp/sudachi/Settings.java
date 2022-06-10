@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  *
  * <p>
  * There are multiple settings which can be paths, and paths are resolved using
- * {@link SettingsAnchor}s. Paths can be resolved with respect to classpath or
+ * {@link PathAnchor}s. Paths can be resolved with respect to classpath or
  * filesystem. SettingsAnchors also can be chained, returning the first existing
  * path.
  * </p>
@@ -77,15 +77,15 @@ import java.util.stream.Collectors;
  *
  *
  * @see Config
- * @see SettingsAnchor
+ * @see PathAnchor
  */
 public class Settings {
     private static final Logger logger = Logger.getLogger(Settings.class.getName());
 
     JsonObject root;
-    SettingsAnchor base;
+    PathAnchor base;
 
-    Settings(JsonObject root, SettingsAnchor base) {
+    Settings(JsonObject root, PathAnchor base) {
         this.root = root;
         this.base = base;
     }
@@ -95,17 +95,17 @@ public class Settings {
      * @return empty object
      */
     public static Settings empty() {
-        return resolvedBy(SettingsAnchor.none());
+        return resolvedBy(PathAnchor.none());
     }
 
     /**
-     * Returns empty object resolved by the provided {@link SettingsAnchor}
+     * Returns empty object resolved by the provided {@link PathAnchor}
      * 
      * @param resolver
      *            anchor
      * @return Settings object
      */
-    public static Settings resolvedBy(SettingsAnchor resolver) {
+    public static Settings resolvedBy(PathAnchor resolver) {
         return new Settings(JsonObject.EMPTY_JSON_OBJECT, resolver);
     }
 
@@ -118,7 +118,7 @@ public class Settings {
      * @return modified Settings object
      * @throws IOException
      *             if IO fails
-     * @see #parse(String, SettingsAnchor)
+     * @see #parse(String, PathAnchor)
      */
     public Settings read(Path file) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", file));
@@ -136,7 +136,7 @@ public class Settings {
      * @return modified Settings object
      * @throws IOException
      *             if IO fails
-     * @see #parse(String, SettingsAnchor)
+     * @see #parse(String, PathAnchor)
      */
     public Settings read(URL resource) throws IOException {
         logger.fine(() -> String.format("reading settings from %s", resource));
@@ -150,20 +150,20 @@ public class Settings {
      * <p>
      *
      * @param path
-     *            will add additional {@link SettingsAnchor} to this path if not
+     *            will add additional {@link PathAnchor} to this path if not
      *            {@code null}
      * @param json
      *            JSON string
      * @return Settings object
      * @throws IllegalArgumentException
      *             if the parsing is failed
-     * @deprecated use {@link #parse(String, SettingsAnchor)}, this method will be
+     * @deprecated use {@link #parse(String, PathAnchor)}, this method will be
      *             removed in 1.0.0
      */
     @Deprecated
     public static Settings parseSettings(String path, String json) {
-        SettingsAnchor anchor = path == null ? SettingsAnchor.none() : SettingsAnchor.filesystem(Paths.get(path));
-        anchor = anchor.andThen(SettingsAnchor.classpath());
+        PathAnchor anchor = path == null ? PathAnchor.none() : PathAnchor.filesystem(Paths.get(path));
+        anchor = anchor.andThen(PathAnchor.classpath());
         return parse(json, anchor);
     }
 
@@ -175,14 +175,14 @@ public class Settings {
      * @param json
      *            JSON object as a String
      * @param resolver
-     *            paths will be resolved against this {@link SettingsAnchor}
+     *            paths will be resolved against this {@link PathAnchor}
      * @return SettingsObject
      *
-     * @see SettingsAnchor#none()
-     * @see SettingsAnchor#filesystem(Path)
-     * @see SettingsAnchor#classpath()
+     * @see PathAnchor#none()
+     * @see PathAnchor#filesystem(Path)
+     * @see PathAnchor#classpath()
      */
-    public static Settings parse(String json, SettingsAnchor resolver) {
+    public static Settings parse(String json, PathAnchor resolver) {
         try (JsonReader reader = Json.createReader(new StringReader(json))) {
             JsonStructure rootStr = reader.read();
             if (rootStr instanceof JsonObject) {
@@ -190,11 +190,11 @@ public class Settings {
                 String basePath = root.getString("path", null);
                 if (basePath == null) {
                     if (resolver == null) {
-                        resolver = SettingsAnchor.none();
+                        resolver = PathAnchor.none();
                     }
                     return new Settings(root, resolver);
                 } else {
-                    SettingsAnchor pathResolver = SettingsAnchor.filesystem(Paths.get(basePath));
+                    PathAnchor pathResolver = PathAnchor.filesystem(Paths.get(basePath));
                     if (resolver != null) {
                         pathResolver = pathResolver.andThen(resolver);
                     }
@@ -217,10 +217,10 @@ public class Settings {
      * @return Settings object
      * @throws IOException
      *             if IO fails
-     * @see #parse(String, SettingsAnchor)
+     * @see #parse(String, PathAnchor)
      */
     public static Settings fromFile(Path path) throws IOException {
-        return fromFile(path, SettingsAnchor.filesystem(path.getParent()));
+        return fromFile(path, PathAnchor.filesystem(path.getParent()));
     }
 
     /**
@@ -234,9 +234,9 @@ public class Settings {
      * @return Settings object
      * @throws IOException
      *             if IO fails
-     * @see #parse(String, SettingsAnchor)
+     * @see #parse(String, PathAnchor)
      */
-    public static Settings fromFile(Path path, SettingsAnchor resolver) throws IOException {
+    public static Settings fromFile(Path path, PathAnchor resolver) throws IOException {
         return resolvedBy(resolver).read(path);
     }
 
@@ -250,9 +250,9 @@ public class Settings {
      * @return Settings object
      * @throws IOException
      *             if IO fails
-     * @see #parse(String, SettingsAnchor)
+     * @see #parse(String, PathAnchor)
      */
-    public static Settings fromClasspath(URL url, SettingsAnchor resolver) throws IOException {
+    public static Settings fromClasspath(URL url, PathAnchor resolver) throws IOException {
         return resolvedBy(resolver).read(url);
     }
 
@@ -400,7 +400,7 @@ public class Settings {
 
     /**
      * Returns resolved path mapped by the key, or {@code null} if the Settings
-     * contains no such key. Paths are resolved using {@link SettingsAnchor}.
+     * contains no such key. Paths are resolved using {@link PathAnchor}.
      *
      * Strongly prefer using {@link #getResource(String)} over this method, because
      * this method can't handle classpath resources.
@@ -565,9 +565,9 @@ public class Settings {
      *
      * The current object will not be modified.
      *
-     * {@link SettingsAnchor} of the another object will be merged with this one,
-     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method,
-     * using the anchor of the passed Settings object before the current anchor.
+     * {@link PathAnchor} of the another object will be merged with this one,
+     * chaining them using {@link PathAnchor#andThen(PathAnchor)} method, using the
+     * anchor of the passed Settings object before the current anchor.
      *
      * This is advanced API, in most cases Configs should be merged instead.
      *
@@ -588,9 +588,9 @@ public class Settings {
      *
      * The current object will not be modified.
      *
-     * {@link SettingsAnchor} of the another object will be merged with this one,
-     * chaining them using {@link SettingsAnchor#andThen(SettingsAnchor)} method,
-     * using the anchor of the passed Settings object after the current anchor.
+     * {@link PathAnchor} of the another object will be merged with this one,
+     * chaining them using {@link PathAnchor#andThen(PathAnchor)} method, using the
+     * anchor of the passed Settings object after the current anchor.
      *
      * This is advanced API, in most cases Configs should be merged instead.
      *

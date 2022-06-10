@@ -18,18 +18,19 @@ package com.worksap.nlp.sudachi
 
 import com.worksap.nlp.sudachi.Config.Resource
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
+import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.test.*
 
-class SettingsAnchorTest {
+class PathAnchorTest {
   @Test
   fun classpath() {
-    assertNotNull(SettingsAnchor.classpath())
+    assertNotNull(PathAnchor.classpath())
   }
 
   @Test
   fun classpathOfClass() {
-    val resolver = SettingsAnchor.classpath(DicBuilder::class.java)
+    val resolver = PathAnchor.classpath(DicBuilder::class.java)
     val path = resolver.resolve("one.csv")
     assertTrue(resolver.exists(path))
     val path2 = resolver.resolve("doesnotexist.file")
@@ -38,15 +39,14 @@ class SettingsAnchorTest {
 
   @Test
   fun chainNone() {
-    assertEquals(SettingsAnchor.none(), SettingsAnchor.none().andThen(SettingsAnchor.none()))
-    assertEquals(
-        SettingsAnchor.classpath(), SettingsAnchor.classpath().andThen(SettingsAnchor.classpath()))
+    assertEquals(PathAnchor.none(), PathAnchor.none().andThen(PathAnchor.none()))
+    assertEquals(PathAnchor.classpath(), PathAnchor.classpath().andThen(PathAnchor.classpath()))
   }
 
   @Test
   fun chain() {
-    val chain = SettingsAnchor.classpath().andThen(SettingsAnchor.none())
-    assertIs<SettingsAnchor.Chain>(chain)
+    val chain = PathAnchor.classpath().andThen(PathAnchor.none())
+    assertIs<PathAnchor.Chain>(chain)
     assertEquals(chain.count(), 2)
     val chain2 = chain.andThen(chain)
     assertSame(chain, chain2)
@@ -54,26 +54,26 @@ class SettingsAnchorTest {
 
   @Test
   fun chainChains() {
-    val chain1 = SettingsAnchor.classpath().andThen(SettingsAnchor.none())
-    val chain2 = SettingsAnchor.classpath().andThen(SettingsAnchor.none())
+    val chain1 = PathAnchor.classpath().andThen(PathAnchor.none())
+    val chain2 = PathAnchor.classpath().andThen(PathAnchor.none())
     val chain3 = chain1.andThen(chain2)
-    assertIs<SettingsAnchor.Chain>(chain3)
+    assertIs<PathAnchor.Chain>(chain3)
     assertEquals(chain3.count(), 2)
   }
 
   @Test
   fun chainChains2() {
-    val chain1 = SettingsAnchor.classpath().andThen(SettingsAnchor.filesystem(Paths.get("")))
-    val chain3 = SettingsAnchor.none().andThen(chain1)
-    assertIs<SettingsAnchor.Chain>(chain3)
+    val chain1 = PathAnchor.classpath().andThen(PathAnchor.filesystem(Paths.get("")))
+    val chain3 = PathAnchor.none().andThen(chain1)
+    assertIs<PathAnchor.Chain>(chain3)
     assertEquals(chain3.count(), 3)
   }
 
   @Test
   fun chainExists() {
-    val a1 = SettingsAnchor.classpath(DicBuilder::class.java)
+    val a1 = PathAnchor.classpath(DicBuilder::class.java)
     assertTrue(a1.exists(a1.resolve("one.csv")))
-    val a2 = SettingsAnchor.none()
+    val a2 = PathAnchor.none()
     assertFalse(a2.exists(a2.resolve("one.csv")))
     val a3 = a2.andThen(a1)
     assertTrue(a3.exists(a3.resolve("one.csv")))
@@ -82,16 +82,16 @@ class SettingsAnchorTest {
   @Test
   fun hashCodeWorks() {
     val a =
-        SettingsAnchor.classpath()
-            .andThen(SettingsAnchor.filesystem(Paths.get("")))
-            .andThen(SettingsAnchor.none())
-    assertNotEquals(a.hashCode(), SettingsAnchor.none().hashCode())
-    assertNotEquals(a, SettingsAnchor.none())
+        PathAnchor.classpath()
+            .andThen(PathAnchor.filesystem(Paths.get("")))
+            .andThen(PathAnchor.none())
+    assertNotEquals(a.hashCode(), PathAnchor.none().hashCode())
+    assertNotEquals(a, PathAnchor.none())
   }
 
   @Test
   fun notExistFile() {
-    val a = SettingsAnchor.filesystem(Paths.get(""))
+    val a = PathAnchor.filesystem("")
     assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore")))
     val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore2")))
     assertFails { x.asByteBuffer() }
@@ -100,15 +100,21 @@ class SettingsAnchorTest {
   }
 
   @Test
+  fun npeFilesystem() {
+    assertFailsWith<NullPointerException> { PathAnchor.filesystem(null as String?) }
+    assertFailsWith<NullPointerException> { PathAnchor.filesystem(null as Path?) }
+  }
+
+  @Test
   fun notExistClasspath() {
-    val a = SettingsAnchor.classpath()
+    val a = PathAnchor.classpath()
     assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def")))
     assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def2")))
   }
 
   @Test
   fun notExistChain() {
-    val a = SettingsAnchor.filesystem(Paths.get("")).andThen(SettingsAnchor.classpath())
+    val a = PathAnchor.filesystem(Paths.get("")).andThen(PathAnchor.classpath())
     assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def")))
     val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def2")))
     assertFails { x.asByteBuffer() }
