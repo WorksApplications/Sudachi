@@ -41,7 +41,8 @@ import java.util.regex.Pattern;
  *      "pos": [ "補助記号", "一般", "*", "*", "*", "*" ],
  *      "leftId": 500,
  *      "rightId": 500,
- *      "cost": 5000
+ *      "cost": 5000,
+ *      "maxLength": 32,
  *  }
  * }
  * </pre>
@@ -60,6 +61,7 @@ public class RegexOovProvider extends OovProviderPlugin {
     private short cost = Short.MIN_VALUE;
     private short leftId = Short.MIN_VALUE;
     private short rightId = Short.MIN_VALUE;
+    private int maxLength = 32;
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
@@ -74,6 +76,7 @@ public class RegexOovProvider extends OovProviderPlugin {
         leftId = checkedShort(settings, "leftId");
         rightId = checkedShort(settings, "rightId");
         pattern = checkPattern(settings.getString("regex"));
+        maxLength = settings.getInt("maxLength", 32);
     }
 
     @Override
@@ -92,7 +95,7 @@ public class RegexOovProvider extends OovProviderPlugin {
         byte[] byteText = inputText.getByteText();
         int textLength = byteText.length;
         int regionStartChars = inputText.modifiedOffset(offset);
-        int regionEndBytes = Math.min(offset + 64, textLength);
+        int regionEndBytes = Math.min(offset + maxLength, textLength);
         int regionEndChars = inputText.modifiedOffset(regionEndBytes);
         matcher.region(regionStartChars, regionEndChars);
 
@@ -100,7 +103,18 @@ public class RegexOovProvider extends OovProviderPlugin {
             int endChar = matcher.end();
             int oovLength = inputText.getCodePointsOffsetLength(offset, endChar - regionStartChars);
             if (WordMask.hasNth(otherWords, oovLength)) {
-                return 0;
+                // there was already created word of length
+                if (oovLength > WordMask.MAX_LENGTH) {
+                    // handle case if there are more than 63 symbols
+                    int byteEnd = offset + oovLength;
+                    for (LatticeNodeImpl node : nodes) {
+                        if (node.end == byteEnd) {
+                            return 0;
+                        }
+                    }
+                } else {
+                    return 0;
+                }
             }
 
             LatticeNodeImpl node = new LatticeNodeImpl(null, leftId, rightId, cost, -1);
