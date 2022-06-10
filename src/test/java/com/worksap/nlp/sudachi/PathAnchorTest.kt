@@ -90,7 +90,7 @@ class PathAnchorTest {
 
   @Test
   fun notExistFile() {
-    val a = PathAnchor.filesystem(Paths.get(""))
+    val a = PathAnchor.filesystem("")
     assertIsNot<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore")))
     val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore2")))
     assertFails { x.asByteBuffer() }
