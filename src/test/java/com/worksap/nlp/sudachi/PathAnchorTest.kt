@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi
 
 import com.worksap.nlp.sudachi.Config.Resource
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
+import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.test.*
 
@@ -96,6 +97,12 @@ class PathAnchorTest {
     assertFails { x.asByteBuffer() }
     assertFails { x.asInputStream() }
     assertFails { x.consume { throw java.lang.RuntimeException() } }
+  }
+
+  @Test
+  fun npeFilesystem() {
+    assertFailsWith<NullPointerException> { PathAnchor.filesystem(null as String?) }
+    assertFailsWith<NullPointerException> { PathAnchor.filesystem(null as Path?) }
   }
 
   @Test

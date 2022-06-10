@@ -112,13 +112,14 @@ public abstract class PathAnchor {
 
     /**
      * Create a filesystem anchor relative to the path
+     * 
      * @param path
-     *      base path to resolve other paths upon
+     *            base path to resolve other paths upon
      * @return filesystem anchor
      */
     public static PathAnchor filesystem(String path) {
         if (path == null) {
-            throw  new NullPointerException("passed path was null");
+            throw new NullPointerException("passed path was null");
         }
         return filesystem(Paths.get(path));
     }
