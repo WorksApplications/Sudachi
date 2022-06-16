@@ -28,6 +28,7 @@ public class GrammarImpl implements Grammar {
 
     private final ByteBuffer bytes;
     private final List<POS> posList;
+    private final short originalPosSize;
     private boolean isCopiedConnectTable;
     private Connection matrix;
 
@@ -50,6 +51,7 @@ public class GrammarImpl implements Grammar {
             }
             posList.add(new POS(pos));
         }
+        originalPosSize = (short) posList.size();
         int leftIdSize = bytes.getShort(offset);
         offset += 2;
         int rightIdSize = bytes.getShort(offset);
@@ -65,6 +67,7 @@ public class GrammarImpl implements Grammar {
     public GrammarImpl() {
         bytes = ByteBuffer.allocate(0);
         posList = Collections.emptyList();
+        originalPosSize = 0;
     }
 
     public int storageSize() {
@@ -78,6 +81,10 @@ public class GrammarImpl implements Grammar {
     @Override
     public int getPartOfSpeechSize() {
         return posList.size();
+    }
+
+    public short getSystemPartOfSpeechSize() {
+        return originalPosSize;
     }
 
     @Override

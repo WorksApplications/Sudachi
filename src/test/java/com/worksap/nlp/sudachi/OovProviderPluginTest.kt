@@ -32,7 +32,7 @@ class OovProviderPluginTest {
         otherWords: Long,
         result: MutableList<LatticeNodeImpl>?
     ): Int {
-      throw NotImplementedError("not implemented")
+      return 0
     }
 
     override fun setUp(grammar: Grammar?) {
@@ -97,5 +97,20 @@ class OovProviderPluginTest {
     assertEquals(8, p1.posId)
     val p2 = assertIs<FakeOovProvider>(oovPlugins[oovPlugins.size - 1])
     assertEquals(8, p2.posId)
+  }
+
+  @Test
+  fun posIdOfWorksNewPosWithUserDict() {
+    val cfg = TestDictionary.user2Cfg()
+    cfg.addOovProviderPlugin(FakeOovProvider::class.java)
+        .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
+        .add(USER_POS, USER_POS_ALLOW)
+    val dict = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val plugin = assertIs<FakeOovProvider>(dict.oovProviderPlugins.last())
+    assertEquals(8, plugin.posId)
+    val tokinzer = dict.create()
+    val tokens = tokinzer.tokenize("すだちかぼす")
+    assertEquals("スダチ", tokens[0].partOfSpeech()[5])
+    assertEquals("カボス", tokens[1].partOfSpeech()[5])
   }
 }

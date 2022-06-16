@@ -76,7 +76,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         BinaryDictionary dictionary = BinaryDictionary.loadSystem(config.getSystemDictionary());
         dictionaries.add(dictionary);
         grammar = dictionary.getGrammar();
-        lexicon = new LexiconSet(dictionary.getLexicon());
+        lexicon = new LexiconSet(dictionary.getLexicon(), grammar.getSystemPartOfSpeechSize());
     }
 
     void setupUserDictionaries(Config config) throws IOException {
