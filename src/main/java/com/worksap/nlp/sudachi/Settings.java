@@ -86,8 +86,8 @@ public class Settings {
     PathAnchor base;
 
     Settings(JsonObject root, PathAnchor base) {
-        this.root = root;
-        this.base = base;
+        this.root = Objects.requireNonNull(root);
+        this.base = Objects.requireNonNull(base);
     }
 
     /**
@@ -624,4 +624,18 @@ public class Settings {
         return builder.build();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Settings settings = (Settings) o;
+        return root.equals(settings.root) && base.equals(settings.base);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(root, base);
+    }
 }
