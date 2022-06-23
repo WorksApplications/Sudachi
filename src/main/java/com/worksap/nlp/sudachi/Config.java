@@ -588,6 +588,28 @@ public class Config {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Config config = (Config) o;
+        return Objects.equals(systemDictionary, config.systemDictionary)
+                && Objects.equals(userDictionary, config.userDictionary)
+                && Objects.equals(characterDefinition, config.characterDefinition)
+                && Objects.equals(editConnectionCost, config.editConnectionCost)
+                && Objects.equals(inputText, config.inputText) && Objects.equals(oovProviders, config.oovProviders)
+                && Objects.equals(pathRewrite, config.pathRewrite)
+                && Objects.equals(allowEmptyMorpheme, config.allowEmptyMorpheme);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(systemDictionary, userDictionary, characterDefinition, editConnectionCost, inputText,
+                oovProviders, pathRewrite, allowEmptyMorpheme);
+    }
+
     @FunctionalInterface
     public interface IOFunction<T, R> {
         R apply(T arg) throws IOException;
@@ -633,22 +655,17 @@ public class Config {
          * @throws IllegalArgumentException
          *             when instantiation fails
          */
-        @SuppressWarnings("unchecked")
         public T instantiate() {
-            Class<T> clz;
+            Class<? extends T> clz;
             try {
-                clz = (Class<T>) Class.forName(clazzName);
+                clz = Class.forName(clazzName).asSubclass(parent);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("non-existent plugin class", e);
-            }
-            if (!parent.isAssignableFrom(clz)) {
-                throw new IllegalArgumentException(String.format("plugin %s did not have correct parent, expected %s",
-                        clazzName, parent.getName()));
             }
 
             T result;
             try {
-                Constructor<T> constructor = clz.getDeclaredConstructor();
+                Constructor<? extends T> constructor = clz.getDeclaredConstructor();
                 result = constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
                     | InvocationTargetException e) {
@@ -702,6 +719,22 @@ public class Config {
             JsonObject obj = Json.createObjectBuilder().add(key, builder).build();
             internal = new Settings(obj, PathAnchor.none()).withFallback(internal);
             return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            PluginConf<?> that = (PluginConf<?>) o;
+            return Objects.equals(clazzName, that.clazzName) && Objects.equals(internal, that.internal)
+                    && Objects.equals(parent, that.parent);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clazzName, internal, parent);
         }
 
         @Override
@@ -803,6 +836,21 @@ public class Config {
             Object repr() {
                 return path;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                Filesystem<?> that = (Filesystem<?>) o;
+                return path.equals(that.path);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(path);
+            }
         }
 
         /**
@@ -840,6 +888,21 @@ public class Config {
             Object repr() {
                 return url;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                Classpath<?> classpath = (Classpath<?>) o;
+                return Objects.equals(url, classpath.url);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(url);
+            }
         }
 
         /**
@@ -863,6 +926,21 @@ public class Config {
             @Override
             Object repr() {
                 return object;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                Ready<?> ready = (Ready<?>) o;
+                return Objects.equals(object, ready.object);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(object);
             }
         }
 
@@ -898,6 +976,21 @@ public class Config {
             private IllegalArgumentException makeException() {
                 String sb = "Failed to resolve file: " + path.toString() + "\n" + "Tried roots: " + anchor;
                 return new IllegalArgumentException(sb);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                NotFound<?> notFound = (NotFound<?>) o;
+                return Objects.equals(path, notFound.path) && Objects.equals(anchor, notFound.anchor);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(path, anchor);
             }
         }
 

@@ -19,10 +19,7 @@ package com.worksap.nlp.sudachi
 import java.net.URL
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFails
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class ConfigTest {
 
@@ -115,5 +112,16 @@ class ConfigTest {
         }""",
             PathAnchor.none())
     assertFails { cfg.oovProviderPlugins[0].instantiate() }
+  }
+
+  @Test
+  fun equalsHashCode() {
+    val c1 = Config.fromClasspath("sudachi.json")
+    val c2 = Config.fromClasspath("sudachi.json")
+    val c3 = TestDictionary.user2Cfg()
+    assertEquals(c1.hashCode(), c2.hashCode())
+    assertEquals(c1, c2)
+    assertNotEquals(c1.hashCode(), c3.hashCode())
+    assertNotEquals(c1, c3)
   }
 }
