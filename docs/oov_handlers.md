@@ -135,7 +135,7 @@ Matching twitter @handles (minimum handle length - 4 symbols):
 ```
 
 Matching URLs:
-```json
+```json5
 {
   "class": "com.worksap.nlp.sudachi.RegexOovProvider",
   "leftId": 5968,
