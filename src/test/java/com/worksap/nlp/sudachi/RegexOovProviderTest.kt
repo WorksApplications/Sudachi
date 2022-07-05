@@ -91,4 +91,26 @@ class RegexOovProviderTest {
     assertEquals(1, tokens.size)
     assertEquals("数詞", tokens[0].partOfSpeech()[1])
   }
+
+  @Test
+  fun strictBoundaries() {
+    val tokens = analyzer { _, cfg -> cfg.add("regex", "@[a-z0-9]{4,}") }.tokenize(":@asda")
+    assertEquals(3, tokens.size)
+    assertEquals(":", tokens[0].surface())
+    assertEquals("@", tokens[1].surface())
+    assertEquals("asda", tokens[2].surface())
+  }
+
+  @Test
+  fun relaxedBoundaries() {
+    val tokens =
+        analyzer { _, cfg ->
+              cfg.add("boundaries", "ReLaXeD")
+              cfg.add("regex", "@[a-z0-9]{4,}")
+            }
+            .tokenize(":@asda")
+    assertEquals(2, tokens.size)
+    assertEquals(":", tokens[0].surface())
+    assertEquals("@asda", tokens[1].surface())
+  }
 }
