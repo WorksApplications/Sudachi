@@ -38,11 +38,12 @@ import java.util.regex.Pattern;
  *  {
  *      "class": "com.worksap.nlp.sudachi.RegexOovProvider",
  *      "regex": "[0-9a-z-]+",
- *      "pos": [ "補助記号", "一般", "*", "*", "*", "*" ],
+ *      "oovPOS": [ "補助記号", "一般", "*", "*", "*", "*" ],
  *      "leftId": 500,
  *      "rightId": 500,
  *      "cost": 5000,
  *      "maxLength": 32,
+ *      "boundaries": "relaxed"
  *  }
  * }
  * </pre>
@@ -62,11 +63,16 @@ public class RegexOovProvider extends OovProviderPlugin {
     private short leftId = Short.MIN_VALUE;
     private short rightId = Short.MIN_VALUE;
     private int maxLength = 32;
+    private boolean strictBoundaries = true;
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
         super.setUp(grammar);
-        POS stringPos = new POS(settings.getStringList("pos"));
+        List<String> oovPOS = settings.getStringList("oovPOS");
+        if (oovPOS.isEmpty()) {
+            oovPOS = settings.getStringList("pos");
+        }
+        POS stringPos = new POS(oovPOS);
         String userPosMode = settings.getString(USER_POS, USER_POS_FORBID);
         posId = posIdOf(grammar, stringPos, userPosMode);
         if (posId == -1) {
@@ -77,11 +83,12 @@ public class RegexOovProvider extends OovProviderPlugin {
         rightId = checkedShort(settings, "rightId");
         pattern = checkPattern(settings.getString("regex"));
         maxLength = settings.getInt("maxLength", 32);
+        strictBoundaries = isStrictContinuity(settings);
     }
 
     @Override
     public int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> nodes) {
-        if (offset > 0) {
+        if (strictBoundaries && offset > 0) {
             int currentContinuity = inputText.getCharCategoryContinuousLength(offset);
             int previousContinuity = inputText.getCharCategoryContinuousLength(offset - 1);
             // if inside single character category
@@ -148,5 +155,15 @@ public class RegexOovProvider extends OovProviderPlugin {
         Matcher x = pattern.matcher("does not matter");
         x.reset();
         return pattern;
+    }
+
+    private static boolean isStrictContinuity(Settings settings) {
+        String content = settings.getString("boundaries", "strict");
+        if ("strict".equalsIgnoreCase(content)) {
+            return true;
+        } else if ("relaxed".equalsIgnoreCase(content)) {
+            return false;
+        }
+        throw new IllegalArgumentException("allowed continuity values: [strict, relaxed], was " + content);
     }
 }
