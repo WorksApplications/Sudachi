@@ -33,7 +33,7 @@ public class PartialPOS extends AbstractList<String> {
             throw new IllegalArgumentException("Partial POS can have at most 6 components, was " + data);
         }
         for (String component : data) {
-            if (component.length() > POS.MAX_COMPONENT_LENGTH) {
+            if (component != null && component.length() > POS.MAX_COMPONENT_LENGTH) {
                 throw new IllegalArgumentException("Component length can't be more than " + POS.MAX_COMPONENT_LENGTH
                         + ", was " + component.length() + ":" + component);
             }

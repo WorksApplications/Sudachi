@@ -17,10 +17,7 @@
 package com.worksap.nlp.sudachi
 
 import com.worksap.nlp.sudachi.dictionary.POS
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class PosMatcherTest {
 
@@ -91,5 +88,31 @@ class PosMatcherTest {
             POS(*"被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ".split(",").toTypedArray()),
             POS(*"被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,カボス".split(",").toTypedArray())),
         posList)
+  }
+
+  @Test
+  fun iteratorThrows() {
+    val filter = dic.posMatcher(PartialPOS("動詞"))
+    val iter = filter.iterator()
+    assertTrue(iter.hasNext())
+    assertEquals(POS("動詞", "非自立可能", "*", "*", "五段-カ行", "終止形-一般"), iter.next())
+    assertTrue(iter.hasNext())
+    assertEquals(POS("動詞", "非自立可能", "*", "*", "五段-カ行", "連用形-促音便"), iter.next())
+    assertFalse(iter.hasNext())
+    assertFailsWith<NoSuchElementException> { iter.next() }
+  }
+
+  @Test
+  fun partialPos() {
+    assertFails { PartialPOS("a", "b", "c", "d", "e", "f", "g") }
+    assertFails { PartialPOS() }
+    assertFails { PartialPOS.of("1".repeat(300)) }
+  }
+
+  @Test
+  fun partialPosNull() {
+    val filter = dic.posMatcher(PartialPOS(null, "数詞"))
+    val matchingTags = filter.toList()
+    assertContains(matchingTags, POS("名詞", "数詞", "*", "*", "*", "*"))
   }
 }

@@ -20,6 +20,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -139,6 +140,9 @@ public class PosMatcher implements Predicate<Morpheme>, Iterable<POS> {
 
             @Override
             public POS next() {
+                if (index < 0) {
+                    throw new NoSuchElementException();
+                }
                 short posId = (short) index;
                 POS result = dictionary.getGrammar().getPartOfSpeechString(posId);
                 index = matching.nextSetBit(index + 1);
