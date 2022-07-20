@@ -94,6 +94,8 @@ public class PosMatcher implements Predicate<Morpheme>, Iterable<POS> {
      * @return PosMatcher which is inverse of this
      */
     public PosMatcher invert() {
+        // bitset can be shorter than number of ids, so we create the full id range and
+        // filter matching items
         int[] indices = IntStream.range(0, dictionary.getPartOfSpeechSize()).filter(idx -> !matching.get(idx))
                 .toArray();
         return new PosMatcher(indices, dictionary);
