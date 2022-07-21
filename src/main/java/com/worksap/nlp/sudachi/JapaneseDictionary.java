@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
@@ -166,4 +168,12 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         return lexicon;
     }
 
+    @Override
+    public PosMatcher posMatcher(Predicate<POS> predicate) {
+        GrammarImpl grammar = getGrammar();
+        int numPos = grammar.getPartOfSpeechSize();
+        int[] ids = IntStream.range(0, numPos).filter(id -> predicate.test(grammar.getPartOfSpeechString((short) id)))
+                .toArray();
+        return new PosMatcher(ids, this);
+    }
 }

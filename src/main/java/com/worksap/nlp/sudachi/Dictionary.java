@@ -16,8 +16,12 @@
 
 package com.worksap.nlp.sudachi;
 
+import com.worksap.nlp.sudachi.dictionary.POS;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A lexicon and a grammar for morphological analysis.
@@ -64,4 +68,48 @@ public interface Dictionary extends AutoCloseable {
      *             if {@code posId} is out of the range
      */
     public List<String> getPartOfSpeechString(short posId);
+
+    /**
+     * Create a POS matcher that will match any of POS for which the passed
+     * predicate returns true. PosMatcher will be much faster than doing string
+     * comparison on POS objects.
+     *
+     * @param predicate
+     *            returns true if the POS is needed
+     * @return PosMatcher object that mirrors behavior of the predicate
+     */
+    PosMatcher posMatcher(Predicate<POS> predicate);
+
+    /**
+     * Create a POS matcher that will mirror matching behavior of passed list of
+     * partially-defined POS.
+     * 
+     * @param posList
+     *            list of partially defined part-of-speech objects
+     * @return mirroring PosMatcher object
+     * @see PartialPOS
+     */
+    default PosMatcher posMatcher(Iterable<PartialPOS> posList) {
+        return posMatcher(posRepr -> {
+            for (PartialPOS p : posList) {
+                if (p.matches(posRepr)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Create a POS matcher that will mirror matching behavior of passed list of
+     * partially-defined POS.
+     * 
+     * @param posList
+     *            list of partially defined part-of-speech objects
+     * @return mirroring PosMatcher object
+     * @see PartialPOS
+     */
+    default PosMatcher posMatcher(PartialPOS... posList) {
+        return posMatcher(Arrays.asList(posList));
+    }
 }
