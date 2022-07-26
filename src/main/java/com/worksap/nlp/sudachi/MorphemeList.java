@@ -92,7 +92,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     List<Morpheme> split(Tokenizer.SplitMode mode, int index) {
         List<LatticeNode> nodes = new ArrayList<>();
         LatticeNodeImpl node = (LatticeNodeImpl) path.get(index);
-        node.appendSplitted(nodes, mode);
+        node.appendSplitsTo(nodes, mode);
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
     }
 
@@ -114,7 +114,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
 
         for (LatticeNode node : path) {
             LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitted(nodes, mode);
+            nodeImpl.appendSplitsTo(nodes, mode);
         }
 
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);

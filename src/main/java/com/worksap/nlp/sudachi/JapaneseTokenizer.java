@@ -289,7 +289,7 @@ class JapaneseTokenizer implements Tokenizer {
         List<LatticeNode> newPath = new ArrayList<>();
         for (LatticeNode node : path) {
             LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitted(newPath, mode);
+            nodeImpl.appendSplitsTo(newPath, mode);
         }
         return newPath;
     }

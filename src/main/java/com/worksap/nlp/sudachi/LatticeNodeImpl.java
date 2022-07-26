@@ -43,8 +43,9 @@ public class LatticeNodeImpl implements LatticeNode {
     Lexicon lexicon;
 
     static final String NULL_SURFACE = "(null)";
-    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(NULL_SURFACE, (short) 0, (short) -1, NULL_SURFACE,
-            NULL_SURFACE, NULL_SURFACE);
+    private static final short ZERO = (short) 0;
+    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(NULL_SURFACE, ZERO, (short) -1, NULL_SURFACE, NULL_SURFACE,
+            NULL_SURFACE);
 
     LatticeNodeImpl(Lexicon lexicon, short leftId, short rightId, short cost, int wordId) {
         this.lexicon = lexicon;
@@ -137,25 +138,37 @@ public class LatticeNodeImpl implements LatticeNode {
                 cost);
     }
 
-    void appendSplitted(List<LatticeNode> result, Tokenizer.SplitMode mode) {
+    /* internal */ void appendSplitsTo(List<LatticeNode> result, Tokenizer.SplitMode mode) {
         if (mode == Tokenizer.SplitMode.A) {
-            appendSplitted(result, getWordInfo().getAunitSplit());
+            appendSplitsTo(result, getWordInfo().getAunitSplit());
         } else if (mode == Tokenizer.SplitMode.B) {
-            appendSplitted(result, getWordInfo().getBunitSplit());
+            appendSplitsTo(result, getWordInfo().getBunitSplit());
         } else {
             result.add(this);
         }
     }
 
-    void appendSplitted(List<LatticeNode> result, int[] ids) {
-        if (ids.length <= 1) {
+    private void appendSplitsTo(List<LatticeNode> result, int[] splitsId) {
+        if (splitsId.length == 0) {
             result.add(this);
+            return;
+        } else if (splitsId.length == 1) {
+            int wid = splitsId[0];
+            if (wid == getWordId()) {
+                result.add(this);
+            } else {
+                LatticeNodeImpl node = new LatticeNodeImpl(lexicon, ZERO, ZERO, ZERO, wid);
+                node.begin = begin;
+                node.end = end;
+                node.totalCost = totalCost;
+                result.add(node);
+            }
             return;
         }
 
         int offset = getBegin();
-        for (int wid : ids) {
-            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
+        for (int wid : splitsId) {
+            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, ZERO, ZERO, ZERO, wid);
             n.begin = offset;
             offset += n.getWordInfo().getLength();
             n.end = offset;

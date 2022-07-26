@@ -35,6 +35,9 @@ import javax.json.JsonReader;
 
 import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,6 +49,25 @@ public class JapaneseTokenizerTest {
     public void setUp() throws IOException {
         dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
+    }
+
+    private static Matcher<Morpheme> morpheme(String surface, int begin, int end) {
+        return new BaseMatcher<Morpheme>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Morpheme=").appendText(surface).appendText(" [").appendValue(begin)
+                        .appendText(",").appendValue(end).appendText("]");
+            }
+
+            @Override
+            public boolean matches(Object actual) {
+                if (!(actual instanceof Morpheme)) {
+                    return false;
+                }
+                Morpheme m = (Morpheme) actual;
+                return m.surface().equals(surface) && m.begin() == begin && m.end() == end;
+            }
+        };
     }
 
     @Test
@@ -295,6 +317,31 @@ public class JapaneseTokenizerTest {
         assertThat(morphemes1.size(), is(1));
         MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
         assertThat(morphemes2, sameInstance(morphemes1));
+    }
+
+    @Test
+    public void splitWithZeroWidthTokens() {
+        MorphemeList morphemes1 = tokenizer.tokenize("…東京都…");
+        assertThat(morphemes1.size(), is(7));
+        assertThat(morphemes1.get(0), morpheme("…", 0, 1));
+        assertThat(morphemes1.get(1), morpheme("", 1, 1));
+        assertThat(morphemes1.get(2), morpheme("", 1, 1));
+        assertThat(morphemes1.get(3), morpheme("東京都", 1, 4));
+        assertThat(morphemes1.get(4), morpheme("…", 4, 5));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.A);
+        assertThat(morphemes2.size(), is(8));
+        assertThat(morphemes2.get(3), morpheme("東京", 1, 3));
+        assertThat(morphemes2.get(4), morpheme("都", 3, 4));
+    }
+
+    @Test
+    public void splitSingleToken() {
+        MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.C, "な。な");
+        assertThat(morphemes1.size(), is(1));
+        assertThat(morphemes1.get(0), morpheme("な。な", 0, 3));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.A);
+        assertThat(morphemes2.get(0), morpheme("な。な", 0, 3));
+        assertThat(morphemes2.get(0).normalizedForm(), is("アイウ"));
     }
 
     @Test
