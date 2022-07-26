@@ -78,8 +78,7 @@ class MorphemeImpl implements Morpheme {
 
     @Override
     public List<Morpheme> split(Tokenizer.SplitMode mode) {
-        WordInfo wi = getWordInfo();
-        return list.split(mode, index, wi);
+        return list.split(mode, index);
     }
 
     @Override

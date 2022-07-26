@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.WordId;
+
 import java.util.Iterator;
 
 /**
@@ -85,8 +87,12 @@ public interface Lexicon {
      * @param wordId
      *            the word ID of the morpheme
      * @return the dictionary ID
+     * @deprecated use {@link WordId#dic(int)}
      */
-    int getDictionaryId(int wordId);
+    @Deprecated
+    default int getDictionaryId(int wordId) {
+        return WordId.dic(wordId);
+    }
 
     /**
      * Returns the number of morphemes in the dictionary.

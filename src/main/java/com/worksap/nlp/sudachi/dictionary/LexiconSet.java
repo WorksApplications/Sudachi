@@ -113,17 +113,17 @@ public class LexiconSet implements Lexicon {
 
     @Override
     public short getLeftId(int wordId) {
-        return lexicons.get(getDictionaryId(wordId)).getLeftId(getWordId(wordId));
+        return lexicons.get(WordId.dic(wordId)).getLeftId(getWordId(wordId));
     }
 
     @Override
     public short getRightId(int wordId) {
-        return lexicons.get(getDictionaryId(wordId)).getRightId(getWordId(wordId));
+        return lexicons.get(WordId.dic(wordId)).getRightId(getWordId(wordId));
     }
 
     @Override
     public short getCost(int wordId) {
-        return lexicons.get(getDictionaryId(wordId)).getCost(getWordId(wordId));
+        return lexicons.get(WordId.dic(wordId)).getCost(getWordId(wordId));
     }
 
     @Override
@@ -139,11 +139,6 @@ public class LexiconSet implements Lexicon {
         convertSplit(wordInfo.getBunitSplit(), dictionaryId);
         convertSplit(wordInfo.getWordStructure(), dictionaryId);
         return wordInfo;
-    }
-
-    @Override
-    public int getDictionaryId(int wordId) {
-        return WordId.dic(wordId);
     }
 
     @Override
@@ -164,7 +159,7 @@ public class LexiconSet implements Lexicon {
 
     private void convertSplit(int[] split, int dictionaryId) {
         for (int i = 0; i < split.length; i++) {
-            if (getDictionaryId(split[i]) > 0) {
+            if (WordId.dic(split[i]) > 0) {
                 split[i] = buildWordId(dictionaryId, getWordId(split[i]));
             }
         }

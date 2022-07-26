@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
+import java.util.List;
+
 public class LatticeNodeImpl implements LatticeNode {
 
     int begin;
@@ -122,7 +124,7 @@ public class LatticeNodeImpl implements LatticeNode {
         if (!isDefined || extraWordInfo != null) {
             return -1;
         }
-        return lexicon.getDictionaryId(wordId);
+        return WordId.dic(wordId);
     }
 
     @Override
@@ -133,5 +135,31 @@ public class LatticeNodeImpl implements LatticeNode {
 
         return String.format("%d %d %s(%d) %d %d %d %d", getBegin(), getEnd(), surface, wordId, pos, leftId, rightId,
                 cost);
+    }
+
+    void appendSplitted(List<LatticeNode> result, Tokenizer.SplitMode mode) {
+        if (mode == Tokenizer.SplitMode.A) {
+            appendSplitted(result, getWordInfo().getAunitSplit());
+        } else if (mode == Tokenizer.SplitMode.B) {
+            appendSplitted(result, getWordInfo().getBunitSplit());
+        } else {
+            result.add(this);
+        }
+    }
+
+    void appendSplitted(List<LatticeNode> result, int[] ids) {
+        if (ids.length <= 1) {
+            result.add(this);
+            return;
+        }
+
+        int offset = getBegin();
+        for (int wid : ids) {
+            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
+            n.begin = offset;
+            offset += n.getWordInfo().getLength();
+            n.end = offset;
+            result.add(n);
+        }
     }
 }

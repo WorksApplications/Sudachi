@@ -150,11 +150,6 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
-    public int getDictionaryId(int wordId) {
-        return 0;
-    }
-
-    @Override
     public int size() {
         return wordParams.size();
     }
@@ -165,7 +160,7 @@ public class DoubleArrayLexicon implements Lexicon {
                 continue;
             }
             String surface = getWordInfo(wordId).getSurface();
-            MorphemeList ms = (MorphemeList) tokenizer.tokenize(surface);
+            MorphemeList ms = tokenizer.tokenize(surface);
             int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
             if (cost > Short.MAX_VALUE) {
                 cost = Short.MAX_VALUE;
