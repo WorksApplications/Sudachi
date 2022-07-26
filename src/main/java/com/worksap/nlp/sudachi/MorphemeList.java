@@ -105,7 +105,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
      *            requested split mode
      * @return current list or a new list in the requested split mode.
      */
-    public MorphemeList splittedWith(Tokenizer.SplitMode mode) {
+    public MorphemeList split(Tokenizer.SplitMode mode) {
         if (mode.compareTo(this.mode) >= 0) {
             return this;
         }

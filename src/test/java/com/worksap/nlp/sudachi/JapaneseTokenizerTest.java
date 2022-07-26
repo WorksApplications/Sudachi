@@ -180,7 +180,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizerWithLongReader() throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             sb.append("京都。");
         }
@@ -261,7 +261,7 @@ public class JapaneseTokenizerTest {
     public void splitAfterTokenizeCtoA() {
         MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
         assertThat(morphemesC.size(), is(1));
-        MorphemeList morphemesA = morphemesC.splittedWith(Tokenizer.SplitMode.A);
+        MorphemeList morphemesA = morphemesC.split(Tokenizer.SplitMode.A);
         assertThat(morphemesA.size(), is(2));
     }
 
@@ -269,7 +269,7 @@ public class JapaneseTokenizerTest {
     public void splitAfterTokenizeCtoB() {
         MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
         assertThat(morphemesC.size(), is(1));
-        MorphemeList morphemesB = morphemesC.splittedWith(Tokenizer.SplitMode.B);
+        MorphemeList morphemesB = morphemesC.split(Tokenizer.SplitMode.B);
         assertThat(morphemesB.size(), is(1));
     }
 
@@ -277,7 +277,7 @@ public class JapaneseTokenizerTest {
     public void splitAfterTokenizeCtoC() {
         MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
         assertThat(morphemes1.size(), is(1));
-        MorphemeList morphemes2 = morphemes1.splittedWith(Tokenizer.SplitMode.C);
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
         assertThat(morphemes2, sameInstance(morphemes1));
     }
 
@@ -285,7 +285,7 @@ public class JapaneseTokenizerTest {
     public void splitAfterTokenizeAtoC() {
         MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.A, "東京都");
         assertThat(morphemes1.size(), is(2));
-        MorphemeList morphemes2 = morphemes1.splittedWith(Tokenizer.SplitMode.C);
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
         assertThat(morphemes2, sameInstance(morphemes1));
     }
 
@@ -293,7 +293,7 @@ public class JapaneseTokenizerTest {
     public void splitAfterTokenizeBtoC() {
         MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.B, "東京都");
         assertThat(morphemes1.size(), is(1));
-        MorphemeList morphemes2 = morphemes1.splittedWith(Tokenizer.SplitMode.C);
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
         assertThat(morphemes2, sameInstance(morphemes1));
     }
 
