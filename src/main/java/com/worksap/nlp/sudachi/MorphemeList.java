@@ -26,20 +26,25 @@ import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 public class MorphemeList extends AbstractList<Morpheme> {
-
     final InputText inputText;
     final Grammar grammar;
     final Lexicon lexicon;
     final List<LatticeNode> path;
     final boolean allowEmptyMorpheme;
 
-    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path,
-            boolean allowEmptyMorpheme) {
+    final Tokenizer.SplitMode mode;
+
+    public final static MorphemeList EMPTY = new MorphemeList(null, null, null, Collections.emptyList(), true,
+            Tokenizer.SplitMode.C);
+
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path, boolean allowEmptyMorpheme,
+            Tokenizer.SplitMode mode) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
         this.path = path;
         this.allowEmptyMorpheme = allowEmptyMorpheme;
+        this.mode = mode;
     }
 
     @Override
@@ -84,33 +89,35 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.get(index).getWordInfo();
     }
 
-    List<Morpheme> split(Tokenizer.SplitMode mode, int index, WordInfo wi) {
-        int[] wordIds;
-        switch (mode) {
-        case A:
-            wordIds = wi.getAunitSplit();
-            break;
-        case B:
-            wordIds = wi.getBunitSplit();
-            break;
-        default:
-            return Collections.singletonList(get(index));
-        }
-        if (wordIds.length == 0 || wordIds.length == 1) {
-            return Collections.singletonList(get(index));
+    List<Morpheme> split(Tokenizer.SplitMode mode, int index) {
+        List<LatticeNode> nodes = new ArrayList<>();
+        LatticeNodeImpl node = (LatticeNodeImpl) path.get(index);
+        node.appendSplitsTo(nodes, mode);
+        return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
+    }
+
+    /**
+     * Produce a copy of this list in a different split mode. If the mode is coarser
+     * than the current split mode, returns the current list. The current list is
+     * not modified.
+     *
+     * @param mode
+     *            requested split mode
+     * @return current list or a new list in the requested split mode.
+     */
+    public MorphemeList split(Tokenizer.SplitMode mode) {
+        if (mode.compareTo(this.mode) >= 0) {
+            return this;
         }
 
-        int offset = path.get(index).getBegin();
-        List<LatticeNode> nodes = new ArrayList<>(wordIds.length);
-        for (int wid : wordIds) {
-            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
-            n.begin = offset;
-            offset += n.getWordInfo().getLength();
-            n.end = offset;
-            nodes.add(n);
+        List<LatticeNode> nodes = new ArrayList<>();
+
+        for (LatticeNode node : path) {
+            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
+            nodeImpl.appendSplitsTo(nodes, mode);
         }
 
-        return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme);
+        return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
     }
 
     boolean isOOV(int index) {

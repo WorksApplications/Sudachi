@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
@@ -34,6 +35,9 @@ import javax.json.JsonReader;
 
 import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +49,25 @@ public class JapaneseTokenizerTest {
     public void setUp() throws IOException {
         dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
+    }
+
+    private static Matcher<Morpheme> morpheme(String surface, int begin, int end) {
+        return new BaseMatcher<Morpheme>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Morpheme=").appendText(surface).appendText(" [").appendValue(begin)
+                        .appendText(",").appendValue(end).appendText("]");
+            }
+
+            @Override
+            public boolean matches(Object actual) {
+                if (!(actual instanceof Morpheme)) {
+                    return false;
+                }
+                Morpheme m = (Morpheme) actual;
+                return m.surface().equals(surface) && m.begin() == begin && m.end() == end;
+            }
+        };
     }
 
     @Test
@@ -117,7 +140,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizeSentences() {
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("京都。東京.東京都。").iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences("京都。東京.東京都。").iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
@@ -134,7 +157,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizerWithDots() {
-        List<Morpheme> s = tokenizer.tokenize("京都…");
+        MorphemeList s = tokenizer.tokenize("京都…");
         assertThat(s.size(), is(4));
         assertThat(s.get(1).surface(), is("…"));
         assertThat(s.get(1).normalizedForm(), is("."));
@@ -146,7 +169,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizerWithModifiedChar() {
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("´´").iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences("´´").iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(4));
         assertThat(it.hasNext(), is(false));
@@ -154,7 +177,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizeSentencesWithSurrogatePair() {
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("。😀").iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences("。😀").iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(1));
         assertThat(it.hasNext(), is(true));
@@ -165,7 +188,7 @@ public class JapaneseTokenizerTest {
     @Test
     public void tokenizerWithReader() throws IOException {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
@@ -179,13 +202,13 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizerWithLongReader() throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             sb.append("京都。");
         }
         sb.append("京都");
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             assertThat(it.hasNext(), is(true));
             assertThat(it.next().size(), is(2));
@@ -197,13 +220,13 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void tokenizerWithReaderAndNormalization() throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("東京都…。");
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
             sb.append("京都。");
         }
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(5));
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
@@ -254,6 +277,71 @@ public class JapaneseTokenizerTest {
         assertThat(s.get(2).normalizedForm(), is("."));
         assertThat(s.get(2).begin(), is(0));
         assertThat(s.get(2).end(), is(1));
+    }
+
+    @Test
+    public void splitAfterTokenizeCtoA() {
+        MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
+        assertThat(morphemesC.size(), is(1));
+        MorphemeList morphemesA = morphemesC.split(Tokenizer.SplitMode.A);
+        assertThat(morphemesA.size(), is(2));
+    }
+
+    @Test
+    public void splitAfterTokenizeCtoB() {
+        MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
+        assertThat(morphemesC.size(), is(1));
+        MorphemeList morphemesB = morphemesC.split(Tokenizer.SplitMode.B);
+        assertThat(morphemesB.size(), is(1));
+    }
+
+    @Test
+    public void splitAfterTokenizeCtoC() {
+        MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
+        assertThat(morphemes1.size(), is(1));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
+        assertThat(morphemes2, sameInstance(morphemes1));
+    }
+
+    @Test
+    public void splitAfterTokenizeAtoC() {
+        MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.A, "東京都");
+        assertThat(morphemes1.size(), is(2));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
+        assertThat(morphemes2, sameInstance(morphemes1));
+    }
+
+    @Test
+    public void splitAfterTokenizeBtoC() {
+        MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.B, "東京都");
+        assertThat(morphemes1.size(), is(1));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.C);
+        assertThat(morphemes2, sameInstance(morphemes1));
+    }
+
+    @Test
+    public void splitWithZeroWidthTokens() {
+        MorphemeList morphemes1 = tokenizer.tokenize("…東京都…");
+        assertThat(morphemes1.size(), is(7));
+        assertThat(morphemes1.get(0), morpheme("…", 0, 1));
+        assertThat(morphemes1.get(1), morpheme("", 1, 1));
+        assertThat(morphemes1.get(2), morpheme("", 1, 1));
+        assertThat(morphemes1.get(3), morpheme("東京都", 1, 4));
+        assertThat(morphemes1.get(4), morpheme("…", 4, 5));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.A);
+        assertThat(morphemes2.size(), is(8));
+        assertThat(morphemes2.get(3), morpheme("東京", 1, 3));
+        assertThat(morphemes2.get(4), morpheme("都", 3, 4));
+    }
+
+    @Test
+    public void splitSingleToken() {
+        MorphemeList morphemes1 = tokenizer.tokenize(Tokenizer.SplitMode.C, "な。な");
+        assertThat(morphemes1.size(), is(1));
+        assertThat(morphemes1.get(0), morpheme("な。な", 0, 3));
+        MorphemeList morphemes2 = morphemes1.split(Tokenizer.SplitMode.A);
+        assertThat(morphemes2.get(0), morpheme("な。な", 0, 3));
+        assertThat(morphemes2.get(0).normalizedForm(), is("アイウ"));
     }
 
     @Test

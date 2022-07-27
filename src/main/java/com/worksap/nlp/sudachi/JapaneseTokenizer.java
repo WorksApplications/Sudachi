@@ -65,23 +65,23 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
+    public MorphemeList tokenize(Tokenizer.SplitMode mode, String text) {
         if (text.isEmpty()) {
-            return Collections.emptyList();
+            return MorphemeList.EMPTY;
         }
         UTF8InputText input = buildInputText(text);
         return tokenizeSentence(mode, input);
     }
 
     @Override
-    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
+    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
         UTF8InputText input = buildInputText(text);
         String normalized = input.getText();
 
-        ArrayList<List<Morpheme>> sentences = new ArrayList<>();
+        ArrayList<MorphemeList> sentences = new ArrayList<>();
         SentenceDetector detector = new SentenceDetector();
         int bos = 0;
         int length;
@@ -106,8 +106,8 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
-        ArrayList<List<Morpheme>> sentences = new ArrayList<>();
+    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
+        ArrayList<MorphemeList> sentences = new ArrayList<>();
         CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
         SentenceDetector detector = new SentenceDetector();
 
@@ -181,7 +181,7 @@ class JapaneseTokenizer implements Tokenizer {
         return input;
     }
 
-    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
+    MorphemeList tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         buildLattice(input);
 
         if (dumpOutput != null) {
@@ -220,7 +220,7 @@ class JapaneseTokenizer implements Tokenizer {
             jsonBuilder.add("rewrittenPath", pathToJson(path, lattice));
         }
 
-        return new MorphemeList(input, grammar, lexicon, path, allowEmptyMorpheme);
+        return new MorphemeList(input, grammar, lexicon, path, allowEmptyMorpheme, mode);
     }
 
     LatticeImpl buildLattice(UTF8InputText input) {
@@ -285,27 +285,11 @@ class JapaneseTokenizer implements Tokenizer {
         return wordMask;
     }
 
-    List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
+    private List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
         List<LatticeNode> newPath = new ArrayList<>();
         for (LatticeNode node : path) {
-            int[] wids;
-            if (mode == Tokenizer.SplitMode.A) {
-                wids = node.getWordInfo().getAunitSplit();
-            } else { // Tokenizer.SplitMode.B
-                wids = node.getWordInfo().getBunitSplit();
-            }
-            if (wids.length == 0 || wids.length == 1) {
-                newPath.add(node);
-            } else {
-                int offset = node.getBegin();
-                for (int wid : wids) {
-                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, (short) 0, (short) 0, (short) 0, wid);
-                    n.begin = offset;
-                    offset += n.getWordInfo().getLength();
-                    n.end = offset;
-                    newPath.add(n);
-                }
-            }
+            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
+            nodeImpl.appendSplitsTo(newPath, mode);
         }
         return newPath;
     }

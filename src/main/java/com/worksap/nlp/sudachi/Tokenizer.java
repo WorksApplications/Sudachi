@@ -38,7 +38,7 @@ public interface Tokenizer {
      *            input text
      * @return a result of tokenizing
      */
-    public List<Morpheme> tokenize(SplitMode mode, String text);
+    MorphemeList tokenize(SplitMode mode, String text);
 
     /**
      * Tokenize a text.
@@ -50,7 +50,7 @@ public interface Tokenizer {
      * @return a result of tokenizing
      * @see #tokenize(SplitMode,String)
      */
-    public default List<Morpheme> tokenize(final String text) {
+    default MorphemeList tokenize(final String text) {
         return tokenize(SplitMode.C, text);
     }
 
@@ -65,7 +65,7 @@ public interface Tokenizer {
      *            input text
      * @return a result of tokenizing
      */
-    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text);
+    Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text);
 
     /**
      * Tokenize sentences.
@@ -78,7 +78,7 @@ public interface Tokenizer {
      * @return a result of tokenizing
      * @see #tokenizeSentences(SplitMode,String)
      */
-    public default Iterable<List<Morpheme>> tokenizeSentences(String text) {
+    default Iterable<MorphemeList> tokenizeSentences(String text) {
         return tokenizeSentences(SplitMode.C, text);
     }
 
@@ -96,7 +96,7 @@ public interface Tokenizer {
      * @throws IOException
      *             if reading a stream is failed
      */
-    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
+    Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
 
     /**
      * Tokenize sentences.
@@ -111,7 +111,7 @@ public interface Tokenizer {
      *             if reading a stream is failed
      * @see #tokenizeSentences(SplitMode,Reader)
      */
-    public default Iterable<List<Morpheme>> tokenizeSentences(Reader input) throws IOException {
+    default Iterable<MorphemeList> tokenizeSentences(Reader input) throws IOException {
         return tokenizeSentences(SplitMode.C, input);
     }
 
@@ -121,7 +121,7 @@ public interface Tokenizer {
      * @param output
      *            an output of printing
      */
-    public void setDumpOutput(PrintStream output);
+    void setDumpOutput(PrintStream output);
 
     /**
      * Tokenize a text and dump the internal structures into a JSON string.
@@ -132,12 +132,12 @@ public interface Tokenizer {
      *            input text
      * @return a JSON string
      */
-    public String dumpInternalStructures(String text);
+    String dumpInternalStructures(String text);
 
     /**
      * A mode of splitting
      */
-    public enum SplitMode {
+    enum SplitMode {
         /** short mode */
         A,
 

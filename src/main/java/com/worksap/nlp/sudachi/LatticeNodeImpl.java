@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
+import java.util.List;
+
 public class LatticeNodeImpl implements LatticeNode {
 
     int begin;
@@ -41,8 +43,9 @@ public class LatticeNodeImpl implements LatticeNode {
     Lexicon lexicon;
 
     static final String NULL_SURFACE = "(null)";
-    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(NULL_SURFACE, (short) 0, (short) -1, NULL_SURFACE,
-            NULL_SURFACE, NULL_SURFACE);
+    private static final short ZERO = (short) 0;
+    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(NULL_SURFACE, ZERO, (short) -1, NULL_SURFACE, NULL_SURFACE,
+            NULL_SURFACE);
 
     LatticeNodeImpl(Lexicon lexicon, short leftId, short rightId, short cost, int wordId) {
         this.lexicon = lexicon;
@@ -122,7 +125,7 @@ public class LatticeNodeImpl implements LatticeNode {
         if (!isDefined || extraWordInfo != null) {
             return -1;
         }
-        return lexicon.getDictionaryId(wordId);
+        return WordId.dic(wordId);
     }
 
     @Override
@@ -133,5 +136,43 @@ public class LatticeNodeImpl implements LatticeNode {
 
         return String.format("%d %d %s(%d) %d %d %d %d", getBegin(), getEnd(), surface, wordId, pos, leftId, rightId,
                 cost);
+    }
+
+    /* internal */ void appendSplitsTo(List<LatticeNode> result, Tokenizer.SplitMode mode) {
+        if (mode == Tokenizer.SplitMode.A) {
+            appendSplitsTo(result, getWordInfo().getAunitSplit());
+        } else if (mode == Tokenizer.SplitMode.B) {
+            appendSplitsTo(result, getWordInfo().getBunitSplit());
+        } else {
+            result.add(this);
+        }
+    }
+
+    private void appendSplitsTo(List<LatticeNode> result, int[] splitsId) {
+        if (splitsId.length == 0) {
+            result.add(this);
+            return;
+        } else if (splitsId.length == 1) {
+            int wid = splitsId[0];
+            if (wid == getWordId()) {
+                result.add(this);
+            } else {
+                LatticeNodeImpl node = new LatticeNodeImpl(lexicon, ZERO, ZERO, ZERO, wid);
+                node.begin = begin;
+                node.end = end;
+                node.totalCost = totalCost;
+                result.add(node);
+            }
+            return;
+        }
+
+        int offset = getBegin();
+        for (int wid : splitsId) {
+            LatticeNodeImpl n = new LatticeNodeImpl(lexicon, ZERO, ZERO, ZERO, wid);
+            n.begin = offset;
+            offset += n.getWordInfo().getLength();
+            n.end = offset;
+            result.add(n);
+        }
     }
 }
