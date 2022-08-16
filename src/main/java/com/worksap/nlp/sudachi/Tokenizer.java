@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.util.List;
 
 /**
  * A tokenizer of morphological analysis.
@@ -27,10 +26,8 @@ import java.util.List;
 public interface Tokenizer {
 
     /**
-     * Tokenize a text.
-     *
-     * This method tokenizes a input text as a sentence. When the text is long, it
-     * required a lot of memory.
+     * Tokenize a text. This method tokenizes an input text as a sentence. When the
+     * text is long, it uses a lot of memory.
      *
      * @param mode
      *            a mode of splitting
@@ -41,7 +38,6 @@ public interface Tokenizer {
     MorphemeList tokenize(SplitMode mode, String text);
 
     /**
-     * Tokenize a text.
      *
      * Tokenize a text with {@link SplitMode}.C.
      *
@@ -55,9 +51,8 @@ public interface Tokenizer {
     }
 
     /**
-     * Tokenize sentences.
-     *
-     * This method divide a input text into sentences and tokenizes them.
+     * Tokenize sentences. This method divide an input text into sentences and
+     * tokenizes them.
      *
      * @param mode
      *            a mode of splitting
@@ -68,10 +63,8 @@ public interface Tokenizer {
     Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text);
 
     /**
-     * Tokenize sentences.
-     *
-     * This method divide a input text into sentences and tokenizes them with
-     * {@link SplitMode}.C.
+     * Tokenize sentences. Divide an input text into sentences and tokenize them
+     * with {@link SplitMode}.C.
      *
      * @param text
      *            input text
@@ -83,10 +76,8 @@ public interface Tokenizer {
     }
 
     /**
-     * Tokenize sentences.
-     *
-     * This method reads a input text from {@code input} and divides it into
-     * sentences and tokenizes them.
+     * Read an input text from {@code input}, divide it into sentences and tokenize
+     * them.
      *
      * @param mode
      *            a mode of splitting
@@ -99,10 +90,8 @@ public interface Tokenizer {
     Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
 
     /**
-     * Tokenize sentences.
-     *
-     * This method reads a input text from {@code input} and divides it into
-     * sentences and tokenizes them with {@link SplitMode}.C.
+     * Reads an input text from {@code input}, divide it into sentences and
+     * tokenizes them with {@link SplitMode}.C.
      *
      * @param input
      *            a reader of input text
@@ -116,7 +105,7 @@ public interface Tokenizer {
     }
 
     /**
-     * Prints a lattice structure of analyzing.
+     * Prints lattice structure of the analysis into the passed {@link PrintStream}.
      *
      * @param output
      *            an output of printing
@@ -124,9 +113,8 @@ public interface Tokenizer {
     void setDumpOutput(PrintStream output);
 
     /**
-     * Tokenize a text and dump the internal structures into a JSON string.
-     *
-     * This method tokenizes a input text as a sentence.
+     * Tokenize a text and dump the internal structures into a JSON string. This
+     * method tokenizes an input text as a single sentence.
      *
      * @param text
      *            input text
