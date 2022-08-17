@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - v*
 #  pull_request: # uncommit for debug
 #      types: [ opened, synchronize, reopened ]
 jobs:

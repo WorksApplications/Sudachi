@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - 'v*'
   pull_request:
     types: [opened, synchronize, reopened]
 
