@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 Works Applications Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.Ints;
@@ -18,7 +34,6 @@ public class WordInfoLayoutFixedWidth {
     private final Ints cSplits = new Ints(16);
     private final Ints wordStructure = new Ints(16);
 
-
     public WordInfoLayoutFixedWidth(Lookup2 resolver, StringIndex index, WordRef.Parser parser) {
         this.lookup = resolver;
         this.index = index;
@@ -26,24 +41,25 @@ public class WordInfoLayoutFixedWidth {
         wordRefParser = parser;
     }
 
-    public void process(CsvLexicon.WordEntry entry) {
+    public void process(RawWordEntry entry) {
 
     }
 
-    public int put(CsvLexicon.WordEntry entry) {
+    public int put(RawWordEntry entry) {
         int position = this.position + buffer.position();
         int entryPtr = position >>> 3;
-        buffer.putShort(entry.leftId);
-        buffer.putShort(entry.rightId);
-        buffer.putShort(entry.cost);
-        buffer.putShort(entry.wordInfo.getPOSId());
+        ByteBuffer buf = this.buffer;
+        buf.putShort(entry.leftId);
+        buf.putShort(entry.rightId);
+        buf.putShort(entry.cost);
+        buf.putShort(entry.posId);
         // 8 bytes
-        buffer.putInt(index.resolve(entry.wordInfo.getSurface()).encode()); // surfacePtr
-        buffer.putInt(index.resolve(entry.wordInfo.getReadingForm()).encode()); // readingPtr
-        int normFormPtr = wordRefParser.parse(entry.wordInfo.getNormalizedForm()).resolve(lookup);
-        int dicFormPtr = wordRefParser.parse(entry.wordInfo.getDictionaryForm()).resolve(lookup);
-        buffer.putInt(normFormPtr); // normalized entry
-        buffer.putInt(dicFormPtr); // dictionary form
+        buf.putInt(index.resolve(entry.headword).encode()); // surfacePtr
+        buf.putInt(index.resolve(entry.reading).encode()); // readingPtr
+        int normFormPtr = wordRefParser.parse(entry.normalizedFormRef).resolve(lookup);
+        int dicFormPtr = wordRefParser.parse(entry.dictionaryFormRef).resolve(lookup);
+        buf.putInt(normFormPtr); // normalized entry
+        buf.putInt(dicFormPtr); // dictionary form
         // 8 + 16 = 24 bytes
 
         byte aSplitLen = parseList(entry.aUnitSplitString, aSplits);
@@ -52,14 +68,14 @@ public class WordInfoLayoutFixedWidth {
         byte wordStructureLen = parseList(entry.wordStructureString, wordStructure);
         byte synonymLen = (byte) entry.wordInfo.getSynonymGroupIds().length;
 
-        buffer.putShort(entry.surfaceUtf8Length);
-        buffer.put(cSplitLen);
-        buffer.put(bSplitLen);
-        buffer.put(aSplitLen);
-        buffer.put(wordStructureLen);
-        buffer.put(synonymLen);
+        buf.putShort(entry.surfaceUtf8Length);
+        buf.put(cSplitLen);
+        buf.put(bSplitLen);
+        buf.put(aSplitLen);
+        buf.put(wordStructureLen);
+        buf.put(synonymLen);
         int userDataLength = entry.userData.length();
-        buffer.put(userDataLength != 0 ? (byte)0 : (byte)1);
+        buf.put(userDataLength != 0 ? (byte) 0 : (byte) 1);
         // 24 + 8 = 32 bytes
 
         putInts(cSplits, cSplitLen);
@@ -69,16 +85,16 @@ public class WordInfoLayoutFixedWidth {
         putInts(Ints.wrap(entry.wordInfo.getSynonymGroupIds()), synonymLen);
 
         if (userDataLength != 0) {
-            buffer.putShort((short) userDataLength);
+            buf.putShort((short) userDataLength);
             String userData = entry.userData;
             for (int i = 0; i < userDataLength; ++i) {
-                buffer.putShort((short)userData.charAt(i));
+                buf.putShort((short) userData.charAt(i));
             }
         }
 
         // align to 8 boundary
-        int currentPosition = buffer.position();
-        buffer.position(Align.align(currentPosition, 8));
+        int currentPosition = buf.position();
+        buf.position(Align.align(currentPosition, 8));
 
         return entryPtr;
     }
@@ -89,16 +105,16 @@ public class WordInfoLayoutFixedWidth {
         }
     }
 
-    public void fillPointers(ByteBuffer data, List<CsvLexicon.WordEntry> entries, Lookup2 lookup) {
+    public void fillPointers(ByteBuffer data, List<RawWordEntry> entries, Lookup2 lookup) {
         for (int i = 0; i < entries.size(); i++) {
-            CsvLexicon.WordEntry entry = entries.get(i);
+            RawWordEntry entry = entries.get(i);
             int offset = entry.pointer << 3;
             data.position(offset + 8);
 
             data.putInt(index.resolve(entry.wordInfo.getSurface()).encode());
             data.putInt(index.resolve(entry.wordInfo.getReadingForm()).encode());
             data.putInt(entry.wordInfo.getDictionaryFormWordId());
-            //data.putInt(entry.)
+            // data.putInt(entry.)
         }
     }
 

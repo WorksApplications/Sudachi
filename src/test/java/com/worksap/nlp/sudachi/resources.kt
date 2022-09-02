@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi.dictionary.build;
+package com.worksap.nlp.sudachi
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream
+import java.net.URL
 
-/**
- * A version of {@link java.util.function.Consumer} which allows throwing
- * IOException
- */
-@FunctionalInterface
-public interface IOConsumer<T> {
-    T accept(ByteBuffer arg) throws IOException;
+fun <T : Any> T.res(name: String): URL {
+  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
+}
+
+fun <T : Any> T.cps(name: String): InputStream {
+  return res(name).openStream()
 }

@@ -28,8 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CsvLexicon implements WriteDictionary {
@@ -39,7 +37,7 @@ public class CsvLexicon implements WriteDictionary {
     private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
     private final Parameters parameters = new Parameters();
     private final POSTable posTable;
-    private final List<WordEntry> entries = new ArrayList<>();
+    private final List<RawWordEntry> entries = new ArrayList<>();
     private WordIdResolver widResolver = new WordLookup.Noop();
 
     public CsvLexicon(POSTable pos) {
@@ -50,46 +48,16 @@ public class CsvLexicon implements WriteDictionary {
         this.widResolver = widResolver;
     }
 
-    /**
-     * Resolve unicode escape sequences in the string
-     * <p>
-     * Sequences are defined to be \\u0000-\\uFFFF: exactly four hexadecimal
-     * characters preceded by \\u \\u{...}: a correct unicode character inside
-     * brackets
-     *
-     * @param text
-     *            to to resolve sequences
-     * @return string with unicode escapes resolved
-     */
-    public static String unescape(String text) {
-        Matcher m = unicodeLiteral.matcher(text);
-        if (!m.find()) {
-            return text;
-        }
-
-        StringBuffer sb = new StringBuffer();
-        m.reset();
-        while (m.find()) {
-            String u = m.group(1);
-            if (u.startsWith("{")) {
-                u = u.substring(1, u.length() - 1);
-            }
-            m.appendReplacement(sb, new String(Character.toChars(Integer.parseInt(u, 16))));
-        }
-        m.appendTail(sb);
-        return sb.toString();
-    }
-
-    public List<WordEntry> getEntries() {
+    public List<RawWordEntry> getEntries() {
         return entries;
     }
 
-    WordEntry parseLine(List<String> cols) {
+    RawWordEntry parseLine(List<String> cols) {
         if (cols.size() < MIN_REQUIRED_NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
         for (int i = 0; i < 15; i++) {
-            cols.set(i, unescape(cols.get(i)));
+            cols.set(i, Unescape.unescape(cols.get(i)));
         }
 
         if (cols.get(0).getBytes(StandardCharsets.UTF_8).length > DicBuffer.MAX_STRING
@@ -102,7 +70,7 @@ public class CsvLexicon implements WriteDictionary {
             throw new IllegalArgumentException("headword is empty");
         }
 
-        WordEntry entry = new WordEntry();
+        RawWordEntry entry = new RawWordEntry();
 
         // headword for trie
         if (!cols.get(1).equals("-1")) {
@@ -167,10 +135,10 @@ public class CsvLexicon implements WriteDictionary {
         if (cols.length < 8) {
             throw new IllegalArgumentException("too few columns");
         }
-        String headword = unescape(cols[0]);
+        String headword = Unescape.unescape(cols[0]);
         POS pos = new POS(Arrays.copyOfRange(cols, 1, 7));
         short posId = posTable.getId(pos);
-        String reading = unescape(cols[7]);
+        String reading = Unescape.unescape(cols[7]);
         return widResolver.lookup(headword, posId, reading);
     }
 
@@ -243,7 +211,7 @@ public class CsvLexicon implements WriteDictionary {
             int offset = (int) output.position();
             int numEntries = entries.size();
             for (int i = 0; i < numEntries; ++i) {
-                WordEntry entry = entries.get(i);
+                RawWordEntry entry = entries.get(i);
                 if (buffer.wontFit(16 * 1024)) {
                     offset += buffer.consume(output::write);
                 }
@@ -259,7 +227,7 @@ public class CsvLexicon implements WriteDictionary {
                 buffer.putInts(parseSplitInfo(entry.aUnitSplitString));
                 buffer.putInts(parseSplitInfo(entry.bUnitSplitString));
                 buffer.putInts(parseSplitInfo(entry.wordStructureString));
-                buffer.putInts(wi.getSynonymGoupIds());
+                buffer.putInts(wi.getSynonymGroupIds());
                 output.progress(i, numEntries);
             }
 
@@ -272,7 +240,7 @@ public class CsvLexicon implements WriteDictionary {
         output.position(pos);
     }
 
-    public int addEntry(WordEntry e) {
+    public int addEntry(RawWordEntry e) {
         int id = entries.size();
         entries.add(e);
         return id;
@@ -281,63 +249,5 @@ public class CsvLexicon implements WriteDictionary {
     public void setLimits(int left, int right) {
         parameters.setLimits(left, right);
     }
-
-    public static class WordEntry implements Lookup2.Entry {
-        int pointer;
-        String headword;
-        WordInfo wordInfo;
-        String aUnitSplitString;
-        String bUnitSplitString;
-        String cUnitSplitString;
-        String userData;
-        String wordStructureString;
-        short leftId;
-        short rightId;
-        short cost;
-        short surfaceUtf8Length;
-        int expectedSize = 0;
-
-        private int countSplits(String data) {
-            return StringUtil.count(data, '/');
-        }
-
-        public int computeExpectedSize() {
-            if (expectedSize != 0) {
-                return expectedSize;
-            }
-
-            int size = 32;
-
-            size += countSplits(aUnitSplitString) * 4;
-            size += countSplits(bUnitSplitString) * 4;
-            size += countSplits(cUnitSplitString) * 4;
-            size += countSplits(wordStructureString) * 4;
-            size += wordInfo.getSynonymGoupIds().length * 4;
-            if (userData.length() != 0) {
-                size += 2 + userData.length() * 2;
-            }
-
-            size = Align.align(size, 8);
-
-            expectedSize = size;
-            return size;
-        }
-
-        @Override
-        public int pointer() {
-            return pointer;
-        }
-
-        @Override
-        public boolean matches(short posId, String reading) {
-            return wordInfo.getPOSId() == posId && Objects.equals(wordInfo.getReadingForm(), reading);
-        }
-
-        @Override
-        public String headword() {
-            return wordInfo.getSurface();
-        }
-    }
-
 
 }

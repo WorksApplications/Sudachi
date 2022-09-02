@@ -51,9 +51,9 @@ public class WordLookup {
 
         @Override
         public int lookup(String headword, short posId, String reading) {
-            List<CsvLexicon.WordEntry> entries = lexicon.getEntries();
+            List<RawWordEntry> entries = lexicon.getEntries();
             for (int i = 0; i < entries.size(); ++i) {
-                CsvLexicon.WordEntry entry = entries.get(i);
+                RawWordEntry entry = entries.get(i);
                 if (entry.wordInfo.getSurface().equals(headword) && entry.wordInfo.getPOSId() == posId
                         && entry.wordInfo.getReadingForm().equals(reading)) {
                     return i;
@@ -67,7 +67,7 @@ public class WordLookup {
             if (wordId < 0) {
                 throw new IllegalArgumentException("wordId can't be negative, was " + wordId);
             }
-            List<CsvLexicon.WordEntry> entries = lexicon.getEntries();
+            List<RawWordEntry> entries = lexicon.getEntries();
             if (wordId >= entries.size()) {
                 throw new IllegalArgumentException(String
                         .format("wordId %d was larger than number of dictionary entries (%d)", wordId, entries.size()));

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 Works Applications Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
@@ -10,20 +26,23 @@ import java.util.StringJoiner;
 
 /**
  * <p>
- * Lays out dictionary words so that they will form correct {@link StringPtr} instances.
- * That means taking into account the required alignment for strings with larger sizes.
- * Aligning strings produces wasted space in form of padding, which is kept track with free list approach.
+ * Lays out dictionary words so that they will form correct {@link StringPtr}
+ * instances. That means taking into account the required alignment for strings
+ * with larger sizes. Aligning strings produces wasted space in form of padding,
+ * which is kept track with free list approach.
  *
  * <p>
- * The main API is {@link #add(String)} method which should be called for all strings.
- * The method should be called for strings sorted in descending order by length, otherwise padding between aligned strings
- * would not be utilized correctly.
- * The returned {@link StringPtr}s will be correct in any case.
+ * The main API is {@link #add(String)} method which should be called for all
+ * strings. The method should be called for strings sorted in descending order
+ * by length, otherwise padding between aligned strings would not be utilized
+ * correctly. The returned {@link StringPtr}s will be correct in any case.
  *
  * <p>
- * The current implementation is relatively fast, but can be made even faster by using sorted multiset collection.
- * JVM standard library does not have one, so the current implementation sorts free list while keeping track if the sort
- * is needed and guarding against relatively expensive checking free lists with additional conditions.
+ * The current implementation is relatively fast, but can be made even faster by
+ * using sorted multiset collection. JVM standard library does not have one, so
+ * the current implementation sorts free list while keeping track if the sort is
+ * needed and guarding against relatively expensive checking free lists with
+ * additional conditions.
  */
 public class WordLayout {
     private final UnicodeBufferResizeable buffer = new UnicodeBufferResizeable();
@@ -45,16 +64,21 @@ public class WordLayout {
     }
 
     /**
-     * Allocates a segment of utf-16 code units in a specified block, taking in account requested alignment.
+     * Allocates a segment of utf-16 code units in a specified block, taking in
+     * account requested alignment.
      *
-     * Alignment can skip some space in the beginning of the block because of padding.
-     * That space will be placed into free lists.
-     * Nothing will be placed in the free lists if the allocation is not possible.
+     * Alignment can skip some space in the beginning of the block because of
+     * padding. That space will be placed into free lists. Nothing will be placed in
+     * the free lists if the allocation is not possible.
      *
-     * @param length requested length of segment
-     * @param alignment requested alignment of segment
-     * @param start start of the block of memory to use
-     * @param end end of the block of memory to use
+     * @param length
+     *            requested length of segment
+     * @param alignment
+     *            requested alignment of segment
+     * @param start
+     *            start of the block of memory to use
+     * @param end
+     *            end of the block of memory to use
      * @return offset of the aligned data or -1 if allocation is impossible
      */
     private int allocateInBlock(int length, int alignment, int start, int end) {
@@ -83,15 +107,19 @@ public class WordLayout {
 
     /**
      * Allocates a slot of {@code length} bytes, alignment with {@code alignment}.
-     * It first considers free slots created by previous allocations, if none is valid.
+     * It first considers free slots created by previous allocations, if none is
+     * valid.
      *
-     * Current implementation is prone to creating "holes" of 1-length, which are almost impossible to fill
-     * from the usual dictionaries.
-     * Most emoji take 2 code units and words which are not substrings of another word are usually longer.
-     * The current implementation wastes ~32k holes in ~42M dictionary, which is ~0.1% of total space.
+     * Current implementation is prone to creating "holes" of 1-length, which are
+     * almost impossible to fill from the usual dictionaries. Most emoji take 2 code
+     * units and words which are not substrings of another word are usually longer.
+     * The current implementation wastes ~32k holes in ~42M dictionary, which is
+     * ~0.1% of total space.
      *
-     * @param length number of byte
-     * @param alignment requested alignment
+     * @param length
+     *            number of byte
+     * @param alignment
+     *            requested alignment
      * @return offset in utf-16 code units to the location of the requested block
      */
     private int allocate(int length, int alignment) {
@@ -119,7 +147,8 @@ public class WordLayout {
                         fs.start = start + length;
                         fs.length = remaining;
                         freeDirty = true;
-                        // we need to recompute maxLength only if modifying the last (maximum) element in free lists
+                        // we need to recompute maxLength only if modifying the last (maximum) element
+                        // in free lists
                         if (i == numFree - 1) {
                             maxLength = computeNewMaxLength(i);
                         }
@@ -133,7 +162,6 @@ public class WordLayout {
             maxLength = Math.max(0, maxLength - 1);
         }
 
-
         int alignedStart = allocateInBlock(length, alignment, pointer, Integer.MAX_VALUE);
         assert alignedStart != -1;
         pointer = alignedStart + length;
@@ -142,7 +170,9 @@ public class WordLayout {
 
     /**
      * Returns available max length for a hole
-     * @param length hole length
+     * 
+     * @param length
+     *            hole length
      * @return length of an element which can be allocated using any alignment
      */
     private static int availableMaxLength(int length) {
@@ -156,9 +186,11 @@ public class WordLayout {
     }
 
     /**
-     * Compute new maximum length which can be handled by free lists.
-     * Should be called if the last element of free lists was updated.
-     * @param index index in free lists of the element which needs to be considered
+     * Compute new maximum length which can be handled by free lists. Should be
+     * called if the last element of free lists was updated.
+     * 
+     * @param index
+     *            index in free lists of the element which needs to be considered
      * @return new maximum length that can be handled by free lists
      */
     private int computeNewMaxLength(int index) {
@@ -182,7 +214,7 @@ public class WordLayout {
     }
 
     public void write(WritableByteChannel channel) throws IOException {
-        buffer.write(channel, pointer * 2);
+        buffer.write(channel, 0, pointer * 2);
     }
 
     public static class FreeSpace implements Comparable<FreeSpace> {
@@ -197,16 +229,15 @@ public class WordLayout {
         @Override
         public int compareTo(FreeSpace o) {
             int comparison = Integer.compare(length, o.length);
-            if (comparison != 0) return comparison;
+            if (comparison != 0)
+                return comparison;
             return Integer.compare(start, o.start);
         }
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", FreeSpace.class.getSimpleName() + "[", "]")
-                    .add("start=" + start)
-                    .add("length=" + length)
-                    .toString();
+            return new StringJoiner(", ", FreeSpace.class.getSimpleName() + "[", "]").add("start=" + start)
+                    .add("length=" + length).toString();
         }
     }
 
