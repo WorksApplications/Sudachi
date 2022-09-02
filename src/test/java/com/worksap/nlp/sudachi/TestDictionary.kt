@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import com.worksap.nlp.sudachi.dictionary.build.MemChannel
-import com.worksap.nlp.sudachi.dictionary.build.res
 
 /** Utility for lazily creating binary dictionaries for test */
 object TestDictionary {

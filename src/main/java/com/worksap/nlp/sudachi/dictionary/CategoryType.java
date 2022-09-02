@@ -17,18 +17,16 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 /**
- * Categories of characters.
- *
- * These categories are used in the
+ * Categories of characters. These categories are used in the
  * {@link com.worksap.nlp.sudachi.OovProviderPlugin} and
  * {@link com.worksap.nlp.sudachi.PathRewritePlugin}.
  *
  * <p>
- * You can defined the range of each category in the file which specified
+ * You can define the range of each category in the file which specified
  * "characterDefinitionFile" of the settings.
  */
 public enum CategoryType {
-    /** The fall back category. */
+    /** The fallback category. */
     DEFAULT(1),
     /** White spaces. */
     SPACE(1 << 1),

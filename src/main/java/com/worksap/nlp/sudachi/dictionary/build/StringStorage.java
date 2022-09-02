@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 Works Applications Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
@@ -27,7 +43,7 @@ public class StringStorage {
         candidates.put("", new Item("", 0, 0));
         List<String> collect = new ArrayList<>(strings.keySet());
         collect.sort(Comparator.comparingInt(String::length).reversed().thenComparing(String::compareTo));
-        for (String str: collect) {
+        for (String str : collect) {
             strings.put(str, process(str));
         }
         candidates.clear();
@@ -100,7 +116,7 @@ public class StringStorage {
 
     public void writeLengthPrefixedCompact(SeekableByteChannel channel) throws IOException {
         DicBuffer buf = new DicBuffer(64 * 1024);
-        for (Map.Entry<String, Item> item: strings.entrySet()) {
+        for (Map.Entry<String, Item> item : strings.entrySet()) {
             Item value = item.getValue();
             String sub = value.data.substring(value.start, value.end);
             if (buf.wontFit(sub.length() * 2)) {
@@ -141,7 +157,6 @@ public class StringStorage {
         }
     }
 
-
     public static void main(String[] args) throws IOException {
         StringStorage strings = new StringStorage();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(args[0]))) {
@@ -157,12 +172,14 @@ public class StringStorage {
         strings.compile();
 
         Path fullName = Paths.get(args[1] + ".lpf");
-        try (SeekableByteChannel chan = Files.newByteChannel(fullName, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (SeekableByteChannel chan = Files.newByteChannel(fullName, StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
             strings.writeLengthPrefixedCompact(chan);
         }
 
         Path compactName = Paths.get(args[1] + ".cmp");
-        try (SeekableByteChannel chan = Files.newByteChannel(compactName, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (SeekableByteChannel chan = Files.newByteChannel(compactName, StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
             strings.writeCompact(chan);
         }
         System.out.printf("wasted bytes=%d, slots=%d%n", strings.layout.wastedBytes(), strings.layout.numSlots());

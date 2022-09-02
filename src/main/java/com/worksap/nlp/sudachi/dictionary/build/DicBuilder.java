@@ -115,7 +115,7 @@ public class DicBuilder {
                 if (fields == null)
                     break;
                 try {
-                    CsvLexicon.WordEntry e = lexicon.parseLine(fields);
+                    RawWordEntry e = lexicon.parseLine(fields);
                     int wordId = lexicon.addEntry(e);
                     if (e.headword != null) {
                         index.add(e.headword, wordId);

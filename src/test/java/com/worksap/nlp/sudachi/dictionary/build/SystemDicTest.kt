@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary.build
 
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.POS
+import com.worksap.nlp.sudachi.res
 import kotlin.test.*
 
 class SystemDicTest {

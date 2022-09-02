@@ -205,7 +205,8 @@ public class WordInfo {
      * Returns the array of the synonym groups.
      *
      * @return the synonym group IDs of the morpheme
-     * @deprecated use {@link #getSynonymGroupIds()}, this method has a typo in its name
+     * @deprecated use {@link #getSynonymGroupIds()}, this method has a typo in its
+     *             name
      */
     @Deprecated
     public int[] getSynonymGoupIds() {

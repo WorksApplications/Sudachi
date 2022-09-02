@@ -16,10 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
-import com.worksap.nlp.sudachi.Config
-import com.worksap.nlp.sudachi.Dictionary
-import com.worksap.nlp.sudachi.DictionaryFactory
-import com.worksap.nlp.sudachi.WordId
+import com.worksap.nlp.sudachi.*
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
@@ -28,10 +25,6 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
-
-fun <T : Any> T.res(name: String): URL {
-  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
-}
 
 class TestDic {
   private var matrixUrl: URL = res("test.matrix")

@@ -1,8 +1,30 @@
+/*
+ * Copyright (c) 2022 Works Applications Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.worksap.nlp.sudachi.dictionary;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * Pointer to a string in the string storage. Consists of offset and length
+ * compressed in a single int value. <br>
+ * Length can be stored from 5 (max value 19) bits to 19 (max value 4095 + 19).
+ * Remaining bits are offset which are aligned with a difficult.
+ */
 public class StringPtr {
     public static final int MAX_LENGTH_BITS = 12;
     public static final int BASE_OFFSET = 32 - 5;
@@ -17,6 +39,16 @@ public class StringPtr {
         this.offset = offset;
     }
 
+    /**
+     * Create a new {@link StringPtr} without any runtime checks. Use
+     * {@link #isValid(int, int)} to check validity.
+     * 
+     * @param length
+     *            length of string
+     * @param offset
+     *            offset of string
+     * @return StringPtr object, possibly invalid
+     */
     public static StringPtr unsafe(int length, int offset) {
         return new StringPtr(length, offset);
     }
@@ -24,12 +56,11 @@ public class StringPtr {
     public static StringPtr checked(int length, int offset) {
         if (length > MAX_LENGTH) {
             throw new IllegalArgumentException(
-                    String.format("Maximum possible length is %d, was requested %d", MAX_LENGTH, length)
-            );
+                    String.format("Maximum possible length is %d, was requested %d", MAX_LENGTH, length));
         }
         if (!isValid(offset, length)) {
-            throw new IllegalArgumentException(
-                    String.format("StringPtr is invalid offset=%08x length=%d alignment=%d", offset, length, requiredAlignment(length)));
+            throw new IllegalArgumentException(String.format("StringPtr is invalid offset=%08x length=%d alignment=%d",
+                    offset, length, requiredAlignment(length)));
         }
         return unsafe(length, offset);
     }
@@ -97,8 +128,10 @@ public class StringPtr {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         StringPtr stringPtr = (StringPtr) o;
         return length == stringPtr.length && offset == stringPtr.offset;
     }
@@ -110,10 +143,8 @@ public class StringPtr {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", StringPtr.class.getSimpleName() + "[", "]")
-                .add("length=" + length)
-                .add("offset=" + offset)
-                .toString();
+        return new StringJoiner(", ", StringPtr.class.getSimpleName() + "[", "]").add("length=" + length)
+                .add("offset=" + offset).add(String.format("encoded=%08x", encode())).toString();
     }
 
     public boolean isSubseqValid(int start, int end) {

@@ -25,6 +25,9 @@ public class Progress {
     private float currentProgress;
     private long lastUpdate;
 
+    public static final Progress NOOP = new Progress(1, progress -> {
+    });
+
     public Progress(int maxUpdates, Callback callback) {
         this.maxUpdates = maxUpdates;
         this.callback = callback;
