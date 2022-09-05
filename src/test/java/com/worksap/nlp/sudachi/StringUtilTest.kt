@@ -16,9 +16,11 @@
 
 package com.worksap.nlp.sudachi
 
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class StringUtilTest {
   @Test
@@ -31,5 +33,44 @@ class StringUtilTest {
     val arr2 = ByteArray(bytes.size)
     buf.get(arr2)
     assertContentEquals(bytes, arr2)
+  }
+
+  @Test
+  fun countUtf8Bytes() {
+    assertEquals(0, StringUtil.countUtf8Bytes(""))
+    assertEquals(4, StringUtil.countUtf8Bytes("test"))
+    assertEquals(12, StringUtil.countUtf8Bytes("привет"))
+    assertEquals(9, StringUtil.countUtf8Bytes("東京都"))
+    assertEquals(4, StringUtil.countUtf8Bytes("💞"))
+    assertEquals(13, StringUtil.countUtf8Bytes("東京💞都"))
+    assertEquals(17, StringUtil.countUtf8Bytes("t東e京s💞t都"))
+    // https://emojipedia.org/family-man-woman-girl-boy/
+    assertEquals(25, StringUtil.countUtf8Bytes("""👨‍👩‍👧‍👦"""))
+  }
+  @Test
+  fun countUtf8BytesRandomInput() {
+    for (iter in 1..1000) {
+      val r = Random(5)
+      val len = r.nextInt(iter)
+      val str =
+          generateSequence { r.nextInt(0x15000) }
+              .filterNot { Character.isBmpCodePoint(it) && Character.isSurrogate(it.toChar()) }
+              .take(len)
+              .fold(StringBuilder()) { s, i -> s.appendCodePoint(i) }
+              .toString()
+      val expected = str.toByteArray().size
+      assertEquals(
+          expected,
+          StringUtil.countUtf8Bytes(str, 0, str.length),
+          "failed to count utf8 bytes for iter=$iter, [$str]")
+    }
+  }
+
+  @Test
+  fun invalidParamters() {
+    assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("", -1, 0) }
+    assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("", 0, 1) }
+    assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("test", 0, 6) }
+    assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("test", 6, 0) }
   }
 }

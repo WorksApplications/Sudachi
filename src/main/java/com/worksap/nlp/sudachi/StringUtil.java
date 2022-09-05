@@ -115,4 +115,41 @@ public class StringUtil {
         buffer.limit(limit);
         return result;
     }
+
+    public static int countUtf8Bytes(CharSequence seq) {
+        return countUtf8Bytes(seq, 0, seq.length());
+    }
+
+    public static int countUtf8Bytes(CharSequence seq, int start, int end) {
+        if (start < 0) {
+            throw new IllegalArgumentException("start < 0, was " + start);
+        }
+        if (start > seq.length()) {
+            throw new IllegalArgumentException(String.format("start > length(): %d length()=%d", start, seq.length()));
+        }
+        if (end > seq.length()) {
+            throw new IllegalArgumentException(String.format("end > length(): %d length()=%d", start, seq.length()));
+        }
+
+        int result = 0;
+        for (int i = start; i < end;) {
+            int cpt = Character.codePointAt(seq, i);
+            result += utf8Length(cpt);
+            i += Character.charCount(cpt);
+        }
+        return result;
+    }
+
+    private static int utf8Length(int codepoint) {
+        // https://en.wikipedia.org/wiki/UTF-8#Encoding
+        if (codepoint < 0x80) {
+            return 1;
+        } else if (codepoint < 0x800) {
+            return 2;
+        } else if (codepoint < 0x10000) {
+            return 3;
+        } else {
+            return 4;
+        }
+    }
 }
