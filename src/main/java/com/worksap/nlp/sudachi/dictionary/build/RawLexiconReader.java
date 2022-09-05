@@ -136,7 +136,9 @@ public class RawLexiconReader {
         entry.dictionaryFormRef = get(data, Column.DictionaryForm, false);
         entry.normalizedFormRef = get(data, Column.NormalizedForm, false);
 
-        POS pos = new POS(get(data, Column.Pos1, true), get(data, Column.Pos2, true), get(data, Column.Pos3, true),
+        POS pos = new POS(
+                // comment for line break
+                get(data, Column.Pos1, true), get(data, Column.Pos2, true), get(data, Column.Pos3, true),
                 get(data, Column.Pos4, true), get(data, Column.Pos5, true), get(data, Column.Pos6, true));
 
         entry.posId = posTable.getId(pos);
