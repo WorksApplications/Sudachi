@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.StringJoiner;
 
 public class Ints {
     private int[] data;
@@ -87,4 +88,12 @@ public class Ints {
         return result;
     }
 
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "I[", "]");
+        for (int i = 0; i < length; ++i) {
+            joiner.add(String.valueOf(data[i]));
+        }
+        return joiner.toString();
+    }
 }

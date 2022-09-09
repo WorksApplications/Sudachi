@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi
+package com.worksap.nlp.sudachi.dictionary.build;
 
-import java.io.InputStream
-import java.net.URL
+import java.io.IOException;
 
-fun <T : Any> T.res(name: String): URL {
-  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
-}
-
-fun <T : Any> T.resStream(name: String): InputStream {
-  return res(name).openStream()
+public interface BlockHandler<T> {
+    T apply(BlockOutput output) throws IOException;
 }

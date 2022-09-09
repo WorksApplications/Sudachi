@@ -56,16 +56,8 @@ public class DoubleArrayLookupBench {
     @Setup()
     public void setup() throws IOException {
         Path keysFile = Paths.get("build/darray/keys.txt");
-        if (Files.notExists(keysFile)) {
-            // download from internet if not exists
-            Files.createDirectories(keysFile.getParent());
-            // Sudachi Dictionary keys for all words (full dictionary)
-            URL keysUrl = new URL("https://github.com/eiennohito/xtime/releases/download/v0.0.1/keys.txt.gz");
-            try (InputStream is = keysUrl.openStream()) {
-                GZIPInputStream gzipStream = new GZIPInputStream(is);
-                Files.copy(gzipStream, keysFile);
-            }
-        }
+        Download.downloadIfNotExist(keysFile,
+                "https://github.com/eiennohito/xtime/releases/download/v0.0.1/keys.txt.gz", true);
         keyCandidates = Files.lines(keysFile).map(l -> l.getBytes(StandardCharsets.UTF_8)).collect(Collectors.toList());
         keyCandidates.sort((a, b) -> {
             int len = Math.min(a.length, b.length);

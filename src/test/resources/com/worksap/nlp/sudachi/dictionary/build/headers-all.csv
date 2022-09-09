@@ -1,2 +1,2 @@
 Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,mode,splita,splitb,splitc,wordstructure,synonymgroups,userdata
-東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,5/9,5/10,5/11,6/7,8/9,10
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,*,*,B,5/9,5/10,5/11,6/7,8/9,10

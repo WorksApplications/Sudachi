@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi
+package com.worksap.nlp.sudachi.dictionary.build;
 
-import java.io.InputStream
-import java.net.URL
+import java.time.Duration;
 
-fun <T : Any> T.res(name: String): URL {
-  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
-}
+public class Stats {
+    public enum Kind {
+        Input, Output
+    }
 
-fun <T : Any> T.resStream(name: String): InputStream {
-  return res(name).openStream()
+    public static class Element {
+        public Kind kind;
+        public String name;
+        public long size;
+        public Duration duration;
+    }
 }

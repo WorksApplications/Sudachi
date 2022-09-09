@@ -21,6 +21,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -44,6 +45,11 @@ public abstract class WordRef {
         public int resolve(Lookup2 resolver) {
             return resolver.byIndex(line).pointer();
         }
+
+        @Override
+        public String toString() {
+            return String.format("WordRef/Line: %d", line);
+        }
     }
 
     public static final class Headword extends WordRef {
@@ -61,6 +67,11 @@ public abstract class WordRef {
         public int resolve(Lookup2 resolver) {
             List<Lookup2.Entry> entries = resolver.byHeadword(headword);
             return entries.get(0).pointer();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("WordRef/Headword: %s", headword);
         }
     }
 
@@ -97,25 +108,39 @@ public abstract class WordRef {
             }
             return -1;
         }
+
+        @Override
+        public String toString() {
+            return String.format("WordRef: %s/%d/%s", headword, posId, reading);
+        }
     }
 
     private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
 
+    public static Parser parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword) {
+        return new Parser(posTable, allowNumeric, allowHeadword);
+    }
+
     public static class Parser {
         private final POSTable posTable;
-        private boolean strict;
+        private final boolean allowNumeric;
+        private final boolean allowHeadword;
 
-        public Parser(POSTable posTable, boolean strict) {
+        public Parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword) {
             this.posTable = posTable;
-            this.strict = strict;
+            this.allowNumeric = allowNumeric;
+            this.allowHeadword = allowHeadword;
         }
 
         public WordRef parse(String text) {
+            if ("*".equals(text) || text == null || text.isEmpty()) {
+                return null;
+            }
+
             if (NUMERIC_RE.matcher(text).matches()) {
-                if (strict) {
-                    throw new CsvFieldException(String.format(
-                            "invalid word reference: %s, numeric references are not supported in modern csv formats",
-                            text));
+                if (!allowNumeric) {
+                    throw new CsvFieldException(
+                            String.format("invalid word reference: %s, numeric references are not supported", text));
                 }
                 int offset = text.charAt(0) == 'U' ? 1 : 0;
                 int lineNum = Integer.parseInt(text.substring(offset));
@@ -135,12 +160,12 @@ public abstract class WordRef {
                 return new Triple(headword, posId, reading);
             }
 
-            if (strict) {
+            if (allowHeadword) {
+                return new Headword(text);
+            } else {
                 throw new CsvFieldException(
                         String.format("invalid word reference: %s, it must contain POS tag and reading", text));
             }
-
-            return new Headword(text);
         }
 
     }

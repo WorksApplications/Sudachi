@@ -109,7 +109,7 @@ public class WordLayout {
      * Allocates a slot of {@code length} bytes, alignment with {@code alignment}.
      * It first considers free slots created by previous allocations, if none is
      * valid.
-     *
+     * <p>
      * Current implementation is prone to creating "holes" of 1-length, which are
      * almost impossible to fill from the usual dictionaries. Most emoji take 2 code
      * units and words which are not substrings of another word are usually longer.
@@ -236,8 +236,7 @@ public class WordLayout {
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", FreeSpace.class.getSimpleName() + "[", "]").add("start=" + start)
-                    .add("length=" + length).toString();
+            return new StringJoiner(", ", "FreeSpace[", "]").add("start=" + start).add("length=" + length).toString();
         }
     }
 

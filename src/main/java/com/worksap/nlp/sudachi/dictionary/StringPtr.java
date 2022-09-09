@@ -88,6 +88,9 @@ public class StringPtr {
     }
 
     static boolean isValid(int offset, int length) {
+        if (length < 0 || length > MAX_LENGTH) {
+            return false;
+        }
         int alignment = requiredAlignment(length);
         if (alignment == 0) {
             return true;

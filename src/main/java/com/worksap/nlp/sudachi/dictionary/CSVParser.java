@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CSVParser implements Closeable {
-
     static class Token {
 
         enum Type {
@@ -58,6 +57,8 @@ public class CSVParser implements Closeable {
     private Deque<Token> tokenBuffer = new ArrayDeque<>();
     private boolean hasNextField = false;
     private int row = -1;
+
+    private String name = "<unknown>";
 
     public CSVParser(Reader reader) {
         this.reader = new BufferedReader(reader);
@@ -239,5 +240,13 @@ public class CSVParser implements Closeable {
 
     private void ungetToken(Token token) {
         tokenBuffer.push(token);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
