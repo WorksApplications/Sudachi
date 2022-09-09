@@ -29,7 +29,8 @@ import java.util.regex.Pattern;
 public class RawLexiconReader {
 
     /**
-     * Enum order is in-csv order. If a header is present, fields will be reordered
+     * Enum order is in legacy csv order. If a header is present, fields will be
+     * reordered with respect to the header.
      */
     public enum Column {
         Surface(true), LeftId(true), RightId(true), Cost(true), Writing(false), Pos1(true), Pos2(true), Pos3(
@@ -48,11 +49,13 @@ public class RawLexiconReader {
     private int[] mapping;
     private final CSVParser parser;
     private final POSTable posTable;
+    private final WordRef.Parser refParser;
 
-    public RawLexiconReader(CSVParser parser, POSTable pos) throws IOException {
+    public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
         this.parser = parser;
         this.posTable = pos;
         resolveColumnLayout();
+        refParser = WordRef.parser(pos, mapping == null || !user, mapping == null);
     }
 
     private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
@@ -133,8 +136,8 @@ public class RawLexiconReader {
         entry.cost = getShort(data, Column.Cost);
 
         entry.reading = get(data, Column.ReadingForm, true);
-        entry.dictionaryFormRef = get(data, Column.DictionaryForm, false);
-        entry.normalizedFormRef = get(data, Column.NormalizedForm, false);
+        entry.dictionaryForm = refParser.parse(get(data, Column.DictionaryForm, false));
+        entry.normalizedForm = refParser.parse(get(data, Column.NormalizedForm, false));
 
         POS pos = new POS(
                 // comment for line break
@@ -151,6 +154,8 @@ public class RawLexiconReader {
         entry.synonymGroups = get(data, Column.SynonymGroups, false);
         entry.userData = get(data, Column.UserData, true);
 
+        entry.validate();
+
         return entry;
     }
 
@@ -164,6 +169,9 @@ public class RawLexiconReader {
         if (record == null) {
             return null;
         }
-        return convertEntry(record);
+        RawWordEntry entry = convertEntry(record);
+        entry.sourceLine = parser.getRow();
+        entry.sourceName = parser.getName();
+        return entry;
     }
 }

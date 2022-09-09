@@ -30,7 +30,7 @@ public class Lookup2 {
         String headword();
     }
 
-    public Lookup2(List<Entry> entries) {
+    public Lookup2(List<? extends Entry> entries) {
         this.entries = entries;
         HashMap<String, List<Entry>> result = new HashMap<>(entries.size() * 4 / 3);
         for (Entry e : entries) {
@@ -40,7 +40,7 @@ public class Lookup2 {
         bySurface = result;
     }
 
-    private final List<Entry> entries;
+    private final List<? extends Entry> entries;
     private final Map<String, List<Entry>> bySurface;
 
     public Entry byIndex(int index) {
@@ -49,5 +49,9 @@ public class Lookup2 {
 
     public List<Entry> byHeadword(String headword) {
         return bySurface.get(headword);
+    }
+
+    public void add(Entry e) {
+        bySurface.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(e);
     }
 }

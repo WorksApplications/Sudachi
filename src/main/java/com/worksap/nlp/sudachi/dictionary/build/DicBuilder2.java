@@ -18,8 +18,11 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class DicBuilder2 {
     private DicBuilder2() {
@@ -29,18 +32,39 @@ public class DicBuilder2 {
     public static class Base<T extends Base<T>> {
         protected final POSTable pos = new POSTable();
         protected final ConnectionMatrix connection = new ConnectionMatrix();
-        protected final Index index = new Index();
         protected Progress progress = Progress.NOOP;
+        protected RawLexicon lexicon = new RawLexicon();
 
         @SuppressWarnings("unchecked")
         private T self() {
             return (T) this;
         }
 
-        public T lexicon(String name, Supplier<InputStream> input, long size) throws IOException {
-
+        public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            progress.startBlock(name, System.nanoTime(), Progress.Kind.INPUT);
+            try (InputStream is = input.get()) {
+                InputStream stream = new TrackingInputStream(is);
+                lexicon.read(name, stream, pos);
+            }
+            progress.endBlock(size, System.nanoTime());
             return self();
+        }
+
+        public void write(SeekableByteChannel channel) throws IOException {
+            BlockLayout layout = new BlockLayout(channel, progress);
+            lexicon.compile(pos, layout);
         }
     }
 
+    public static void main(String[] args) throws IOException {
+        Base<?> b = new Base<>();
+        Path input = Paths.get(args[0]);
+        b.lexicon(input.getFileName().toString(), () -> Files.newInputStream(input), Files.size(input));
+        Path output = Paths.get(args[1]);
+        Files.createDirectories(output.getParent());
+        try (SeekableByteChannel chan = Files.newByteChannel(output, StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE)) {
+            b.write(chan);
+        }
+    }
 }

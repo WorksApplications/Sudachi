@@ -26,7 +26,7 @@ class StringStorageTest {
     val strs = StringStorage()
     strs.add("test")
     strs.add("es")
-    strs.compile()
+    strs.compile(null)
     val data = strs.strings
     assertEquals(2, data.size)
     assertEquals(1, data["es"]?.start)
@@ -38,7 +38,7 @@ class StringStorageTest {
     val strs = StringStorage()
     strs.add("x")
     strs.add("y")
-    strs.compile()
+    strs.compile(null)
     val data = strs.strings
     assertEquals(2, data.size)
     assertEquals(0, data["x"]?.start)

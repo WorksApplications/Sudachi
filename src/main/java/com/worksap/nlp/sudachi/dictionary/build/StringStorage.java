@@ -29,7 +29,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-public class StringStorage {
+public class StringStorage implements StringIndex {
     private final HashMap<String, Item> strings = new HashMap<>();
     private final HashMap<String, Item> candidates = new HashMap<>();
     private final WordLayout layout = new WordLayout();
@@ -38,13 +38,18 @@ public class StringStorage {
         strings.put(data, null);
     }
 
-    void compile() {
+    void compile(Progress progress) {
         candidates.clear();
         candidates.put("", new Item("", 0, 0));
         List<String> collect = new ArrayList<>(strings.keySet());
         collect.sort(Comparator.comparingInt(String::length).reversed().thenComparing(String::compareTo));
-        for (String str : collect) {
+        int size = collect.size();
+        for (int i = 0; i < size; ++i) {
+            String str = collect.get(i);
             strings.put(str, process(str));
+            if (progress != null) {
+                progress.progress(i, size);
+            }
         }
         candidates.clear();
     }
@@ -169,7 +174,7 @@ public class StringStorage {
                 strings.add(record.get(12));
             }
         }
-        strings.compile();
+        strings.compile(null);
 
         Path fullName = Paths.get(args[1] + ".lpf");
         try (SeekableByteChannel chan = Files.newByteChannel(fullName, StandardOpenOption.CREATE,

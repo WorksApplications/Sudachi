@@ -22,17 +22,19 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.channels.WritableByteChannel;
 
-public class UnicodeBuffer {
+public class ChanneledBuffer {
     private final ByteBuffer buffer;
     private final WritableByteChannel channel;
 
-    public UnicodeBuffer(WritableByteChannel channel, int size) {
+    private int offset;
+
+    public ChanneledBuffer(WritableByteChannel channel, int size) {
         this.channel = channel;
         this.buffer = ByteBuffer.allocate(size);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public UnicodeBuffer(WritableByteChannel channel) {
+    public ChanneledBuffer(WritableByteChannel channel) {
         this(channel, 64 * 1024);
     }
 
@@ -49,6 +51,7 @@ public class UnicodeBuffer {
         int remaining = buffer.remaining();
         int byteLength = numChars * 2;
         if (remaining < byteLength) {
+            offset += buffer.position();
             buffer.flip();
             channel.write(buffer);
             buffer.clear();
@@ -61,7 +64,45 @@ public class UnicodeBuffer {
         return chars;
     }
 
+    public ByteBuffer byteBuffer(int maxLength) throws IOException {
+        ByteBuffer buf = buffer;
+        int remaining = buf.remaining();
+        if (remaining < maxLength) {
+            offset += buf.position();
+            buf.flip();
+            channel.write(buf);
+            buf.clear();
+            if (buf.remaining() < maxLength) {
+                throw new IllegalArgumentException(String.format(
+                        "requested additionally: %d bytes, but the buffer size is %d", maxLength, buf.capacity()));
+            }
+        }
+        return buf;
+    }
+
+    public BufWriter writer(int maxLength) throws IOException {
+        ByteBuffer buf = byteBuffer(maxLength);
+        return new BufWriter(buf);
+    }
+
     public void flush() throws IOException {
         channel.write(buffer);
+        buffer.clear();
+    }
+
+    public int offset() {
+        return this.offset + buffer.position();
+    }
+
+    public int alignTo(int alignment) {
+        ByteBuffer buf = buffer;
+        int pos = buf.position();
+        int aligned = Align.align(pos, alignment);
+        buf.position(aligned);
+        return aligned + offset;
+    }
+
+    public void position(int newPosition) {
+        buffer.position(newPosition);
     }
 }

@@ -16,8 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
-import com.worksap.nlp.sudachi.cps
 import com.worksap.nlp.sudachi.dictionary.CSVParser
+import com.worksap.nlp.sudachi.resStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -26,14 +26,14 @@ import kotlin.test.assertNull
 class RawLexiconReaderTest {
   companion object {
     fun csv(name: String): CSVParser {
-      val stream = cps(name)
+      val stream = resStream(name)
       return CSVParser(stream.reader())
     }
   }
 
   @Test
   fun legacyCsvWithMinimumFields() {
-    val reader = RawLexiconReader(csv("legacy-minimum.csv"), POSTable())
+    val reader = RawLexiconReader(csv("legacy-minimum.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
@@ -46,7 +46,7 @@ class RawLexiconReaderTest {
 
   @Test
   fun legacyCsvWithAllFields() {
-    val reader = RawLexiconReader(csv("legacy-full.csv"), POSTable())
+    val reader = RawLexiconReader(csv("legacy-full.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
@@ -61,7 +61,7 @@ class RawLexiconReaderTest {
 
   @Test
   fun headerCsvAllFields() {
-    val reader = RawLexiconReader(csv("headers-all.csv"), POSTable())
+    val reader = RawLexiconReader(csv("headers-all.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)

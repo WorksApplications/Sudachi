@@ -17,18 +17,20 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.StringUtil;
+import com.worksap.nlp.sudachi.dictionary.StringPtr;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
+import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("jol")
 public class RawWordEntry implements Lookup2.Entry {
+    WordInfo wordInfo;
     int pointer;
     String headword;
     String reading;
-    String normalizedFormRef;
-    String dictionaryFormRef;
-    WordInfo wordInfo;
+    WordRef normalizedForm;
+    WordRef dictionaryForm;
     String aUnitSplitString;
     String bUnitSplitString;
     String cUnitSplitString;
@@ -39,33 +41,40 @@ public class RawWordEntry implements Lookup2.Entry {
     short leftId;
     short rightId;
     short cost;
-    short surfaceUtf8Length;
-    int expectedSize = 0;
     short posId;
+    int sourceLine;
+    String sourceName;
 
-    private int countSplits(String data) {
-        return StringUtil.count(data, '/');
+    private int countRefs(String data, String prev) {
+        if (data == null || data.isEmpty() || "*".equals(data) || data.equals(prev)) {
+            return 0;
+        }
+        int nsplits = StringUtil.count(data, '/');
+        if (nsplits >= CsvLexicon.ARRAY_MAX_LENGTH) {
+            throw new CsvFieldException("maximum number of splits were exceeded");
+        }
+        return nsplits + 1;
     }
 
+    /**
+     * Compute expected size of word entry when put in the binary dictionary. This
+     * function additionally validates length of split entries.
+     * 
+     * @return expected binary size of this entry, in bytes, will be always >=32
+     */
     public int computeExpectedSize() {
-        if (expectedSize != 0) {
-            return expectedSize;
-        }
-
         int size = 32;
 
-        size += countSplits(aUnitSplitString) * 4;
-        size += countSplits(bUnitSplitString) * 4;
-        size += countSplits(cUnitSplitString) * 4;
-        size += countSplits(wordStructureString) * 4;
-        size += wordInfo.getSynonymGroupIds().length * 4;
+        size += countRefs(cUnitSplitString, "") * 4;
+        size += countRefs(bUnitSplitString, cUnitSplitString) * 4;
+        size += countRefs(aUnitSplitString, bUnitSplitString) * 4;
+        size += countRefs(wordStructureString, aUnitSplitString) * 4;
+        size += countRefs(synonymGroups, "") * 4;
         if (userData.length() != 0) {
             size += 2 + userData.length() * 2;
         }
 
         size = Align.align(size, 8);
-
-        expectedSize = size;
         return size;
     }
 
@@ -85,11 +94,58 @@ public class RawWordEntry implements Lookup2.Entry {
 
     @Override
     public boolean matches(short posId, String reading) {
-        return wordInfo.getPOSId() == posId && Objects.equals(wordInfo.getReadingForm(), reading);
+        return this.posId == posId && Objects.equals(this.reading, reading);
     }
 
     @Override
     public String headword() {
-        return wordInfo.getSurface();
+        return headword;
+    }
+
+    private void checkString(String value, String name) {
+        if (value.length() > StringPtr.MAX_LENGTH) {
+            throw new CsvFieldException(
+                    String.format("field %s had value which exceeded the maximum length %d (actual length: %d)", name,
+                            StringPtr.MAX_LENGTH, value.length()));
+        }
+    }
+
+    public void validate() {
+        checkString(headword, "headword");
+        checkString(reading, "reading");
+    }
+
+    public void publishStrings(StringStorage strings) {
+        strings.add(headword);
+        strings.add(reading);
+        if (normalizedForm instanceof WordRef.Headword) {
+            WordRef.Headword normalized = (WordRef.Headword) normalizedForm;
+            strings.add(normalized.getHeadword());
+        }
+    }
+
+    public int addPhantomEntries(List<RawWordEntry> list, Lookup2 lookup) {
+        if (normalizedForm instanceof WordRef.Headword) {
+            WordRef.Headword ref = (WordRef.Headword) normalizedForm;
+            if (lookup.byHeadword(ref.getHeadword()) != null) {
+                return 0;
+            }
+            RawWordEntry copy = new RawWordEntry();
+            copy.headword = ref.getHeadword();
+            copy.reading = copy.headword;
+            copy.userData = "";
+            copy.leftId = -1;
+            copy.rightId = -1;
+            copy.cost = Short.MAX_VALUE;
+            copy.mode = "A";
+            copy.posId = posId;
+            RawWordEntry last = list.get(list.size() - 1);
+            copy.pointer = RawLexicon.pointer(last.pointer * 8L + last.computeExpectedSize());
+            list.add(copy);
+            lookup.add(copy);
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

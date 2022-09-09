@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.dictionary.Blocks;
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
 
 import java.io.IOException;
@@ -28,28 +29,35 @@ import java.util.List;
 
 public class RawLexicon {
     private static final long MAX_OFFSET = Integer.MAX_VALUE * 8L;
+    private static final int INITIAL_OFFSET = 32;
     private final StringStorage strings = new StringStorage();
     private final List<RawWordEntry> entries = new ArrayList<>();
 
-    private long offset = 0;
+    private final Index index = new Index();
+    private boolean user;
 
-    public void read(InputStream data, POSTable posTable) throws IOException {
-        read(new InputStreamReader(data, StandardCharsets.UTF_8), posTable);
+    private long offset = INITIAL_OFFSET;
+
+    public void read(String name, InputStream data, POSTable posTable) throws IOException {
+        read(name, new InputStreamReader(data, StandardCharsets.UTF_8), posTable);
     }
 
-    public void read(Reader data, POSTable posTable) throws IOException {
+    public void read(String name, Reader data, POSTable posTable) throws IOException {
         CSVParser parser = new CSVParser(data);
-        RawLexiconReader reader = new RawLexiconReader(parser, posTable);
+        parser.setName(name);
+        RawLexiconReader reader = new RawLexiconReader(parser, posTable, user);
 
         long offset = this.offset;
         RawWordEntry entry;
         while ((entry = reader.nextEntry()) != null) {
-            strings.add(entry.headword);
-            strings.add(entry.reading);
+            entry.publishStrings(strings);
             entries.add(entry);
             entry.pointer = pointer(offset);
             offset += entry.computeExpectedSize();
             checkOffset(offset);
+            if (entry.shouldBeIndexed()) {
+                index.add(entry.headword, entry.pointer);
+            }
         }
         this.offset = offset;
     }
@@ -65,5 +73,42 @@ public class RawLexicon {
         if (offset > MAX_OFFSET) {
             throw new IllegalArgumentException("passed dictionary is too large, Sudachi can't handle it");
         }
+    }
+
+    public void compile(POSTable pos, BlockLayout layout) throws IOException {
+        index.compile(layout);
+        layout.block(Blocks.STRINGS, this::writeStrings);
+        layout.block(Blocks.ENTRIES, (p) -> writeEntries(pos, p));
+    }
+
+    private Void writeEntries(POSTable pos, BlockOutput blockOutput) throws IOException {
+        return blockOutput.measured("Word Entries", (p) -> {
+            List<RawWordEntry> list = entries;
+            Lookup2 lookup = new Lookup2(list);
+            WordRef.Parser refParser = WordRef.parser(pos, !user, false);
+            ChanneledBuffer buf = new ChanneledBuffer(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
+            buf.position(INITIAL_OFFSET);
+            WordEntryLayout layout = new WordEntryLayout(lookup, strings, refParser, buf);
+            int size = list.size();
+            int ptr = pointer(INITIAL_OFFSET);
+            for (int i = 0; i < size; ++i) {
+                RawWordEntry e = list.get(i);
+                if (e.pointer != ptr) {
+                    throw new IllegalStateException("expected entry pointer != actual pointer");
+                }
+                size += e.addPhantomEntries(list, lookup);
+                ptr = layout.put(e);
+                p.progress(i, size);
+            }
+            return null;
+        });
+    }
+
+    private Void writeStrings(BlockOutput blockOutput) throws IOException {
+        return blockOutput.measured("Strings", (p) -> {
+            strings.compile(p);
+            strings.writeCompact(blockOutput.getChannel());
+            return null;
+        });
     }
 }

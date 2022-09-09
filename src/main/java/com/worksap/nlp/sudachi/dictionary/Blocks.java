@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi
+package com.worksap.nlp.sudachi.dictionary;
 
-import java.io.InputStream
-import java.net.URL
-
-fun <T : Any> T.res(name: String): URL {
-  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
-}
-
-fun <T : Any> T.resStream(name: String): InputStream {
-  return res(name).openStream()
+public class Blocks {
+    public static final String WORD_ID_TABLE = "WordIdTable";
+    public static final String TRIE_INDEX = "TrieIndex";
+    public static final String STRINGS = "Strings";
+    public static final String ENTRIES = "Entries";
 }
