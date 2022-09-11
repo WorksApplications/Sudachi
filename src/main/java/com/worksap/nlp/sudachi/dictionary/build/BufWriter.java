@@ -62,6 +62,9 @@ public class BufWriter {
     }
 
     public BufWriter putInts(Ints value, int length) {
+        if (length <= 0) {
+            return this;
+        }
         ByteBuffer buf = buffer;
         int pos = buf.position();
         for (int i = 0; i < length; ++i) {
