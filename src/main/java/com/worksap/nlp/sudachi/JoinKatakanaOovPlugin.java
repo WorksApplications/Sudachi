@@ -39,7 +39,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *     "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
  *     "oovPOS" : [ "POS1", "POS2", ... ],
  *     "minLength" : 3
- *   }
+ * }
  * }
  * </pre>
  */

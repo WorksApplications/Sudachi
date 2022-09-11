@@ -32,7 +32,7 @@ import java.util.List;
  *     "class" : "com.worksap.nlp.sudachi.SurfaceFormatter",
  *     "delimiter" : " ",
  *     "eos" : "\n",
- *   }
+ * }
  * }
  * </pre>
  *

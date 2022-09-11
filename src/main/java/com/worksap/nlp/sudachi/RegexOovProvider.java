@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  *      "cost": 5000,
  *      "maxLength": 32,
  *      "boundaries": "relaxed"
- *  }
+ * }
  * }
  * </pre>
  *
