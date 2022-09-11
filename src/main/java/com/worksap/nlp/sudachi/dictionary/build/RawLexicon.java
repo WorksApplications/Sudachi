@@ -94,7 +94,7 @@ public class RawLexicon {
             for (int i = 0; i < size; ++i) {
                 RawWordEntry e = list.get(i);
                 if (e.pointer != ptr) {
-                    throw new IllegalStateException("expected entry pointer != actual pointer");
+                    throw new IllegalStateException("expected entry pointer != actual pointer, i=" + i);
                 }
                 size += e.addPhantomEntries(list, lookup);
                 ptr = layout.put(e);
