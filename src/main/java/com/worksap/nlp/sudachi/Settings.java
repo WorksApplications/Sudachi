@@ -52,23 +52,23 @@ import java.util.stream.Collectors;
  *     "systemDict" : "system.dic",
  *     "characterDefinitionFile" : "char.def",
  *     "inputTextPlugin" : [
- *       { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" }
- *     ],
- *     "oovProviderPlugin" : [
- *       {
- *         "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
- *         "charDef" : "char.def",
- *         "unkDef" : "unk.def"
- *       },
- *       {
- *         "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
- *         "oovPOSStrings" : [ "補助記号", "一般", "*", "*", "*", "*" ],
- *         "leftId" : 5968,
- *         "rightId" : 5968,
- *         "cost" : 3857
- *       }
- *     ]
- *   }
+ * { "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin" }
+ * ],
+ * "oovProviderPlugin" : [
+ * {
+ * "class" : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
+ * "charDef" : "char.def",
+ * "unkDef" : "unk.def"
+ * },
+ * {
+ * "class" : "com.worksap.nlp.sudachi.SimpleOovProviderPlugin",
+ * "oovPOSStrings" : [ "補助記号", "一般", "*", "*", "*", "*" ],
+ * "leftId" : 5968,
+ * "rightId" : 5968,
+ * "cost" : 3857
+ * }
+ * ]
+ * }
  * }
  * </pre>
  * <p>

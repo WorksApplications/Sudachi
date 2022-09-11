@@ -44,7 +44,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *     "class" : "com.worksap.nlp.sudachi.ProlongedSoundMarkInputTextPlugin",
         "prolongedSoundMarks": ["ー", "〜", "〰"],
         "replacementSymbol": "ー"
- *   }
+ * }
  * }
  * </pre>
  *

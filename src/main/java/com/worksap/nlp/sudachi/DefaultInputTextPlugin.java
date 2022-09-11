@@ -51,7 +51,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.DefaultInputTextPlugin",
  *     "rewriteDef" : "rewrite.def"
- *   }
+ * }
  * }
  * </pre>
  *

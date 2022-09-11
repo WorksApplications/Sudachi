@@ -40,7 +40,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.OovProviderPlugin",
  *     "example" : "example setting"
- *   }
+ * }
  * }
  * </pre>
  */

@@ -32,7 +32,7 @@ import java.util.Arrays;
  *     "delimiter"  : "\n",
  *     "eos" : "\nEOS\n",
  *     "columnDelimiter" : "\t"
- *   }
+ * }
  * }
  * </pre>
  *

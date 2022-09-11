@@ -38,7 +38,7 @@ import java.util.List;
  *     "leftId"  : 5968,
  *     "rigthId" : 5968,
  *     "cost"    : 3857
- *   }
+ * }
  * }
  * </pre>
  *

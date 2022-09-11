@@ -32,7 +32,7 @@ import java.util.List;
  *     "class"   : "com.worksap.nlp.sudachi.MorphemeFormatterPlugin",
  *     "delimiter"  : "\n",
  *     "eos" : "\nEOS\n",
-  *   }
+ * }
  * }
  * </pre>
  *

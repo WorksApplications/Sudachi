@@ -41,7 +41,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *       "leftBrackets": ["(", "（"],
  *       "rightBrackets": [")", "）"],
  *       "maxYomiganaLength": 4
- *   }
+ * }
  * }
  * </pre>
  *

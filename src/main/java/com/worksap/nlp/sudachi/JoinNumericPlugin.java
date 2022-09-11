@@ -36,7 +36,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
  *     "enableNormalize" : true,
- *   }
+ * }
  * }
  * </pre>
  *

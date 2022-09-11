@@ -35,7 +35,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.InhibitConnectionPlugin",
  *     "inhibitedPair" : [ [ 0, 233 ], [435, 332] ]
- *   }
+ * }
  * }
  * </pre>
  *

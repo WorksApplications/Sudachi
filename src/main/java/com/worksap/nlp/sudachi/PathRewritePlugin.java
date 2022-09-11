@@ -40,7 +40,7 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.PathRewritePlugin",
  *     "example" : "example setting"
- *   }
+ * }
  * }
  * </pre>
  */
