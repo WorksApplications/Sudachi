@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.Blocks;
+import com.worksap.nlp.sudachi.dictionary.Description;
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess;
 
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class DicBuilder2 {
         protected final ConnectionMatrix connection = new ConnectionMatrix();
         protected Progress progress = Progress.NOOP;
         protected RawLexicon lexicon = new RawLexicon();
+        protected final Description description = new Description();
 
         @SuppressWarnings("unchecked")
         private T self() {
@@ -120,7 +122,7 @@ public class DicBuilder2 {
     public static final class User extends Base<User> {
         private User(DictionaryAccess system) {
             pos.preloadFrom(system.getGrammar());
-
+            description.setSignature("");
         }
     }
 

@@ -16,24 +16,28 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.dictionary.build.BufWriter;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 public class Description {
-
-    private Instant creationTime;
+    private Instant creationTime = Instant.now();
 
     private String comment;
 
-    private String signature;
+    private String signature = defaultSignature(creationTime);
 
-    private String reference;
+      private String reference;
 
     private List<Block> blocks = new ArrayList<>();
 
@@ -83,6 +87,30 @@ public class Description {
         return desc;
     }
 
+    public void save(SeekableByteChannel channel) throws IOException {
+        ByteBuffer buff = ByteBuffer.allocate(4096);
+        buff.put(MAGIC_BYTES);
+        BufWriter writer = new BufWriter(buff);
+        writer.putLong(1); // version
+        writer.putVarint64(creationTime.getEpochSecond());
+        writer.putStringUtf8(comment);
+        writer.putStringUtf8(signature);
+        writer.putStringUtf8(reference);
+        int length = blocks.size();
+        writer.putVarint32(length);
+        for (Block b: blocks) {
+            writer.putStringUtf8(b.name);
+            writer.putVarint64(b.start);
+            writer.putVarint64(b.size);
+        }
+
+        long pos = channel.position();
+        channel.position(0);
+        buff.reset();
+        channel.write(buff);
+        channel.position(pos);
+    }
+
     public final static byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
 
     private static void checkMagic(ByteBuffer raw) {
@@ -104,6 +132,11 @@ public class Description {
         if (DictionaryVersion.isUserDictionary(version)) {
             throw new IllegalArgumentException("passed dictionary is a legacy user dictionary, please rebuild it");
         }
+    }
+
+    private String defaultSignature(Instant date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ROOT);
+        return String.format("%s-%08x", formatter.format(date), new Random().nextLong());
     }
 
     public Instant getCreationTime() {
