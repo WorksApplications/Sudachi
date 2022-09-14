@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class BufWriter {
     private final ByteBuffer buffer;
@@ -34,7 +35,16 @@ public class BufWriter {
 
     // Encode int as LEB128
     public BufWriter putVarint32(int val) {
-        if (val <= 127) {
+        if ((val & 0xff) == 0) {
+            putByte((byte) val);
+        } else {
+            putVarintSlow(val & 0xffff_ffffL);
+        }
+        return this;
+    }
+
+    public BufWriter putVarint64(long val) {
+        if ((val & 0xff) == 0) {
             putByte((byte) val);
         } else {
             putVarintSlow(val);
@@ -65,7 +75,7 @@ public class BufWriter {
         if (length <= 0) {
             return this;
         }
-        ByteBuffer buf = buffer;
+        ByteBuffer buf = buffer; // read field only once
         int pos = buf.position();
         for (int i = 0; i < length; ++i) {
             buf.putInt(pos + i * 4, value.get(i));
@@ -74,4 +84,25 @@ public class BufWriter {
         return this;
     }
 
+    /**
+     * Put string which has length < Short.MAX_VALUE
+     * 
+     * @param s
+     *            string to put in the buffer
+     */
+    public void putShortString(String s) {
+        int length = s.length();
+        assert length < Short.MAX_VALUE;
+        putShort((short) length);
+        for (int i = 0; i < length; ++i) {
+            putShort((short) s.charAt(i));
+        }
+    }
+
+    public BufWriter putStringUtf8(String s) {
+        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        putVarint32(bytes.length);
+        buffer.put(bytes);
+        return this;
+    }
 }

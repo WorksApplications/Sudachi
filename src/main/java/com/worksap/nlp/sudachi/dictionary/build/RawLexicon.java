@@ -32,6 +32,7 @@ public class RawLexicon {
     private static final int INITIAL_OFFSET = 32;
     private final StringStorage strings = new StringStorage();
     private final List<RawWordEntry> entries = new ArrayList<>();
+    private final List<RawWordEntry> notIndexed = new ArrayList<>();
 
     private final Index index = new Index();
     private boolean user;
@@ -57,6 +58,8 @@ public class RawLexicon {
             checkOffset(offset);
             if (entry.shouldBeIndexed()) {
                 index.add(entry.headword, entry.pointer);
+            } else {
+                notIndexed.add(entry);
             }
         }
         this.offset = offset;
@@ -76,7 +79,7 @@ public class RawLexicon {
     }
 
     public void compile(POSTable pos, BlockLayout layout) throws IOException {
-        index.compile(layout);
+        index.compile(layout, notIndexed);
         layout.block(Blocks.STRINGS, this::writeStrings);
         layout.block(Blocks.ENTRIES, (p) -> writeEntries(pos, p));
     }
