@@ -105,4 +105,8 @@ public class BufWriter {
         buffer.put(bytes);
         return this;
     }
+
+    public void putLong(long x) {
+        buffer.putLong(x);
+    }
 }
