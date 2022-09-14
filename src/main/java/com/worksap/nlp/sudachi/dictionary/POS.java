@@ -29,6 +29,7 @@ import java.util.List;
 public final class POS extends AbstractList<String> {
     public final static int DEPTH = 6;
     public final static int MAX_COMPONENT_LENGTH = 127;
+    public static final int MAX_BINARY_LENGTH = DEPTH * (MAX_COMPONENT_LENGTH + 1) * 2;
     private final String[] elems;
 
     /**

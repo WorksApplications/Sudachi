@@ -147,4 +147,15 @@ public class ConnectionMatrix implements WriteDictionary {
     public short getNumRight() {
         return numRight;
     }
+
+    public boolean nonEmpty() {
+        return numLeft > 0 || numRight > 0;
+    }
+
+    public Void compile(BlockOutput out) throws IOException {
+        return out.measured("Connection Matrix", (p) -> {
+            out.getChannel().write(compiled.duplicate());
+            return null;
+        });
+    }
 }

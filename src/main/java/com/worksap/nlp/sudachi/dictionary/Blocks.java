@@ -17,8 +17,10 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 public class Blocks {
-    public static final String WORD_ID_TABLE = "WordIdTable";
+    public static final String WORD_POINTERS = "WordPointers";
     public static final String TRIE_INDEX = "TrieIndex";
     public static final String STRINGS = "Strings";
     public static final String ENTRIES = "Entries";
+    public static final String CONNECTION_MATRIX = "ConnMatrix";
+    public static final String POS_TABLE = "POS";
 }

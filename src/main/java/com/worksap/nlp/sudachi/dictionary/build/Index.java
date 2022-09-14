@@ -95,16 +95,17 @@ public class Index implements WriteDictionary {
         output.write(wordIdTable);
     }
 
-    public void compile(BlockLayout layout) throws IOException {
-        TrieData data = layout.block(Blocks.WORD_ID_TABLE, this::writeWordTable);
+    public void compile(BlockLayout layout, List<RawWordEntry> notIndexed) throws IOException {
+        TrieData data = layout.block(Blocks.WORD_POINTERS, (o) -> writeWordTable(o, notIndexed));
         layout.block(Blocks.TRIE_INDEX, data::writeTrie);
     }
 
-    private TrieData writeWordTable(BlockOutput out) throws IOException {
+    private TrieData writeWordTable(BlockOutput out, List<? extends Lookup2.Entry> notIndexed) throws IOException {
         int size = this.elements.size();
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ChanneledBuffer buffer = new ChanneledBuffer(out.getChannel());
+        ChanneledBuffer buffer = new ChanneledBuffer(out.getChannel(),
+                Math.max((notIndexed.size() + 16) * 5, 64 * 1024));
 
         out.measured("Word Id table", (p) -> {
             int i = 0;
@@ -124,6 +125,16 @@ public class Index implements WriteDictionary {
                     prevWid = wid;
                 }
                 p.progress(i, size);
+            }
+            // write non-indexed entries for being able to iterate over all word entries
+            int nis = notIndexed.size();
+            BufWriter buf = buffer.writer((nis + 1) * 5);
+            buf.putVarint32(nis);
+            int prevId = 0;
+            for (Lookup2.Entry e : notIndexed) {
+                int wid = e.pointer();
+                buf.putVarint32(wid - prevId);
+                prevId = wid;
             }
             return null;
         });
