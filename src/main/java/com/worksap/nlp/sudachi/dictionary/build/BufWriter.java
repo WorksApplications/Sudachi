@@ -85,7 +85,7 @@ public class BufWriter {
     }
 
     /**
-     * Put string which has length < Short.MAX_VALUE
+     * Put string which has length is shorter than Short.MAX_VALUE
      * 
      * @param s
      *            string to put in the buffer

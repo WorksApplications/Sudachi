@@ -37,7 +37,7 @@ public class Description {
 
     private String signature = defaultSignature(creationTime);
 
-      private String reference;
+    private String reference;
 
     private List<Block> blocks = new ArrayList<>();
 
@@ -98,7 +98,7 @@ public class Description {
         writer.putStringUtf8(reference);
         int length = blocks.size();
         writer.putVarint32(length);
-        for (Block b: blocks) {
+        for (Block b : blocks) {
             writer.putStringUtf8(b.name);
             writer.putVarint64(b.start);
             writer.putVarint64(b.size);
@@ -111,7 +111,7 @@ public class Description {
         channel.position(pos);
     }
 
-    public final static byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
+    private final static byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
 
     private static void checkMagic(ByteBuffer raw) {
         assert MAGIC_BYTES.length == 16;
