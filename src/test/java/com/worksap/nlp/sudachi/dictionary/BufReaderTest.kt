@@ -21,39 +21,23 @@ import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-fun checkLong(x: Long) {
+inline fun <reified T> check(
+    crossinline fin: (BufWriter, T) -> Unit,
+    crossinline fout: (BufReader) -> T
+): (T) -> Unit = {
   val bb = ByteBuffer.allocate(32)
   val w = BufWriter(bb)
-  w.putVarint64(x)
+  fin(w, it)
   bb.flip()
   val r = BufReader(bb)
-  val y = r.readVarint64()
-  assertEquals(x, y)
-}
-
-fun checkInt(x: Int) {
-  val bb = ByteBuffer.allocate(32)
-  val w = BufWriter(bb)
-  w.putVarint32(x)
-  bb.flip()
-  val r = BufReader(bb)
-  val y = r.readVarint32()
-  assertEquals(x, y)
-}
-
-fun checkUtf8String(s: String) {
-  val bb = ByteBuffer.allocate(32)
-  val w = BufWriter(bb)
-  w.putStringUtf8(s)
-  bb.flip()
-  val r = BufReader(bb)
-  val y = r.readUtf8String()
-  assertEquals(s, y)
+  val y = fout(r)
+  assertEquals(it, y)
 }
 
 class BufReaderTest {
   @Test
   fun varint64() {
+    val checkLong = check({ w, x -> w.putVarint64(x) }, { it.readVarint64() })
     checkLong(0L.inv())
     checkLong(0x0)
     checkLong(0x1)
@@ -97,6 +81,7 @@ class BufReaderTest {
 
   @Test
   fun varint32() {
+    val checkInt = check({ w, x -> w.putVarint32(x) }, { it.readVarint32() })
     checkInt(0.inv())
     checkInt(0x0)
     checkInt(0x1)
@@ -117,6 +102,7 @@ class BufReaderTest {
 
   @Test
   fun utf8String() {
+    val checkUtf8String = check({ w, x -> w.putStringUtf8(x) }, { it.readUtf8String() })
     checkUtf8String("")
     checkUtf8String("test")
     checkUtf8String("привет")
