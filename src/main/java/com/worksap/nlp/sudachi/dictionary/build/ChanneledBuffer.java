@@ -86,6 +86,7 @@ public class ChanneledBuffer {
     }
 
     public void flush() throws IOException {
+        buffer.flip();
         channel.write(buffer);
         buffer.clear();
     }

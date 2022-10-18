@@ -58,9 +58,8 @@ public class DictionaryBuilderTest {
 
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
 
-            DictionaryHeader header = dictionary.getDictionaryHeader();
-            assertThat(header.getVersion(), is(DictionaryVersion.SYSTEM_DICT_VERSION_2));
-            assertThat(header.getDescription(), is("test"));
+            Description header = dictionary.getDictionaryHeader();
+            assertThat(header.getComment(), is("test"));
 
             Grammar grammar = dictionary.getGrammar();
             assertThat(grammar.getPartOfSpeechSize(), is(2));
@@ -70,29 +69,31 @@ public class DictionaryBuilderTest {
 
             Lexicon lexicon = dictionary.getLexicon();
             assertThat(lexicon.size(), is(3));
+            long params = lexicon.parameters(0);
 
-            assertThat(lexicon.getLeftId(0), is((short) 0));
-            assertThat(lexicon.getCost(0), is((short) 0));
+            assertThat(WordParameters.leftId(params), is((short) 0));
+            assertThat(WordParameters.cost(params), is((short) 0));
             WordInfo info = lexicon.getWordInfo(0);
             assertThat(info.getSurface(), is("東京都"));
             assertThat(info.getNormalizedForm(), is("東京都"));
-            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getDictionaryForm(), is(-1));
             assertThat(info.getReadingForm(), is("ヒガシキョウト"));
             assertThat(info.getPOSId(), is((short) 0));
             assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
             assertThat(info.getBunitSplit().length, is(0));
-            assertThat(info.getSynonymGoupIds(), is(new int[] { 1, 2 }));
+            assertThat(info.getSynonymGroupIds(), is(new int[] { 1, 2 }));
             Iterator<int[]> i = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
             assertTrue(i.hasNext());
             assertThat(i.next(), is(new int[] { 0, "東京都".getBytes(StandardCharsets.UTF_8).length }));
             assertFalse(i.hasNext());
 
-            assertThat(lexicon.getLeftId(1), is((short) -1));
-            assertThat(lexicon.getCost(1), is((short) 0));
+            params = lexicon.parameters(1);
+            assertThat(WordParameters.leftId(params), is((short) -1));
+            assertThat(WordParameters.cost(params), is((short) 0));
             info = lexicon.getWordInfo(1);
             assertThat(info.getSurface(), is("東"));
             assertThat(info.getNormalizedForm(), is("ひがし"));
-            assertThat(info.getDictionaryFormWordId(), is(-1));
+            assertThat(info.getDictionaryForm(), is(-1));
             assertThat(info.getReadingForm(), is("ヒガシ"));
             assertThat(info.getPOSId(), is((short) 1));
             assertThat(info.getAunitSplit().length, is(0));

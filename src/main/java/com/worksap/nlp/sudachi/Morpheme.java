@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+import com.worksap.nlp.sudachi.dictionary.POS;
+
 import java.util.List;
 
 /**
@@ -55,7 +57,7 @@ public interface Morpheme {
      *
      * @return the part of speech of the morpheme
      */
-    public List<String> partOfSpeech();
+    public POS partOfSpeech();
 
     /**
      * Returns the ID of part of speech of the morpheme.

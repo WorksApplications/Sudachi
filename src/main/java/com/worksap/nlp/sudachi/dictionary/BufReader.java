@@ -77,7 +77,7 @@ public class BufReader {
         }
         v0 |= (v7 & 0x7f) << 49;
         long v8 = b.get() & 0xff;
-        if (v8 < 0x80) { // only 6 bits are valid here, rest must be 0
+        if (v8 < 0x80) {
             return (v8 << 56) | v0;
         }
         v0 |= (v8 & 0x7f) << 56;
@@ -113,5 +113,9 @@ public class BufReader {
             buffer.get(repr);
             return new String(repr, StandardCharsets.UTF_8);
         }
+    }
+
+    public int remaining() {
+        return buffer.remaining();
     }
 }

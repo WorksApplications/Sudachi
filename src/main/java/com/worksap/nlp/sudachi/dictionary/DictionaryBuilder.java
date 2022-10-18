@@ -66,6 +66,7 @@ public class DictionaryBuilder {
         String description = "";
         String outputPath = null;
         String matrixPath = null;
+        String signature = null;
 
         int i;
         for (i = 0; i < args.length; i++) {
@@ -75,6 +76,8 @@ public class DictionaryBuilder {
                 matrixPath = args[++i];
             } else if (args[i].equals("-d") && i + 1 < args.length) {
                 description = args[++i];
+            } else if (args[i].equals("-s")) {
+                signature = args[++i];
             } else if (args[i].equals("-h")) {
                 printUsage();
                 return;
@@ -90,8 +93,12 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DicBuilder.System builder = DicBuilder.system().matrix(Paths.get(matrixPath)).description(description)
+        DicBuilder.System builder = DicBuilder.system().matrix(Paths.get(matrixPath)).comment(description)
                 .progress(new Progress(20, new StderrProgress()));
+
+        if (signature != null) {
+            builder.signature(signature);
+        }
 
         for (String lexiconPath : lexiconPaths) {
             builder = builder.lexicon(Paths.get(lexiconPath));

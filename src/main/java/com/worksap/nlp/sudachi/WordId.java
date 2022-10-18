@@ -20,6 +20,9 @@ public class WordId {
     private WordId() {
     }
 
+    public static final int ID_BOS = 0xffff_fff0;
+    public static final int ID_EOS = 0xffff_fff1;
+
     /**
      * Internal word ids can't be larger than this number
      */
@@ -77,11 +80,29 @@ public class WordId {
         return wordId & MAX_WORD_ID;
     }
 
+    public static int blendDic(int rawWordId, int actualDicId) {
+        int flag = dic(rawWordId);
+        return flag * actualDicId;
+    }
+
     public static int dicIdMask(int dicId) {
         return dicId << 28;
     }
 
     public static int applyMask(int wordId, int dicIdMask) {
         return (wordId & MAX_WORD_ID) | dicIdMask;
+    }
+
+    public static boolean isOov(int wordId) {
+        // low 16 bits are OOV POS, top 4 are 1s
+        return (wordId & 0xffff_0000) == 0xf000_0000;
+    }
+    public static boolean isSpecial(int wordId) {
+        // top 5 bits should be filled
+        return (wordId & 0xf800_0000) == 0xf800_0000;
+    }
+
+    public static int oovWid(short posId) {
+        return 0xf000_0000 | posId;
     }
 }

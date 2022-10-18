@@ -89,6 +89,7 @@ public class POSTable implements WriteDictionary {
                 }
                 p.progress(i, table.size());
             }
+            cbuf.flush();
             return null;
         });
 

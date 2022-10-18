@@ -16,60 +16,178 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DictionaryPrinter {
 
-    private DictionaryPrinter() {
+    private final PrintStream output;
+    private final BinaryDictionary dic;
+    private final BinaryDictionary base;
+
+    private final GrammarImpl grammar;
+    private final DoubleArrayLexicon lex;
+    private final Ints wordIds;
+
+    private DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) {
+        this.output = output;
+        this.dic = dic;
+        this.base = base;
+
+        if (base != null) {
+            GrammarImpl grammar = base.getGrammar();
+            grammar.addPosList(dic.getGrammar());
+            this.grammar = grammar;
+        } else {
+            grammar = dic.getGrammar();
+        }
+
+        lex = dic.getLexicon();
+
+        // in order to output dictionary entries in in-dictionary order we need to sort them
+        // iterator over them will get them not in the sorted order, but grouped by surface (and sorted in groups)
+        Ints allIds = new Ints(lex.size());
+        Iterator<Ints> ids = lex.wordIds();
+        while (ids.hasNext()) {
+            allIds.appendAll(ids.next());
+        }
+        allIds.sort();
+        wordIds = allIds;
     }
 
-    static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
-        GrammarImpl grammar = null;
+    void printHeader() {
+        // @formatter:off
+        printColumnHeaders(Column.Surface, Column.LeftId, Column.RightId, Column.Cost, Column.Pos1, Column.Pos2,
+                Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6, Column.ReadingForm, Column.DictionaryForm,
+                Column.NormalizedForm, Column.Mode, Column.SplitA, Column.SplitB, Column.SplitC, Column.WordStructure,
+                Column.SynonymGroups, Column.UserData);
+        // @formatter:on
+    }
 
-        try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
-            if (dictionary.getDictionaryHeader().isSystemDictionary()) {
-                grammar = dictionary.getGrammar();
-            } else if (systemDict == null) {
-                throw new IllegalArgumentException("the system dictionary is not specified");
+    void printColumnHeaders(Column... headers) {
+        for (Column c : headers) {
+            output.print(c.name());
+        }
+        output.println();
+    }
+
+    void printEntry(int wordId) {
+        WordInfo info = lex.getWordInfo(wordId);
+        POS pos = grammar.getPartOfSpeechString(info.getPOSId());
+        long params = lex.parameters(wordId);
+        short leftId = WordParameters.leftId(params);
+        short rightId = WordParameters.rightId(params);
+        short cost = WordParameters.cost(params);
+        String surface = lex.string(0, info.getSurface());
+        String reading = lex.string(0, info.getReadingForm());
+        field(surface);
+        field(leftId);
+        field(rightId);
+        field(cost);
+        field(pos.get(0));
+        field(pos.get(1));
+        field(pos.get(2));
+        field(pos.get(3));
+        field(pos.get(4));
+        field(pos.get(5));
+        field(reading);
+        entryPtr(info.getNormalizedForm(), ",");
+        entryPtr(info.getDictionaryForm(), ",");
+        output.print("\n");
+    }
+
+    void entryPtr(int wordId, String delimiter) {
+        WordInfo info = lex.getWordInfo(wordId);
+        POS pos = grammar.getPartOfSpeechString(info.getPOSId());
+        String surface = lex.string(0, info.getSurface());
+        String reading = lex.string(0, info.getReadingForm());
+        ptrPart(surface, "-");
+        ptrPart(pos.get(0), "-");
+        ptrPart(pos.get(1), "-");
+        ptrPart(pos.get(2), "-");
+        ptrPart(pos.get(3), "-");
+        ptrPart(pos.get(4), "-");
+        ptrPart(pos.get(5), "-");
+        ptrPart(reading, "");
+        output.print(delimiter);
+    }
+
+    void ptrPart(String part, String delimiter) {
+        output.print(part);
+        output.print(delimiter);
+    }
+
+    void field(short value) {
+        output.print(value);
+        output.print(',');
+    }
+
+    void field(String value) {
+        output.print(maybeQuoteField(value));
+        output.print(',');
+    }
+
+    private String maybeQuoteField(String value) {
+        boolean hasCommas = value.indexOf(',') != -1;
+        boolean hasQuotes = value.indexOf('"') != -1;
+        if (hasCommas || hasQuotes) {
+            return escape(value, hasQuotes);
+        }
+        return value;
+    }
+
+    private String maybeQuoteRefPart(String value) {
+        if (value.indexOf(',') != -1 || value.indexOf('"') != -1 || value.indexOf('-') != -1 || value.indexOf(
+                '/') != -1) {
+            return fullEscape(value);
+        }
+        return value;
+    }
+
+    private String escape(String value, boolean hasQuotes) {
+        if (hasQuotes) {
+            return fullEscape(value);
+        }
+        // only commas
+        return "\"" + value + "\"";
+    }
+
+    private String fullEscape(String value) {
+        StringBuilder sb = new StringBuilder(value.length() + 10);
+        int len = value.length();
+        for (int i = 0; i < len; ++i) {
+            char c = value.charAt(i);
+            if (c != '"' && c != '-' && c != ',' && c != '/') {
+                sb.append(c);
             } else {
-                grammar = systemDict.getGrammar();
-                if (DictionaryVersion.hasGrammar(dictionary.getDictionaryHeader().getVersion())) {
-                    grammar.addPosList(dictionary.getGrammar());
-                }
+                sb.append("\\u{").append(Integer.toHexString(c)).append('}');
             }
+        }
+        return sb.toString();
+    }
 
-            List<String> posStrings = new ArrayList<>();
-            for (short pid = 0; pid < grammar.getPartOfSpeechSize(); pid++) {
-                posStrings.add(String.join(",", grammar.getPartOfSpeechString(pid)));
-            }
-
-            Lexicon lexicon = dictionary.getLexicon();
-            for (int wordId = 0; wordId < lexicon.size(); wordId++) {
-                short leftId = lexicon.getLeftId(wordId);
-                short rightId = lexicon.getRightId(wordId);
-                short cost = lexicon.getCost(wordId);
-                WordInfo wordInfo = lexicon.getWordInfo(wordId);
-
-                char unitType = getUnitType(wordInfo);
-
-                output.println(String.format("%s,%d,%d,%d,%s,%s,%s,%s,%s,%c,%s,%s,%s", wordInfo.getSurface(), leftId,
-                        rightId, cost, wordInfo.getSurface(), posStrings.get(wordInfo.getPOSId()),
-                        wordInfo.getReadingForm(), wordInfo.getNormalizedForm(),
-                        wordIdToString(wordInfo.getDictionaryFormWordId()), unitType,
-                        splitToString(wordInfo.getAunitSplit()), splitToString(wordInfo.getBunitSplit()),
-                        splitToString(wordInfo.getWordStructure())));
-            }
+    private void printEntries() {
+        for (int i = 0; i < wordIds.length(); ++i) {
+            printEntry(wordIds.get(i));
         }
     }
 
-    static String wordIdToString(int wid) {
-        return (wid < 0) ? "*" : Integer.toString(wid);
+    static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
+        try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
+            DictionaryPrinter dp = new DictionaryPrinter(output, dictionary, systemDict);
+            dp.printHeader();
+            dp.printEntries();
+        }
     }
+
+
 
     static char getUnitType(WordInfo info) {
         if (info.getAunitSplit().length == 0) {
@@ -104,11 +222,11 @@ public class DictionaryPrinter {
      * </dl>
      * <p>
      * This tool requires the system dictionary when it dumps an user dictionary.
-     * 
+     *
      * @param args
-     *            the option and the input filename
+     *         the option and the input filename
      * @throws IOException
-     *             if IO
+     *         if IO
      */
     public static void main(String[] args) throws IOException {
         BinaryDictionary systemDict = null;

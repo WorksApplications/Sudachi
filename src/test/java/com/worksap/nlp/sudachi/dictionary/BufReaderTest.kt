@@ -69,6 +69,7 @@ class BufReaderTest {
     checkLong(0xff_ffff_ffff_ffff)
     checkLong(0x4ff_ffff_ffff_ffff)
     checkLong(0xfff_ffff_ffff_ffff)
+    checkLong(0x1000_0000_0000_0000)
     checkLong(0x4fff_ffff_ffff_ffff)
     checkLong(0x5fff_ffff_ffff_ffff)
     checkLong(0x6fff_ffff_ffff_ffff)
@@ -89,12 +90,16 @@ class BufReaderTest {
     checkInt(0xff)
     checkInt(0x4ff)
     checkInt(0xfff)
+    checkInt(0x1000)
     checkInt(0x4fff)
     checkInt(0xffff)
+    checkInt(0x1_0000)
     checkInt(0x4_ffff)
     checkInt(0xf_ffff)
+    checkInt(0x10_0000)
     checkInt(0x4f_ffff)
     checkInt(0xff_ffff)
+    checkInt(0x100_0000)
     checkInt(0x4ff_ffff)
     checkInt(0xfff_ffff)
     checkInt(0x4fff_ffff)
@@ -110,5 +115,13 @@ class BufReaderTest {
     checkUtf8String("東京都")
     checkUtf8String("""👨‍👩‍👧‍👦""")
     checkUtf8String("""t東e京s💞t都""")
+  }
+
+  @Test
+  fun checkInts() {
+    val checkInt = check({ w, x -> w.putVarint32(x) }, { it.readVarint32() })
+    for (i in 0..10000) {
+      checkInt(i)
+    }
   }
 }

@@ -98,7 +98,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         DoubleArrayLexicon userLexicon = dictionary.getLexicon();
         Tokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
                 Collections.emptyList());
-        userLexicon.calculateCost(tokenizer);
+        userLexicon.calculateDynamicCosts(tokenizer);
 
         lexicon.add(userLexicon, (short) grammar.getPartOfSpeechSize());
         grammar.addPosList(dictionary.getGrammar());

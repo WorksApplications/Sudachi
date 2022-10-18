@@ -46,9 +46,9 @@ class LatticeImpl implements Lattice {
 
         endLists = new ArrayList<>();
         LatticeNodeImpl bosNode = new LatticeNodeImpl();
+        bosNode.bestPreviousNode = bosNode;
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
-        bosNode.isConnectedToBOS = true;
         // endLists should not contain anything except ArrayLists
         // it is crucial to have monomorphic dispatch here
         ArrayList<LatticeNodeImpl> bos = new ArrayList<>();
@@ -94,9 +94,17 @@ class LatticeImpl implements Lattice {
     }
 
     @Override
-    public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
-        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin))
-                .min(Comparator.comparingInt(l -> l.cost));
+    public LatticeNodeImpl getMinimumNode(int begin, int end) {
+        ArrayList<LatticeNodeImpl> ends = endLists.get(end);
+        LatticeNodeImpl result = null;
+        for (LatticeNodeImpl node: ends) {
+            if (node.begin == begin) {
+                if (result == null || result.totalCost >= node.cost) {
+                    result = node;
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -143,7 +151,7 @@ class LatticeImpl implements Lattice {
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < endNodes.size(); ++i) {
             LatticeNodeImpl lNode = endNodes.get(i);
-            if (!lNode.isConnectedToBOS) {
+            if (!lNode.isConnectedToBOS()) {
                 continue;
             }
 
@@ -157,7 +165,6 @@ class LatticeImpl implements Lattice {
                 bestPrevNode = lNode;
             }
         }
-        rNode.isConnectedToBOS = (bestPrevNode != null);
         rNode.totalCost = minLeftCost + rNode.cost;
         rNode.bestPreviousNode = bestPrevNode;
     }
@@ -166,11 +173,11 @@ class LatticeImpl implements Lattice {
         connectNode(eosNode);
     }
 
-    List<LatticeNode> getBestPath() {
-        if (!eosNode.isConnectedToBOS) { // EOS node
+    List<LatticeNodeImpl> getBestPath() {
+        if (!eosNode.isConnectedToBOS()) { // EOS node
             throw new IllegalStateException("EOS isn't connected to BOS");
         }
-        ArrayList<LatticeNode> result = new ArrayList<>();
+        ArrayList<LatticeNodeImpl> result = new ArrayList<>();
         for (LatticeNodeImpl node = eosNode.bestPreviousNode; node != endLists.get(0)
                 .get(0); node = node.bestPreviousNode) {
             result.add(node);
@@ -180,7 +187,7 @@ class LatticeImpl implements Lattice {
     }
 
     String getSurface(LatticeNodeImpl node) {
-        return (node.isDefined) ? node.getWordInfo().getSurface() : "(null)";
+        return (node.isDefined) ? node.getBaseSurface() : "(null)";
     }
 
     String getPos(LatticeNodeImpl node) {

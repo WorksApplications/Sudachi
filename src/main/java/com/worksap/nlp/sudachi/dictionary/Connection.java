@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 /**
@@ -82,5 +84,16 @@ public final class Connection {
             // should never happen, but adds a compiler precondition to the inlined method
             throw new IllegalArgumentException(String.format("leftId < leftSize: (%d, %d)", leftId, leftSize));
         }
+    }
+
+    public static Connection fromByteBufferV1(ByteBuffer raw) {
+        short numLeft = raw.getShort();
+        short numRight = raw.getShort();
+        ByteBuffer dup = raw.duplicate();
+        dup.order(ByteOrder.LITTLE_ENDIAN);
+        dup.position(raw.position());
+        dup.limit(raw.position() + numLeft * numRight * 2);
+        ShortBuffer data = dup.asShortBuffer();
+        return new Connection(data, numLeft, numRight);
     }
 }

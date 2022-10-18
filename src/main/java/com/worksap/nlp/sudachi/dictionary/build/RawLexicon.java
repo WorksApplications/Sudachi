@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.Blocks;
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
+import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +39,7 @@ public class RawLexicon {
     private boolean user;
 
     private long offset = INITIAL_OFFSET;
+    private boolean runtimeCosts = false;
 
     public void read(String name, InputStream data, POSTable posTable) throws IOException {
         read(name, new InputStreamReader(data, StandardCharsets.UTF_8), posTable);
@@ -61,6 +63,7 @@ public class RawLexicon {
             } else {
                 notIndexed.add(entry);
             }
+            this.runtimeCosts |= !DoubleArrayLexicon.isNormalCost(entry.cost);
         }
         this.offset = offset;
     }
@@ -103,6 +106,7 @@ public class RawLexicon {
                 ptr = layout.put(e);
                 p.progress(i, size);
             }
+            buf.flush();
             return null;
         });
     }
@@ -113,5 +117,17 @@ public class RawLexicon {
             strings.writeCompact(blockOutput.getChannel());
             return null;
         });
+    }
+
+    public int getIndexedEntries() {
+        return this.entries.size() - this.notIndexed.size();
+    }
+
+    public int getTotalEntries() {
+        return this.entries.size();
+    }
+
+    public boolean hasRuntimeCosts() {
+        return this.runtimeCosts;
     }
 }

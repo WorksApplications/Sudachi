@@ -88,7 +88,7 @@ public class UserDictionaryBuilder {
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
         try (BinaryDictionary system = new BinaryDictionary(sysDictPath)) {
-            DicBuilder.User builder = DicBuilder.user(system).description(description)
+            DicBuilder.User builder = DicBuilder.user(system).comment(description)
                     .progress(new Progress(20, new DictionaryBuilder.StderrProgress()));
 
             for (String lexicon : lexiconPaths) {
