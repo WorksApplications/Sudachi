@@ -192,7 +192,7 @@ class JapaneseTokenizer implements Tokenizer {
             jsonBuilder.add("lattice", lattice.toJson());
         }
 
-        List<LatticeNode> path = lattice.getBestPath();
+        List<LatticeNodeImpl> path = lattice.getBestPath();
 
         if (dumpOutput != null) {
             dumpOutput.println("=== Before rewriting:");
@@ -243,8 +243,7 @@ class JapaneseTokenizer implements Tokenizer {
                 int[] wordIds = wordLookup.getWordsIds();
                 for (int word = 0; word < numWords; ++word) {
                     int wordId = wordIds[word];
-                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId),
-                            lexicon.getRightId(wordId), lexicon.getCost(wordId), wordId);
+                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.parameters(wordId), wordId);
                     lattice.insert(byteBoundary, end, n);
                     unkNodes.add(n);
                     wordMask = WordMask.addNth(wordMask, end - byteBoundary);
@@ -285,16 +284,15 @@ class JapaneseTokenizer implements Tokenizer {
         return wordMask;
     }
 
-    private List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
-        List<LatticeNode> newPath = new ArrayList<>();
-        for (LatticeNode node : path) {
-            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitsTo(newPath, mode);
+    private List<LatticeNodeImpl> splitPath(List<LatticeNodeImpl> path, SplitMode mode) {
+        List<LatticeNodeImpl> newPath = new ArrayList<>();
+        for (LatticeNodeImpl node : path) {
+            node.appendSplitsTo(newPath, mode);
         }
         return newPath;
     }
 
-    void dumpPath(List<LatticeNode> path) {
+    void dumpPath(List<? extends LatticeNode> path) {
         int i = 0;
         for (LatticeNode node : path) {
             dumpOutput.printf("%d: %s\n", i, node.toString());
@@ -302,7 +300,7 @@ class JapaneseTokenizer implements Tokenizer {
         }
     }
 
-    JsonArrayBuilder pathToJson(List<LatticeNode> path, LatticeImpl lattice) {
+    JsonArrayBuilder pathToJson(List<? extends LatticeNode> path, LatticeImpl lattice) {
         JsonArrayBuilder builder = Json.createArrayBuilder();
         for (LatticeNode node : path) {
             builder.add(lattice.nodeToJson((LatticeNodeImpl) node));

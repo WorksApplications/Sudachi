@@ -101,32 +101,6 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
-    public int getWordId(String headword, short posId, String readingForm) {
-        for (int dictId = 1; dictId < lexicons.size(); dictId++) {
-            int wid = lexicons.get(dictId).getWordId(headword, posId, readingForm);
-            if (wid >= 0) {
-                return buildWordId(dictId, wid);
-            }
-        }
-        return lexicons.get(0).getWordId(headword, posId, readingForm);
-    }
-
-    @Override
-    public short getLeftId(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getLeftId(getWordId(wordId));
-    }
-
-    @Override
-    public short getRightId(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getRightId(getWordId(wordId));
-    }
-
-    @Override
-    public short getCost(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getCost(getWordId(wordId));
-    }
-
-    @Override
     public WordInfo getWordInfo(int wordId) {
         int dictionaryId = WordId.dic(wordId);
         int internalId = WordId.word(wordId);
@@ -167,5 +141,21 @@ public class LexiconSet implements Lexicon {
 
     public WordLookup makeLookup() {
         return new WordLookup(this.lexicons);
+    }
+
+    @Override
+    public long parameters(int wordId) {
+        int dic = WordId.dic(wordId);
+        return lexicons.get(dic).parameters(wordId);
+    }
+
+    @Override
+    public String string(int dic, int stringPtr) {
+        return lexicons.get(dic).string(dic, stringPtr);
+    }
+
+    @Override
+    public WordInfoList wordInfos(int dic) {
+        return lexicons.get(dic).wordInfos(dic);
     }
 }

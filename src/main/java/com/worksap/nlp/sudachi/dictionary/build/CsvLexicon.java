@@ -38,7 +38,7 @@ public class CsvLexicon implements WriteDictionary {
     private final Parameters parameters = new Parameters();
     private final POSTable posTable;
     private final List<RawWordEntry> entries = new ArrayList<>();
-    private WordIdResolver widResolver = new WordLookup.Noop();
+    private WordIdResolver widResolver = null;
 
     public CsvLexicon(POSTable pos) {
         posTable = pos;
@@ -99,19 +99,6 @@ public class CsvLexicon implements WriteDictionary {
         if (cols.get(14).equals("A") && (!entry.aUnitSplitString.equals("*") || !entry.bUnitSplitString.equals("*"))) {
             throw new IllegalArgumentException("invalid splitting");
         }
-
-        int[] synonymGids = new int[0];
-        if (cols.size() > 18) {
-            synonymGids = parseSynonymGids(cols.get(18));
-        }
-
-        entry.wordInfo = new WordInfo(cols.get(4), // headword
-                (short) cols.get(0).getBytes(StandardCharsets.UTF_8).length, posId, cols.get(12), // normalizedForm
-                (cols.get(13).equals("*") ? -1 : Integer.parseInt(cols.get(13))), // dictionaryFormWordId
-                "", // dummy
-                cols.get(11), // readingForm
-                null, null, null, synonymGids);
-
         return entry;
     }
 
@@ -191,53 +178,7 @@ public class CsvLexicon implements WriteDictionary {
 
     @Override
     public void writeTo(ModelOutput output) throws IOException {
-        // write number of entries
-        ByteBuffer buf = ByteBuffer.allocate(4);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        buf.putInt(entries.size());
-        buf.flip();
-        output.write(buf);
 
-        parameters.writeTo(output);
-
-        int offsetsSize = 4 * entries.size();
-        DicBuffer offsets = new DicBuffer(offsetsSize);
-        long offsetsPosition = output.position();
-        // make a hole for
-        output.position(offsetsPosition + offsetsSize);
-
-        output.withPart("word entries", () -> {
-            DicBuffer buffer = new DicBuffer(128 * 1024);
-            int offset = (int) output.position();
-            int numEntries = entries.size();
-            for (int i = 0; i < numEntries; ++i) {
-                RawWordEntry entry = entries.get(i);
-                if (buffer.wontFit(16 * 1024)) {
-                    offset += buffer.consume(output::write);
-                }
-                offsets.putInt(offset + buffer.position());
-
-                WordInfo wi = entry.wordInfo;
-                buffer.put(wi.getSurface());
-                buffer.putLength(wi.getLength());
-                buffer.putShort(wi.getPOSId());
-                buffer.putEmptyIfEqual(wi.getNormalizedForm(), wi.getSurface());
-                buffer.putInt(wi.getDictionaryFormWordId());
-                buffer.putEmptyIfEqual(wi.getReadingForm(), wi.getSurface());
-                buffer.putInts(parseSplitInfo(entry.aUnitSplitString));
-                buffer.putInts(parseSplitInfo(entry.bUnitSplitString));
-                buffer.putInts(parseSplitInfo(entry.wordStructureString));
-                buffer.putInts(wi.getSynonymGroupIds());
-                output.progress(i, numEntries);
-            }
-
-            buffer.consume(output::write);
-        });
-
-        long pos = output.position();
-        output.position(offsetsPosition);
-        output.withPart("WordInfo offsets", () -> offsets.consume(output::write));
-        output.position(pos);
     }
 
     public int addEntry(RawWordEntry e) {

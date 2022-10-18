@@ -72,7 +72,7 @@ public interface Lattice {
      *            the index to after the last position in the input text
      * @return the node which start at {@code begin} and end at {@code end}
      */
-    public Optional<? extends LatticeNode> getMinimumNode(int begin, int end);
+    public LatticeNodeImpl getMinimumNode(int begin, int end);
 
     /**
      * Insert the node at the specified index.

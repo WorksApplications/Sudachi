@@ -18,15 +18,15 @@ package com.worksap.nlp.sudachi;
 
 import java.util.List;
 
+import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 class MorphemeImpl implements Morpheme {
+    private final MorphemeList list;
+    private final int index;
+    private LatticeNodeImpl node;
 
-    final MorphemeList list;
-    final int index;
-    WordInfo wordInfo;
-
-    MorphemeImpl(MorphemeList list, int index) {
+    /*internal*/ MorphemeImpl(MorphemeList list, int index) {
         this.list = list;
         this.index = index;
     }
@@ -47,7 +47,7 @@ class MorphemeImpl implements Morpheme {
     }
 
     @Override
-    public List<String> partOfSpeech() {
+    public POS partOfSpeech() {
         WordInfo wi = getWordInfo();
         return list.grammar.getPartOfSpeechString(wi.getPOSId());
     }
@@ -60,20 +60,17 @@ class MorphemeImpl implements Morpheme {
 
     @Override
     public String dictionaryForm() {
-        WordInfo wi = getWordInfo();
-        return wi.getDictionaryForm();
+        return node().getDictionaryForm();
     }
 
     @Override
     public String normalizedForm() {
-        WordInfo wi = getWordInfo();
-        return wi.getNormalizedForm();
+        return node().getNormalizedForm();
     }
 
     @Override
     public String readingForm() {
-        WordInfo wi = getWordInfo();
-        return wi.getReadingForm();
+        return node().getReading();
     }
 
     @Override
@@ -83,30 +80,36 @@ class MorphemeImpl implements Morpheme {
 
     @Override
     public boolean isOOV() {
-        return list.isOOV(index);
+        return node().isOOV();
     }
 
     @Override
     public int getWordId() {
-        return list.getWordId(index);
+        return node().getWordId();
     }
 
     @Override
     public int getDictionaryId() {
-        return list.getDictionaryId(index);
+        return node().getDictionaryId();
     }
 
     @Override
     public int[] getSynonymGroupIds() {
         WordInfo wi = getWordInfo();
-        return wi.getSynonymGoupIds();
+        return wi.getSynonymGroupIds();
+    }
+
+    private LatticeNodeImpl node() {
+        LatticeNodeImpl n = node;
+        if (n == null) {
+            n = list.node(index);
+            node = n;
+        }
+        return n;
     }
 
     WordInfo getWordInfo() {
-        if (wordInfo == null) {
-            wordInfo = list.getWordInfo(index);
-        }
-        return wordInfo;
+        return node().getWordInfo();
     }
 
     @Override
@@ -120,5 +123,9 @@ class MorphemeImpl implements Morpheme {
         sb.append(", wid=(").append(WordId.dic(wordId)).append(',').append(WordId.word(wordId));
         sb.append(")}");
         return sb.toString();
+    }
+
+    /*internal*/ boolean isCompatible(JapaneseDictionary dictionary) {
+        return dictionary.grammar == this.list.grammar;
     }
 }

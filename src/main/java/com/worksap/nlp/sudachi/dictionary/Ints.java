@@ -20,6 +20,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.StringJoiner;
 
+/**
+ * Internal class for dealing with resizable integer arrays without boxing or double indirection.
+ * This class is not a part of Sudachi API and can be changed.
+ */
 public class Ints {
     private int[] data;
     private int length;
@@ -60,11 +64,14 @@ public class Ints {
         length = 0;
     }
 
-    public void maybeResize(int additional) {
+    private int[] maybeResize(int additional) {
         int newSize = length + additional;
-        if (newSize > data.length) {
-            data = Arrays.copyOf(data, Math.max(newSize, length * 2));
+        int[] d = data;
+        if (newSize > d.length) {
+            d = Arrays.copyOf(data, Math.max(newSize, length * 2));
+            data = d;
         }
+        return d;
     }
 
     public static Ints wrap(int[] array, int size) {
@@ -75,15 +82,24 @@ public class Ints {
         return new Ints(array, array.length);
     }
 
-    private static final int[] EMPTY_ARRAY = new int[0];
+    public static final int[] EMPTY_ARRAY = new int[0];
 
     public static int[] readArray(ByteBuffer buffer, int len) {
         if (len == 0) {
             return EMPTY_ARRAY;
         }
+        int position = buffer.position();
+        buffer.position(position + len * 4);
+        return readArray(buffer, position, len);
+    }
+
+    public static int[] readArray(ByteBuffer buffer, int offset, int len) {
+        if (len == 0) {
+            return EMPTY_ARRAY;
+        }
         int[] result = new int[len];
         for (int i = 0; i < len; ++i) {
-            result[i] = buffer.getInt();
+            result[i] = buffer.getInt(offset + i * 4);
         }
         return result;
     }
@@ -95,5 +111,23 @@ public class Ints {
             joiner.add(String.valueOf(data[i]));
         }
         return joiner.toString();
+    }
+
+    public int[] prepare(int size) {
+        return maybeResize(length - size);
+    }
+
+    public void appendAll(Ints other) {
+        int addedLength = other.length;
+        int[] write = maybeResize(addedLength);
+        int start = length;
+        if (addedLength >= 0) {
+            System.arraycopy(other.data, 0, write, start, addedLength);
+        }
+        length += addedLength;
+    }
+
+    public void sort() {
+        Arrays.sort(data, 0, length);
     }
 }

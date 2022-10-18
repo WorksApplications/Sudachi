@@ -45,9 +45,10 @@ public final class InMemoryChannel implements SeekableByteChannel {
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        int position = buffer.position();
-        buffer.put(dst);
-        int newPosition = buffer.position();
+        ByteBuffer src = buffer;
+        int position = src.position();
+        dst.put(src);
+        int newPosition = src.position();
         return newPosition - position;
     }
 

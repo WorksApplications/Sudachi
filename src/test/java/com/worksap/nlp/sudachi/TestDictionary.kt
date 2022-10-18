@@ -27,7 +27,7 @@ object TestDictionary {
     DicBuilder.system()
         .matrix(res("/dict/matrix.def"))
         .lexicon(res("/dict/lex.csv"))
-        .description("the system dictionary for the unit tests")
+        .comment("the system dictionary for the unit tests")
         .build(result)
     result
   }

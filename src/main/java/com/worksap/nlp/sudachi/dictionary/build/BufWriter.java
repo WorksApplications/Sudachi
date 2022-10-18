@@ -35,7 +35,7 @@ public class BufWriter {
 
     // Encode int as LEB128
     public BufWriter putVarint32(int val) {
-        if ((val & 0xff) == 0) {
+        if ((val & ~0x7f) == 0) {
             putByte((byte) val);
         } else {
             putVarintSlow(val & 0xffff_ffffL);
@@ -44,7 +44,7 @@ public class BufWriter {
     }
 
     public BufWriter putVarint64(long val) {
-        if ((val & 0xff) == 0) {
+        if ((val & ~0x7fL) == 0) {
             putByte((byte) val);
         } else {
             putVarintSlow(val);

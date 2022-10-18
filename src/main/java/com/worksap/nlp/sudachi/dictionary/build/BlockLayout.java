@@ -16,14 +16,18 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.dictionary.Description;
+
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class BlockLayout {
     private final SeekableByteChannel channel;
     private final Progress progress;
+    private final List<BlockInfo> info = new ArrayList<>();
 
     public BlockLayout(SeekableByteChannel channel, Progress progress) throws IOException {
         this.channel = channel;
@@ -42,7 +46,14 @@ public class BlockLayout {
         return result;
     }
 
-    private final static List<BlockInfo> info = new ArrayList<>();
+    public List<Description.Block> blocks() {
+        List<Description.Block> result = new ArrayList<>();
+        for (BlockInfo b: info) {
+            Description.Block published = new Description.Block(b.name, b.start, b.end - b.start);
+            result.add(published);
+        }
+        return result;
+    }
 
     private static class BlockInfo {
         String name;
@@ -53,6 +64,12 @@ public class BlockLayout {
             this.name = name;
             this.start = start;
             this.end = end;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", BlockInfo.class.getSimpleName() + "[", "]").add("name='" + name + "'")
+                    .add("start=" + start).add("end=" + end).toString();
         }
     }
 }

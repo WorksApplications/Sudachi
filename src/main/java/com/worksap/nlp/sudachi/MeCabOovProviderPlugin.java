@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
  *
  * {@code charDef} is the file path of the definition of OOV insertion behavior.
  * {@code unkDef} is the file path of the definition of OOV informations.
- *
+ * <p>
  * These files are compatible with MeCab. But the definitions of character
  * categories in {@code charDef} are ignored and this plugin uses the ones
  * {@code characterDefinitionFile} in the settings.
@@ -62,15 +62,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
         int length;
     }
 
-    static class OOV {
-        short leftId;
-        short rightId;
-        short cost;
-        short posId;
-    }
-
     Map<CategoryType, CategoryInfo> categories = new EnumMap<>(CategoryType.class);
-    Map<CategoryType, List<OOV>> oovList = new EnumMap<>(CategoryType.class);
+    Map<CategoryType, List<LatticeNodeImpl.OOVFactory>> oovList = new EnumMap<>(CategoryType.class);
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
@@ -91,14 +84,13 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                     continue;
                 }
                 int llength = length;
-                List<OOV> oovs = oovList.get(cinfo.type);
+                List<LatticeNodeImpl.OOVFactory> oovs = oovList.get(cinfo.type);
                 if (oovs == null) {
                     continue;
                 }
                 if (cinfo.isGroup && (cinfo.isInvoke || otherWords == 0)) {
-                    String s = inputText.getSubstring(offset, offset + length);
-                    for (OOV oov : oovs) {
-                        nodes.add(getOOVNode(s, oov, length));
+                    for (LatticeNodeImpl.OOVFactory oov : oovs) {
+                        nodes.add(oov.make(offset, offset + length, inputText));
                         added += 1;
                     }
                     llength -= 1;
@@ -109,9 +101,8 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                         if (sublength > llength) {
                             break;
                         }
-                        String s = inputText.getSubstring(offset, offset + sublength);
-                        for (OOV oov : oovs) {
-                            nodes.add(getOOVNode(s, oov, sublength));
+                        for (LatticeNodeImpl.OOVFactory oov : oovs) {
+                            nodes.add(oov.make(offset, offset + sublength, inputText));
                             added += 1;
                         }
                     }
@@ -119,14 +110,6 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
             }
         }
         return added;
-    }
-
-    LatticeNodeImpl getOOVNode(String text, OOV oov, int length) {
-        LatticeNodeImpl node = createNode();
-        node.setParameter(oov.leftId, oov.rightId, oov.cost);
-        WordInfo info = new WordInfo(text, (short) length, oov.posId, text, text, "");
-        node.setWordInfo(info);
-        return node;
     }
 
     private static final Pattern PATTERN_SPACES = Pattern.compile("\\s+");
@@ -191,13 +174,12 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
                     throw new IllegalArgumentException(cols[0] + " is undefined at line " + reader.getLineNumber());
                 }
 
-                OOV oov = new OOV();
-                oov.leftId = Short.parseShort(cols[1]);
-                oov.rightId = Short.parseShort(cols[2]);
-                oov.cost = Short.parseShort(cols[3]);
+                short leftId = Short.parseShort(cols[1]);
+                short rightId = Short.parseShort(cols[2]);
+                short cost = Short.parseShort(cols[3]);
                 POS pos = new POS(cols[4], cols[5], cols[6], cols[7], cols[8], cols[9]);
-                oov.posId = posIdOf(grammar, pos, userPosMode);
-
+                short posId = posIdOf(grammar, pos, userPosMode);
+                LatticeNodeImpl.OOVFactory oov = LatticeNodeImpl.oovFactory(leftId, rightId, cost, posId);
                 oovList.computeIfAbsent(type, t -> new ArrayList<>()).add(oov);
             }
         }

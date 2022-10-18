@@ -27,72 +27,26 @@ public interface Lexicon {
 
     Iterator<int[]> lookup(byte[] text, int offset);
 
-    int getWordId(String headword, short posId, String readingForm);
-
     /**
-     * Returns the left-ID of the morpheme specified by the word ID.
-     *
-     * <p>
-     * when the word ID is out of range, the behavior is undefined.
-     *
-     * @param wordId
-     *            the word ID of the morpheme
-     * @return the left-ID of the morpheme
+     * Return packed parameters for the morpheme with the given id.
+     * Parameters are leftId, rightId, cost packed in a single long value.
+     * @param wordId id of word to extract parameters
+     * @return long value of packed parameters
      */
-    short getLeftId(int wordId);
+    long parameters(int wordId);
 
     /**
-     * Returns the right-ID of the morpheme specified by the word ID.
+     * Returns the on-disk information of the morpheme specified by the word ID.
      *
      * <p>
      * when the word ID is out of range, the behavior is undefined.
      *
      * @param wordId
      *            the word ID of the morpheme
-     * @return the right-ID of the morpheme.
-     */
-    short getRightId(int wordId);
-
-    /**
-     * Returns the word occurrence cost of the morpheme specified by the word ID.
-     *
-     * <p>
-     * when the word ID is out of range, the behavior is undefined.
-     *
-     * @param wordId
-     *            the word ID of the morpheme
-     * @return the word occurrence cost
-     */
-    short getCost(int wordId);
-
-    /**
-     * Returns the informations of the morpheme specified by the word ID.
-     *
-     * <p>
-     * when the word ID is out of range, the behavior is undefined.
-     *
-     * @param wordId
-     *            the word ID of the morpheme
-     * @return the informations of the morpheme
+     * @return on-disk information for the morpheme with the given id
      * @see WordInfo
      */
     WordInfo getWordInfo(int wordId);
-
-    /**
-     * Returns the ID of the dictionary containing the morpheme specified by the
-     * word ID.
-     *
-     * If the morpheme is in the system dictionary, it returns {@code 0}.
-     *
-     * @param wordId
-     *            the word ID of the morpheme
-     * @return the dictionary ID
-     * @deprecated use {@link WordId#dic(int)}
-     */
-    @Deprecated
-    default int getDictionaryId(int wordId) {
-        return WordId.dic(wordId);
-    }
 
     /**
      * Returns the number of morphemes in the dictionary.
@@ -100,4 +54,15 @@ public interface Lexicon {
      * @return the number of morphemes
      */
     int size();
+
+    /**
+     * Get the string with the given packed string pointer from the dictionary
+     * @param dic dictionary id
+     * @param stringPtr packed string pointer
+     * @return String object value, copy of the in-memory representation
+     * @see WordId#dic(int)
+     */
+    String string(int dic, int stringPtr);
+
+    WordInfoList wordInfos(int dic);
 }
