@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.json.Json;
@@ -78,67 +77,41 @@ class JapaneseTokenizer implements Tokenizer {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        UTF8InputText input = buildInputText(text);
-        String normalized = input.getText();
 
-        ArrayList<MorphemeList> sentences = new ArrayList<>();
-        SentenceDetector detector = new SentenceDetector();
-        int bos = 0;
-        int length;
-        NonBreakChecker checker = new NonBreakChecker(input);
-        checker.setBos(bos);
-        while ((length = detector.getEos(normalized, checker)) != 0) {
-            if (length < 0) {
-                length = -length;
+        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
+        int length = analysis.tokenizeBuffer(text);
+        ArrayList<MorphemeList> result = analysis.result;
+        int bos = analysis.bos;
+        if (length < 0) {
+            // treat remaining thing as a single sentence
+            int eos = analysis.input.getText().length();
+            if (bos != eos) {
+                UTF8InputText slice = analysis.input;
+                if (bos != 0) {
+                    slice = slice.slice(bos, eos);
+                }
+                result.add(tokenizeSentence(mode, slice));
             }
-            int eos = bos + length;
-            if (eos < normalized.length()) {
-                eos = input.getNextInOriginal(eos - 1);
-                length = eos - bos;
-            }
-            UTF8InputText sentence = input.slice(bos, eos);
-            sentences.add(tokenizeSentence(mode, sentence));
-            normalized = normalized.substring(length);
-            bos = eos;
-            checker.setBos(bos);
         }
-        return sentences;
+        return result;
     }
 
     @Override
     public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
-        ArrayList<MorphemeList> sentences = new ArrayList<>();
         CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
-        SentenceDetector detector = new SentenceDetector();
+        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
 
-        while (reader.read(buffer) > 0) {
+        while (IOTools.readAsMuchAsCan(reader, buffer) > 0) {
             buffer.flip();
-
-            UTF8InputText input = buildInputText(buffer);
-            String normalized = input.getText();
-
-            int bos = 0;
-            int length;
-            NonBreakChecker checker = new NonBreakChecker(input);
-            checker.setBos(bos);
-            while ((length = detector.getEos(normalized, checker)) > 0) {
-                int eos = bos + length;
-                if (eos < normalized.length()) {
-                    eos = input.getNextInOriginal(eos - 1);
-                    length = eos - bos;
-                }
-                UTF8InputText sentence = input.slice(bos, eos);
-                sentences.add(tokenizeSentence(mode, sentence));
-                normalized = normalized.substring(length);
-                bos = eos;
-                checker.setBos(bos);
-            }
+            int length = analysis.tokenizeBuffer(buffer);
             if (length < 0) {
-                buffer.position(input.textIndexToOriginalTextIndex(bos));
+                buffer.position(analysis.bosPosition());
                 buffer.compact();
             }
         }
         buffer.flip();
+        ArrayList<MorphemeList> sentences = analysis.result;
+
         if (buffer.hasRemaining()) {
             sentences.add(tokenizeSentence(mode, buildInputText(buffer)));
         }
@@ -312,35 +285,5 @@ class JapaneseTokenizer implements Tokenizer {
 
     void disableEmptyMorpheme() {
         allowEmptyMorpheme = false;
-    }
-
-    class NonBreakChecker implements SentenceDetector.NonBreakCheker {
-        private final UTF8InputText input;
-        private int bos;
-
-        NonBreakChecker(UTF8InputText input) {
-            this.input = input;
-        }
-
-        public void setBos(int bos) {
-            this.bos = bos;
-        }
-
-        @Override
-        public boolean hasNonBreakWord(int length) {
-            int byteEOS = input.getCodePointsOffsetLength(0, bos + length);
-            byte[] bytes = input.getByteText();
-            for (int i = Math.max(0, byteEOS - 64); i < byteEOS; i++) {
-                Iterator<int[]> iterator = lexicon.lookup(bytes, i);
-                while (iterator.hasNext()) {
-                    int[] r = iterator.next();
-                    int l = r[1];
-                    if (l > byteEOS || (l == byteEOS && bos + length - input.modifiedOffset(i) > 1)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }
