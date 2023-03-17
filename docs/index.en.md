@@ -99,5 +99,4 @@ Please refer to [chiTra](https://github.com/WorksApplications/SudachiTra) for th
 | Version | Normalized             | SudachiTra | Sudachi | SudachiDict   | Text         | Pretrained Model                                                                            |
 | ------- | ---------------------- | ---------- | ------- | ------------- | ------------ | ------------------------------------------------------------------------------------------- |
 | v1.0    | normalized_and_surface | v0.1.7     | 0.6.2   | 20211220-core | NWJC (148GB) | 395 MB ([tar.gz](https://sudachi.s3.ap-northeast-1.amazonaws.com/chitra/chiTra-1.0.tar.gz)) | 
-
-
+| v1.1    | normalized_nouns       | v0.1.8     | 0.6.6   | 20220729-core | NWJC with additional cleaning (79GB) | 396 MB ([tar.gz](https://sudachi.s3.ap-northeast-1.amazonaws.com/chitra/chiTra-1.1.tar.gz)) |
