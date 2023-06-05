@@ -169,7 +169,7 @@ public abstract class PathAnchor {
      * @return resource, encapsulating path, works both for filesystem and classpath
      */
     public <T> Config.Resource<T> toResource(Path path) {
-        if (Files.exists(path)) {
+        if (this.exists(path)) {
             return new Config.Resource.Filesystem<>(path);
         }
         return new Config.Resource.NotFound<>(path, this);
@@ -294,7 +294,7 @@ public abstract class PathAnchor {
 
         @Override
         public String toString() {
-            return "Classpath{" + "prefix=" + prefix + '}';
+            return "Classpath{prefix=" + prefix + '}';
         }
     }
 
