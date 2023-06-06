@@ -43,20 +43,20 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         dictionaries = new ArrayList<>();
         setupSystemDictionary(config);
         for (Config.PluginConf<EditConnectionCostPlugin> p : config.getEditConnectionCostPlugins()) {
-            EditConnectionCostPlugin instance = p.instantiate();
+            EditConnectionCostPlugin instance = p.instantiate(config.getAnchor());
             instance.setUp(grammar);
             instance.edit(grammar);
         }
         setupCharacterDefinition(config);
         inputTextPlugins = new ArrayList<>();
         for (Config.PluginConf<InputTextPlugin> p : config.getInputTextPlugins()) {
-            InputTextPlugin instance = p.instantiate();
+            InputTextPlugin instance = p.instantiate(config.getAnchor());
             instance.setUp(grammar);
             inputTextPlugins.add(instance);
         }
         oovProviderPlugins = new ArrayList<>();
         for (Config.PluginConf<OovProviderPlugin> p : config.getOovProviderPlugins()) {
-            OovProviderPlugin instance = p.instantiate();
+            OovProviderPlugin instance = p.instantiate(config.getAnchor());
             instance.setUp(grammar);
             oovProviderPlugins.add(instance);
         }
@@ -65,7 +65,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
         pathRewritePlugins = new ArrayList<>();
         for (Config.PluginConf<PathRewritePlugin> p : config.getPathRewritePlugins()) {
-            PathRewritePlugin instance = p.instantiate();
+            PathRewritePlugin instance = p.instantiate(config.getAnchor());
             instance.setUp(grammar);
             pathRewritePlugins.add(instance);
         }

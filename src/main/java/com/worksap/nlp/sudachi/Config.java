@@ -64,8 +64,10 @@ public class Config {
     private List<PluginConf<OovProviderPlugin>> oovProviders;
     private List<PluginConf<PathRewritePlugin>> pathRewrite;
     private Boolean allowEmptyMorpheme;
+    private PathAnchor anchor;
 
-    private Config() {
+    private Config(PathAnchor anchor) {
+        this.anchor = anchor;
     }
 
     /**
@@ -75,7 +77,7 @@ public class Config {
      * @return empty Config object
      */
     public static Config empty() {
-        return new Config();
+        return new Config(PathAnchor.none());
     }
 
     /**
@@ -289,6 +291,7 @@ public class Config {
         oovProviders = settings.getPlugins("oovProviderPlugin", OovProviderPlugin.class);
         pathRewrite = settings.getPlugins("pathRewritePlugin", PathRewritePlugin.class);
         allowEmptyMorpheme = settings.getBoolean("allowEmptyMorpheme", null);
+        anchor = anchor.andThen(settings.base);
 
         return this;
     }
@@ -371,6 +374,7 @@ public class Config {
      * @param url
      *            URL of the classpath resource
      * @return modified Config
+     * @see ClassLoader#getResource(String)
      */
     public Config addUserDictionary(URL url) {
         if (userDictionary == null) {
@@ -585,6 +589,7 @@ public class Config {
         oovProviders = mergePluginList(oovProviders, other.oovProviders);
         pathRewrite = mergePluginList(pathRewrite, other.pathRewrite);
         allowEmptyMorpheme = mergeOne(allowEmptyMorpheme, other.allowEmptyMorpheme);
+        anchor = anchor.andThen(other.anchor);
         return this;
     }
 
@@ -601,13 +606,36 @@ public class Config {
                 && Objects.equals(editConnectionCost, config.editConnectionCost)
                 && Objects.equals(inputText, config.inputText) && Objects.equals(oovProviders, config.oovProviders)
                 && Objects.equals(pathRewrite, config.pathRewrite)
-                && Objects.equals(allowEmptyMorpheme, config.allowEmptyMorpheme);
+                && Objects.equals(allowEmptyMorpheme, config.allowEmptyMorpheme)
+                && Objects.equals(anchor, config.anchor);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(systemDictionary, userDictionary, characterDefinition, editConnectionCost, inputText,
-                oovProviders, pathRewrite, allowEmptyMorpheme);
+                oovProviders, pathRewrite, allowEmptyMorpheme, anchor);
+    }
+
+    /**
+     * Return current {@link PathAnchor} resolver
+     * 
+     * @return current anchor object
+     */
+    public PathAnchor getAnchor() {
+        return anchor;
+    }
+
+    /**
+     * Add the given anchor to the current config object. Passed anchor will be
+     * resolved last.
+     *
+     * @param anchor
+     *            new anchor
+     * @return updated configuration object
+     */
+    public Config anchoredWith(PathAnchor anchor) {
+        this.anchor = this.anchor.andThen(anchor);
+        return this;
     }
 
     @FunctionalInterface
@@ -655,10 +683,11 @@ public class Config {
          * @throws IllegalArgumentException
          *             when instantiation fails
          */
-        public T instantiate() {
+        public T instantiate(PathAnchor anchor) {
             Class<? extends T> clz;
+            PathAnchor realAnchor = anchor.andThen(internal.base);
             try {
-                clz = Class.forName(clazzName).asSubclass(parent);
+                clz = realAnchor.lookupClass(clazzName).asSubclass(parent);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("non-existent plugin class", e);
             }
@@ -671,7 +700,9 @@ public class Config {
                     | InvocationTargetException e) {
                 throw new IllegalArgumentException(e);
             }
-            result.setSettings(internal);
+            Settings pluginSettings = Settings.empty().withFallback(internal);
+            pluginSettings.base = realAnchor;
+            result.setSettings(pluginSettings);
             return result;
         }
 
