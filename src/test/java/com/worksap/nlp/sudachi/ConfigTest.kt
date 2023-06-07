@@ -115,6 +115,19 @@ class ConfigTest {
   }
 
   @Test
+  fun pluginInvalidClassNameWithChainedAnchor() {
+    val cfg =
+        Config.fromJsonString(
+            """{            
+            "oovProviderPlugin": [{
+              "class": "java.lang.SSSSSString"              
+            }]
+        }""",
+            PathAnchor.classpath(Config::class.java.classLoader))
+    assertFails { cfg.oovProviderPlugins[0].instantiate(PathAnchor.filesystem("")) }
+  }
+
+  @Test
   fun equalsHashCode() {
     val c1 = Config.fromClasspath("sudachi.json")
     val c2 = Config.fromClasspath("sudachi.json")
