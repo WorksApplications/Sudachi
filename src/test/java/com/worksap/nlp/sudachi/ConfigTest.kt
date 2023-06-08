@@ -98,7 +98,7 @@ class ConfigTest {
             }]
         }""",
             PathAnchor.none())
-    assertFails { cfg.oovProviderPlugins[0].instantiate() }
+    assertFails { cfg.oovProviderPlugins[0].instantiate(PathAnchor.none()) }
   }
 
   @Test
@@ -111,7 +111,20 @@ class ConfigTest {
             }]
         }""",
             PathAnchor.none())
-    assertFails { cfg.oovProviderPlugins[0].instantiate() }
+    assertFails { cfg.oovProviderPlugins[0].instantiate(PathAnchor.none()) }
+  }
+
+  @Test
+  fun pluginInvalidClassNameWithChainedAnchor() {
+    val cfg =
+        Config.fromJsonString(
+            """{            
+            "oovProviderPlugin": [{
+              "class": "java.lang.SSSSSString"              
+            }]
+        }""",
+            PathAnchor.classpath(Config::class.java.classLoader))
+    assertFails { cfg.oovProviderPlugins[0].instantiate(PathAnchor.filesystem("")) }
   }
 
   @Test
@@ -123,5 +136,12 @@ class ConfigTest {
     assertEquals(c1, c2)
     assertNotEquals(c1.hashCode(), c3.hashCode())
     assertNotEquals(c1, c3)
+  }
+
+  @Test
+  fun anchoredWith() {
+    val cfg = Config.empty()
+    cfg.anchoredWith(PathAnchor.filesystem("test"))
+    assertIs<PathAnchor.Chain>(cfg.anchor)
   }
 }

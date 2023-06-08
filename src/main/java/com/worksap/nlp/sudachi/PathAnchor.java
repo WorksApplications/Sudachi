@@ -41,7 +41,10 @@ import java.util.logging.Logger;
  * <li>{@link Classpath} which will resolve classpath resources</li>
  * </ul>
  * Use static methods for their creation.
- *
+ * <p>
+ * One more utility of this class is to capture multiple classloaders in case of
+ * complex environment with multiple classloaders (e.g. ElasticSearch plugins).
+ * </p>
  * <p>
  * It is also possible to chain anchors using {@link #andThen(PathAnchor)}
  * method, which will resolve the first existing path.
@@ -169,7 +172,7 @@ public abstract class PathAnchor {
      * @return resource, encapsulating path, works both for filesystem and classpath
      */
     public <T> Config.Resource<T> toResource(Path path) {
-        if (Files.exists(path)) {
+        if (this.exists(path)) {
             return new Config.Resource.Filesystem<>(path);
         }
         return new Config.Resource.NotFound<>(path, this);
@@ -202,6 +205,17 @@ public abstract class PathAnchor {
             return this;
         }
         return new Chain(this, other);
+    }
+
+    /**
+     * Try to load class with the given name.
+     * 
+     * @param name
+     *            class name
+     * @return instance of the class or null if class is not found
+     */
+    public Class<?> lookupClass(String name) throws ClassNotFoundException {
+        return getClass().getClassLoader().loadClass(name);
     }
 
     static class Filesystem extends PathAnchor {
@@ -279,6 +293,11 @@ public abstract class PathAnchor {
         }
 
         @Override
+        public Class<?> lookupClass(String name) throws ClassNotFoundException {
+            return loader.loadClass(name);
+        }
+
+        @Override
         public boolean equals(Object obj) {
             if (obj instanceof Classpath) {
                 Classpath c = (Classpath) obj;
@@ -294,7 +313,7 @@ public abstract class PathAnchor {
 
         @Override
         public String toString() {
-            return "Classpath{" + "prefix=" + prefix + '}';
+            return "Classpath{prefix=" + prefix + '}';
         }
     }
 
@@ -345,6 +364,19 @@ public abstract class PathAnchor {
             }
 
             return new Config.Resource.NotFound<>(path, this);
+        }
+
+        @Override
+        public Class<?> lookupClass(String name) throws ClassNotFoundException {
+            for (PathAnchor child : children) {
+                try {
+                    return child.lookupClass(name);
+                } catch (ClassNotFoundException ignored) {
+                    // do nothing
+                }
+            }
+
+            throw new ClassNotFoundException(name);
         }
 
         @Override

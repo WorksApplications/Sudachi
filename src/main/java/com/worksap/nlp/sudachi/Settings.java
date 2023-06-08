@@ -75,7 +75,6 @@ import java.util.stream.Collectors;
  * {@code path} is a reserved key. It prepends an additional filesystem anchor
  * to the current list of anchors.
  *
- *
  * @see Config
  * @see PathAnchor
  */
@@ -401,7 +400,7 @@ public class Settings {
     /**
      * Returns resolved path mapped by the key, or {@code null} if the Settings
      * contains no such key. Paths are resolved using {@link PathAnchor}.
-     *
+     * <p>
      * Strongly prefer using {@link #getResource(String)} over this method, because
      * this method can't handle classpath resources.
      *
@@ -424,7 +423,7 @@ public class Settings {
     /**
      * Returns the setting value as the file path, or {@code null} if there is no
      * corresponding setting.
-     *
+     * <p>
      * Strongly prefer using {@link #getResource(String)} over this method, because
      * this method can't handle classpath resources.
      *
@@ -561,14 +560,11 @@ public class Settings {
     /**
      * Merge another Settings object with this object, returning a new Settings
      * object. Scalar values and arrays of this object will be replaced by values of
-     * another object.
-     *
-     * The current object will not be modified.
-     *
+     * another object. <br>
+     * The current object will not be modified. <br>
      * {@link PathAnchor} of the another object will be merged with this one,
      * chaining them using {@link PathAnchor#andThen(PathAnchor)} method, using the
-     * anchor of the passed Settings object before the current anchor.
-     *
+     * anchor of the passed Settings object before the current anchor. <br>
      * This is advanced API, in most cases Configs should be merged instead.
      *
      * @param settings
@@ -584,14 +580,11 @@ public class Settings {
     /**
      * Merge another Settings object with this object, returning a new Settings
      * object. Scalar values and arrays of another object will be added to the
-     * config if they are not present yet.
-     *
-     * The current object will not be modified.
-     *
+     * config if they are not present yet. <br>
+     * The current object will not be modified. <br>
      * {@link PathAnchor} of the another object will be merged with this one,
      * chaining them using {@link PathAnchor#andThen(PathAnchor)} method, using the
-     * anchor of the passed Settings object after the current anchor.
-     *
+     * anchor of the passed Settings object after the current anchor. <br>
      * This is advanced API, in most cases Configs should be merged instead.
      *
      * @param other
