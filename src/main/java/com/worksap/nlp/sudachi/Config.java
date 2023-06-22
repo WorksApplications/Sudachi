@@ -694,7 +694,7 @@ public class Config {
 
             T result;
             try {
-                Constructor<? extends T> constructor = clz.getDeclaredConstructor();
+                Constructor<? extends T> constructor = clz.getConstructor();
                 result = constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
                     | InvocationTargetException e) {
