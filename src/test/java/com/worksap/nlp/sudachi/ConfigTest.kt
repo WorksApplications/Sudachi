@@ -16,6 +16,9 @@
 
 package com.worksap.nlp.sudachi
 
+import com.worksap.nlp.sudachi.Config.Resource
+import com.worksap.nlp.sudachi.dictionary.build.res
+import java.io.FileNotFoundException
 import java.net.URL
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -143,5 +146,41 @@ class ConfigTest {
     val cfg = Config.empty()
     cfg.anchoredWith(PathAnchor.filesystem("test"))
     assertIs<PathAnchor.Chain>(cfg.anchor)
+  }
+
+  @Test
+  fun fromResourceFile() {
+    val anchor = PathAnchor.filesystem("src/test/resources")
+    val cfgFile = anchor.resource<Any>("sudachi.json")
+    val cfg = Config.fromResource(cfgFile, anchor)
+    assertEquals(1, cfg.userDictionaries.size)
+  }
+
+  @Test
+  fun fromResourceClasspath() {
+    val anchor = PathAnchor.classpath(javaClass.classLoader)
+    val cfgFile = anchor.resource<Any>("sudachi.json")
+    val cfg = Config.fromResource(cfgFile, anchor)
+    assertEquals(1, cfg.userDictionaries.size)
+  }
+
+  @Test
+  fun fromReady() {
+    val configRes = Resource.ready(Config.defaultConfig())
+    val cfg = Config.fromResource(configRes, PathAnchor.none())
+    assertEquals(1, cfg.userDictionaries.size)
+  }
+
+  @Test
+  fun fromReadyInvalidClass() {
+    val res = Resource.ready(10)
+    assertFailsWith<ClassCastException> { Config.fromResource(res, PathAnchor.none()) }
+  }
+
+  @Test
+  fun fromReadyNotFound() {
+    val anchor = PathAnchor.none()
+    val res = anchor.resource<Any>("not_found.resource")
+    assertFailsWith<FileNotFoundException> { Config.fromResource(res, anchor) }
   }
 }

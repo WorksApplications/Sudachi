@@ -22,6 +22,7 @@ import com.worksap.nlp.sudachi.dictionary.CharacterCategory;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -219,6 +220,37 @@ public class Config {
      */
     public static Config fromClasspathMerged(String name) throws IOException {
         return fromClasspathMerged(Config.class.getClassLoader(), name);
+    }
+
+    /**
+     * Create Config object from the passed resource. Resources are created by {@link PathAnchor}.
+     *
+     * @param resource resource object capturing
+     * @param anchor object that will be used for path resolution and class loading
+     * @return parsed Config object
+     * @param <T> can be anything
+     * @throws IOException when IO fails
+     * @throws FileNotFoundException if resource can not be found
+     * @see PathAnchor#resource(String)
+     */
+    public static <T> Config fromResource(Resource<T> resource, PathAnchor anchor) throws IOException {
+        if (resource instanceof Resource.Classpath) {
+            return fromClasspath((URL)resource.repr(), anchor);
+        }
+        if (resource instanceof Resource.Filesystem) {
+            return fromFile((Path)resource.repr(), anchor);
+        }
+        if (resource instanceof Resource.Ready) {
+            Object ready = resource.repr();
+            if (ready instanceof Config) {
+                return (Config) ready;
+            }
+            throw new ClassCastException("expected Config, was " + ready.getClass());
+        }
+        if (resource instanceof Resource.NotFound) {
+            throw new FileNotFoundException(resource.toString());
+        }
+        throw new IllegalStateException("should not happen");
     }
 
     /**
