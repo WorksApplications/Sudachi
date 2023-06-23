@@ -223,22 +223,28 @@ public class Config {
     }
 
     /**
-     * Create Config object from the passed resource. Resources are created by {@link PathAnchor}.
+     * Create Config object from the passed resource. Resources are created by
+     * {@link PathAnchor}.
      *
-     * @param resource resource object capturing
-     * @param anchor object that will be used for path resolution and class loading
+     * @param resource
+     *            resource object capturing
+     * @param anchor
+     *            object that will be used for path resolution and class loading
      * @return parsed Config object
-     * @param <T> can be anything
-     * @throws IOException when IO fails
-     * @throws FileNotFoundException if resource can not be found
+     * @param <T>
+     *            can be anything
+     * @throws IOException
+     *             when IO fails
+     * @throws FileNotFoundException
+     *             if resource can not be found
      * @see PathAnchor#resource(String)
      */
     public static <T> Config fromResource(Resource<T> resource, PathAnchor anchor) throws IOException {
         if (resource instanceof Resource.Classpath) {
-            return fromClasspath((URL)resource.repr(), anchor);
+            return fromClasspath((URL) resource.repr(), anchor);
         }
         if (resource instanceof Resource.Filesystem) {
-            return fromFile((Path)resource.repr(), anchor);
+            return fromFile((Path) resource.repr(), anchor);
         }
         if (resource instanceof Resource.Ready) {
             Object ready = resource.repr();
@@ -726,7 +732,7 @@ public class Config {
 
             T result;
             try {
-                Constructor<? extends T> constructor = clz.getConstructor();
+                Constructor<? extends T> constructor = lookupConstructor(clz);
                 result = constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
                     | InvocationTargetException e) {
@@ -736,6 +742,19 @@ public class Config {
             pluginSettings.base = realAnchor;
             result.setSettings(pluginSettings);
             return result;
+        }
+
+        private Constructor<? extends T> lookupConstructor(Class<? extends T> clz) throws NoSuchMethodException {
+            try {
+                return clz.getConstructor();
+            } catch (NoSuchMethodException ignored) {
+                try {
+                    return clz.getDeclaredConstructor();
+                } catch (NoSuchMethodException | SecurityException ignored2) {
+                    throw new NoSuchElementException("class " + clz
+                            + " did not have accessible no-arg constructor or security policy forbids access");
+                }
+            }
         }
 
         /**
