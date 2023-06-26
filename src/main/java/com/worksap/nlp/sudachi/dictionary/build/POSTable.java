@@ -76,4 +76,22 @@ public class POSTable implements WriteDictionary {
         return table.size() - builtin;
     }
 
+    public Void compile(BlockOutput out) throws IOException {
+        return out.measured("POS Table", (p) -> {
+            ChanneledBuffer cbuf = new ChanneledBuffer(out.getChannel());
+            cbuf.byteBuffer(2).putShort((short) table.size());
+            for (int i = 0; i < table.size(); ++i) {
+                BufWriter writer = cbuf.writer(POS.MAX_BINARY_LENGTH);
+                POS pos = table.get(i);
+                for (String s : pos) {
+                    // strings are always shorter than POS.MAX
+                    writer.putShortString(s);
+                }
+                p.progress(i, table.size());
+            }
+            cbuf.flush();
+            return null;
+        });
+
+    }
 }

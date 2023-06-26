@@ -38,7 +38,7 @@ import java.util.List;
  *     "leftId"  : 5968,
  *     "rigthId" : 5968,
  *     "cost"    : 3857
- *   }
+ * }
  * }
  * </pre>
  *
@@ -47,31 +47,24 @@ import java.util.List;
  * {@code cost} is the cost of the OOVs.
  */
 class SimpleOovProviderPlugin extends OovProviderPlugin {
-
-    short oovPOSId;
-    short leftId;
-    short rightId;
-    short cost;
+    LatticeNodeImpl.OOVFactory factory;
 
     @Override
     public void setUp(Grammar grammar) {
         POS pos = new POS(settings.getStringList("oovPOS"));
-        leftId = (short) settings.getInt("leftId");
-        rightId = (short) settings.getInt("rightId");
-        cost = (short) settings.getInt("cost");
+        short leftId = (short) settings.getInt("leftId");
+        short rightId = (short) settings.getInt("rightId");
+        short cost = (short) settings.getInt("cost");
         String userPosMode = settings.getString(USER_POS, USER_POS_FORBID);
-        oovPOSId = posIdOf(grammar, pos, userPosMode);
+        short oovPOSId = posIdOf(grammar, pos, userPosMode);
+        factory = LatticeNodeImpl.oovFactory(leftId, rightId, cost, oovPOSId);
     }
 
     @Override
     public int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> nodes) {
         if (otherWords == 0) {
-            LatticeNodeImpl node = createNode();
-            node.setParameter(leftId, rightId, cost);
             int length = inputText.getWordCandidateLength(offset);
-            String s = inputText.getSubstring(offset, offset + length);
-            WordInfo info = new WordInfo(s, (short) length, oovPOSId, s, s, "");
-            node.setWordInfo(info);
+            LatticeNodeImpl node = factory.make(offset, offset + length, inputText);
             nodes.add(node);
             return 1;
         } else {

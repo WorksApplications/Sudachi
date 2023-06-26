@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,24 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.GZIPInputStream;
 
-class DictionaryReader {
-
-    static ByteBuffer read(String filename) throws IOException {
-        InputStream input = DictionaryReader.class.getResourceAsStream(filename);
-        ArrayList<Byte> buffer = new ArrayList<>();
-        for (int c = input.read(); c >= 0; c = input.read()) {
-            buffer.add((byte) c);
+public class Download {
+    public static void downloadIfNotExist(Path file, String url, boolean gzip) throws IOException {
+        if (Files.exists(file)) {
+            return;
         }
-        ByteBuffer bytes = ByteBuffer.allocate(buffer.size());
-        bytes.order(ByteOrder.LITTLE_ENDIAN);
-        for (Byte b : buffer) {
-            bytes.put(b);
+        Files.createDirectories(file.getParent());
+        URL toDownload = new URL(url);
+        try (InputStream is = toDownload.openStream()) {
+            InputStream stream = is;
+            if (gzip) {
+                stream = new GZIPInputStream(is);
+            }
+            Files.copy(stream, file);
         }
-        bytes.rewind();
-
-        return bytes;
     }
 }

@@ -102,17 +102,19 @@ class CsvLexiconTest {
 
   @Test
   fun unescape() {
-    assertEquals("test", CsvLexicon.unescape("""test"""))
-    assertEquals("\u0000", CsvLexicon.unescape("""\u0000"""))
-    assertEquals("あ", CsvLexicon.unescape("""\u3042"""))
-    assertEquals("あ5", CsvLexicon.unescape("""\u30425"""))
-    assertEquals("💕", CsvLexicon.unescape("""\u{1f495}"""))
-    assertEquals("\udbff\udfff", CsvLexicon.unescape("""\u{10ffff}"""))
+    assertEquals("test", Unescape.unescape("""test"""))
+    assertEquals("\u0000", Unescape.unescape("""\u0000"""))
+    assertEquals("a\u0000a", Unescape.unescape("""a\u0000a"""))
+    assertEquals("あ", Unescape.unescape("""\u3042"""))
+    assertEquals("あ5", Unescape.unescape("""\u30425"""))
+    assertEquals("💕", Unescape.unescape("""\u{1f495}"""))
+    assertEquals("a💕x", Unescape.unescape("""a\u{1f495}x"""))
+    assertEquals("\udbff\udfff", Unescape.unescape("""\u{10ffff}"""))
   }
 
   @Test
   fun unescapeFails() {
-    assertFails { CsvLexicon.unescape("""\u{FFFFFF}""") }
-    assertFails { CsvLexicon.unescape("""\u{110000}""") } // 0x10ffff is the largest codepoint
+    assertFails { Unescape.unescape("""\u{FFFFFF}""") }
+    assertFails { Unescape.unescape("""\u{110000}""") } // 0x10ffff is the largest codepoint
   }
 }

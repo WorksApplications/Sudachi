@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.MMap;
@@ -26,33 +28,24 @@ import com.worksap.nlp.sudachi.MMap;
 public class BinaryDictionary implements Closeable, DictionaryAccess {
 
     private final ByteBuffer bytes;
-    private final DictionaryHeader header;
+    private final Description header;
     private final GrammarImpl grammar;
     private final DoubleArrayLexicon lexicon;
 
     public BinaryDictionary(String fileName) throws IOException {
-        this(MMap.map(fileName));
+        this(Paths.get(fileName));
+    }
+
+    public BinaryDictionary(Path filename) throws IOException {
+        this(MMap.map(filename));
     }
 
     public BinaryDictionary(ByteBuffer dictionary) throws IOException {
-        int offset = 0;
         bytes = dictionary;
 
-        header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-
-        long version = header.getVersion();
-        if (DictionaryVersion.hasGrammar(version)) {
-            grammar = new GrammarImpl(bytes, offset);
-            offset += grammar.storageSize();
-        } else if (header.isUserDictionary()) {
-            grammar = new GrammarImpl();
-        } else {
-            MMap.unmap(bytes);
-            throw new IOException("invalid dictionary");
-        }
-
-        lexicon = new DoubleArrayLexicon(bytes, offset, DictionaryVersion.hasSynonymGroupIds(version));
+        header = Description.load(dictionary);
+        grammar = GrammarImpl.load(bytes, header);
+        lexicon = DoubleArrayLexicon.load(bytes, header);
     }
 
     public static BinaryDictionary loadSystem(String fileName) throws IOException {
@@ -94,7 +87,7 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
         MMap.unmap(bytes);
     }
 
-    public DictionaryHeader getDictionaryHeader() {
+    public Description getDictionaryHeader() {
         return header;
     }
 

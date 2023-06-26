@@ -16,10 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
-import com.worksap.nlp.sudachi.Config
-import com.worksap.nlp.sudachi.Dictionary
-import com.worksap.nlp.sudachi.DictionaryFactory
-import com.worksap.nlp.sudachi.WordId
+import com.worksap.nlp.sudachi.*
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
@@ -28,10 +25,6 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
-
-fun <T : Any> T.res(name: String): URL {
-  return javaClass.getResource(name) ?: throw IllegalArgumentException("$name was not found")
-}
 
 class TestDic {
   private var matrixUrl: URL = res("test.matrix")
@@ -45,7 +38,7 @@ class TestDic {
   }
 
   fun system(data: String): TestDic {
-    val bldr = DicBuilder.system().matrix(matrixUrl).lexicon(data.byteInputStream())
+    val bldr = DicBuilder.system().matrix(matrixUrl).lexicon(data)
     val ch = MemChannel()
     bldr.build(ch)
     this.systemDic = BinaryDictionary(ch.buffer())
@@ -53,7 +46,7 @@ class TestDic {
   }
 
   fun user(data: String): TestDic {
-    val bldr = DicBuilder.user(systemDic).lexicon(data.byteInputStream())
+    val bldr = DicBuilder.user(systemDic).lexicon(data)
     val ch = MemChannel()
     bldr.build(ch)
     this.userDics.add(BinaryDictionary(ch.buffer()))
@@ -79,10 +72,10 @@ class UserDicTest {
             .load()
 
     val da = dic as DictionaryAccess
-    val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
-    assertEquals(dic.partOfSpeechSize, 2)
-    assertEquals(wi.surface, "東京都")
-    assertEquals(wi.readingForm, "トウキョウト")
+      assertEquals(dic.partOfSpeechSize, 2)
+      val wi = da.morpheme(WordId.make(1, 0))
+    assertEquals(wi.surface(), "東京都")
+    assertEquals(wi.readingForm(), "トウキョウト")
   }
 
   @Test
@@ -140,11 +133,10 @@ class UserDicTest {
             .load()
 
     val da = dic as DictionaryAccess
-    val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
+    val wi = da.morpheme(WordId.make(1, 0))
     assertEquals(dic.partOfSpeechSize, 3)
-    assertEquals(wi.surface, "東京都")
-    assertEquals(wi.posId, 2)
-    assertEquals(da.grammar.getPartOfSpeechString(2), POS("a", "b", "c", "d", "e", "f"))
+    assertEquals(wi.surface(), "東京都")
+    assertEquals(wi.partOfSpeech(), "a,b,c,d,e,f".pos)
   }
 
   @Test

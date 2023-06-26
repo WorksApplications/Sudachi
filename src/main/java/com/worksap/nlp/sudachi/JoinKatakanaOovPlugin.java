@@ -39,7 +39,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *     "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
  *     "oovPOS" : [ "POS1", "POS2", ... ],
  *     "minLength" : 3
- *   }
+ * }
  * }
  * </pre>
  */
@@ -47,6 +47,7 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
 
     short oovPosId;
     int minLength;
+    private LatticeNodeImpl.OOVFactory factory;
 
     @Override
     public void setUp(Grammar grammar) {
@@ -62,10 +63,12 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
         if (minLength < 0) {
             throw new IllegalArgumentException("minLength is negative");
         }
+
+        factory = LatticeNodeImpl.oovFactory((short) -1, (short) -1, (short) -1, oovPosId);
     }
 
     @Override
-    public void rewrite(InputText text, List<LatticeNode> path, Lattice lattice) {
+    public void rewrite(InputText text, List<LatticeNodeImpl> path, Lattice lattice) {
         for (int i = 0; i < path.size(); i++) {
             LatticeNode node = path.get(i);
             if ((node.isOOV() || isShorter(minLength, text, node)) && isKatakanaNode(text, node)) {
@@ -89,7 +92,7 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
                     begin++;
                 }
                 if (end - begin > 1) {
-                    concatenateOov(path, begin, end, oovPosId, lattice);
+                    concatenateOov(path, begin, end, factory, lattice);
                     i = begin + 1;
                 }
             }

@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
@@ -27,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CsvLexicon implements WriteDictionary {
@@ -37,8 +37,8 @@ public class CsvLexicon implements WriteDictionary {
     private static final Pattern PATTERN_ID = Pattern.compile("U?\\d+");
     private final Parameters parameters = new Parameters();
     private final POSTable posTable;
-    private final List<WordEntry> entries = new ArrayList<>();
-    private WordIdResolver widResolver = new WordLookup.Noop();
+    private final List<RawWordEntry> entries = new ArrayList<>();
+    private WordIdResolver widResolver = null;
 
     public CsvLexicon(POSTable pos) {
         posTable = pos;
@@ -48,46 +48,16 @@ public class CsvLexicon implements WriteDictionary {
         this.widResolver = widResolver;
     }
 
-    /**
-     * Resolve unicode escape sequences in the string
-     * <p>
-     * Sequences are defined to be \\u0000-\\uFFFF: exactly four hexadecimal
-     * characters preceded by \\u \\u{...}: a correct unicode character inside
-     * brackets
-     *
-     * @param text
-     *            to to resolve sequences
-     * @return string with unicode escapes resolved
-     */
-    public static String unescape(String text) {
-        Matcher m = unicodeLiteral.matcher(text);
-        if (!m.find()) {
-            return text;
-        }
-
-        StringBuffer sb = new StringBuffer();
-        m.reset();
-        while (m.find()) {
-            String u = m.group(1);
-            if (u.startsWith("{")) {
-                u = u.substring(1, u.length() - 1);
-            }
-            m.appendReplacement(sb, new String(Character.toChars(Integer.parseInt(u, 16))));
-        }
-        m.appendTail(sb);
-        return sb.toString();
-    }
-
-    public List<WordEntry> getEntries() {
+    public List<RawWordEntry> getEntries() {
         return entries;
     }
 
-    WordEntry parseLine(List<String> cols) {
+    RawWordEntry parseLine(List<String> cols) {
         if (cols.size() < MIN_REQUIRED_NUMBER_OF_COLUMNS) {
             throw new IllegalArgumentException("invalid format");
         }
         for (int i = 0; i < 15; i++) {
-            cols.set(i, unescape(cols.get(i)));
+            cols.set(i, Unescape.unescape(cols.get(i)));
         }
 
         if (cols.get(0).getBytes(StandardCharsets.UTF_8).length > DicBuffer.MAX_STRING
@@ -100,7 +70,7 @@ public class CsvLexicon implements WriteDictionary {
             throw new IllegalArgumentException("headword is empty");
         }
 
-        WordEntry entry = new WordEntry();
+        RawWordEntry entry = new RawWordEntry();
 
         // headword for trie
         if (!cols.get(1).equals("-1")) {
@@ -108,7 +78,13 @@ public class CsvLexicon implements WriteDictionary {
         }
 
         // left-id, right-id, cost
-        parameters.add(Short.parseShort(cols.get(1)), Short.parseShort(cols.get(2)), Short.parseShort(cols.get(3)));
+        short leftId = Short.parseShort(cols.get(1));
+        short rightId = Short.parseShort(cols.get(2));
+        short cost = Short.parseShort(cols.get(3));
+        parameters.add(leftId, rightId, cost);
+        entry.leftId = leftId;
+        entry.rightId = rightId;
+        entry.cost = cost;
 
         // part of speech
         POS pos = new POS(cols.get(5), cols.get(6), cols.get(7), cols.get(8), cols.get(9), cols.get(10));
@@ -123,19 +99,6 @@ public class CsvLexicon implements WriteDictionary {
         if (cols.get(14).equals("A") && (!entry.aUnitSplitString.equals("*") || !entry.bUnitSplitString.equals("*"))) {
             throw new IllegalArgumentException("invalid splitting");
         }
-
-        int[] synonymGids = new int[0];
-        if (cols.size() > 18) {
-            synonymGids = parseSynonymGids(cols.get(18));
-        }
-
-        entry.wordInfo = new WordInfo(cols.get(4), // headword
-                (short) cols.get(0).getBytes(StandardCharsets.UTF_8).length, posId, cols.get(12), // normalizedForm
-                (cols.get(13).equals("*") ? -1 : Integer.parseInt(cols.get(13))), // dictionaryFormWordId
-                "", // dummy
-                cols.get(11), // readingForm
-                null, null, null, synonymGids);
-
         return entry;
     }
 
@@ -159,15 +122,15 @@ public class CsvLexicon implements WriteDictionary {
         if (cols.length < 8) {
             throw new IllegalArgumentException("too few columns");
         }
-        String headword = unescape(cols[0]);
+        String headword = Unescape.unescape(cols[0]);
         POS pos = new POS(Arrays.copyOfRange(cols, 1, 7));
         short posId = posTable.getId(pos);
-        String reading = unescape(cols[7]);
+        String reading = Unescape.unescape(cols[7]);
         return widResolver.lookup(headword, posId, reading);
     }
 
     void checkSplitInfoFormat(String info) {
-        if (info.chars().filter(i -> i == '/').count() + 1 > ARRAY_MAX_LENGTH) {
+        if (StringUtil.count(info, '/') + 1 > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
         }
     }
@@ -215,56 +178,10 @@ public class CsvLexicon implements WriteDictionary {
 
     @Override
     public void writeTo(ModelOutput output) throws IOException {
-        // write number of entries
-        ByteBuffer buf = ByteBuffer.allocate(4);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        buf.putInt(entries.size());
-        buf.flip();
-        output.write(buf);
 
-        parameters.writeTo(output);
-
-        int offsetsSize = 4 * entries.size();
-        DicBuffer offsets = new DicBuffer(offsetsSize);
-        long offsetsPosition = output.position();
-        // make a hole for
-        output.position(offsetsPosition + offsetsSize);
-
-        output.withPart("word entries", () -> {
-            DicBuffer buffer = new DicBuffer(128 * 1024);
-            int offset = (int) output.position();
-            int numEntries = entries.size();
-            for (int i = 0; i < numEntries; ++i) {
-                WordEntry entry = entries.get(i);
-                if (buffer.wontFit(16 * 1024)) {
-                    offset += buffer.consume(output::write);
-                }
-                offsets.putInt(offset + buffer.position());
-
-                WordInfo wi = entry.wordInfo;
-                buffer.put(wi.getSurface());
-                buffer.putLength(wi.getLength());
-                buffer.putShort(wi.getPOSId());
-                buffer.putEmptyIfEqual(wi.getNormalizedForm(), wi.getSurface());
-                buffer.putInt(wi.getDictionaryFormWordId());
-                buffer.putEmptyIfEqual(wi.getReadingForm(), wi.getSurface());
-                buffer.putInts(parseSplitInfo(entry.aUnitSplitString));
-                buffer.putInts(parseSplitInfo(entry.bUnitSplitString));
-                buffer.putInts(parseSplitInfo(entry.wordStructureString));
-                buffer.putInts(wi.getSynonymGoupIds());
-                output.progress(i, numEntries);
-            }
-
-            buffer.consume(output::write);
-        });
-
-        long pos = output.position();
-        output.position(offsetsPosition);
-        output.withPart("WordInfo offsets", () -> offsets.consume(output::write));
-        output.position(pos);
     }
 
-    public int addEntry(WordEntry e) {
+    public int addEntry(RawWordEntry e) {
         int id = entries.size();
         entries.add(e);
         return id;
@@ -274,11 +191,4 @@ public class CsvLexicon implements WriteDictionary {
         parameters.setLimits(left, right);
     }
 
-    public static class WordEntry {
-        String headword;
-        WordInfo wordInfo;
-        String aUnitSplitString;
-        String bUnitSplitString;
-        String wordStructureString;
-    }
 }

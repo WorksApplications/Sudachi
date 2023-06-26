@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import com.worksap.nlp.sudachi.dictionary.build.MemChannel
-import com.worksap.nlp.sudachi.dictionary.build.res
 
 /** Utility for lazily creating binary dictionaries for test */
 object TestDictionary {
@@ -28,7 +27,7 @@ object TestDictionary {
     DicBuilder.system()
         .matrix(res("/dict/matrix.def"))
         .lexicon(res("/dict/lex.csv"))
-        .description("the system dictionary for the unit tests")
+        .comment("the system dictionary for the unit tests")
         .build(result)
     result
   }

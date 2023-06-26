@@ -41,7 +41,7 @@ public class JoinKatakanaOovPluginTest {
         // アイ, アイウ in the dictionary
 
         plugin.minLength = 0;
-        List<LatticeNode> path = getPath("アイアイウ");
+        List<? extends LatticeNode> path = getPath("アイアイウ");
         assertEquals(2, path.size());
 
         plugin.minLength = 1;
@@ -61,7 +61,7 @@ public class JoinKatakanaOovPluginTest {
     public void testPOS() {
         // アイアイウ is 名詞-固有名詞-地名-一般 in the dictionary
         plugin.minLength = 3;
-        List<LatticeNode> path = getPath("アイアイウ");
+        List<? extends LatticeNode> path = getPath("アイアイウ");
         assertEquals(1, path.size());
         assertFalse(path.get(0).isOOV()); // use the word in dictionary
     }
@@ -69,32 +69,32 @@ public class JoinKatakanaOovPluginTest {
     @Test
     public void testStartWithMiddle() {
         plugin.minLength = 3;
-        List<LatticeNode> path = getPath("アイウアイアイウ");
+        List<? extends LatticeNode> path = getPath("アイウアイアイウ");
         assertEquals(1, path.size());
     }
 
     @Test
     public void testStartWithTail() {
         plugin.minLength = 3;
-        List<LatticeNode> path = getPath("アイウアイウアイ");
+        List<? extends LatticeNode> path = getPath("アイウアイウアイ");
         assertEquals(1, path.size());
     }
 
     @Test
     public void testWithNOOOVBOW() {
         plugin.minLength = 3;
-        List<LatticeNode> path = getPath("ァアイアイウ");
+        List<LatticeNodeImpl> path = getPath("ァアイアイウ");
         assertEquals(2, path.size());
-        assertEquals("ァ", path.get(0).getWordInfo().getSurface());
+        assertEquals("ァ", path.get(0).getBaseSurface());
 
         path = getPath("アイウァアイウ");
         assertEquals(1, path.size());
     }
 
-    private List<LatticeNode> getPath(String text) {
+    private List<LatticeNodeImpl> getPath(String text) {
         UTF8InputText input = new UTF8InputTextBuilder(text, tokenizer.grammar).build();
         LatticeImpl lattice = tokenizer.buildLattice(input);
-        List<LatticeNode> path = lattice.getBestPath();
+        List<LatticeNodeImpl> path = lattice.getBestPath();
         plugin.rewrite(input, path, lattice);
         lattice.clear();
         return path;

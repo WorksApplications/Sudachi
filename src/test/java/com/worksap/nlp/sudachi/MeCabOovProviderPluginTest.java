@@ -56,10 +56,8 @@ public class MeCabOovProviderPluginTest {
     public void setUp() throws IOException {
         plugin = new TestPlugin();
 
-        MeCabOovProviderPlugin.OOV oov1 = new MeCabOovProviderPlugin.OOV();
-        oov1.posId = 1;
-        MeCabOovProviderPlugin.OOV oov2 = new MeCabOovProviderPlugin.OOV();
-        oov2.posId = 2;
+        LatticeNodeImpl.OOVFactory oov1 = TestLattice.oovFactory(1);
+        LatticeNodeImpl.OOVFactory oov2 = TestLattice.oovFactory(2);
         plugin.oovList.put(CategoryType.KANJI, Collections.singletonList(oov1));
         plugin.oovList.put(CategoryType.KANJINUMERIC, Arrays.asList(oov1, oov2));
 
@@ -406,10 +404,8 @@ public class MeCabOovProviderPluginTest {
         plugin.readOOV(oovConfig, new MockGrammar(), "forbid");
         assertThat(plugin.oovList.size(), is(1));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).size(), is(2));
-        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).leftId, is((short) 1));
-        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).rightId, is((short) 2));
-        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).cost, is((short) 3));
-        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0).posId, is((short) 0));
+        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0), is(LatticeNodeImpl.oovFactory((short) 1, (short) 2,
+                (short) 3, (short) 0)));
     }
 
     @Test(expected = IllegalArgumentException.class)

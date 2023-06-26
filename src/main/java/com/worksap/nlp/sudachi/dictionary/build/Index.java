@@ -17,6 +17,8 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
+import com.worksap.nlp.sudachi.dictionary.Blocks;
+import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +30,7 @@ import java.util.*;
  * Dictionary Parts: Trie index and entry offsets
  */
 public class Index implements WriteDictionary {
-    private final SortedMap<byte[], List<Integer>> elements = new TreeMap<>((byte[] l, byte[] r) -> {
+    private final SortedMap<byte[], Ints> elements = new TreeMap<>((byte[] l, byte[] r) -> {
         int llen = l.length;
         int rlen = r.length;
         for (int i = 0; i < Math.min(llen, rlen); i++) {
@@ -43,11 +45,8 @@ public class Index implements WriteDictionary {
 
     public int add(String key, int wordId) {
         byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
-        List<Integer> entries = elements.computeIfAbsent(bytes, k -> new ArrayList<>());
-        if (entries.size() >= 255) {
-            throw new IllegalArgumentException(String.format("key %s has >= 255 entries in the dictionary", key));
-        }
-        entries.add(wordId);
+        Ints entries = elements.computeIfAbsent(bytes, k -> new Ints(4));
+        entries.append(wordId);
         count += 1;
         return bytes.length;
     }
@@ -65,13 +64,15 @@ public class Index implements WriteDictionary {
         output.withSizedPart("WordId table", () -> {
             int i = 0;
             int numEntries = this.elements.entrySet().size();
-            for (Map.Entry<byte[], List<Integer>> entry : this.elements.entrySet()) {
+            for (Map.Entry<byte[], Ints> entry : this.elements.entrySet()) {
                 keys[i] = entry.getKey();
                 values[i] = wordIdTable.position();
                 i++;
-                List<Integer> wordIds = entry.getValue();
-                wordIdTable.put((byte) wordIds.size());
-                for (int wid : wordIds) {
+                Ints wordIds = entry.getValue();
+                int length = wordIds.length();
+                wordIdTable.put((byte) length);
+                for (int word = 0; word < length; ++word) {
+                    int wid = wordIds.get(word);
                     wordIdTable.putInt(wid);
                 }
                 output.progress(i, numEntries);
@@ -92,5 +93,74 @@ public class Index implements WriteDictionary {
 
         wordIdTable.flip();
         output.write(wordIdTable);
+    }
+
+    public void compile(BlockLayout layout, List<RawWordEntry> notIndexed) throws IOException {
+        TrieData data = layout.block(Blocks.WORD_POINTERS, (o) -> writeWordTable(o, notIndexed));
+        layout.block(Blocks.TRIE_INDEX, data::writeTrie);
+    }
+
+    private TrieData writeWordTable(BlockOutput out, List<? extends Lookup2.Entry> notIndexed) throws IOException {
+        int size = this.elements.size();
+        byte[][] keys = new byte[size][];
+        int[] values = new int[size];
+        ChanneledBuffer buffer = new ChanneledBuffer(out.getChannel(),
+                Math.max((notIndexed.size() + 16) * 5, 64 * 1024));
+
+        out.measured("Word Id table", (p) -> {
+            int i = 0;
+            for (Map.Entry<byte[], Ints> entry : this.elements.entrySet()) {
+                keys[i] = entry.getKey();
+                values[i] = buffer.offset();
+                i++;
+                Ints wordIds = entry.getValue();
+                int length = wordIds.length();
+                BufWriter buf = buffer.writer((length + 1) * 5);
+
+                buf.putVarint32(length);
+                int prevWid = 0;
+                for (int word = 0; word < length; ++word) {
+                    int wid = wordIds.get(word);
+                    buf.putVarint32(wid - prevWid);
+                    prevWid = wid;
+                }
+                p.progress(i, size);
+            }
+            // write non-indexed entries for being able to iterate over all word entries
+            int nis = notIndexed.size();
+            BufWriter buf = buffer.writer((nis + 1) * 5);
+            buf.putVarint32(nis);
+            int prevId = 0;
+            for (Lookup2.Entry e : notIndexed) {
+                int wid = e.pointer();
+                buf.putVarint32(wid - prevId);
+                prevId = wid;
+            }
+            return null;
+        });
+
+        buffer.flush();
+
+        return new TrieData(keys, values);
+    }
+
+    private static class TrieData {
+        private final byte[][] keys;
+        private final int[] values;
+
+        public TrieData(byte[][] keys, int[] values) {
+            this.keys = keys;
+            this.values = values;
+        }
+
+        public Void writeTrie(BlockOutput block) throws IOException {
+            return block.measured("Trie Index", (p) -> {
+                DoubleArray trie = new DoubleArray();
+                trie.build(keys, values, p::progress);
+                ByteBuffer buf = trie.byteArray().duplicate();
+                block.getChannel().write(buf);
+                return null;
+            });
+        }
     }
 }

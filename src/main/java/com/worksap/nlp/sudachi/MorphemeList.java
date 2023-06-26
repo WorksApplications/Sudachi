@@ -29,7 +29,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     final InputText inputText;
     final Grammar grammar;
     final Lexicon lexicon;
-    final List<LatticeNode> path;
+    final List<LatticeNodeImpl> path;
     final boolean allowEmptyMorpheme;
 
     final Tokenizer.SplitMode mode;
@@ -37,7 +37,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     public final static MorphemeList EMPTY = new MorphemeList(null, null, null, Collections.emptyList(), true,
             Tokenizer.SplitMode.C);
 
-    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path, boolean allowEmptyMorpheme,
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNodeImpl> path, boolean allowEmptyMorpheme,
             Tokenizer.SplitMode mode) {
         this.inputText = input;
         this.grammar = grammar;
@@ -90,8 +90,8 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     List<Morpheme> split(Tokenizer.SplitMode mode, int index) {
-        List<LatticeNode> nodes = new ArrayList<>();
-        LatticeNodeImpl node = (LatticeNodeImpl) path.get(index);
+        List<LatticeNodeImpl> nodes = new ArrayList<>();
+        LatticeNodeImpl node = path.get(index);
         node.appendSplitsTo(nodes, mode);
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
     }
@@ -110,11 +110,10 @@ public class MorphemeList extends AbstractList<Morpheme> {
             return this;
         }
 
-        List<LatticeNode> nodes = new ArrayList<>();
+        List<LatticeNodeImpl> nodes = new ArrayList<>();
 
-        for (LatticeNode node : path) {
-            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitsTo(nodes, mode);
+        for (LatticeNodeImpl node : path) {
+            node.appendSplitsTo(nodes, mode);
         }
 
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
@@ -133,6 +132,11 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     public int getInternalCost() {
-        return path.get(path.size() - 1).getPathCost() - path.get(0).getPathCost();
+        List<LatticeNodeImpl> p = path;
+        return p.get(p.size() - 1).getPathCost() - p.get(0).getPathCost();
+    }
+
+    /* internal*/ LatticeNodeImpl node(int index) {
+        return path.get(index);
     }
 }

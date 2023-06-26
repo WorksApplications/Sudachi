@@ -70,6 +70,11 @@ public class GrammarImpl implements Grammar {
         originalPosSize = 0;
     }
 
+    public static GrammarImpl load(ByteBuffer binaryDic, Description header) {
+        Connection matrix = Connection.fromByteBufferV1(header.slice(binaryDic, Blocks.CONNECTION_MATRIX));
+        return new GrammarImpl();
+    }
+
     public int storageSize() {
         return storageSize;
     }

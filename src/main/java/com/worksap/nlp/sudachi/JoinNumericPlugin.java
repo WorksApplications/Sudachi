@@ -16,12 +16,12 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.POS;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * A plugin for concatenation of the numerics.
@@ -36,7 +36,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
  *     "enableNormalize" : true,
- *   }
+ * }
  * }
  * </pre>
  *
@@ -47,7 +47,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  */
 class JoinNumericPlugin extends PathRewritePlugin {
 
-    static final List<String> NUMERIC_POS = Arrays.asList("名詞", "数詞", "*", "*", "*", "*");
+    static final POS NUMERIC_POS = new POS("名詞", "数詞", "*", "*", "*", "*");
 
     boolean enableNormalize;
     short numericPOSId;
@@ -59,16 +59,16 @@ class JoinNumericPlugin extends PathRewritePlugin {
     }
 
     @Override
-    public void rewrite(InputText text, List<LatticeNode> path, Lattice lattice) {
+    public void rewrite(InputText text, List<LatticeNodeImpl> path, Lattice lattice) {
         int beginIndex = -1;
         boolean commaAsDigit = true;
         boolean periodAsDigit = true;
         NumericParser parser = new NumericParser();
 
         for (int i = 0; i < path.size(); i++) {
-            LatticeNode node = path.get(i);
+            LatticeNodeImpl node = path.get(i);
             Set<CategoryType> types = getCharCategoryTypes(text, node);
-            String s = node.getWordInfo().getNormalizedForm();
+            String s = node.getNormalizedForm();
             if (types.contains(CategoryType.NUMERIC) || types.contains(CategoryType.KANJINUMERIC)
                     || (periodAsDigit && s.equals(".")) || (commaAsDigit && s.equals(","))) {
 
@@ -99,7 +99,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
                         concat(path, beginIndex, i, lattice, parser);
                         i = beginIndex + 1;
                     } else {
-                        String ss = path.get(i - 1).getWordInfo().getNormalizedForm();
+                        String ss = path.get(i - 1).getNormalizedForm();
                         if ((parser.errorState == NumericParser.Error.COMMA && ss.equals(","))
                                 || (parser.errorState == NumericParser.Error.POINT && ss.equals("."))) {
                             concat(path, beginIndex, i - 1, lattice, parser);
@@ -121,7 +121,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
             if (parser.done()) {
                 concat(path, beginIndex, path.size(), lattice, parser);
             } else {
-                String ss = path.get(path.size() - 1).getWordInfo().getNormalizedForm();
+                String ss = path.get(path.size() - 1).getNormalizedForm();
                 if ((parser.errorState == NumericParser.Error.COMMA && ss.equals(","))
                         || (parser.errorState == NumericParser.Error.POINT && ss.equals("."))) {
                     concat(path, beginIndex, path.size() - 1, lattice, parser);
@@ -130,7 +130,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
         }
     }
 
-    private void concat(List<LatticeNode> path, int begin, int end, Lattice lattice, NumericParser parser) {
+    private void concat(List<LatticeNodeImpl> path, int begin, int end, Lattice lattice, NumericParser parser) {
         if (path.get(begin).getWordInfo().getPOSId() != numericPOSId)
             return;
         if (enableNormalize) {

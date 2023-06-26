@@ -40,7 +40,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.OovProviderPlugin",
  *     "example" : "example setting"
- *   }
+ * }
  * }
  * </pre>
  */
@@ -61,8 +61,6 @@ public abstract class OovProviderPlugin extends Plugin {
 
     /**
      * Provides the nodes of OOV morphemes.
-     *
-     * To create the new node you can use {@link #createNode}.
      *
      * @param inputText
      *            the input text
@@ -93,14 +91,13 @@ public abstract class OovProviderPlugin extends Plugin {
     }
 
     /**
-     * Returns a new node which represents an OOV word.
+     * Use {@link LatticeNodeImpl#oovFactory(short, short, short, short)} instead.
      *
-     * @return a new OOV node
+     * @return throws an exception
      */
+    @Deprecated
     protected LatticeNodeImpl createNode() {
-        LatticeNodeImpl node = new LatticeNodeImpl();
-        node.setOOV();
-        return node;
+        throw new IllegalStateException("use LatticeNodeImpl.oovFactory()");
     }
 
     /**

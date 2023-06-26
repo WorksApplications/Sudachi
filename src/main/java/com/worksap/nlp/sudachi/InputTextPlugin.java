@@ -34,7 +34,7 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.InputTextPlugin",
  *     "example" : "example setting"
- *   }
+ * }
  * }
  * </pre>
  */
