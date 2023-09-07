@@ -168,4 +168,12 @@ public class LexiconSet implements Lexicon {
     public WordLookup makeLookup() {
         return new WordLookup(this.lexicons);
     }
+
+    public boolean isValid() {
+        return lexicons != null;
+    }
+
+    public void invalidate() {
+        lexicons = null;
+    }
 }

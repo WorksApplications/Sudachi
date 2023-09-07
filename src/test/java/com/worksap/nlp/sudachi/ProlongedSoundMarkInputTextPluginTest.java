@@ -214,5 +214,10 @@ public class ProlongedSoundMarkInputTextPluginTest {
         @Override
         public void setCharacterCategory(CharacterCategory charCategory) {
         }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
     }
 }

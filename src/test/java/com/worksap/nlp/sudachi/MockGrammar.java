@@ -82,4 +82,9 @@ public class MockGrammar implements Grammar {
     @Override
     public void setCharacterCategory(CharacterCategory charCategory) {
     }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 }

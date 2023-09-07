@@ -164,4 +164,13 @@ public class GrammarImpl implements Grammar {
         }
         return (short) i;
     }
+
+    @Override
+    public boolean isValid() {
+        return matrix != null;
+    }
+
+    public void invalidate() {
+        matrix = null;
+    }
 }

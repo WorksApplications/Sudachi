@@ -155,6 +155,7 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     MorphemeList tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
+        checkIfAlive();
         buildLattice(input);
 
         if (dumpOutput != null) {
@@ -285,5 +286,12 @@ class JapaneseTokenizer implements Tokenizer {
 
     void disableEmptyMorpheme() {
         allowEmptyMorpheme = false;
+    }
+
+    void checkIfAlive() {
+        if (lexicon.isValid() && grammar.isValid()) {
+            return;
+        }
+        throw new IllegalStateException("dictionary was closed prior to tokenization");
     }
 }

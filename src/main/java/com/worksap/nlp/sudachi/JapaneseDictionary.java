@@ -118,7 +118,9 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
     @Override
     public void close() throws IOException {
+        grammar.invalidate();
         grammar = null;
+        lexicon.invalidate();
         lexicon = null;
         for (BinaryDictionary dictionary : dictionaries) {
             dictionary.close();
@@ -127,6 +129,9 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
     @Override
     public Tokenizer create() {
+        if (grammar == null || lexicon == null) {
+            throw new IllegalStateException("trying to use closed dictionary");
+        }
         JapaneseTokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
                 pathRewritePlugins);
         if (!allowEmptyMorpheme) {
