@@ -126,4 +126,6 @@ public interface Grammar {
     default Connection getConnection() {
         throw new UnsupportedOperationException();
     }
+
+    boolean isValid();
 }
