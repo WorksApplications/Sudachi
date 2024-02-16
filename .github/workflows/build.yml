@@ -30,6 +30,7 @@ jobs:
           distribution: temurin
           cache: gradle
       - name: Cache SonarCloud packages
+        if: matrix.java-version != 11
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
