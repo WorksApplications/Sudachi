@@ -21,7 +21,7 @@
     ],
     "pathRewritePlugin" : [
         { "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
-          "joinKanjiNumeric" : true },
+          "enableNormalize" : true },
         { "class" : "com.worksap.nlp.sudachi.JoinKatakanaOovPlugin",
           "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],
           "minLength" : 3
