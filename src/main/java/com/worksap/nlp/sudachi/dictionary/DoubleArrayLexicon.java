@@ -33,9 +33,8 @@ public class DoubleArrayLexicon implements Lexicon {
     private final WordIdTable wordIdTable;
     private final CompactedStrings strings;
 
-
-    public DoubleArrayLexicon(Description description, WordIdTable wordIdTable, WordParameters wordParams, WordInfoList wordInfos,
-            DoubleArray trie, CompactedStrings strings) {
+    public DoubleArrayLexicon(Description description, WordIdTable wordIdTable, WordParameters wordParams,
+            WordInfoList wordInfos, DoubleArray trie, CompactedStrings strings) {
         this.description = description;
         this.wordIdTable = wordIdTable;
         this.parameters = wordParams;
@@ -155,9 +154,11 @@ public class DoubleArrayLexicon implements Lexicon {
 
     /**
      * Returns true if the cost value is a normal value which can be used as is.
-     * Otherwise, it is a placeholder which needs to be recalculated
-     * based on the content of the dictionary.
-     * @param cost raw cost value
+     * Otherwise, it is a placeholder which needs to be recalculated based on the
+     * content of the dictionary.
+     * 
+     * @param cost
+     *            raw cost value
      * @return true a normal cost value
      */
     public static boolean isNormalCost(short cost) {

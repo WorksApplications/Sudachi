@@ -24,11 +24,11 @@ import com.worksap.nlp.sudachi.wordInfo
 import kotlin.test.*
 
 fun DicBuilder.System.lexicon(s: String): DicBuilder.System {
-    return this.lexicon("test", {s.byteInputStream()}, s.length.toLong())
+  return this.lexicon("test", { s.byteInputStream() }, s.length.toLong())
 }
 
 fun DicBuilder.User.lexicon(s: String): DicBuilder.User {
-    return this.lexicon("test", {s.byteInputStream()}, s.length.toLong())
+  return this.lexicon("test", { s.byteInputStream() }, s.length.toLong())
 }
 
 class SystemDicTest {
@@ -49,9 +49,7 @@ class SystemDicTest {
     val bldr = DicBuilder.system().matrix(javaClass.getResource("test.matrix"))
     val data = MemChannel()
     repeat(10) { bldr.lexicon(javaClass.getResource("one.csv")) }
-    bldr
-        .lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7")
-        .build(data)
+    bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7").build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(11, dic.lexicon.size())
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
@@ -87,12 +85,8 @@ class SystemDicTest {
   @Test
   fun failMatrixSizeValidation() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
-    assertFails {
-      bldr.lexicon("東,4,1,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*")
-    }
-    assertFails {
-      bldr.lexicon("東,1,4,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*")
-    }
+    assertFails { bldr.lexicon("東,4,1,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*") }
+    assertFails { bldr.lexicon("東,1,4,4675,東,名詞,普通名詞,一般,*,*,*,ヒガシ,東,*,A,*,*,*,*") }
   }
 
   @Test
@@ -103,8 +97,7 @@ class SystemDicTest {
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/2,*,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
-                .trimIndent())
+                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
@@ -121,8 +114,7 @@ class SystemDicTest {
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/2",*,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
-                .trimIndent())
+                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
@@ -139,8 +131,7 @@ class SystemDicTest {
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
-                .trimIndent())
+                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
@@ -157,8 +148,7 @@ class SystemDicTest {
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
                         東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,U0/U2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*"""
-                .trimIndent())
+                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
@@ -177,8 +167,7 @@ class SystemDicTest {
   @Test
   fun failInvalidNumberOfInlineRefFields() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
-    bldr.lexicon(
-        """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"a,b,c,d,e",*,*""")
+    bldr.lexicon("""東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"a,b,c,d,e",*,*""")
     assertFails { bldr.build(MemChannel()) }
   }
 
@@ -187,8 +176,7 @@ class SystemDicTest {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     bldr.lexicon(
         """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-               東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"東京,名詞,固有名詞,地名,一般,*,*,a",*,*"""
-            .trimMargin())
+               東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"東京,名詞,固有名詞,地名,一般,*,*,a",*,*""".trimMargin())
     assertFails { bldr.build(MemChannel()) }
   }
 
@@ -200,8 +188,7 @@ class SystemDicTest {
       val surf = "a".repeat(1024) + istr
       val read = "b".repeat(1024) + istr
       val norm = "c".repeat(1024) + istr
-      bldr.lexicon(
-          "$surf,1,1,2816,$surf,名詞,固有名詞,地名,一般,*,*,$read,$norm,*,A,*,*,*,*")
+      bldr.lexicon("$surf,1,1,2816,$surf,名詞,固有名詞,地名,一般,*,*,$read,$norm,*,A,*,*,*,*")
     }
     val ch = MemChannel()
     bldr.build(ch)

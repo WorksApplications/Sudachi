@@ -33,8 +33,8 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
- * Description of the dictionary blocks, in-memory representation.
- * Basically, an extended version of the dictionary header.
+ * Description of the dictionary blocks, in-memory representation. Basically, an
+ * extended version of the dictionary header.
  */
 public class Description {
     private Instant creationTime = Instant.now();
@@ -48,10 +48,15 @@ public class Description {
 
     /**
      * Return a slice of the full dictionary with the provided name
-     * @param full ByteBuffer which represents the whole dictionary loaded into memory
-     * @param part name of the required part
+     * 
+     * @param full
+     *            ByteBuffer which represents the whole dictionary loaded into
+     *            memory
+     * @param part
+     *            name of the required part
      * @return slice of the ByteBuffer
-     * @throws IllegalArgumentException if the part with the provided name was not found
+     * @throws IllegalArgumentException
+     *             if the part with the provided name was not found
      */
     public ByteBuffer slice(ByteBuffer full, String part) {
         ByteBuffer slice = sliceOrNull(full, part);
@@ -63,15 +68,19 @@ public class Description {
 
     /**
      * Return a slice of the full dictionary with the provided name
-     * @param full ByteBuffer which represents the whole dictionary loaded into memory
-     * @param part name of the required part
+     * 
+     * @param full
+     *            ByteBuffer which represents the whole dictionary loaded into
+     *            memory
+     * @param part
+     *            name of the required part
      * @return slice of the ByteBuffer or null if not found
      */
     public ByteBuffer sliceOrNull(ByteBuffer full, String part) {
-        for (Block b: blocks) {
+        for (Block b : blocks) {
             if (b.name.equals(part)) {
-                int start = (int)b.start;
-                int end = (int)(b.start + b.size);
+                int start = (int) b.start;
+                int end = (int) (b.start + b.size);
                 int position = full.position();
                 int limit = full.limit();
                 full.position(start);
@@ -215,7 +224,8 @@ public class Description {
 
     private String defaultSignature(Instant date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
-        return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())), new Random().nextLong());
+        return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())),
+                new Random().nextLong());
     }
 
     public Instant getCreationTime() {
@@ -227,7 +237,9 @@ public class Description {
     }
 
     @Deprecated
-    public String getDescription() { return getComment(); }
+    public String getDescription() {
+        return getComment();
+    }
 
     public String getComment() {
         return comment;

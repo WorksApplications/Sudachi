@@ -37,8 +37,8 @@ public class MorphemeList extends AbstractList<Morpheme> {
     public final static MorphemeList EMPTY = new MorphemeList(null, null, null, Collections.emptyList(), true,
             Tokenizer.SplitMode.C);
 
-    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNodeImpl> path, boolean allowEmptyMorpheme,
-            Tokenizer.SplitMode mode) {
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNodeImpl> path,
+            boolean allowEmptyMorpheme, Tokenizer.SplitMode mode) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
@@ -136,7 +136,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return p.get(p.size() - 1).getPathCost() - p.get(0).getPathCost();
     }
 
-    /* internal*/ LatticeNodeImpl node(int index) {
+    /* internal */ LatticeNodeImpl node(int index) {
         return path.get(index);
     }
 }

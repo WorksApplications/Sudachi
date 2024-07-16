@@ -26,7 +26,7 @@ class MorphemeImpl implements Morpheme {
     private final int index;
     private LatticeNodeImpl node;
 
-    /*internal*/ MorphemeImpl(MorphemeList list, int index) {
+    /* internal */ MorphemeImpl(MorphemeList list, int index) {
         this.list = list;
         this.index = index;
     }
@@ -125,7 +125,7 @@ class MorphemeImpl implements Morpheme {
         return sb.toString();
     }
 
-    /*internal*/ boolean isCompatible(JapaneseDictionary dictionary) {
+    /* internal */ boolean isCompatible(JapaneseDictionary dictionary) {
         return dictionary.grammar == this.list.grammar;
     }
 }

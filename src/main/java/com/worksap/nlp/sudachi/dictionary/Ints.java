@@ -21,8 +21,9 @@ import java.util.Arrays;
 import java.util.StringJoiner;
 
 /**
- * Internal class for dealing with resizable integer arrays without boxing or double indirection.
- * This class is not a part of Sudachi API and can be changed.
+ * Internal class for dealing with resizable integer arrays without boxing or
+ * double indirection. This class is not a part of Sudachi API and can be
+ * changed.
  */
 public class Ints {
     private int[] data;

@@ -404,8 +404,8 @@ public class MeCabOovProviderPluginTest {
         plugin.readOOV(oovConfig, new MockGrammar(), "forbid");
         assertThat(plugin.oovList.size(), is(1));
         assertThat(plugin.oovList.get(CategoryType.DEFAULT).size(), is(2));
-        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0), is(LatticeNodeImpl.oovFactory((short) 1, (short) 2,
-                (short) 3, (short) 0)));
+        assertThat(plugin.oovList.get(CategoryType.DEFAULT).get(0),
+                is(LatticeNodeImpl.oovFactory((short) 1, (short) 2, (short) 3, (short) 0)));
     }
 
     @Test(expected = IllegalArgumentException.class)

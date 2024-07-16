@@ -28,9 +28,11 @@ public interface Lexicon {
     Iterator<int[]> lookup(byte[] text, int offset);
 
     /**
-     * Return packed parameters for the morpheme with the given id.
-     * Parameters are leftId, rightId, cost packed in a single long value.
-     * @param wordId id of word to extract parameters
+     * Return packed parameters for the morpheme with the given id. Parameters are
+     * leftId, rightId, cost packed in a single long value.
+     * 
+     * @param wordId
+     *            id of word to extract parameters
      * @return long value of packed parameters
      */
     long parameters(int wordId);
@@ -57,8 +59,11 @@ public interface Lexicon {
 
     /**
      * Get the string with the given packed string pointer from the dictionary
-     * @param dic dictionary id
-     * @param stringPtr packed string pointer
+     * 
+     * @param dic
+     *            dictionary id
+     * @param stringPtr
+     *            packed string pointer
      * @return String object value, copy of the in-memory representation
      * @see WordId#dic(int)
      */

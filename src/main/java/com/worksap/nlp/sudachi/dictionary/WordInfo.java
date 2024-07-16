@@ -58,8 +58,8 @@ public class WordInfo {
     }
 
     /**
-     * Allocates morpheme information for ones not in the lexicon.
-     * For example, OOVs.
+     * Allocates morpheme information for ones not in the lexicon. For example,
+     * OOVs.
      *
      * @param headwordLength
      *            the length of the morpheme
@@ -105,9 +105,8 @@ public class WordInfo {
     }
 
     /**
-     * Returns the part-of-speech ID of the morpheme.
-     * The strings of part-of-speech name can be gotten with
-     * {@link Grammar#getPartOfSpeechString}.
+     * Returns the part-of-speech ID of the morpheme. The strings of part-of-speech
+     * name can be gotten with {@link Grammar#getPartOfSpeechString}.
      * 
      * @return the POS ID
      */
@@ -135,9 +134,8 @@ public class WordInfo {
     }
 
     /**
-     * Returns the word ID of the dictionary form of the morpheme.
-     * The information of the dictionary form can be gotten with
-     * {@link Lexicon#getWordInfo}
+     * Returns the word ID of the dictionary form of the morpheme. The information
+     * of the dictionary form can be gotten with {@link Lexicon#getWordInfo}
      *
      * @return the word ID of the dictionary form of the morpheme
      */
@@ -214,7 +212,6 @@ public class WordInfo {
     public static int readingForm(ByteBuffer buffer, int pos) {
         return buffer.getInt(pos + 12);
     }
-
 
     private WordInfo(ByteBuffer buffer, int pos) {
         // short leftId = buffer.getShort(pos);

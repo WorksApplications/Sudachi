@@ -97,6 +97,7 @@ public class WordId {
         // low 16 bits are OOV POS, top 4 are 1s
         return (wordId & 0xffff_0000) == 0xf000_0000;
     }
+
     public static boolean isSpecial(int wordId) {
         // top 5 bits should be filled
         return (wordId & 0xf800_0000) == 0xf800_0000;

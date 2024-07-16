@@ -48,7 +48,7 @@ public class BlockLayout {
 
     public List<Description.Block> blocks() {
         List<Description.Block> result = new ArrayList<>();
-        for (BlockInfo b: info) {
+        for (BlockInfo b : info) {
             Description.Block published = new Description.Block(b.name, b.start, b.end - b.start);
             result.add(published);
         }

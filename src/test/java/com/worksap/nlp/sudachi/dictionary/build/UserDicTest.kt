@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi.dictionary.build
 import com.worksap.nlp.sudachi.*
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
-import com.worksap.nlp.sudachi.dictionary.POS
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -72,8 +71,8 @@ class UserDicTest {
             .load()
 
     val da = dic as DictionaryAccess
-      assertEquals(dic.partOfSpeechSize, 2)
-      val wi = da.morpheme(WordId.make(1, 0))
+    assertEquals(dic.partOfSpeechSize, 2)
+    val wi = da.morpheme(WordId.make(1, 0))
     assertEquals(wi.surface(), "東京都")
     assertEquals(wi.readingForm(), "トウキョウト")
   }

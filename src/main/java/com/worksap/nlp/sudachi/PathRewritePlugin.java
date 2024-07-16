@@ -96,7 +96,8 @@ public abstract class PathRewritePlugin extends Plugin {
      *             length of the sequence, or {@code begin} equals or is greater
      *             than {@code end}
      */
-    public LatticeNode concatenate(List<LatticeNodeImpl> path, int begin, int end, Lattice lattice, String normalizedForm) {
+    public LatticeNode concatenate(List<LatticeNodeImpl> path, int begin, int end, Lattice lattice,
+            String normalizedForm) {
         if (begin >= end) {
             throw new IndexOutOfBoundsException("begin >= end");
         }
@@ -118,14 +119,9 @@ public abstract class PathRewritePlugin extends Plugin {
         }
 
         String s = surface.toString();
-        LatticeNodeImpl node = LatticeNodeImpl.makeOov(
-                b, e,
-                posId,
-                s,
-                (normalizedForm == null) ? normalizedFormBuilder.toString() : normalizedForm,
-                dictionaryForm.toString(),
-                readingForm.toString()
-        );
+        LatticeNodeImpl node = LatticeNodeImpl.makeOov(b, e, posId, s,
+                (normalizedForm == null) ? normalizedFormBuilder.toString() : normalizedForm, dictionaryForm.toString(),
+                readingForm.toString());
         replaceNode(path, begin, end, node);
         return node;
     }
@@ -153,7 +149,8 @@ public abstract class PathRewritePlugin extends Plugin {
      *             length of the sequence, or {@code begin} equals or is greater
      *             than {@code end}
      */
-    public LatticeNode concatenateOov(List<LatticeNodeImpl> path, int begin, int end, LatticeNodeImpl.OOVFactory factory, Lattice lattice) {
+    public LatticeNode concatenateOov(List<LatticeNodeImpl> path, int begin, int end,
+            LatticeNodeImpl.OOVFactory factory, Lattice lattice) {
         if (begin >= end) {
             throw new IndexOutOfBoundsException("begin >= end");
         }

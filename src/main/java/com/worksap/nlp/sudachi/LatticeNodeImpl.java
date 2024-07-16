@@ -70,7 +70,7 @@ public class LatticeNodeImpl implements LatticeNode {
         if (lexicon instanceof Lexicon) {
             return (Lexicon) lexicon;
         } else if (lexicon instanceof StringsCache) {
-            return ((StringsCache)lexicon).lexicon;
+            return ((StringsCache) lexicon).lexicon;
         } else {
             throw new IllegalStateException("lexicon was null probably");
         }
@@ -349,8 +349,8 @@ public class LatticeNodeImpl implements LatticeNode {
             if (o == null || getClass() != o.getClass())
                 return false;
             OOVFactory that = (OOVFactory) o;
-            return leftId == that.leftId && rightId == that.rightId && cost == that.cost && posId == that.posId && Objects.equals(
-                    wordInfo, that.wordInfo);
+            return leftId == that.leftId && rightId == that.rightId && cost == that.cost && posId == that.posId
+                    && Objects.equals(wordInfo, that.wordInfo);
         }
 
         @Override

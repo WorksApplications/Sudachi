@@ -51,8 +51,10 @@ public class DictionaryPrinter {
 
         lex = dic.getLexicon();
 
-        // in order to output dictionary entries in in-dictionary order we need to sort them
-        // iterator over them will get them not in the sorted order, but grouped by surface (and sorted in groups)
+        // in order to output dictionary entries in in-dictionary order we need to sort
+        // them
+        // iterator over them will get them not in the sorted order, but grouped by
+        // surface (and sorted in groups)
         Ints allIds = new Ints(lex.size());
         Iterator<Ints> ids = lex.wordIds();
         while (ids.hasNext()) {
@@ -144,8 +146,8 @@ public class DictionaryPrinter {
     }
 
     private String maybeQuoteRefPart(String value) {
-        if (value.indexOf(',') != -1 || value.indexOf('"') != -1 || value.indexOf('-') != -1 || value.indexOf(
-                '/') != -1) {
+        if (value.indexOf(',') != -1 || value.indexOf('"') != -1 || value.indexOf('-') != -1
+                || value.indexOf('/') != -1) {
             return fullEscape(value);
         }
         return value;
@@ -187,8 +189,6 @@ public class DictionaryPrinter {
         }
     }
 
-
-
     static char getUnitType(WordInfo info) {
         if (info.getAunitSplit().length == 0) {
             return 'A';
@@ -224,9 +224,9 @@ public class DictionaryPrinter {
      * This tool requires the system dictionary when it dumps an user dictionary.
      *
      * @param args
-     *         the option and the input filename
+     *            the option and the input filename
      * @throws IOException
-     *         if IO
+     *             if IO
      */
     public static void main(String[] args) throws IOException {
         BinaryDictionary systemDict = null;

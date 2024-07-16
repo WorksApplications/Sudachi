@@ -35,8 +35,8 @@ import java.util.Objects;
 import static java.lang.System.nanoTime;
 
 /**
- * Fluid API for building a binary dictionary from a CSV file.
- * See documentation for the format of the CSV dictionary.
+ * Fluid API for building a binary dictionary from a CSV file. See documentation
+ * for the format of the CSV dictionary.
  */
 public class DicBuilder {
     private DicBuilder() {
@@ -58,11 +58,17 @@ public class DicBuilder {
         /**
          * Import words from the csv lexicon into the binary dictionary compiler.
          *
-         * @param name name of input file
-         * @param input factory for the InputStream with the lexicon content. May be called several times.
-         * @param size total size of the file in bytes. Used for reporting progress and can be not very precise.
-         * @return current object 
-         * @throws IOException when IO fails
+         * @param name
+         *            name of input file
+         * @param input
+         *            factory for the InputStream with the lexicon content. May be
+         *            called several times.
+         * @param size
+         *            total size of the file in bytes. Used for reporting progress and
+         *            can be not very precise.
+         * @return current object
+         * @throws IOException
+         *             when IO fails
          */
         public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
             progress.startBlock(name, nanoTime(), Progress.Kind.INPUT);
@@ -75,12 +81,15 @@ public class DicBuilder {
         }
 
         /**
-         * Import words from the csv lexicon into the binary dictionary compiler.
-         * This method is for loading resources from classpath mostly, remote access is untested.
+         * Import words from the csv lexicon into the binary dictionary compiler. This
+         * method is for loading resources from classpath mostly, remote access is
+         * untested.
          *
-         * @param url pointing to the
+         * @param url
+         *            pointing to the
          * @return current object
-         * @throws IOException when IO fails
+         * @throws IOException
+         *             when IO fails
          * @see Class#getResource(String)
          * @see ClassLoader#getResource(String)
          */
@@ -94,9 +103,11 @@ public class DicBuilder {
         /**
          * Import words from the csv lexicon into the binary dictionary compiler.
          *
-         * @param path csv file
+         * @param path
+         *            csv file
          * @return current object
-         * @throws IOException when IO fails
+         * @throws IOException
+         *             when IO fails
          */
         public T lexicon(Path path) throws IOException {
             String name = path.getFileName().toString();
@@ -106,7 +117,9 @@ public class DicBuilder {
 
         /**
          * Set the progress handler to the provided one
-         * @param progress handler
+         * 
+         * @param progress
+         *            handler
          * @return current object
          */
         public T progress(Progress progress) {
@@ -116,7 +129,9 @@ public class DicBuilder {
 
         /**
          * Set the comment string in the binary dictionary
-         * @param comment provided string
+         * 
+         * @param comment
+         *            provided string
          * @return current object
          */
         public T comment(String comment) {
@@ -126,7 +141,9 @@ public class DicBuilder {
 
         /**
          * Set the dictionary compilation time
-         * @param instant time to set
+         * 
+         * @param instant
+         *            time to set
          * @return current object
          */
         public T compilationTime(Instant instant) {
@@ -136,8 +153,11 @@ public class DicBuilder {
 
         /**
          * Compile the binary dictionary and write it to the proviced channel
-         * @param channel contents will be written here
-         * @throws IOException if io fails
+         * 
+         * @param channel
+         *            contents will be written here
+         * @throws IOException
+         *             if io fails
          */
         public void build(SeekableByteChannel channel) throws IOException {
             BlockLayout layout = new BlockLayout(channel, progress);
@@ -165,9 +185,11 @@ public class DicBuilder {
         }
 
         /**
-         * Set the system dictionary signature to the provided string.
-         * By default, it is current timestamp and a random 8 hexadecimal characters.
-         * @param signature provided dictionary signature. Can not be empty.
+         * Set the system dictionary signature to the provided string. By default, it is
+         * current timestamp and a random 8 hexadecimal characters.
+         * 
+         * @param signature
+         *            provided dictionary signature. Can not be empty.
          * @return current object
          */
         public System signature(String signature) {
@@ -183,7 +205,8 @@ public class DicBuilder {
     }
 
     /**
-     * Typestate pattern for system dictionary that does not have connection matrix added yet
+     * Typestate pattern for system dictionary that does not have connection matrix
+     * added yet
      */
     public static final class SystemNoMatrix {
         private final System inner;
@@ -194,21 +217,32 @@ public class DicBuilder {
 
         /**
          * Read connection matrix from MeCab matrix.def format text file.
-         * @param name name of the file
-         * @param data factory for the InputStream which contains the file. This can be called more than once.
-         * @param size total number of bytes for the file. This information will be only used for calculating progress.
+         * 
+         * @param name
+         *            name of the file
+         * @param data
+         *            factory for the InputStream which contains the file. This can be
+         *            called more than once.
+         * @param size
+         *            total number of bytes for the file. This information will be only
+         *            used for calculating progress.
          * @return system dictionary builder
-         * @throws IOException if IO fails
+         * @throws IOException
+         *             if IO fails
          */
         public DicBuilder.System matrix(String name, IOSupplier<InputStream> data, long size) throws IOException {
             return inner.readMatrix(name, data, size);
         }
 
         /**
-         * Read connection matrix from MeCab matrix.def format text file. Classpath version.
-         * @param data name of the file
+         * Read connection matrix from MeCab matrix.def format text file. Classpath
+         * version.
+         * 
+         * @param data
+         *            name of the file
          * @return system dictionary builder
-         * @throws IOException if IO fails
+         * @throws IOException
+         *             if IO fails
          */
         public DicBuilder.System matrix(URL data) throws IOException {
             String name = data.getPath();
@@ -218,10 +252,14 @@ public class DicBuilder {
         }
 
         /**
-         * Read connection matrix from MeCab matrix.def format text file. Filesystem version.
-         * @param path path to matrix.def format file
+         * Read connection matrix from MeCab matrix.def format text file. Filesystem
+         * version.
+         * 
+         * @param path
+         *            path to matrix.def format file
          * @return system dictionary builder
-         * @throws IOException if IO fails
+         * @throws IOException
+         *             if IO fails
          */
         public DicBuilder.System matrix(Path path) throws IOException {
             String name = path.getFileName().toString();
@@ -239,6 +277,7 @@ public class DicBuilder {
 
     /**
      * Create a new system dictionary compiler
+     * 
      * @return new dictionary compiler object
      */
     public static SystemNoMatrix system() {
@@ -246,8 +285,11 @@ public class DicBuilder {
     }
 
     /**
-     * Create a new user dictionary compiler which will reference the provided user dictionary.
-     * @param system referenced dictionary
+     * Create a new user dictionary compiler which will reference the provided user
+     * dictionary.
+     * 
+     * @param system
+     *            referenced dictionary
      * @return new dictionary compiler object
      */
     public static User user(DictionaryAccess system) {

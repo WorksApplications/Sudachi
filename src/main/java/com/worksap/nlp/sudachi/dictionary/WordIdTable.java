@@ -78,16 +78,19 @@ class WordIdTable {
     }
 
     /**
-     * Iterates over all valid word ids in the dictionary.
-     * Iteration order is not the same as the original dictionary order, but dictionary ids, when sorted, form the correct order.
-     * <br>
-     * The returned Ints object will be the same for each invocation of {@code next()}.
+     * Iterates over all valid word ids in the dictionary. Iteration order is not
+     * the same as the original dictionary order, but dictionary ids, when sorted,
+     * form the correct order. <br>
+     * The returned Ints object will be the same for each invocation of
+     * {@code next()}.
+     * 
      * @return iterator object
      */
     public Iterator<Ints> wordIds() {
         return new Iterator<Ints>() {
             private final BufReader buf = new BufReader(bytes.duplicate());
             private final Ints ints = new Ints(16);
+
             @Override
             public boolean hasNext() {
                 return buf.remaining() > 0;
