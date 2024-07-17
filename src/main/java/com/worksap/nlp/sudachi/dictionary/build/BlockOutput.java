@@ -41,7 +41,7 @@ public class BlockOutput {
     public <T> T measured(String name, IOFunction<T, Progress> fun) throws IOException {
         Progress p = progress;
         long start = chan.position();
-        p.startBlock(name, System.nanoTime(), Progress.Kind.OUTPUT);
+        p.startBlock(name, System.nanoTime(), Progress.Kind.BYTE);
         T result = fun.apply(p);
         long size = chan.position() - start;
         p.endBlock(size, System.nanoTime());

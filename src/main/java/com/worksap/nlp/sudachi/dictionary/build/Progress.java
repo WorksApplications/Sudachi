@@ -23,6 +23,7 @@ public class Progress {
     private final int maxUpdates;
     private final Callback callback;
     private float currentProgress;
+    private long startTime;
     private long lastUpdate;
 
     public static final Progress NOOP = new Progress(1, progress -> {
@@ -34,6 +35,7 @@ public class Progress {
     }
 
     public void startBlock(String name, long start, Kind kind) {
+        startTime = start;
         lastUpdate = start;
         callback.start(name, kind);
         currentProgress = step();
@@ -72,11 +74,11 @@ public class Progress {
     }
 
     public void endBlock(long size, long time) {
-        callback.end(size, Duration.ofNanos(time));
+        callback.end(size, Duration.ofNanos(time - startTime));
     }
 
     public enum Kind {
-        INPUT, OUTPUT
+        BYTE, ENTRY
     }
 
     /**

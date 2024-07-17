@@ -71,7 +71,7 @@ public class DicBuilder {
          *             when IO fails
          */
         public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
-            progress.startBlock(name, nanoTime(), Progress.Kind.INPUT);
+            progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
             try (InputStream is = input.get()) {
                 InputStream stream = new TrackingInputStream(is);
                 lexicon.read(name, stream, pos);
@@ -175,7 +175,7 @@ public class DicBuilder {
 
     public static final class System extends Base<System> {
         private System readMatrix(String name, IOSupplier<InputStream> input, long size) throws IOException {
-            progress.startBlock(name, nanoTime(), Progress.Kind.INPUT);
+            progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
             try (InputStream is = input.get()) {
                 InputStream stream = new ProgressInputStream(is, size, progress);
                 connection.readEntries(stream);
@@ -265,6 +265,18 @@ public class DicBuilder {
             String name = path.getFileName().toString();
             long size = Files.size(path);
             return matrix(name, () -> Files.newInputStream(path), size);
+        }
+
+        /**
+         * Set the progress handler to the provided one
+         * 
+         * @param progress
+         *            handler
+         * @return current object
+         */
+        public SystemNoMatrix progress(Progress progress) {
+            inner.progress(progress);
+            return this;
         }
     }
 

@@ -113,7 +113,7 @@ public class ModelOutput implements SeekableByteChannel {
         long pos = position();
         long start = System.nanoTime();
         if (progressor != null) {
-            progressor.startBlock(name, start, Progress.Kind.OUTPUT);
+            progressor.startBlock(name, start, Progress.Kind.BYTE);
         }
         inner.run();
         long time = System.nanoTime() - start;
@@ -127,7 +127,7 @@ public class ModelOutput implements SeekableByteChannel {
     public void withSizedPart(String name, SizedRunnable inner) throws IOException {
         long start = System.nanoTime();
         if (progressor != null) {
-            progressor.startBlock(name, start, Progress.Kind.OUTPUT);
+            progressor.startBlock(name, start, Progress.Kind.BYTE);
         }
         long size = inner.run();
         long time = System.nanoTime() - start;

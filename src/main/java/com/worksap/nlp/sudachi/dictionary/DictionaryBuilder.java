@@ -38,10 +38,11 @@ public class DictionaryBuilder {
 
     static void printUsage() {
         Console console = System.console();
-        console.printf("usage: DictionaryBuilder -o file -m file [-d description] files...\n");
+        console.printf("usage: DictionaryBuilder -o file -m file [-d description] [-s signature] files...\n");
         console.printf("\t-o file\toutput to file\n");
         console.printf("\t-m file\tmatrix file\n");
         console.printf("\t-d description\tcomment\n");
+        console.printf("\t-s signature\tsignature\n");
     }
 
     /**
@@ -93,8 +94,8 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DicBuilder.System builder = DicBuilder.system().matrix(Paths.get(matrixPath)).comment(description)
-                .progress(new Progress(20, new StderrProgress()));
+        DicBuilder.System builder = DicBuilder.system().progress(new Progress(20, new StderrProgress()))
+                .matrix(Paths.get(matrixPath)).comment(description);
 
         if (signature != null) {
             builder.signature(signature);
@@ -119,10 +120,10 @@ public class DictionaryBuilder {
             System.err.printf("%s\t", name);
             last = 0;
             switch (kind) {
-            case OUTPUT:
+            case BYTE:
                 unit = "bytes";
                 break;
-            case INPUT:
+            case ENTRY:
                 unit = "entries";
                 break;
             }
