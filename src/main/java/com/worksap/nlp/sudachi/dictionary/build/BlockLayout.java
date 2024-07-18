@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 public class BlockLayout {
+    private static final long BLOCK_SIZE = 4096;
     private final SeekableByteChannel channel;
     private final Progress progress;
     private final List<BlockInfo> info = new ArrayList<>();
@@ -32,7 +33,7 @@ public class BlockLayout {
     public BlockLayout(SeekableByteChannel channel, Progress progress) throws IOException {
         this.channel = channel;
         this.progress = progress;
-        channel.position(4096);
+        channel.position(BLOCK_SIZE); // keep first block for the description
     }
 
     public <T> T block(String name, BlockHandler<T> handler) throws IOException {
@@ -40,7 +41,7 @@ public class BlockLayout {
         long start = chan.position();
         T result = handler.apply(new BlockOutput(chan, progress));
         long end = chan.position();
-        long newPosition = Align.align(end, 4096);
+        long newPosition = Align.align(end, BLOCK_SIZE);
         chan.position(newPosition);
         info.add(new BlockInfo(name, start, end));
         return result;

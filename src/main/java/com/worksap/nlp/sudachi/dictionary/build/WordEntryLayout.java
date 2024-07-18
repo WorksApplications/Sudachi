@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.dictionary.Ints;
+import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,8 +37,8 @@ public class WordEntryLayout {
     private final Ints synonymGroups = new Ints(16);
 
     public static final int MAX_LENGTH = 32 // basic size
-            + Byte.MAX_VALUE * 4 * 5 // splits and synonyms
-            + (Short.MAX_VALUE + 1) * 2; // user data
+            + Byte.MAX_VALUE * Integer.BYTES * 5 // splits and synonyms
+            + (Short.MAX_VALUE + 1) * Character.BYTES; // user data
 
     public WordEntryLayout(Lookup2 resolver, StringIndex index, WordRef.Parser parser, BufferedChannel buffer) {
         this.lookup = resolver;
@@ -99,7 +100,7 @@ public class WordEntryLayout {
             }
         }
 
-        int position = this.buffer.alignTo(8);
+        int position = this.buffer.alignTo(WordInfoList.OFFSET_ALIGNMENT);
         return RawLexicon.pointer(position);
     }
 

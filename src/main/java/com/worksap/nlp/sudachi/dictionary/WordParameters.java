@@ -27,12 +27,12 @@ public class WordParameters {
     }
 
     public long loadParams(int wordId) {
-        int addr = wordId * 8;
+        int addr = WordInfoList.wordId2offset(wordId);
         return data.getLong(addr);
     }
 
     public void setCost(int wordId, short cost) {
-        int addr = wordId * 8 + 6;
+        int addr = WordInfoList.wordId2offset(wordId) + 6;
         data.putShort(addr, cost);
     }
 

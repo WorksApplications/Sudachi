@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
+import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.util.List;
 import java.util.Objects;
@@ -74,7 +75,7 @@ public class RawWordEntry implements Lookup2.Entry {
             size += 2 + userData.length() * 2;
         }
 
-        size = Align.align(size, 8);
+        size = Align.align(size, WordInfoList.OFFSET_ALIGNMENT);
         return size;
     }
 
@@ -140,7 +141,7 @@ public class RawWordEntry implements Lookup2.Entry {
             copy.mode = "A";
             copy.posId = posId;
             RawWordEntry last = list.get(list.size() - 1);
-            copy.pointer = RawLexicon.pointer(last.pointer * 8L + last.computeExpectedSize());
+            copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
             list.add(copy);
             lookup.add(copy);
             return 1;

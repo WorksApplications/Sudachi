@@ -19,6 +19,17 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.ByteBuffer;
 
 public class WordInfoList {
+    public static final int ALIGNMENT_BITS = 3;
+    public static final int OFFSET_ALIGNMENT = 1 << ALIGNMENT_BITS;
+
+    public static int wordId2offset(int wordId) {
+        return wordId << ALIGNMENT_BITS;
+    }
+
+    public static int offset2wordId(long offset) {
+        return (int) (offset >>> ALIGNMENT_BITS);
+    }
+
     private final ByteBuffer bytes;
 
     WordInfoList(ByteBuffer bytes) {
@@ -26,15 +37,14 @@ public class WordInfoList {
     }
 
     public WordInfo getWordInfo(int wordId) {
-        int position = wordId * 8;
-        return WordInfo.read(bytes, position);
+        return WordInfo.read(bytes, wordId2offset(wordId));
     }
 
     public int surfacePtr(int wordId) {
-        return WordInfo.surfaceForm(bytes, wordId * 8);
+        return WordInfo.surfaceForm(bytes, wordId2offset(wordId));
     }
 
     public int readingPtr(int wordId) {
-        return WordInfo.readingForm(bytes, wordId * 8);
+        return WordInfo.readingForm(bytes, wordId2offset(wordId));
     }
 }

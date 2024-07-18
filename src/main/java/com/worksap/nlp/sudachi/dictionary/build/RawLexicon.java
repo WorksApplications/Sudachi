@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.Blocks;
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
+import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RawLexicon {
-    private static final long MAX_OFFSET = Integer.MAX_VALUE * 8L;
+    private static final long MAX_OFFSET = (long) Integer.MAX_VALUE * WordInfoList.OFFSET_ALIGNMENT;
     private static final int INITIAL_OFFSET = 32;
     private final StringStorage strings = new StringStorage();
     private final List<RawWordEntry> entries = new ArrayList<>();
@@ -69,7 +70,7 @@ public class RawLexicon {
     }
 
     public static int pointer(long offset) {
-        return (int) (offset >>> 3);
+        return WordInfoList.offset2wordId(offset);
     }
 
     public void checkOffset(long offset) {
