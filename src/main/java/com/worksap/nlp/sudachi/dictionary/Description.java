@@ -179,15 +179,15 @@ public class Description {
         writer.putLong(1); // version
         writer.putLong(creationTime.getEpochSecond());
         writer.putLong(flags);
-        writer.putStringUtf8(comment);
-        writer.putStringUtf8(signature);
-        writer.putStringUtf8(reference);
+        writer.putUtf8String(comment);
+        writer.putUtf8String(signature);
+        writer.putUtf8String(reference);
         writer.putVarint32(numIndexedEntries);
         writer.putVarint32(numTotalEntries);
         int length = blocks.size();
         writer.putVarint32(length);
         for (Block b : blocks) {
-            writer.putStringUtf8(b.name);
+            writer.putUtf8String(b.name);
             writer.putVarint64(b.start);
             writer.putVarint64(b.size);
         }

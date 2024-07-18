@@ -28,7 +28,7 @@ public class WordEntryLayout {
     private final StringIndex index;
     private final WordRef.Parser wordRefParser;
     private final Lookup2 lookup;
-    private final ChanneledBuffer buffer;
+    private final BufferedChannel buffer;
     private final Ints aSplits = new Ints(16);
     private final Ints bSplits = new Ints(16);
     private final Ints cSplits = new Ints(16);
@@ -36,10 +36,10 @@ public class WordEntryLayout {
     private final Ints synonymGroups = new Ints(16);
 
     public static final int MAX_LENGTH = 32 // basic size
-            + Byte.MAX_VALUE * 5 * 4 // splits and synonyms
+            + Byte.MAX_VALUE * 4 * 5 // splits and synonyms
             + (Short.MAX_VALUE + 1) * 2; // user data
 
-    public WordEntryLayout(Lookup2 resolver, StringIndex index, WordRef.Parser parser, ChanneledBuffer buffer) {
+    public WordEntryLayout(Lookup2 resolver, StringIndex index, WordRef.Parser parser, BufferedChannel buffer) {
         this.lookup = resolver;
         this.index = index;
         this.wordRefParser = parser;

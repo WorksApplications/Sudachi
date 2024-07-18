@@ -104,7 +104,7 @@ public class Index implements WriteDictionary {
         int size = this.elements.size();
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ChanneledBuffer buffer = new ChanneledBuffer(out.getChannel(),
+        BufferedChannel buffer = new BufferedChannel(out.getChannel(),
                 Math.max((notIndexed.size() + 16) * 5, 64 * 1024));
 
         out.measured("Word Id table", (p) -> {

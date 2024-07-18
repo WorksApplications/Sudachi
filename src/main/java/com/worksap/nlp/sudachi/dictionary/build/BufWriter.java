@@ -33,7 +33,28 @@ public class BufWriter {
         return this;
     }
 
-    // Encode int as LEB128
+    public BufWriter putShort(short val) {
+        buffer.putShort(val);
+        return this;
+    }
+
+    public BufWriter putInt(int val) {
+        buffer.putInt(val);
+        return this;
+    }
+
+    public BufWriter putLong(long x) {
+        buffer.putLong(x);
+        return this;
+    }
+
+    /**
+     * Envode int as LEB128
+     * 
+     * @param val
+     *            value to encode
+     * @return this
+     */
     public BufWriter putVarint32(int val) {
         if ((val & ~0x7f) == 0) {
             putByte((byte) val);
@@ -43,6 +64,13 @@ public class BufWriter {
         return this;
     }
 
+    /**
+     * Envode long as LEB128
+     * 
+     * @param val
+     *            value to encode
+     * @return this
+     */
     public BufWriter putVarint64(long val) {
         if ((val & ~0x7fL) == 0) {
             putByte((byte) val);
@@ -61,16 +89,6 @@ public class BufWriter {
         putByte((byte) val);
     }
 
-    public BufWriter putShort(short val) {
-        buffer.putShort(val);
-        return this;
-    }
-
-    public BufWriter putInt(int val) {
-        buffer.putInt(val);
-        return this;
-    }
-
     public BufWriter putInts(Ints value, int length) {
         if (length <= 0) {
             return this;
@@ -85,10 +103,10 @@ public class BufWriter {
     }
 
     /**
-     * Put string which has length is shorter than Short.MAX_VALUE
+     * Encode string which has length is shorter than Short.MAX_VALUE
      * 
      * @param s
-     *            string to put in the buffer
+     *            string to put in the buffer. Must be shorter than Short.MAX_VALUE.
      */
     public void putShortString(String s) {
         int length = s.length();
@@ -99,14 +117,10 @@ public class BufWriter {
         }
     }
 
-    public BufWriter putStringUtf8(String s) {
+    public BufWriter putUtf8String(String s) {
         byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
         putVarint32(bytes.length);
         buffer.put(bytes);
         return this;
-    }
-
-    public void putLong(long x) {
-        buffer.putLong(x);
     }
 }

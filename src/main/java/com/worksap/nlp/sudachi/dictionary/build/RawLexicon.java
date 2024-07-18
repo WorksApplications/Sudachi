@@ -92,7 +92,7 @@ public class RawLexicon {
             List<RawWordEntry> list = entries;
             Lookup2 lookup = new Lookup2(list);
             WordRef.Parser refParser = WordRef.parser(pos, !user, false);
-            ChanneledBuffer buf = new ChanneledBuffer(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
+            BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
             WordEntryLayout layout = new WordEntryLayout(lookup, strings, refParser, buf);
             int size = list.size();

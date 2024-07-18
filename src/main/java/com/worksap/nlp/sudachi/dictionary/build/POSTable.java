@@ -78,7 +78,7 @@ public class POSTable implements WriteDictionary {
 
     public Void compile(BlockOutput out) throws IOException {
         return out.measured("POS Table", (p) -> {
-            ChanneledBuffer cbuf = new ChanneledBuffer(out.getChannel());
+            BufferedChannel cbuf = new BufferedChannel(out.getChannel());
             cbuf.byteBuffer(2).putShort((short) table.size());
             for (int i = 0; i < table.size(); ++i) {
                 BufWriter writer = cbuf.writer(POS.MAX_BINARY_LENGTH);

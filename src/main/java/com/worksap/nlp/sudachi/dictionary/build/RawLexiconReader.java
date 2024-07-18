@@ -55,10 +55,14 @@ public class RawLexiconReader {
         this.parser = parser;
         this.posTable = pos;
         resolveColumnLayout();
-        refParser = WordRef.parser(pos, mapping == null || !user, mapping == null);
+        refParser = WordRef.parser(pos, isLegacyColumnLayout() || !user, isLegacyColumnLayout());
     }
 
     private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
+
+    private boolean isLegacyColumnLayout() {
+        return mapping == null;
+    }
 
     private void resolveColumnLayout() throws IOException {
         List<String> record = parser.getNextRecord();

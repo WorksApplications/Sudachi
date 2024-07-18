@@ -107,7 +107,7 @@ class BufReaderTest {
 
   @Test
   fun utf8String() {
-    val checkUtf8String = check({ w, x -> w.putStringUtf8(x) }, { it.readUtf8String() })
+    val checkUtf8String = check({ w, x -> w.putUtf8String(x) }, { it.readUtf8String() })
     checkUtf8String("")
     checkUtf8String("test")
     checkUtf8String("привет")

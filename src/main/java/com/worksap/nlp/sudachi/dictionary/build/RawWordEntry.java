@@ -49,11 +49,11 @@ public class RawWordEntry implements Lookup2.Entry {
         if (data == null || data.isEmpty() || "*".equals(data) || data.equals(prev)) {
             return 0;
         }
-        int nsplits = StringUtil.count(data, '/');
-        if (nsplits >= CsvLexicon.ARRAY_MAX_LENGTH) {
+        int nsplits = StringUtil.count(data, '/') + 1;
+        if (nsplits > CsvLexicon.ARRAY_MAX_LENGTH) {
             throw new CsvFieldException("maximum number of splits were exceeded");
         }
-        return nsplits + 1;
+        return nsplits;
     }
 
     /**

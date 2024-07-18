@@ -22,19 +22,19 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.channels.WritableByteChannel;
 
-public class ChanneledBuffer {
+public class BufferedChannel {
     private final ByteBuffer buffer;
     private final WritableByteChannel channel;
 
     private int offset;
 
-    public ChanneledBuffer(WritableByteChannel channel, int size) {
+    public BufferedChannel(WritableByteChannel channel, int size) {
         this.channel = channel;
         this.buffer = ByteBuffer.allocate(size);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public ChanneledBuffer(WritableByteChannel channel) {
+    public BufferedChannel(WritableByteChannel channel) {
         this(channel, 64 * 1024);
     }
 
