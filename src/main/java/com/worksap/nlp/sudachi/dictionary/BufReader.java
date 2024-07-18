@@ -30,6 +30,14 @@ public class BufReader {
         return buffer.getLong();
     }
 
+    short readShort() {
+        return buffer.getShort();
+    }
+
+    char readChar() {
+        return buffer.getChar();
+    }
+
     long readVarint64() {
         ByteBuffer b = buffer;
         int first = b.get() & 0xff;
@@ -94,6 +102,24 @@ public class BufReader {
             throw new IllegalStateException("invalid int varint encoding");
         }
         return (int) l;
+    }
+
+    public String readShortString() {
+        short length = readShort();
+
+        // remember buffer state
+        int originalLimit = buffer.limit();
+        int stringLimit = buffer.position() + length * 2;
+        buffer.limit(stringLimit);
+
+        // implementation: use the fact that CharBuffers are CharSequences
+        // and the fact that ByteBuffer can be used as CharBuffer
+        String result = buffer.asCharBuffer().toString();
+
+        // adjust state
+        buffer.position(stringLimit);
+        buffer.limit(originalLimit);
+        return result;
     }
 
     public String readUtf8String() {

@@ -70,9 +70,31 @@ public class GrammarImpl implements Grammar {
         originalPosSize = 0;
     }
 
+    public GrammarImpl(List<POS> posList, Connection matrix) {
+        bytes = ByteBuffer.allocate(0);
+        this.posList = posList;
+        this.matrix = matrix;
+        originalPosSize = (short) posList.size();
+    }
+
     public static GrammarImpl load(ByteBuffer binaryDic, Description header) {
         Connection matrix = Connection.fromByteBufferV1(header.slice(binaryDic, Blocks.CONNECTION_MATRIX));
-        return new GrammarImpl();
+        List<POS> posList = loadPosList(header.slice(binaryDic, Blocks.POS_TABLE));
+        return new GrammarImpl(posList, matrix);
+    }
+
+    private static List<POS> loadPosList(ByteBuffer bytes) {
+        BufReader reader = new BufReader(bytes);
+        int posSize = reader.readShort();
+        List<POS> posList = new ArrayList<>(posSize);
+        for (int i = 0; i < posSize; i++) {
+            String[] pos = new String[POS_DEPTH];
+            for (int j = 0; j < POS_DEPTH; j++) {
+                pos[j] = reader.readShortString();
+            }
+            posList.add(new POS(pos));
+        }
+        return posList;
     }
 
     public int storageSize() {
