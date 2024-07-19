@@ -96,16 +96,24 @@ public class StringUtil {
         return count;
     }
 
-    public static String readLengthPrefixed(ByteBuffer buffer) {
+    /**
+     * Read string encoded by length in short + chars format
+     * (BufWriter.putShortString).
+     * 
+     * @param buffer
+     * @param offset
+     * @return string read
+     */
+    public static String readLengthPrefixed(ByteBuffer buffer, int offset) {
         // implementation: use the fact that CharBuffers are CharSequences
         // and the fact that ByteBuffer can be used as CharBuffer
         // remember buffer state
         int limit = buffer.limit();
         int position = buffer.position();
         // read length
-        short length = buffer.getShort(position);
+        short length = buffer.getShort(offset);
         // compute new buffer state
-        int newPosition = position + 2;
+        int newPosition = offset + 2;
         buffer.position(newPosition);
         buffer.limit(newPosition + length * 2);
         // use CharBuffer API
@@ -114,6 +122,17 @@ public class StringUtil {
         buffer.position(position);
         buffer.limit(limit);
         return result;
+    }
+
+    /**
+     * Read string encoded by length in short + chars format
+     * (BufWriter.putShortString).
+     * 
+     * @param buffer
+     * @return string read
+     */
+    public static String readLengthPrefixed(ByteBuffer buffer) {
+        return readLengthPrefixed(buffer, buffer.position());
     }
 
     public static int countUtf8Bytes(CharSequence seq) {

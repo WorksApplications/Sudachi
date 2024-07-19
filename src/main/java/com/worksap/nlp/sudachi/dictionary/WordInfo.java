@@ -238,10 +238,12 @@ public class WordInfo {
         // short cost = buffer.getShort(pos + 4);
         // do not modify buffer metadata for better performance
         posId = buffer.getShort(pos + 6);
+
         surface = surfaceForm(buffer, pos); // +8
         reading = readingForm(buffer, pos); // +12
         normalizedForm = buffer.getInt(pos + 16);
         dictionaryForm = buffer.getInt(pos + 20);
+
         long rest = buffer.getLong(pos + 24);
         headwordLength = (short) (rest & 0xffff);
         rest >>>= 16;
@@ -260,6 +262,7 @@ public class WordInfo {
         int wordStructureLen = (int) ((rest >>> 24) & 0xff);
         int synonymLen = (int) ((rest >>> 32) & 0xff);
         int userDataFlag = (int) ((rest >>> 40) & 0xff);
+
         int offset = pos + 32;
         cUnitSplit = Ints.readArray(buffer, offset, cSplitLen);
         offset += cSplitLen * 4;
@@ -277,14 +280,15 @@ public class WordInfo {
         }
         if (wordStructureLen == 0xff) {
             wordStructure = aUnitSplit;
-            offset += wordStructureLen * 4; // here?
         } else {
             wordStructure = Ints.readArray(buffer, offset, wordStructureLen);
+            offset += wordStructureLen * 4;
         }
         synonymGids = Ints.readArray(buffer, offset, synonymLen);
+        offset += synonymLen * 4;
 
         if (userDataFlag != 0) {
-            userData = StringUtil.readLengthPrefixed(buffer); // offset?
+            userData = StringUtil.readLengthPrefixed(buffer, offset);
         } else {
             userData = "";
         }
