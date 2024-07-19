@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility to look up entries from the list.
+ */
 public class Lookup2 {
     public interface Entry {
         int pointer();
@@ -41,16 +44,35 @@ public class Lookup2 {
     }
 
     private final List<? extends Entry> entries;
+    // mapping to entries that have same surfaces
     private final Map<String, List<Entry>> bySurface;
 
+    /**
+     * Lookup an entry by the list index. Make sure you know the order of entries in
+     * the list.
+     * 
+     * @param index
+     * @return
+     */
     public Entry byIndex(int index) {
         return entries.get(index);
     }
 
+    /**
+     * Lookup entries by the headword (surface).
+     * 
+     * @param headword
+     * @return
+     */
     public List<Entry> byHeadword(String headword) {
         return bySurface.get(headword);
     }
 
+    /**
+     * Add an entry for headword search.
+     * 
+     * @param e
+     */
     public void add(Entry e) {
         bySurface.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(e);
     }

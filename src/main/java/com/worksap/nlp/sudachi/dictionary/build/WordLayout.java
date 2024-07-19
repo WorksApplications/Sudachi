@@ -51,15 +51,12 @@ public class WordLayout {
     private int pointer;
     private int maxLength = -1;
 
+    /** Locates string and returns the pointer to that. */
     public StringPtr add(String string) {
-        return add(string, 0, string.length());
-    }
-
-    public StringPtr add(String string, int start, int end) {
         int length = string.length();
         int alignment = StringPtr.requiredAlignment(length);
         int offset = allocate(length, alignment);
-        buffer.put(offset, string, start, end);
+        buffer.put(offset, string, 0, string.length());
         return StringPtr.checked(length, offset);
     }
 
@@ -213,10 +210,17 @@ public class WordLayout {
         }
     }
 
+    /**
+     * Write layouted strings to the provided channel.
+     * 
+     * @param channel
+     * @throws IOException
+     */
     public void write(WritableByteChannel channel) throws IOException {
         buffer.write(channel, 0, pointer * 2);
     }
 
+    /** Represents empty ranges where strings are not placed yet. */
     public static class FreeSpace implements Comparable<FreeSpace> {
         int start;
         int length;

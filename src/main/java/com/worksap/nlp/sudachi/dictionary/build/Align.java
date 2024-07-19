@@ -16,11 +16,20 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+/**
+ * Utility class to align binary data boundary.
+ */
 public class Align {
 
     private Align() {
     }
 
+    /**
+     * Check if given value is power of 2.
+     * 
+     * @param value
+     * @return
+     */
     public static boolean isPowerOf2(long value) {
         return (value & value - 1) == 0;
     }

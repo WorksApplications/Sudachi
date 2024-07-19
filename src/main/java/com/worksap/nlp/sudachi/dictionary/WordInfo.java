@@ -201,14 +201,33 @@ public class WordInfo {
         return synonymGids;
     }
 
+    /**
+     * Returns the user data string.
+     * 
+     * @return the user data string.
+     */
     public String getUserData() {
         return userData;
     }
 
+    /**
+     * Read StringPtr to the surface form directly.
+     * 
+     * @param buffer
+     * @param pos
+     * @return
+     */
     public static int surfaceForm(ByteBuffer buffer, int pos) {
         return buffer.getInt(pos + 8);
     }
 
+    /**
+     * Read StringPtr to the reading form directly.
+     * 
+     * @param buffer
+     * @param pos
+     * @return
+     */
     public static int readingForm(ByteBuffer buffer, int pos) {
         return buffer.getInt(pos + 12);
     }
@@ -258,19 +277,27 @@ public class WordInfo {
         }
         if (wordStructureLen == 0xff) {
             wordStructure = aUnitSplit;
-            offset += wordStructureLen * 4;
+            offset += wordStructureLen * 4; // here?
         } else {
             wordStructure = Ints.readArray(buffer, offset, wordStructureLen);
         }
         synonymGids = Ints.readArray(buffer, offset, synonymLen);
 
         if (userDataFlag != 0) {
-            userData = StringUtil.readLengthPrefixed(buffer);
+            userData = StringUtil.readLengthPrefixed(buffer); // offset?
         } else {
             userData = "";
         }
     }
 
+    /**
+     * read WordInfo from the buffer, staring from the provided position.
+     * 
+     * @param buffer
+     * @param pos
+     *            position to start reading.
+     * @return
+     */
     public static WordInfo read(ByteBuffer buffer, int pos) {
         return new WordInfo(buffer, pos);
     }

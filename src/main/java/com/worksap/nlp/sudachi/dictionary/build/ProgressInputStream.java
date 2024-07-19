@@ -19,6 +19,11 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Input stream with progress.
+ * 
+ * Reading from this automaticaly calls Progress.progress.
+ */
 public class ProgressInputStream extends InputStream {
     private final InputStream inner;
     private long position = 0;

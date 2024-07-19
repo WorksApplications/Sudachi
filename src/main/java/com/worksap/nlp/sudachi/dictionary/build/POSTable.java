@@ -24,11 +24,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Dictionary parts: List of part-of-speeches.
+ */
 public class POSTable implements WriteDictionary {
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
     private int builtin = 0;
 
+    /**
+     * Returns the id of given POS, updating table if it's not in the list.
+     * 
+     * @param s
+     * @return
+     */
     short getId(POS s) {
         return lookup.computeIfAbsent(s, p -> {
             int next = table.size();
@@ -40,6 +49,12 @@ public class POSTable implements WriteDictionary {
         });
     }
 
+    /**
+     * Load pos table from the grammar (of the system dictionary). They are
+     * considered as built-in pos.
+     * 
+     * @param grammar
+     */
     public void preloadFrom(Grammar grammar) {
         int partOfSpeechSize = grammar.getPartOfSpeechSize();
         for (short i = 0; i < partOfSpeechSize; ++i) {
@@ -50,6 +65,7 @@ public class POSTable implements WriteDictionary {
         builtin += partOfSpeechSize;
     }
 
+    /** @return full POS list that contains builtin and newly added POSs */
     List<POS> getList() {
         return table;
     }
@@ -72,10 +88,20 @@ public class POSTable implements WriteDictionary {
         });
     }
 
+    /**
+     * @return number of non-builtin POSs.
+     */
     public int ownedLength() {
         return table.size() - builtin;
     }
 
+    /**
+     * Write pos table to the provided block output.
+     * 
+     * @param out
+     * @return
+     * @throws IOException
+     */
     public Void compile(BlockOutput out) throws IOException {
         return out.measured("POS Table", (p) -> {
             BufferedChannel cbuf = new BufferedChannel(out.getChannel());

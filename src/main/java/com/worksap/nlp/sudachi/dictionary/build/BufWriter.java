@@ -21,6 +21,7 @@ import com.worksap.nlp.sudachi.dictionary.Ints;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+/** Basic data type writer */
 public class BufWriter {
     private final ByteBuffer buffer;
 
@@ -49,7 +50,7 @@ public class BufWriter {
     }
 
     /**
-     * Envode int as LEB128
+     * Encode int as LEB128
      * 
      * @param val
      *            value to encode
@@ -117,6 +118,13 @@ public class BufWriter {
         }
     }
 
+    /**
+     * Encode string in utf8 format, with length encoded in varint.
+     * 
+     * @param s
+     *            string to put in the buffer.
+     * @return this
+     */
     public BufWriter putUtf8String(String s) {
         byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
         putVarint32(bytes.length);

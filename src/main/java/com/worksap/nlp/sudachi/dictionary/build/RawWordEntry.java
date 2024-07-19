@@ -24,10 +24,13 @@ import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Raw word info entry parsed from the lexicon csv.
+ */
 @SuppressWarnings("jol")
 public class RawWordEntry implements Lookup2.Entry {
     WordInfo wordInfo;
-    int pointer;
+    int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
     String headword;
     String reading;
     WordRef normalizedForm;
@@ -111,11 +114,18 @@ public class RawWordEntry implements Lookup2.Entry {
         }
     }
 
+    /** check if sudachi dictionary can handle this entry */
     public void validate() {
         checkString(headword, "headword");
         checkString(reading, "reading");
     }
 
+    /**
+     * add necessary strings into the string storage.
+     * 
+     * @param strings
+     *            storage to publish strings.
+     */
     public void publishStrings(StringStorage strings) {
         strings.add(headword);
         strings.add(reading);
@@ -125,6 +135,13 @@ public class RawWordEntry implements Lookup2.Entry {
         }
     }
 
+    /**
+     * Add surface-only entry to access via normalized_form reference if necessary.
+     * 
+     * @param list
+     * @param lookup
+     * @return 1 if phantom entry added, 0 otherwise
+     */
     public int addPhantomEntries(List<RawWordEntry> list, Lookup2 lookup) {
         if (normalizedForm instanceof WordRef.Headword) {
             WordRef.Headword ref = (WordRef.Headword) normalizedForm;

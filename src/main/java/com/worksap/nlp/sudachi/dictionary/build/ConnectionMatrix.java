@@ -25,6 +25,9 @@ import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
+/**
+ * Dictionary parts: left/right id connection cost matrix.
+ */
 public class ConnectionMatrix implements WriteDictionary {
     private short numLeft;
     private short numRight;
@@ -126,6 +129,7 @@ public class ConnectionMatrix implements WriteDictionary {
         return numLines;
     }
 
+    /** Clear this ConnectionMatrix */
     public void makeEmpty() {
         ByteBuffer data = ByteBuffer.allocate(4);
         data.order(ByteOrder.LITTLE_ENDIAN);
@@ -140,18 +144,28 @@ public class ConnectionMatrix implements WriteDictionary {
         output.write(compiled);
     }
 
+    /** @return number of left id */
     public short getNumLeft() {
         return numLeft;
     }
 
+    /** @return number of right id */
     public short getNumRight() {
         return numRight;
     }
 
+    /** @return if this is empty */
     public boolean nonEmpty() {
         return numLeft > 0 || numRight > 0;
     }
 
+    /**
+     * Write connection matrix to the provided block output.
+     * 
+     * @param out
+     * @return
+     * @throws IOException
+     */
     public Void compile(BlockOutput out) throws IOException {
         return out.measured("Connection Matrix", (p) -> {
             out.getChannel().write(compiled.duplicate());

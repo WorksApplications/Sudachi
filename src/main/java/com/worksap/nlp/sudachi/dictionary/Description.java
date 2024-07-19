@@ -192,6 +192,7 @@ public class Description {
             writer.putVarint64(b.size);
         }
 
+        // write to the first block
         long pos = channel.position();
         channel.position(0);
         buff.flip();

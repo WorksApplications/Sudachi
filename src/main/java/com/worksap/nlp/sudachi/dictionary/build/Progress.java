@@ -18,14 +18,22 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import java.time.Duration;
 
+/**
+ * Handles progress of each build process.
+ */
 public class Progress {
+    // minimum time delta for callback.progress call
     private final static long MS_100 = 100_000_000L; // 100ms in nanos
+    // resolution of progress step.
     private final int maxUpdates;
     private final Callback callback;
     private float currentProgress;
+    // records the nano time of startBlock call
     private long startTime;
+    // records the nano time of last callback.progress call
     private long lastUpdate;
 
+    /** Progress with no-operation. */
     public static final Progress NOOP = new Progress(1, progress -> {
     });
 
@@ -34,6 +42,16 @@ public class Progress {
         this.callback = callback;
     }
 
+    /**
+     * declare the start of progress block
+     * 
+     * @param name
+     *            name of this block
+     * @param start
+     *            nano time when the process starts
+     * @param kind
+     *            what kind of data will be processed.
+     */
     public void startBlock(String name, long start, Kind kind) {
         startTime = start;
         lastUpdate = start;
@@ -73,10 +91,21 @@ public class Progress {
         }
     }
 
+    /**
+     * declare the end of progress block
+     * 
+     * @param size
+     *            actual size of processed data.
+     * @param time
+     *            nano time when the process ends.
+     */
     public void endBlock(long size, long time) {
         callback.end(size, Duration.ofNanos(time - startTime));
     }
 
+    /**
+     * What kind of data will be processed.
+     */
     public enum Kind {
         BYTE, ENTRY
     }
@@ -86,7 +115,7 @@ public class Progress {
      */
     public interface Callback {
         /**
-         * This function will be called for each step at the beginning
+         * This function will be called at the beginning of each block.
          * 
          * @param name
          *            step name
@@ -102,6 +131,12 @@ public class Progress {
          */
         void progress(float progress);
 
+        /**
+         * This function will be called at the end of each block
+         * 
+         * @param size
+         * @param time
+         */
         default void end(long size, Duration time) {
         }
     }

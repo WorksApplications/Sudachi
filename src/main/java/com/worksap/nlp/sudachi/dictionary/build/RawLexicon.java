@@ -29,23 +29,47 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dictionary part: Lexicon loaded from csv files.
+ */
 public class RawLexicon {
+    // word id must be integer size.
+    // However, current implementation (ByteBuffer) cannot handle offset larger than
+    // Integer.MAX_VALUE.
     private static final long MAX_OFFSET = (long) Integer.MAX_VALUE * WordInfoList.OFFSET_ALIGNMENT;
+    // first
     private static final int INITIAL_OFFSET = 32;
     private final StringStorage strings = new StringStorage();
     private final List<RawWordEntry> entries = new ArrayList<>();
     private final List<RawWordEntry> notIndexed = new ArrayList<>();
 
     private final Index index = new Index();
-    private boolean user;
+    private boolean user = false;
 
+    // offset for next entry
     private long offset = INITIAL_OFFSET;
     private boolean runtimeCosts = false;
 
+    /**
+     * Read lexicon from InputStream.
+     * 
+     * @param name
+     * @param data
+     * @param posTable
+     * @throws IOException
+     */
     public void read(String name, InputStream data, POSTable posTable) throws IOException {
         read(name, new InputStreamReader(data, StandardCharsets.UTF_8), posTable);
     }
 
+    /**
+     * Read lexicon from Reader.
+     * 
+     * @param name
+     * @param data
+     * @param posTable
+     * @throws IOException
+     */
     public void read(String name, Reader data, POSTable posTable) throws IOException {
         CSVParser parser = new CSVParser(data);
         parser.setName(name);
@@ -69,10 +93,17 @@ public class RawLexicon {
         this.offset = offset;
     }
 
+    /**
+     * Convert offset to pointer (word id)
+     * 
+     * @param offset
+     * @return
+     */
     public static int pointer(long offset) {
         return WordInfoList.offset2wordId(offset);
     }
 
+    /** check if the current offset is valid */
     public void checkOffset(long offset) {
         if ((offset & 0x7) != 0) {
             throw new IllegalArgumentException("offset is not aligned, should not happen");
@@ -82,8 +113,16 @@ public class RawLexicon {
         }
     }
 
+    /**
+     * Write lexicon to the provided block layout.
+     * 
+     * @param pos
+     * @param layout
+     * @throws IOException
+     */
     public void compile(POSTable pos, BlockLayout layout) throws IOException {
         index.compile(layout, notIndexed);
+        // entry layout requires stringstorage to be compiled beforehand.
         layout.block(Blocks.STRINGS, this::writeStrings);
         layout.block(Blocks.ENTRIES, (p) -> writeEntries(pos, p));
     }
@@ -103,6 +142,7 @@ public class RawLexicon {
                 if (e.pointer != ptr) {
                     throw new IllegalStateException("expected entry pointer != actual pointer, i=" + i);
                 }
+                // size may increases with phantom entry
                 size += e.addPhantomEntries(list, lookup);
                 ptr = layout.put(e);
                 p.progress(i, size);
@@ -120,14 +160,17 @@ public class RawLexicon {
         });
     }
 
+    /** @return number of entries in the TRIE index */
     public int getIndexedEntries() {
         return this.entries.size() - this.notIndexed.size();
     }
 
+    /** @return number of all entries including non-indexed ones */
     public int getTotalEntries() {
         return this.entries.size();
     }
 
+    /** @return if lexicon has entries that need runtime cost caluculation */
     public boolean hasRuntimeCosts() {
         return this.runtimeCosts;
     }

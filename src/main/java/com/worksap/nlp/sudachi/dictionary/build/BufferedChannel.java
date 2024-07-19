@@ -22,10 +22,12 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.channels.WritableByteChannel;
 
+/** Output channel wrapper with buffer. */
 public class BufferedChannel {
     private final ByteBuffer buffer;
     private final WritableByteChannel channel;
 
+    // data size written to the channel.
     private int offset;
 
     public BufferedChannel(WritableByteChannel channel, int size) {
@@ -38,15 +40,38 @@ public class BufferedChannel {
         this(channel, 64 * 1024);
     }
 
+    /**
+     * Put string to the buffer.
+     * 
+     * @param data
+     * @throws IOException
+     */
     public void put(String data) throws IOException {
         put(data, 0, data.length());
     }
 
+    /**
+     * Put substring to the buffer.
+     * 
+     * @param data
+     * @param start
+     * @param end
+     * @throws IOException
+     */
     public void put(String data, int start, int end) throws IOException {
         CharBuffer chars = prepare(end - start);
         chars.put(data, start, end);
     }
 
+    /**
+     * Obtain CharBuffer of spcified char size, flushing if necessary.
+     * 
+     * Moves buffer position assuming that caller will put requested size of chars.
+     * 
+     * @param numChars
+     * @return
+     * @throws IOException
+     */
     private CharBuffer prepare(int numChars) throws IOException {
         int remaining = buffer.remaining();
         int byteLength = numChars * 2;
@@ -64,6 +89,13 @@ public class BufferedChannel {
         return chars;
     }
 
+    /**
+     * Obtain ByteBuffer of specified size, flushing if necessary.
+     * 
+     * @param maxLength
+     * @return
+     * @throws IOException
+     */
     public ByteBuffer byteBuffer(int maxLength) throws IOException {
         ByteBuffer buf = buffer;
         int remaining = buf.remaining();
@@ -80,21 +112,40 @@ public class BufferedChannel {
         return buf;
     }
 
+    /**
+     * Obtain BufWriter of specified size, flushing if necessary.
+     * 
+     * @param maxLength
+     * @return
+     * @throws IOException
+     */
     public BufWriter writer(int maxLength) throws IOException {
         ByteBuffer buf = byteBuffer(maxLength);
         return new BufWriter(buf);
     }
 
+    /**
+     * Flush internal buffer to the channel.
+     * 
+     * @throws IOException
+     */
     public void flush() throws IOException {
         buffer.flip();
         channel.write(buffer);
         buffer.clear();
     }
 
+    /** @return total size of data in the buffer + written to the channel. */
     public int offset() {
         return this.offset + buffer.position();
     }
 
+    /**
+     * Align internal buffer position.
+     * 
+     * @param alignment
+     * @return offset after alignment
+     */
     public int alignTo(int alignment) {
         ByteBuffer buf = buffer;
         int pos = buf.position();
@@ -103,6 +154,7 @@ public class BufferedChannel {
         return aligned + offset;
     }
 
+    /** Set position of internal buffer */
     public void position(int newPosition) {
         buffer.position(newPosition);
     }

@@ -25,6 +25,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
+/**
+ * Output channel wrapper to write word entries.
+ */
 public class WordEntryLayout {
     private final StringIndex index;
     private final WordRef.Parser wordRefParser;
@@ -36,7 +39,7 @@ public class WordEntryLayout {
     private final Ints wordStructure = new Ints(16);
     private final Ints synonymGroups = new Ints(16);
 
-    public static final int MAX_LENGTH = 32 // basic size
+    public static final int MAX_LENGTH = 32 // minimum size
             + Byte.MAX_VALUE * Integer.BYTES * 5 // splits and synonyms
             + (Short.MAX_VALUE + 1) * Character.BYTES; // user data
 
@@ -47,13 +50,22 @@ public class WordEntryLayout {
         this.buffer = buffer;
     }
 
+    /**
+     * Write word entry into output and returns next offset.
+     * 
+     * @param entry
+     * @return
+     * @throws IOException
+     */
     public int put(RawWordEntry entry) throws IOException {
         BufWriter buf = this.buffer.writer(MAX_LENGTH);
+
         buf.putShort(entry.leftId);
         buf.putShort(entry.rightId);
         buf.putShort(entry.cost);
         buf.putShort(entry.posId);
-        // 8 bytes
+        // 2*4 = 8 bytes
+
         buf.putInt(index.resolve(entry.headword).encode()); // surfacePtr
         buf.putInt(index.resolve(entry.reading).encode()); // readingPtr
         int normFormPtr = 0;
@@ -66,32 +78,31 @@ public class WordEntryLayout {
         }
         buf.putInt(normFormPtr); // normalized entry
         buf.putInt(dicFormPtr); // dictionary form
-        // 8 + 16 = 24 bytes
+        // 8 + 4*4 = 24 bytes
 
+        // length can't be more than ~4k utf-16 code units so the cast is safe
+        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.headword);
         byte cSplitLen = parseList(entry.cUnitSplitString, "", cSplits);
         byte bSplitLen = parseList(entry.bUnitSplitString, entry.cUnitSplitString, bSplits);
         byte aSplitLen = parseList(entry.aUnitSplitString, entry.bUnitSplitString, aSplits);
         byte wordStructureLen = parseList(entry.wordStructureString, entry.aUnitSplitString, wordStructure);
         byte synonymLen = parseIntList(entry.synonymGroups, synonymGroups);
-
-        // length can't be more than ~4k utf-16 code units so the cast is safe
-        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.headword);
+        int userDataLength = entry.userData.length();
         buf.putShort(utf8Len);
         buf.putByte(cSplitLen);
         buf.putByte(bSplitLen);
         buf.putByte(aSplitLen);
         buf.putByte(wordStructureLen);
         buf.putByte(synonymLen);
-        int userDataLength = entry.userData.length();
         buf.putByte(userDataLength == 0 ? (byte) 0 : (byte) 1);
         // 24 + 8 = 32 bytes
 
+        // putInts is no-op if length <= 0
         buf.putInts(cSplits, cSplitLen);
         buf.putInts(bSplits, bSplitLen);
         buf.putInts(aSplits, aSplitLen);
         buf.putInts(wordStructure, wordStructureLen);
         buf.putInts(synonymGroups, synonymLen);
-
         if (userDataLength != 0) {
             buf.putShort((short) userDataLength);
             String userData = entry.userData;
@@ -104,6 +115,7 @@ public class WordEntryLayout {
         return RawLexicon.pointer(position);
     }
 
+    /** parse int list, i.e. synonym group ids */
     private byte parseIntList(String data, Ints result) {
         if (data == null || data.isEmpty() || "*".equals(data)) {
             result.clear();
@@ -120,6 +132,7 @@ public class WordEntryLayout {
         return (byte) parts.length;
     }
 
+    /** parse word ref list, i.e. A/B/C split and word structure */
     byte parseList(String data, String reference, Ints result) {
         if (data == null || data.isEmpty() || "*".equals(data)) {
             result.clear();

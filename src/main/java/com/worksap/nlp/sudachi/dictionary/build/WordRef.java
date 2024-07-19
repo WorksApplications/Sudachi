@@ -25,11 +25,14 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Reference to a word in the CSV dictionary.
+ * Reference to a word in the lexicon csv.
  */
 public abstract class WordRef {
     public abstract int resolve(Lookup2 resolver);
 
+    /**
+     * Reference written by line number of the lexicon csv file.
+     */
     public static final class LineNo extends WordRef {
         private final int line;
 
@@ -52,6 +55,9 @@ public abstract class WordRef {
         }
     }
 
+    /**
+     * Reference written by surface.
+     */
     public static final class Headword extends WordRef {
         private final String headword;
 
@@ -75,6 +81,9 @@ public abstract class WordRef {
         }
     }
 
+    /**
+     * Reference written by surface-pos-reading tuple.
+     */
     public static final class Triple extends WordRef {
         private final String headword;
         private final short posId;
@@ -117,10 +126,12 @@ public abstract class WordRef {
 
     private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
 
+    /** Alias of WordRef.Parser constructor. */
     public static Parser parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword) {
         return new Parser(posTable, allowNumeric, allowHeadword);
     }
 
+    /** Parser to parse wordref from a string in the lexicon field. */
     public static class Parser {
         private final POSTable posTable;
         private final boolean allowNumeric;
@@ -132,6 +143,7 @@ public abstract class WordRef {
             this.allowHeadword = allowHeadword;
         }
 
+        /** @return WordRef parsed from the text. */
         public WordRef parse(String text) {
             if ("*".equals(text) || text == null || text.isEmpty()) {
                 return null;

@@ -19,6 +19,9 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Utility to un-escape string from csv.
+ */
 public class Unescape {
     private static final Pattern unicodeLiteral = Pattern.compile("\\\\u(?:[0-9a-fA-F]{4}|\\{[0-9a-fA-F]+})");
 

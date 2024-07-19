@@ -19,6 +19,9 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 
+/**
+ * Data class for BlockLayout.BlockHandler argument.
+ */
 public class BlockOutput {
     private SeekableByteChannel chan;
     private Progress progress;
@@ -38,6 +41,19 @@ public class BlockOutput {
         return progress;
     }
 
+    /**
+     * Function decorator to measure output progress.
+     * 
+     * @param <T>
+     *            return type of the fun
+     * @param name
+     *            name for progress block.
+     * @param fun
+     *            actual process to measure progress. Must take Progress as an only
+     *            arg.
+     * @return
+     * @throws IOException
+     */
     public <T> T measured(String name, IOFunction<T, Progress> fun) throws IOException {
         Progress p = progress;
         long start = chan.position();

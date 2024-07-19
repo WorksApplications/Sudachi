@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 
+/** Resizable byte buffer wrapper. */
 public class ResizableBuffer {
     private ByteBuffer buffer;
 
@@ -30,6 +31,7 @@ public class ResizableBuffer {
         buffer = buf;
     }
 
+    /** make sure the buffer has enough capacity for specified size. */
     public ByteBuffer prepare(int additional) {
         ByteBuffer buf = buffer;
         if (buf.remaining() >= additional) {
@@ -39,6 +41,7 @@ public class ResizableBuffer {
         }
     }
 
+    /** make sure the buffer has enough capacity from offset for specified size. */
     public ByteBuffer prepare(int offset, int size) {
         ByteBuffer buf = buffer;
         int capacity = buf.capacity();
@@ -63,10 +66,12 @@ public class ResizableBuffer {
         return fresh;
     }
 
+    /** @return internal buffer */
     public ByteBuffer getBuffer() {
         return buffer;
     }
 
+    /** write specified range of the buffer to the channel */
     public void write(WritableByteChannel channel, int start, int end) throws IOException {
         ByteBuffer buf = buffer;
         int pos = buf.position();

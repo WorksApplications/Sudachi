@@ -29,19 +29,36 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+/**
+ * Dictionary parts: storage of strings used in the lexicons.
+ */
 public class StringStorage implements StringIndex {
+    // strings required by lexicons
     private final HashMap<String, Item> strings = new HashMap<>();
     private final HashMap<String, Item> candidates = new HashMap<>();
+    // compacted strings layout
     private final WordLayout layout = new WordLayout();
 
+    /**
+     * Add string to the storage.
+     * 
+     * @param data
+     */
     void add(String data) {
         strings.put(data, null);
     }
 
+    /**
+     * Compile added strings. should only call once after all strings are added and
+     * before use.
+     * 
+     * @param progress
+     */
     void compile(Progress progress) {
         candidates.clear();
         candidates.put("", new Item("", 0, 0));
         List<String> collect = new ArrayList<>(strings.keySet());
+        // sort strings so that processing works correctly
         collect.sort(Comparator.comparingInt(String::length).reversed().thenComparing(String::compareTo));
         int size = collect.size();
         for (int i = 0; i < size; ++i) {
@@ -54,9 +71,10 @@ public class StringStorage implements StringIndex {
         candidates.clear();
     }
 
+    // layout string and returns Item
     private Item process(String str) {
         Item present = candidates.get(str);
-        if (present != null) {
+        if (present != null) { // this str is a substring of previous one.
             return present;
         }
 
@@ -64,12 +82,13 @@ public class StringStorage implements StringIndex {
         int[] offsets = new int[length + 1];
         int numOffsets = computeOffsets(str, offsets);
 
-        StringPtr ptr = layout.add(str, 0, length);
+        StringPtr ptr = layout.add(str);
         Item full = new Item(str, 0, length);
         full.root = full;
         full.ptr = ptr;
         candidates.put(str, full);
 
+        // handle substrings
         for (int i = 0; i < numOffsets; ++i) {
             int start = offsets[i];
             for (int j = i + 1; j <= numOffsets; ++j) {
@@ -77,7 +96,8 @@ public class StringStorage implements StringIndex {
                 String sub = str.substring(start, end);
                 // Create a possible substring only if
                 // 1. It does not exist yet
-                // 2. Can form a valid pointer to it
+                // 2. Can form a valid pointer to it (string pointer requires aligned offset
+                // based on str length)
                 if (!candidates.containsKey(sub) && ptr.isSubseqValid(start, end)) {
                     Item item = new Item(str, start, end);
                     item.root = full;
@@ -89,6 +109,8 @@ public class StringStorage implements StringIndex {
         return full;
     }
 
+    // compute char offset for each codepoint in the str.
+    // @return number of code points.
     private int computeOffsets(String str, int[] offsets) {
         int count = 0;
         int len = str.length();
@@ -106,19 +128,33 @@ public class StringStorage implements StringIndex {
         return count;
     }
 
+    /** @return StringPtr for the string */
     public StringPtr resolve(String data) {
         Item item = strings.get(data);
         return item.root.ptr.subPtr(item.start, item.end);
     }
 
+    /** @return string hash map */
     public HashMap<String, Item> getStrings() {
         return strings;
     }
 
+    /**
+     * Write compacted string storage to the provided channel
+     * 
+     * @param channel
+     * @throws IOException
+     */
     public void writeCompact(WritableByteChannel channel) throws IOException {
         layout.write(channel);
     }
 
+    /**
+     * legacy string compilation. only for comparison purpose.
+     * 
+     * @param channel
+     * @throws IOException
+     */
     public void writeLengthPrefixedCompact(SeekableByteChannel channel) throws IOException {
         DicBuffer buf = new DicBuffer(64 * 1024);
         for (Map.Entry<String, Item> item : strings.entrySet()) {
@@ -132,11 +168,18 @@ public class StringStorage implements StringIndex {
         buf.consume(channel::write);
     }
 
+    /**
+     * Data class of string and its pointer.
+     */
     public static class Item {
+        // super-string that contains this string
         private final String data;
+        // substring range of this string in data
         private final int start;
         private final int end;
+        // root to get the pointer from
         private Item root;
+        // pointer to data in the storage
         private StringPtr ptr;
 
         public Item(String data, int start, int end) {
@@ -162,6 +205,12 @@ public class StringStorage implements StringIndex {
         }
     }
 
+    /**
+     * Save strings in the lexicon csv (first arg) with legacy/compressed format
+     * with given name (second arg).
+     * 
+     * Use this to compare output size of each format.
+     */
     public static void main(String[] args) throws IOException {
         StringStorage strings = new StringStorage();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(args[0]))) {
@@ -173,6 +222,7 @@ public class StringStorage implements StringIndex {
                 strings.add(record.get(11));
                 strings.add(record.get(12));
             }
+            parser.close();
         }
         strings.compile(null);
 

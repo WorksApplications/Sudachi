@@ -73,7 +73,7 @@ public class DicBuilder {
         public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
             progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
             try (InputStream is = input.get()) {
-                InputStream stream = new TrackingInputStream(is);
+                InputStream stream = new ProgressInputStream(is, size, progress);
                 lexicon.read(name, stream, pos);
             }
             progress.endBlock(size, nanoTime());
@@ -173,6 +173,11 @@ public class DicBuilder {
         }
     }
 
+    /**
+     * System dictionary with connection matrix added.
+     * 
+     * Instanciate via SystemNoMatrix.
+     */
     public static final class System extends Base<System> {
         private System readMatrix(String name, IOSupplier<InputStream> input, long size) throws IOException {
             progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
@@ -280,6 +285,11 @@ public class DicBuilder {
         }
     }
 
+    /**
+     * User dictionary.
+     * 
+     * Requires system dictionary to load grammar from to initialize.
+     */
     public static final class User extends Base<User> {
         private User(DictionaryAccess system) {
             pos.preloadFrom(system.getGrammar());
@@ -308,6 +318,7 @@ public class DicBuilder {
         return new User(system);
     }
 
+    /** entry point to test Base build with single lexicon (first arg). */
     public static void main(String[] args) throws IOException {
         Base<?> b = new Base<>();
         Path input = Paths.get(args[0]);

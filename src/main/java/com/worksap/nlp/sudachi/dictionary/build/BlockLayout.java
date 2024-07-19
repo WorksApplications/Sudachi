@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+/**
+ * Output channel wrapper to write dictionary parts in block layout. Also
+ * provides access to the Progress.
+ */
 public class BlockLayout {
     private static final long BLOCK_SIZE = 4096;
     private final SeekableByteChannel channel;
@@ -36,6 +40,23 @@ public class BlockLayout {
         channel.position(BLOCK_SIZE); // keep first block for the description
     }
 
+    /** Function that works with BlockOutput */
+    public interface BlockHandler<T> {
+        T apply(BlockOutput output) throws IOException;
+    }
+
+    /**
+     * Let handler write data in block layout.
+     * 
+     * @param <T>
+     *            return type of the handler.
+     * @param name
+     *            the name for the block used as key in BlockInfo.
+     * @param handler
+     *            handler that works on the channel and progress.
+     * @return result of the handler.
+     * @throws IOException
+     */
     public <T> T block(String name, BlockHandler<T> handler) throws IOException {
         SeekableByteChannel chan = channel;
         long start = chan.position();
@@ -47,6 +68,11 @@ public class BlockLayout {
         return result;
     }
 
+    /**
+     * Returns the summary of block written.
+     * 
+     * @return block information in the Description.Block format.
+     */
     public List<Description.Block> blocks() {
         List<Description.Block> result = new ArrayList<>();
         for (BlockInfo b : info) {

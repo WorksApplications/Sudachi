@@ -23,6 +23,7 @@ import java.nio.CharBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+/** Resizable byte buffer to store string */
 public class UnicodeBufferResizeable {
     private ResizableBuffer buffer;
 
@@ -34,6 +35,7 @@ public class UnicodeBufferResizeable {
         this(64 * 1024);
     }
 
+    /** put specified (char) range of the string to the buffer from offset */
     public void put(int offset, String data, int start, int end) {
         CharBuffer chars = prepare(offset, end - start);
         chars.put(data, start, end);
@@ -44,6 +46,7 @@ public class UnicodeBufferResizeable {
         return buf.asCharBuffer();
     }
 
+    /** write specified (byte) range of the buffer to the channel */
     public void write(WritableByteChannel channel, int start, int end) throws IOException {
         buffer.write(channel, start, end);
     }

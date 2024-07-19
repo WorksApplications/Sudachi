@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
+/**
+ * Reader for the lexicon csv file.
+ */
 public class RawLexiconReader {
 
     /**
@@ -60,10 +63,12 @@ public class RawLexiconReader {
 
     private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
 
+    /** assume legacy column layout if header line is not present */
     private boolean isLegacyColumnLayout() {
         return mapping == null;
     }
 
+    /** resolve header line and set to mapping if it exists. */
     private void resolveColumnLayout() throws IOException {
         List<String> record = parser.getNextRecord();
 
@@ -101,6 +106,7 @@ public class RawLexiconReader {
         this.mapping = mapping;
     }
 
+    /** parse specified column as string */
     private String get(List<String> data, Column column, boolean unescape) {
         int index = column.ordinal();
         if (mapping != null) {
@@ -122,6 +128,7 @@ public class RawLexiconReader {
         }
     }
 
+    /** parse specified column as short */
     private short getShort(List<String> data, Column column) {
         String value = get(data, column, false);
         try {
@@ -132,6 +139,7 @@ public class RawLexiconReader {
         }
     }
 
+    /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
         entry.headword = get(data, Column.Surface, true);
@@ -163,6 +171,7 @@ public class RawLexiconReader {
         return entry;
     }
 
+    /** @return next entry parsed */
     public RawWordEntry nextEntry() throws IOException {
         List<String> record = cachedRecord;
         if (record != null) {
