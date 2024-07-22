@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
  * Reference to a word in the lexicon csv.
  */
 public abstract class WordRef {
+    /** resolve word ref into pointer (word id) using resolver. */
     public abstract int resolve(Lookup2 resolver);
 
     /**
@@ -127,8 +128,9 @@ public abstract class WordRef {
     private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
 
     /** Alias of WordRef.Parser constructor. */
-    public static Parser parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword) {
-        return new Parser(posTable, allowNumeric, allowHeadword);
+    public static Parser parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword,
+            boolean allowNullAsterisk) {
+        return new Parser(posTable, allowNumeric, allowHeadword, allowNullAsterisk);
     }
 
     /** Parser to parse wordref from a string in the lexicon field. */
@@ -136,24 +138,22 @@ public abstract class WordRef {
         private final POSTable posTable;
         private final boolean allowNumeric;
         private final boolean allowHeadword;
+        private final boolean allowNullAsterisk;
 
-        public Parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword) {
+        public Parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword, boolean allowNullAsterisk) {
             this.posTable = posTable;
             this.allowNumeric = allowNumeric;
             this.allowHeadword = allowHeadword;
+            this.allowNullAsterisk = allowNullAsterisk;
         }
 
         /** @return WordRef parsed from the text. */
         public WordRef parse(String text) {
-            if ("*".equals(text) || text == null || text.isEmpty()) {
+            if (text == null || text.isEmpty() || (allowNullAsterisk && "*".equals(text))) {
                 return null;
             }
 
-            if (NUMERIC_RE.matcher(text).matches()) {
-                if (!allowNumeric) {
-                    throw new CsvFieldException(
-                            String.format("invalid word reference: %s, numeric references are not supported", text));
-                }
+            if (allowNumeric && NUMERIC_RE.matcher(text).matches()) {
                 int offset = text.charAt(0) == 'U' ? 1 : 0;
                 int lineNum = Integer.parseInt(text.substring(offset));
                 return new LineNo(lineNum);

@@ -52,13 +52,20 @@ public class RawLexiconReader {
     private int[] mapping;
     private final CSVParser parser;
     private final POSTable posTable;
-    private final WordRef.Parser refParser;
+    private final WordRef.Parser normRefParser; // for normalized form
+    private final WordRef.Parser dictRefParser; // for dictionary form
 
     public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
         this.parser = parser;
         this.posTable = pos;
         resolveColumnLayout();
-        refParser = WordRef.parser(pos, isLegacyColumnLayout() || !user, isLegacyColumnLayout());
+        if (isLegacyColumnLayout()) {
+            normRefParser = WordRef.parser(pos, false, true, false);
+            dictRefParser = WordRef.parser(pos, true, true, true);
+        } else {
+            normRefParser = WordRef.parser(pos, false, false, false);
+            dictRefParser = WordRef.parser(pos, !user, false, false);
+        }
     }
 
     private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
@@ -148,8 +155,8 @@ public class RawLexiconReader {
         entry.cost = getShort(data, Column.Cost);
 
         entry.reading = get(data, Column.ReadingForm, true);
-        entry.dictionaryForm = refParser.parse(get(data, Column.DictionaryForm, false));
-        entry.normalizedForm = refParser.parse(get(data, Column.NormalizedForm, false));
+        entry.normalizedForm = normRefParser.parse(get(data, Column.NormalizedForm, false));
+        entry.dictionaryForm = dictRefParser.parse(get(data, Column.DictionaryForm, false));
 
         POS pos = new POS(
                 // comment for line break

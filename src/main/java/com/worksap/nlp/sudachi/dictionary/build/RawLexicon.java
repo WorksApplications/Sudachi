@@ -37,7 +37,7 @@ public class RawLexicon {
     // However, current implementation (ByteBuffer) cannot handle offset larger than
     // Integer.MAX_VALUE.
     private static final long MAX_OFFSET = (long) Integer.MAX_VALUE * WordInfoList.OFFSET_ALIGNMENT;
-    // first
+    // put empty entry at the first
     private static final int INITIAL_OFFSET = 32;
     private final StringStorage strings = new StringStorage();
     private final List<RawWordEntry> entries = new ArrayList<>();
@@ -131,7 +131,7 @@ public class RawLexicon {
         return blockOutput.measured("Word Entries", (p) -> {
             List<RawWordEntry> list = entries;
             Lookup2 lookup = new Lookup2(list);
-            WordRef.Parser refParser = WordRef.parser(pos, !user, false);
+            WordRef.Parser refParser = WordRef.parser(pos, !user, false, false);
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
             WordEntryLayout layout = new WordEntryLayout(lookup, strings, refParser, buf);

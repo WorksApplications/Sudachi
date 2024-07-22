@@ -29,7 +29,6 @@ import java.util.Objects;
  */
 @SuppressWarnings("jol")
 public class RawWordEntry implements Lookup2.Entry {
-    WordInfo wordInfo;
     int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
     String headword;
     String reading;

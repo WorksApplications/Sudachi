@@ -68,11 +68,11 @@ public class WordEntryLayout {
 
         buf.putInt(index.resolve(entry.headword).encode()); // surfacePtr
         buf.putInt(index.resolve(entry.reading).encode()); // readingPtr
-        int normFormPtr = 0;
+        int normFormPtr = entry.pointer;
         if (entry.normalizedForm != null) {
             normFormPtr = entry.normalizedForm.resolve(lookup);
         }
-        int dicFormPtr = 0;
+        int dicFormPtr = entry.pointer;
         if (entry.dictionaryForm != null) {
             dicFormPtr = entry.dictionaryForm.resolve(lookup);
         }
@@ -82,10 +82,10 @@ public class WordEntryLayout {
 
         // length can't be more than ~4k utf-16 code units so the cast is safe
         short utf8Len = (short) StringUtil.countUtf8Bytes(entry.headword);
-        byte cSplitLen = parseList(entry.cUnitSplitString, "", cSplits);
-        byte bSplitLen = parseList(entry.bUnitSplitString, entry.cUnitSplitString, bSplits);
-        byte aSplitLen = parseList(entry.aUnitSplitString, entry.bUnitSplitString, aSplits);
-        byte wordStructureLen = parseList(entry.wordStructureString, entry.aUnitSplitString, wordStructure);
+        byte cSplitLen = parseWordRefList(entry.cUnitSplitString, "", cSplits);
+        byte bSplitLen = parseWordRefList(entry.bUnitSplitString, entry.cUnitSplitString, bSplits);
+        byte aSplitLen = parseWordRefList(entry.aUnitSplitString, entry.bUnitSplitString, aSplits);
+        byte wordStructureLen = parseWordRefList(entry.wordStructureString, entry.aUnitSplitString, wordStructure);
         byte synonymLen = parseIntList(entry.synonymGroups, synonymGroups);
         int userDataLength = entry.userData.length();
         buf.putShort(utf8Len);
@@ -132,8 +132,17 @@ public class WordEntryLayout {
         return (byte) parts.length;
     }
 
-    /** parse word ref list, i.e. A/B/C split and word structure */
-    byte parseList(String data, String reference, Ints result) {
+    /**
+     * Parse word ref list, i.e. A/B/C split and word structure.
+     * 
+     * If it is equivalent to the reference, return -1 without parsing.
+     * 
+     * @param data
+     * @param reference
+     * @param result
+     * @return
+     */
+    byte parseWordRefList(String data, String reference, Ints result) {
         if (data == null || data.isEmpty() || "*".equals(data)) {
             result.clear();
             return 0;
@@ -142,6 +151,7 @@ public class WordEntryLayout {
             result.clear();
             return -1;
         }
+
         String[] parts = data.split("/");
         if (parts.length > Byte.MAX_VALUE) {
             throw new IllegalArgumentException("reference list contained more than 127 entries: " + data);

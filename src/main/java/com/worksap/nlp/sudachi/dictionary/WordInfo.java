@@ -232,6 +232,7 @@ public class WordInfo {
         return buffer.getInt(pos + 12);
     }
 
+    // see dictionary.build.WordEntryLayout
     private WordInfo(ByteBuffer buffer, int pos) {
         // short leftId = buffer.getShort(pos);
         // short rightId = buffer.getShort(pos + 2);
