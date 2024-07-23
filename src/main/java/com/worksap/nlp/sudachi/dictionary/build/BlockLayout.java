@@ -40,6 +40,19 @@ public class BlockLayout {
         channel.position(BLOCK_SIZE); // keep first block for the description
     }
 
+    /**
+     * Align the current position of output channel.
+     * 
+     * @return new position of channel
+     */
+    private long alignPosition() throws IOException {
+        SeekableByteChannel chan = channel;
+        long end = chan.position();
+        long newPosition = Align.align(end, BLOCK_SIZE);
+        chan.position(newPosition);
+        return newPosition;
+    }
+
     /** Function that works with BlockOutput */
     public interface BlockHandler<T> {
         T apply(BlockOutput output) throws IOException;
@@ -59,11 +72,9 @@ public class BlockLayout {
      */
     public <T> T block(String name, BlockHandler<T> handler) throws IOException {
         SeekableByteChannel chan = channel;
-        long start = chan.position();
+        long start = alignPosition();
         T result = handler.apply(new BlockOutput(chan, progress));
         long end = chan.position();
-        long newPosition = Align.align(end, BLOCK_SIZE);
-        chan.position(newPosition);
         info.add(new BlockInfo(name, start, end));
         return result;
     }
