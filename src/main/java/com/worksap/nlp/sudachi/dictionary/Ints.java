@@ -54,6 +54,10 @@ public class Ints {
         return length;
     }
 
+    public int capacity() {
+        return data.length;
+    }
+
     public void append(int value) {
         maybeResize(1);
         int idx = this.length;
@@ -68,7 +72,7 @@ public class Ints {
     private int[] maybeResize(int additional) {
         int newSize = length + additional;
         int[] d = data;
-        if (newSize > d.length) {
+        if (newSize > capacity()) {
             d = Arrays.copyOf(data, Math.max(newSize, length * 2));
             data = d;
         }
@@ -114,8 +118,17 @@ public class Ints {
         return joiner.toString();
     }
 
+    /**
+     * Make sure the internal buffer has enough capacity for the specified size.
+     * This also increases length and they should be filled using {@code set} or
+     * returned array.
+     * 
+     * @return internal int array
+     */
     public int[] prepare(int size) {
-        return maybeResize(length - size);
+        int[] d = maybeResize(size);
+        this.length += size;
+        return d;
     }
 
     public void appendAll(Ints other) {

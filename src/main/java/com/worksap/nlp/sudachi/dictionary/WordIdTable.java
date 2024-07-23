@@ -88,7 +88,7 @@ class WordIdTable {
      */
     public Iterator<Ints> wordIds() {
         return new Iterator<Ints>() {
-            private final BufReader buf = new BufReader(bytes.duplicate());
+            private final BufReader buf = new BufReader((ByteBuffer) bytes.duplicate().position(0));
             private final Ints ints = new Ints(16);
 
             @Override
@@ -100,6 +100,7 @@ class WordIdTable {
             public Ints next() {
                 BufReader r = buf;
                 int size = r.readVarint32();
+                ints.clear();
                 int[] data = ints.prepare(size);
                 readDeltaCompressed(data, size, dicIdMask, r);
                 return ints;

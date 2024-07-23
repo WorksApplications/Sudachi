@@ -56,12 +56,25 @@ public class DictionaryPrinter {
         // iterator over them will get them not in the sorted order, but grouped by
         // surface (and sorted in groups)
         Ints allIds = new Ints(lex.size());
-        Iterator<Ints> ids = lex.wordIds();
+        Iterator<Ints> ids = lex.wordIds(0);
         while (ids.hasNext()) {
             allIds.appendAll(ids.next());
         }
         allIds.sort();
         wordIds = allIds;
+    }
+
+    /** print information in the dictionary Description part */
+    void printDescription(BinaryDictionary dic) {
+        PrintStream out = System.err;
+        Description desc = dic.getDictionaryHeader();
+        out.printf("creation time: %s%n", desc.getCreationTime());
+        out.printf("comment: %s%n", desc.getComment());
+        out.printf("reference: %s%n", desc.getReference());
+        for (Description.Block b : desc.getBlocks()) {
+            long start = b.getStart();
+            out.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
+        }
     }
 
     void printHeader() {
@@ -74,7 +87,13 @@ public class DictionaryPrinter {
     }
 
     void printColumnHeaders(Column... headers) {
+        boolean isFirst = true;
         for (Column c : headers) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                output.print(",");
+            }
             output.print(c.name());
         }
         output.println();
@@ -102,6 +121,14 @@ public class DictionaryPrinter {
         field(reading);
         entryPtr(info.getNormalizedForm(), ",");
         entryPtr(info.getDictionaryForm(), ",");
+        // TODO:
+        field(""); // mode
+        field(""); // C split
+        field(""); // B split
+        field(""); // A split
+        field(""); // Word structure
+        field(""); // sysnonym groups
+        field(""); // user data
         output.print("\n");
     }
 
@@ -184,6 +211,7 @@ public class DictionaryPrinter {
     static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
         try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
             DictionaryPrinter dp = new DictionaryPrinter(output, dictionary, systemDict);
+            dp.printDescription(dictionary);
             dp.printHeader();
             dp.printEntries();
         }

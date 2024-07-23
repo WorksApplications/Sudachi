@@ -166,4 +166,9 @@ public class LexiconSet implements Lexicon {
     public WordInfoList wordInfos(int dic) {
         return lexicons.get(dic).wordInfos(dic);
     }
+
+    @Override
+    public Iterator<Ints> wordIds(int dic) {
+        return lexicons.get(dic).wordIds(dic);
+    }
 }

@@ -69,5 +69,12 @@ public interface Lexicon {
      */
     String string(int dic, int stringPtr);
 
+    /** @return WordInfoList of the specified dictionary */
     WordInfoList wordInfos(int dic);
+
+    /**
+     * Iterates over all word ids in the specified dictionary. Returned word ids are
+     * not sorted.
+     */
+    Iterator<Ints> wordIds(int dic);
 }

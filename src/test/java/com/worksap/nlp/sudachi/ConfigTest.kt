@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi
 
 import com.worksap.nlp.sudachi.Config.Resource
-import com.worksap.nlp.sudachi.dictionary.build.res
 import java.io.FileNotFoundException
 import java.net.URL
 import java.nio.file.Path
