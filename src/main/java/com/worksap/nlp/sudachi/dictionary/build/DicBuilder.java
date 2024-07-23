@@ -211,7 +211,7 @@ public class DicBuilder {
 
     /**
      * Typestate pattern for system dictionary that does not have connection matrix
-     * added yet
+     * added yet.
      */
     public static final class SystemNoMatrix {
         private final System inner;
@@ -286,18 +286,6 @@ public class DicBuilder {
     }
 
     /**
-     * User dictionary.
-     * 
-     * Requires system dictionary to load grammar from to initialize.
-     */
-    public static final class User extends Base<User> {
-        private User(DictionaryAccess system) {
-            pos.preloadFrom(system.getGrammar());
-            description.setSignature("");
-        }
-    }
-
-    /**
      * Create a new system dictionary compiler
      * 
      * @return new dictionary compiler object
@@ -307,15 +295,68 @@ public class DicBuilder {
     }
 
     /**
+     * User dictionary with reference system dictionary added.
+     * 
+     * Instanciate via UserNoSystem.
+     */
+    public static final class User extends Base<User> {
+        public User system(DictionaryAccess system) {
+            progress.startBlock("system dict entries", nanoTime(), Progress.Kind.ENTRY);
+            int nread = lexicon.preloadFrom(system.getLexicon(), progress);
+            progress.endBlock(nread, nanoTime());
+
+            progress.startBlock("system dict pos list", nanoTime(), Progress.Kind.ENTRY);
+            pos.preloadFrom(system.getGrammar());
+            progress.endBlock(pos.getList().size(), nanoTime());
+
+            description.setSignature("");
+            return this;
+        }
+    }
+
+    /**
+     * Typestate pattern for user dictionary that does not have system dictionary
+     * added yet.
+     */
+    public static final class UserNoSystem {
+        private final User inner;
+
+        private UserNoSystem(DicBuilder.User inner) {
+            this.inner = inner;
+        }
+
+        /**
+         * Preload data from given system dictionary.
+         * 
+         * @param system
+         *            referenced dictionary
+         * @return
+         */
+        public DicBuilder.User system(DictionaryAccess system) {
+            return inner.system(system);
+        }
+
+        /**
+         * Set the progress handler to the provided one
+         * 
+         * @param progress
+         *            handler
+         * @return current object
+         */
+        public UserNoSystem progress(Progress progress) {
+            inner.progress(progress);
+            return this;
+        }
+    }
+
+    /**
      * Create a new user dictionary compiler which will reference the provided user
      * dictionary.
      * 
-     * @param system
-     *            referenced dictionary
      * @return new dictionary compiler object
      */
-    public static User user(DictionaryAccess system) {
-        return new User(system);
+    public static UserNoSystem user() {
+        return new UserNoSystem(new User());
     }
 
     /** entry point to test Base build with single lexicon (first arg). */

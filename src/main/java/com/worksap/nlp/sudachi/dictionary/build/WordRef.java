@@ -36,9 +36,11 @@ public abstract class WordRef {
      */
     public static final class LineNo extends WordRef {
         private final int line;
+        private final boolean isUser;
 
-        public LineNo(int line) {
+        public LineNo(int line, boolean isUser) {
             this.line = line;
+            this.isUser = isUser;
         }
 
         public int getLine() {
@@ -47,12 +49,12 @@ public abstract class WordRef {
 
         @Override
         public int resolve(Lookup2 resolver) {
-            return resolver.byIndex(line).pointer();
+            return resolver.byIndex(line, isUser).pointer();
         }
 
         @Override
         public String toString() {
-            return String.format("WordRef/Line: %d", line);
+            return String.format("WordRef/Line: %s%d", isUser ? "U" : "S", line);
         }
     }
 
@@ -154,9 +156,10 @@ public abstract class WordRef {
             }
 
             if (allowNumeric && NUMERIC_RE.matcher(text).matches()) {
-                int offset = text.charAt(0) == 'U' ? 1 : 0;
+                boolean isUser = text.charAt(0) == 'U';
+                int offset = isUser ? 1 : 0;
                 int lineNum = Integer.parseInt(text.substring(offset));
-                return new LineNo(lineNum);
+                return new LineNo(lineNum, isUser);
             }
 
             if (StringUtil.count(text, ',') == 7) {

@@ -105,15 +105,15 @@ public class POSTable implements WriteDictionary {
     public Void compile(BlockOutput out) throws IOException {
         return out.measured("POS Table", (p) -> {
             BufferedChannel cbuf = new BufferedChannel(out.getChannel());
-            cbuf.byteBuffer(2).putShort((short) table.size());
-            for (int i = 0; i < table.size(); ++i) {
+            cbuf.byteBuffer(2).putShort((short) ownedLength());
+            for (int i = 0; i < ownedLength(); ++i) {
                 BufWriter writer = cbuf.writer(POS.MAX_BINARY_LENGTH);
-                POS pos = table.get(i);
+                POS pos = table.get(builtin + i);
                 for (String s : pos) {
                     // strings are always shorter than POS.MAX
                     writer.putShortString(s);
                 }
-                p.progress(i, table.size());
+                p.progress(i, ownedLength());
             }
             cbuf.flush();
             return null;

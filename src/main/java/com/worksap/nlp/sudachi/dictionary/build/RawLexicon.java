@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.Blocks;
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
+import com.worksap.nlp.sudachi.dictionary.Ints;
+import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.io.IOException;
@@ -27,7 +29,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Dictionary part: Lexicon loaded from csv files.
@@ -39,16 +44,48 @@ public class RawLexicon {
     private static final long MAX_OFFSET = (long) Integer.MAX_VALUE * WordInfoList.OFFSET_ALIGNMENT;
     // put empty entry at the first
     private static final int INITIAL_OFFSET = 32;
-    private final StringStorage strings = new StringStorage();
+
+    // full list of word entries, in the order in csv.
     private final List<RawWordEntry> entries = new ArrayList<>();
-    private final List<RawWordEntry> notIndexed = new ArrayList<>();
 
     private final Index index = new Index();
+    private final List<RawWordEntry> notIndexed = new ArrayList<>();
+    private final StringStorage strings = new StringStorage();
     private boolean user = false;
 
     // offset for next entry
     private long offset = INITIAL_OFFSET;
     private boolean runtimeCosts = false;
+
+    // entries loaded from the referencing system dictionary (for user
+    // dict build).
+    private final List<CompiledWordEntry> preloadedEntries = new ArrayList<>();
+
+    /**
+     * Preload entries from the lexicon (of the system dictionary). They are only
+     * used to resolve wordref.
+     * 
+     * @param lexicon
+     * @return number of entries read.
+     */
+    public int preloadFrom(Lexicon lexicon, Progress progress) {
+        Ints allIds = new Ints(lexicon.size());
+        Iterator<Ints> ids = lexicon.wordIds(0);
+        while (ids.hasNext()) {
+            allIds.appendAll(ids.next());
+        }
+        allIds.sort();
+        for (int i = 0; i < allIds.length(); i++) {
+            preloadedEntries.add(new CompiledWordEntry(lexicon, allIds.get(i)));
+            progress.progress(i, allIds.length());
+        }
+        return preloadedEntries.size();
+    }
+
+    /** Full list of entries in referencing system and target lexicon. */
+    private List<Lookup2.Entry> lookupEntries() {
+        return Stream.concat(preloadedEntries.stream(), entries.stream()).collect(Collectors.toList());
+    }
 
     /**
      * Read lexicon from InputStream.
@@ -130,7 +167,7 @@ public class RawLexicon {
     private Void writeEntries(POSTable pos, BlockOutput blockOutput) throws IOException {
         return blockOutput.measured("Word Entries", (p) -> {
             List<RawWordEntry> list = entries;
-            Lookup2 lookup = new Lookup2(list);
+            Lookup2 lookup = new Lookup2(lookupEntries(), preloadedEntries.size());
             WordRef.Parser refParser = WordRef.parser(pos, !user, false, false);
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);

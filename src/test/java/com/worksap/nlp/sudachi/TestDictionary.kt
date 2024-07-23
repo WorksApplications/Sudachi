@@ -34,7 +34,7 @@ object TestDictionary {
 
   val userDict1Data: MemChannel by lazy {
     val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user.csv")).build(chan)
+    DicBuilder.user().system(systemDict).lexicon(res("/dict/user.csv")).build(chan)
     chan
   }
 
@@ -46,7 +46,7 @@ object TestDictionary {
 
   val userDict2: BinaryDictionary by lazy {
     val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
+    DicBuilder.user().system(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
     BinaryDictionary.loadUser(chan.buffer())
   }
 

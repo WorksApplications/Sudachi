@@ -45,7 +45,7 @@ class TestDic {
   }
 
   fun user(data: String): TestDic {
-    val bldr = DicBuilder.user(systemDic).lexicon(data)
+    val bldr = DicBuilder.user().system(systemDic).lexicon(data)
     val ch = MemChannel()
     bldr.build(ch)
     this.userDics.add(BinaryDictionary(ch.buffer()))

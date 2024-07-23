@@ -161,9 +161,9 @@ public class Index implements WriteDictionary {
                 prevId = wid;
                 p.progress(++i, fullsize);
             }
+            buffer.flush();
             return null;
         });
-        buffer.flush();
 
         return new TrieData(keys, values);
     }

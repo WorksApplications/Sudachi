@@ -33,8 +33,16 @@ public class Lookup2 {
         String headword();
     }
 
-    public Lookup2(List<? extends Entry> entries) {
+    private final List<? extends Entry> entries;
+    // number of reference system dictionary entries. only used to resolve user
+    // line-no ref.
+    private final int nbuiltin;
+    // mapping to entries that have same surfaces
+    private final Map<String, List<Entry>> bySurface;
+
+    public Lookup2(List<? extends Entry> entries, int nbuiltin) {
         this.entries = entries;
+        this.nbuiltin = nbuiltin;
         HashMap<String, List<Entry>> result = new HashMap<>(entries.size() * 4 / 3);
         for (Entry e : entries) {
             List<Entry> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
@@ -43,10 +51,6 @@ public class Lookup2 {
         bySurface = result;
     }
 
-    private final List<? extends Entry> entries;
-    // mapping to entries that have same surfaces
-    private final Map<String, List<Entry>> bySurface;
-
     /**
      * Lookup an entry by the list index. Make sure you know the order of entries in
      * the list.
@@ -54,8 +58,9 @@ public class Lookup2 {
      * @param index
      * @return
      */
-    public Entry byIndex(int index) {
-        return entries.get(index);
+    public Entry byIndex(int index, boolean isUser) {
+        int offset = isUser ? nbuiltin : 0;
+        return entries.get(index + offset);
     }
 
     /**
