@@ -145,7 +145,7 @@ public class DoubleArrayLexicon implements Lexicon {
 
     @Override
     public int size() {
-        return (int) description.getNumTotalEntries();
+        return description.getNumTotalEntries();
     }
 
     public Iterator<Ints> wordIds(int dic) {

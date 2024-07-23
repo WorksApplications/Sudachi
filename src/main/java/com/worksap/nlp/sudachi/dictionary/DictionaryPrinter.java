@@ -64,19 +64,6 @@ public class DictionaryPrinter {
         wordIds = allIds;
     }
 
-    /** print information in the dictionary Description part */
-    void printDescription(BinaryDictionary dic) {
-        PrintStream out = System.err;
-        Description desc = dic.getDictionaryHeader();
-        out.printf("creation time: %s%n", desc.getCreationTime());
-        out.printf("comment: %s%n", desc.getComment());
-        out.printf("reference: %s%n", desc.getReference());
-        for (Description.Block b : desc.getBlocks()) {
-            long start = b.getStart();
-            out.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
-        }
-    }
-
     void printHeader() {
         // @formatter:off
         printColumnHeaders(Column.Surface, Column.LeftId, Column.RightId, Column.Cost, Column.Pos1, Column.Pos2,
@@ -211,7 +198,6 @@ public class DictionaryPrinter {
     static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
         try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
             DictionaryPrinter dp = new DictionaryPrinter(output, dictionary, systemDict);
-            dp.printDescription(dictionary);
             dp.printHeader();
             dp.printEntries();
         }

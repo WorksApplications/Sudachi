@@ -103,10 +103,6 @@ public class Description {
         return !reference.isEmpty();
     }
 
-    public long getNumTotalEntries() {
-        return numTotalEntries;
-    }
-
     public static class Block {
         private final String name;
         private final long start;
@@ -281,6 +277,14 @@ public class Description {
 
     public boolean isRuntimeCosts() {
         return (flags & 0x1L) != 0;
+    }
+
+    public int getNumTotalEntries() {
+        return numTotalEntries;
+    }
+
+    public int getNumIndexedEntries() {
+        return this.numIndexedEntries;
     }
 
     public void setNumberOfEntries(int indexed, int total) {

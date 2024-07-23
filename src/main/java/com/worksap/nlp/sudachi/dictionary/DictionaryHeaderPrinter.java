@@ -33,6 +33,28 @@ public class DictionaryHeaderPrinter {
     private DictionaryHeaderPrinter() {
     }
 
+    /** print information in the dictionary Description part */
+    static void printDescription(String filename, PrintStream output) throws IOException {
+        ByteBuffer bytes;
+        try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
+            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
+            bytes.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        Description desc = Description.load(bytes);
+
+        output.printf("Creation time: %s%n", desc.getCreationTime());
+        output.printf("Comment: %s%n", desc.getComment());
+        output.printf("Signature: %s%n", desc.getSignature());
+        output.printf("Reference: %s%n", desc.getReference());
+        output.printf("Entries total: %d%n", desc.getNumTotalEntries());
+        output.printf("Entries indexed: %d%n", desc.getNumIndexedEntries());
+        for (Description.Block b : desc.getBlocks()) {
+            long start = b.getStart();
+            output.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
+        }
+        output.printf("Flag isRuntimeCosts: %s%n", desc.isRuntimeCosts());
+    }
+
     static void printHeader(String filename, PrintStream output) throws IOException {
         ByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
@@ -69,7 +91,7 @@ public class DictionaryHeaderPrinter {
      */
     public static void main(String[] args) throws IOException {
         for (String filename : args) {
-            printHeader(filename, System.out);
+            printDescription(filename, System.out);
         }
     }
 }
