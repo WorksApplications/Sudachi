@@ -78,7 +78,11 @@ public class GrammarImpl implements Grammar {
     }
 
     public static GrammarImpl load(ByteBuffer binaryDic, Description header) {
-        Connection matrix = Connection.fromByteBufferV1(header.slice(binaryDic, Blocks.CONNECTION_MATRIX));
+        ByteBuffer connmatBytes = header.sliceOrNull(binaryDic, Blocks.CONNECTION_MATRIX);
+        Connection matrix = null;
+        if (connmatBytes != null) {
+            matrix = Connection.fromByteBufferV1(connmatBytes);
+        }
         List<POS> posList = loadPosList(header.slice(binaryDic, Blocks.POS_TABLE));
         return new GrammarImpl(posList, matrix);
     }
