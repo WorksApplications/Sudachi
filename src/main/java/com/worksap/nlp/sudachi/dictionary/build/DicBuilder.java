@@ -16,9 +16,9 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
+import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
 import com.worksap.nlp.sudachi.dictionary.Blocks;
 import com.worksap.nlp.sudachi.dictionary.Description;
-import com.worksap.nlp.sudachi.dictionary.DictionaryAccess;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -300,7 +300,7 @@ public class DicBuilder {
      * Instanciate via UserNoSystem.
      */
     public static final class User extends Base<User> {
-        public User system(DictionaryAccess system) {
+        public User system(BinaryDictionary system) {
             progress.startBlock("system dict entries", nanoTime(), Progress.Kind.ENTRY);
             int nread = lexicon.preloadFrom(system.getLexicon(), progress);
             progress.endBlock(nread, nanoTime());
@@ -310,6 +310,7 @@ public class DicBuilder {
             progress.endBlock(pos.getList().size(), nanoTime());
 
             description.setSignature("");
+            description.setReference(system.getDictionaryHeader().getSignature());
             return this;
         }
     }
@@ -332,7 +333,7 @@ public class DicBuilder {
          *            referenced dictionary
          * @return
          */
-        public DicBuilder.User system(DictionaryAccess system) {
+        public DicBuilder.User system(BinaryDictionary system) {
             return inner.system(system);
         }
 
