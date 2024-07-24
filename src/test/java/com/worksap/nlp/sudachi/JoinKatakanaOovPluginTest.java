@@ -34,6 +34,7 @@ public class JoinKatakanaOovPluginTest {
         Dictionary dict = TestDictionary.INSTANCE.user1();
         tokenizer = (JapaneseTokenizer) dict.create();
         plugin = new JoinKatakanaOovPlugin();
+        plugin.setOovFactory((short) -1);
     }
 
     @Test

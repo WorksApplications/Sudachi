@@ -64,6 +64,10 @@ class JoinKatakanaOovPlugin extends PathRewritePlugin {
             throw new IllegalArgumentException("minLength is negative");
         }
 
+        setOovFactory(oovPosId);
+    }
+
+    public void setOovFactory(short oovPosId) {
         factory = LatticeNodeImpl.oovFactory((short) -1, (short) -1, (short) -1, oovPosId);
     }
 
