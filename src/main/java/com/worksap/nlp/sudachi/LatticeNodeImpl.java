@@ -175,25 +175,29 @@ public class LatticeNodeImpl implements LatticeNode {
         return bestPreviousNode != null;
     }
 
-    public String getBaseSurface() {
+    @Override
+    public String getSurface() {
         return strings().getSurface(this);
     }
 
+    @Override
     public String getReading() {
         return strings().getReading(this);
     }
 
+    @Override
     public String getNormalizedForm() {
         return strings().getNormalizedForm(this);
     }
 
+    @Override
     public String getDictionaryForm() {
         return strings().getDictionaryForm(this);
     }
 
     @Override
     public String toString() {
-        String surface = getBaseSurface();
+        String surface = getSurface();
         short pos = getWordInfo().getPOSId();
 
         return String.format("%d %d %s(%d) %d %d %d %d", getBegin(), getEnd(), surface, wordId, pos, leftId, rightId,

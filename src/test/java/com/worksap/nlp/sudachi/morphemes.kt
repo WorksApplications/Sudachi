@@ -25,7 +25,7 @@ fun DictionaryAccess.morpheme(id: Int): Morpheme {
 
   val l =
       MorphemeList(
-          UTF8InputTextBuilder(node.baseSurface, grammar).build(),
+          UTF8InputTextBuilder(node.surface, grammar).build(),
           grammar,
           lexicon,
           listOf(node),

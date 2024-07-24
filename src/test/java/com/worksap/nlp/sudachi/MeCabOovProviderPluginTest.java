@@ -115,7 +115,7 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(1));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -138,7 +138,7 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(1));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -161,12 +161,12 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(2));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あ"));
+        assertThat(n.getSurface(), is("あ"));
         assertThat(n.getWordInfo().getLength(), is((short) 1));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あい"));
+        assertThat(n.getSurface(), is("あい"));
         assertThat(n.getWordInfo().getLength(), is((short) 2));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -190,12 +190,12 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(2));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あ"));
+        assertThat(n.getSurface(), is("あ"));
         assertThat(n.getWordInfo().getLength(), is((short) 1));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あい"));
+        assertThat(n.getSurface(), is("あい"));
         assertThat(n.getWordInfo().getLength(), is((short) 2));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -218,17 +218,17 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(3));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あ"));
+        assertThat(n.getSurface(), is("あ"));
         assertThat(n.getWordInfo().getLength(), is((short) 1));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(2);
-        assertThat(n.getWordInfo().getSurface(), is("あい"));
+        assertThat(n.getSurface(), is("あい"));
         assertThat(n.getWordInfo().getLength(), is((short) 2));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -251,17 +251,17 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(3));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あ"));
+        assertThat(n.getSurface(), is("あ"));
         assertThat(n.getWordInfo().getLength(), is((short) 1));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(2);
-        assertThat(n.getWordInfo().getSurface(), is("あい"));
+        assertThat(n.getSurface(), is("あい"));
         assertThat(n.getWordInfo().getLength(), is((short) 2));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -284,17 +284,17 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(3));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あ"));
+        assertThat(n.getSurface(), is("あ"));
         assertThat(n.getWordInfo().getLength(), is((short) 1));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あい"));
+        assertThat(n.getSurface(), is("あい"));
         assertThat(n.getWordInfo().getLength(), is((short) 2));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(2);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
@@ -317,12 +317,12 @@ public class MeCabOovProviderPluginTest {
         assertThat(nodes.size(), is(2));
 
         LatticeNode n = nodes.get(0);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 1));
 
         n = nodes.get(1);
-        assertThat(n.getWordInfo().getSurface(), is("あいう"));
+        assertThat(n.getSurface(), is("あいう"));
         assertThat(n.getWordInfo().getLength(), is((short) 3));
         assertThat(n.getWordInfo().getPOSId(), is((short) 2));
     }

@@ -44,20 +44,20 @@ public class JoinNumericPluginTest {
     public void testDigit() {
         List<LatticeNodeImpl> path = getPath("123円20銭");
         assertEquals(4, path.size());
-        assertEquals("123", path.get(0).getBaseSurface());
-        assertEquals("20", path.get(2).getBaseSurface());
+        assertEquals("123", path.get(0).getSurface());
+        assertEquals("20", path.get(2).getSurface());
 
         path = getPath("080-121");
         assertEquals(3, path.size());
-        assertEquals("080", path.get(0).getBaseSurface());
-        assertEquals("121", path.get(2).getBaseSurface());
+        assertEquals("080", path.get(0).getSurface());
+        assertEquals("121", path.get(2).getSurface());
     }
 
     @Test
     public void testKanjiNumeric() {
         List<LatticeNodeImpl> path = getPath("一二三万二千円");
         assertEquals(2, path.size());
-        assertEquals("一二三万二千", path.get(0).getBaseSurface());
+        assertEquals("一二三万二千", path.get(0).getSurface());
 
         path = getPath("二百百");
         assertEquals(3, path.size());

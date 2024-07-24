@@ -187,7 +187,7 @@ class LatticeImpl implements Lattice {
     }
 
     String getSurface(LatticeNodeImpl node) {
-        return node.isSpecial() ? "(null)" : node.getBaseSurface();
+        return node.isSpecial() ? "(null)" : node.getSurface();
     }
 
     String getPos(LatticeNodeImpl node) {

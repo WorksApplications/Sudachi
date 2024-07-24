@@ -86,7 +86,7 @@ public class JoinKatakanaOovPluginTest {
         plugin.minLength = 3;
         List<LatticeNodeImpl> path = getPath("ァアイアイウ");
         assertEquals(2, path.size());
-        assertEquals("ァ", path.get(0).getBaseSurface());
+        assertEquals("ァ", path.get(0).getSurface());
 
         path = getPath("アイウァアイウ");
         assertEquals(1, path.size());
