@@ -135,7 +135,7 @@ class JoinNumericPlugin extends PathRewritePlugin {
             return;
         if (enableNormalize) {
             String normalizedForm = parser.getNormalized();
-            if (end - begin > 1 || !normalizedForm.equals(path.get(begin).getWordInfo().getNormalizedForm())) {
+            if (end - begin > 1 || !normalizedForm.equals(path.get(begin).getNormalizedForm())) {
                 concatenate(path, begin, end, lattice, normalizedForm);
             }
         } else {

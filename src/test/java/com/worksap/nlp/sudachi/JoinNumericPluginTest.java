@@ -68,7 +68,7 @@ public class JoinNumericPluginTest {
         plugin.enableNormalize = true;
         List<LatticeNodeImpl> path = getPath("一二三万二千円");
         assertEquals(2, path.size());
-        assertEquals("1232000", path.get(0).getBaseSurface());
+        assertEquals("1232000", path.get(0).getNormalizedForm());
     }
 
     @Test
