@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.worksap.nlp.sudachi.WordId;
+
 public class WordParameters {
     private final ByteBuffer data;
 
@@ -27,12 +29,12 @@ public class WordParameters {
     }
 
     public long loadParams(int wordId) {
-        int addr = WordInfoList.wordId2offset(wordId);
+        int addr = WordInfoList.wordId2offset(WordId.word(wordId));
         return data.getLong(addr);
     }
 
     public void setCost(int wordId, short cost) {
-        int addr = WordInfoList.wordId2offset(wordId) + 6;
+        int addr = WordInfoList.wordId2offset(WordId.word(wordId)) + 6;
         data.putShort(addr, cost);
     }
 
@@ -48,7 +50,7 @@ public class WordParameters {
         int lim = roBuf.limit();
         ByteBuffer buf = ByteBuffer.allocate(lim);
         buf.order(ByteOrder.LITTLE_ENDIAN);
-        roBuf.put(buf);
+        buf.put(roBuf);
         buf.position(0);
         return new WordParameters(buf);
     }

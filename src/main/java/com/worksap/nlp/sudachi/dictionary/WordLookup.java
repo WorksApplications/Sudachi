@@ -78,7 +78,7 @@ public final class WordLookup {
     }
 
     /**
-     * Sets the wordIds, numWords, endOffset to the
+     * Sets the wordIds, numWords, endOffset to the next value.
      *
      * @return true if there was an entry in any of binary dictionaries
      */
