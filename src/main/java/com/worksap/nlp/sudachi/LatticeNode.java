@@ -26,8 +26,8 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * and the information of morpheme as {@link WordInfo}
  *
  * <p>
- * Allocation of a node in the plugins must be done through
- * {@link Lattice#createNode}.
+ * Node should be creadted via {@link LatticeNodeImpl#makeOov} or
+ * {@link LatticeNodeImpl.OOVFactory} in the plugins.
  *
  * @see Lattice
  * @see WordInfo
@@ -83,7 +83,11 @@ public interface LatticeNode {
 
     /**
      * Makes the node out of vocabulary.
+     * 
+     * @deprecated OOV node should be created via {@link LatticeNodeImpl#makeOov} or
+     *             {@link LatticeNodeImpl.OOVFactory}.
      */
+    @Deprecated
     public void setOOV();
 
     /**

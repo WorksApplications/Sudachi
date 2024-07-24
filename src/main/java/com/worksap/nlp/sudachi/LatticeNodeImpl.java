@@ -32,19 +32,18 @@ public class LatticeNodeImpl implements LatticeNode {
     short cost;
 
     int wordId;
+    // word info that corresponds to wordId or that manually set (OOV).
+    WordInfo wordInfo;
 
+    // for lattice construction
     int totalCost;
     LatticeNodeImpl bestPreviousNode;
 
-    boolean isDefined;
-    boolean isOOV;
-    WordInfo extraWordInfo;
-
-    // this is either Lexicon or StringsCache object
+    // either Lexicon or StringsCache object
     Object lexicon;
 
-    private static final short ZERO = (short) 0;
-    static final WordInfo UNDEFINED_WORDINFO = new WordInfo(ZERO, ZERO);
+    // Empty wordInfo for special words.
+    static final WordInfo UNDEFINED_WORDINFO = new WordInfo((short) 0, (short) -1);
 
     LatticeNodeImpl(Lexicon lexicon, long params, int wordId) {
         this.lexicon = lexicon;
@@ -52,11 +51,30 @@ public class LatticeNodeImpl implements LatticeNode {
         this.rightId = WordParameters.rightId(params);
         this.cost = WordParameters.cost(params);
         this.wordId = wordId;
-        this.isDefined = true;
     }
 
+    /** Create empty node. Caller must fill fields. */
     LatticeNodeImpl() {
-        isDefined = false;
+    }
+
+    /** Create special node with given wordid. */
+    static LatticeNodeImpl makeSpecial(int specialWordId) {
+        assert WordId.isSpecial(specialWordId);
+        LatticeNodeImpl node = new LatticeNodeImpl();
+        node.wordId = specialWordId;
+        return node;
+    }
+
+    /** Create OOV node. */
+    public static LatticeNodeImpl makeOov(int begin, int end, short posId, String surface, String normalizedForm,
+            String dictionaryForm, String readingForm) {
+        LatticeNodeImpl node = new LatticeNodeImpl();
+        node.wordId = WordId.makeOov(posId);
+        node.wordInfo = new WordInfo((short) (end - begin), posId);
+        node.lexicon = new StringsCache(surface, readingForm, normalizedForm, dictionaryForm);
+        node.begin = begin;
+        node.end = end;
+        return node;
     }
 
     @Override
@@ -64,6 +82,12 @@ public class LatticeNodeImpl implements LatticeNode {
         this.leftId = leftId;
         this.rightId = rightId;
         this.cost = cost;
+    }
+
+    public void setParameter(long params) {
+        this.leftId = WordParameters.leftId(params);
+        this.rightId = WordParameters.rightId(params);
+        this.cost = WordParameters.cost(params);
     }
 
     private Lexicon lexicon() {
@@ -99,26 +123,34 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public void setOOV() {
-        isOOV = true;
+        this.wordId = WordId.ID_OOV_NOPOS;
+    }
+
+    /** @return if this node is a special node. */
+    public boolean isSpecial() {
+        return WordId.isSpecial(wordId);
+    }
+
+    /** @return if this node comes from a dictionary. */
+    public boolean isDefined() {
+        return !isOOV() && !isSpecial();
     }
 
     @Override
     public WordInfo getWordInfo() {
-        if (!isDefined) {
+        if (isSpecial()) {
             return UNDEFINED_WORDINFO;
         }
-        if (extraWordInfo != null) {
-            return extraWordInfo;
+        if (wordInfo != null) {
+            return wordInfo;
         }
-        WordInfo info = lexicon().getWordInfo(wordId);
-        extraWordInfo = info;
-        return info;
+        wordInfo = lexicon().getWordInfo(wordId);
+        return wordInfo;
     }
 
     @Override
     public void setWordInfo(WordInfo wordInfo) {
-        extraWordInfo = wordInfo;
-        isDefined = true;
+        this.wordInfo = wordInfo;
     }
 
     @Override
@@ -133,10 +165,10 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public int getDictionaryId() {
-        if (!isDefined || extraWordInfo != null) {
-            return -1;
+        if (isDefined()) {
+            return WordId.dic(wordId);
         }
-        return WordId.dic(wordId);
+        return -1;
     }
 
     public boolean isConnectedToBOS() {
@@ -224,11 +256,19 @@ public class LatticeNodeImpl implements LatticeNode {
         private final Lexicon lexicon;
         private String surface;
         private String reading;
-        private String dictionaryForm;
         private String normalizedForm;
+        private String dictionaryForm;
 
         public StringsCache(Lexicon lexicon) {
             this.lexicon = lexicon;
+        }
+
+        public StringsCache(String surface, String readingForm, String normalizedForm, String dictionaryForm) {
+            this.lexicon = null;
+            this.surface = surface;
+            this.reading = readingForm;
+            this.normalizedForm = normalizedForm;
+            this.dictionaryForm = dictionaryForm;
         }
 
         public String getSurface(LatticeNodeImpl node) {
@@ -257,19 +297,6 @@ public class LatticeNodeImpl implements LatticeNode {
             return s;
         }
 
-        public String getDictionaryForm(LatticeNodeImpl node) {
-            String s = dictionaryForm;
-            if (s == null) {
-                WordInfo wi = node.getWordInfo();
-                int dicEntryPtr = wi.getDictionaryForm();
-                int dic = WordId.blendDic(dicEntryPtr, WordId.dic(node.wordId));
-                int surface = lexicon.wordInfos(dic).surfacePtr(dicEntryPtr);
-                s = lexicon.string(dic, surface);
-                dictionaryForm = s;
-            }
-            return s;
-        }
-
         public String getNormalizedForm(LatticeNodeImpl node) {
             String s = normalizedForm;
             if (s == null) {
@@ -282,26 +309,23 @@ public class LatticeNodeImpl implements LatticeNode {
             }
             return s;
         }
+
+        public String getDictionaryForm(LatticeNodeImpl node) {
+            String s = dictionaryForm;
+            if (s == null) {
+                WordInfo wi = node.getWordInfo();
+                int dicEntryPtr = wi.getDictionaryForm();
+                int dic = WordId.blendDic(dicEntryPtr, WordId.dic(node.wordId));
+                int surface = lexicon.wordInfos(dic).surfacePtr(dicEntryPtr);
+                s = lexicon.string(dic, surface);
+                dictionaryForm = s;
+            }
+            return s;
+        }
     }
 
     public static OOVFactory oovFactory(short leftId, short rightId, short cost, short posId) {
         return new OOVFactory(leftId, rightId, cost, posId);
-    }
-
-    public static LatticeNodeImpl makeOov(int begin, int end, short posId, String surface, String normalizedForm,
-            String dictionaryForm, String readingForm) {
-        StringsCache c = new StringsCache(null);
-        c.surface = surface;
-        c.normalizedForm = normalizedForm;
-        c.reading = readingForm;
-        c.dictionaryForm = dictionaryForm;
-        WordInfo wi = new WordInfo(Short.MIN_VALUE, posId);
-        LatticeNodeImpl node = new LatticeNodeImpl();
-        node.extraWordInfo = wi;
-        node.lexicon = c;
-        node.begin = begin;
-        node.end = end;
-        return node;
     }
 
     public static final class OOVFactory {
@@ -309,36 +333,22 @@ public class LatticeNodeImpl implements LatticeNode {
         private final short rightId;
         private final short cost;
         private final short posId;
-        private final WordInfo wordInfo;
 
         private OOVFactory(short leftId, short rightId, short cost, short posId) {
             this.rightId = rightId;
             this.cost = cost;
             this.leftId = leftId;
             this.posId = posId;
-            this.wordInfo = new WordInfo(ZERO, posId);
         }
 
-        public LatticeNodeImpl make(int start, int end, InputText input) {
-            String s = input.getSubstring(start, end);
-            return make(start, end, s);
+        public LatticeNodeImpl make(int begin, int end, InputText input) {
+            String s = input.getSubstring(begin, end);
+            return make(begin, end, s);
         }
 
-        public LatticeNodeImpl make(int start, int end, String text) {
-            LatticeNodeImpl i = new LatticeNodeImpl();
-            i.begin = start;
-            i.end = end;
-            i.leftId = leftId;
-            i.rightId = rightId;
-            i.cost = cost;
-            i.wordId = WordId.oovWid(posId);
-            i.extraWordInfo = wordInfo;
-            StringsCache sc = new StringsCache(null);
-            sc.surface = text;
-            sc.reading = text;
-            sc.dictionaryForm = text;
-            sc.normalizedForm = text;
-            i.lexicon = sc;
+        public LatticeNodeImpl make(int begin, int end, String text) {
+            LatticeNodeImpl i = makeOov(begin, end, posId, text, text, text, text);
+            i.setParameter(leftId, rightId, cost);
             return i;
         }
 
@@ -349,13 +359,12 @@ public class LatticeNodeImpl implements LatticeNode {
             if (o == null || getClass() != o.getClass())
                 return false;
             OOVFactory that = (OOVFactory) o;
-            return leftId == that.leftId && rightId == that.rightId && cost == that.cost && posId == that.posId
-                    && Objects.equals(wordInfo, that.wordInfo);
+            return leftId == that.leftId && rightId == that.rightId && cost == that.cost && posId == that.posId;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(leftId, rightId, cost, posId, wordInfo);
+            return Objects.hash(leftId, rightId, cost, posId);
         }
     }
 }

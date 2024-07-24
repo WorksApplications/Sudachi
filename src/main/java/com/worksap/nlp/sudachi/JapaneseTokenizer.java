@@ -250,6 +250,11 @@ class JapaneseTokenizer implements Tokenizer {
         return lattice;
     }
 
+    /**
+     * Create OOV nodes using plugin and add them to the lattice and unkNodes.
+     * 
+     * @return wordMask updated based on created OOV nodes.
+     */
     private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
             int boundary, long wordMask) {
         int initialSize = unkNodes.size();

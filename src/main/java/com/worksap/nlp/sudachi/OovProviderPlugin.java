@@ -73,12 +73,13 @@ public abstract class OovProviderPlugin extends Plugin {
      *            bit is set, it means that a node of length of 64 <b>or greater</b>
      *            was created.
      * @param result
-     *            OOV provider plugins need to add nodes here
+     *            OOV provider plugins need to add nodes here.
      * @return the number of created nodes. Values outside that range will be
      *         ignored.
      */
     public abstract int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result);
 
+    /** Runs provideOOV and set proper begin/end for each nodes. */
     int getOOV(UTF8InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result) {
         int oldSize = result.size();
         int numCreated = provideOOV(inputText, offset, otherWords, result);

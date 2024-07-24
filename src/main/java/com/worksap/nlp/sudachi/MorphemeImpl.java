@@ -24,7 +24,7 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 class MorphemeImpl implements Morpheme {
     private final MorphemeList list;
     private final int index;
-    private LatticeNodeImpl node;
+    private LatticeNodeImpl node; // cache
 
     /* internal */ MorphemeImpl(MorphemeList list, int index) {
         this.list = list;

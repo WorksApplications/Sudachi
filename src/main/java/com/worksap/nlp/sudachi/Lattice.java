@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * A graph structure used in the morphological analysis.
@@ -113,6 +112,10 @@ public interface Lattice {
      * Allocate a new node.
      *
      * @return a new node has no information
+     * 
+     * @deprecated use {@code LatticeNodeImpl.makeOOV} or
+     *             {@code LatticeNodeImpl.OOVFactory} instead.
      */
+    @Deprecated
     public LatticeNode createNode();
 }

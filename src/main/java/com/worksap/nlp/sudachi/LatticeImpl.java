@@ -45,7 +45,7 @@ class LatticeImpl implements Lattice {
         eosParams = grammar.getEOSParameter();
 
         endLists = new ArrayList<>();
-        LatticeNodeImpl bosNode = new LatticeNodeImpl();
+        LatticeNodeImpl bosNode = LatticeNodeImpl.makeSpecial(WordId.ID_BOS);
         bosNode.bestPreviousNode = bosNode;
         short[] bosParams = grammar.getBOSParameter();
         bosNode.setParameter(bosParams[0], bosParams[1], bosParams[2]);
@@ -62,7 +62,7 @@ class LatticeImpl implements Lattice {
         }
         this.size = size;
 
-        eosNode = new LatticeNodeImpl();
+        eosNode = LatticeNodeImpl.makeSpecial(WordId.ID_EOS);
         eosNode.setParameter(eosParams[0], eosParams[1], eosParams[2]);
         eosNode.begin = eosNode.end = size;
     }
@@ -187,11 +187,11 @@ class LatticeImpl implements Lattice {
     }
 
     String getSurface(LatticeNodeImpl node) {
-        return (node.isDefined) ? node.getBaseSurface() : "(null)";
+        return node.isSpecial() ? "(null)" : node.getBaseSurface();
     }
 
     String getPos(LatticeNodeImpl node) {
-        if (!node.isDefined) {
+        if (node.isSpecial()) {
             return "BOS/EOS";
         } else {
             WordInfo wi = node.getWordInfo();

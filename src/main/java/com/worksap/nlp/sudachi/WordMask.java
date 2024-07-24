@@ -38,7 +38,8 @@ public class WordMask {
     }
 
     /**
-     * Create a word mask with nth position set
+     * Create a word mask with nth position set. If position > 64, set the highest
+     * bit instead.
      * 
      * @param position
      *            number of set position
