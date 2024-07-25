@@ -120,9 +120,45 @@ public class WordId {
         return (wordId & MAX_WORD_ID) | dicIdMask;
     }
 
-    public static int blendDic(int rawWordId, int actualDicId) {
-        int flag = dic(rawWordId);
-        return flag * actualDicId;
+    /** Override dictionary part of the word id with given dic id. */
+    public static int overrideDic(int wordId, int dicId) {
+        return applyMask(wordId, dicIdMask(dicId));
+    }
+
+    /**
+     * Resolve dic id to refer.
+     * 
+     * @param wordRef
+     *            word ref taken from word entry.
+     * @param actualDicId
+     *            dic id of the dict which the word entry comes from.
+     * @return dic id which the wordid referring to.
+     */
+    public static int refDic(int wordRef, int actualDicId) {
+        // 1 if wordref refers to the entry inside same dict, 0 otherwise (i.e. refers
+        // to system dict entry)
+        boolean isReferringUser = dic(wordRef) == 1;
+        if (isReferringUser) {
+            return actualDicId;
+        }
+        return 0; // system dict id
+    }
+
+    /**
+     * Fill flag part of word ref with actual dic id.
+     * 
+     * @param wordRef
+     *            word ref taken from word entry.
+     * @param actualDicId
+     *            dic id of the dict which the word entry comes from.
+     * @return dic id which the wordid referring to.
+     */
+    public static int resolveRef(int wordRef, int actualDicId) {
+        boolean isReferringUser = dic(wordRef) == 1;
+        if (isReferringUser) {
+            return overrideDic(wordRef, actualDicId);
+        }
+        return wordRef; // dict part is 0 and thus no need to change.
     }
 
     /** @return if given word id represents OOV. */

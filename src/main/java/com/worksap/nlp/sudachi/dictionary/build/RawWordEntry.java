@@ -133,36 +133,4 @@ public class RawWordEntry implements Lookup2.Entry {
             strings.add(normalized.getHeadword());
         }
     }
-
-    /**
-     * Add surface-only entry to access via normalized_form reference if necessary.
-     * 
-     * @param list
-     * @param lookup
-     * @return 1 if phantom entry added, 0 otherwise
-     */
-    public int addPhantomEntries(List<RawWordEntry> list, Lookup2 lookup) {
-        if (normalizedForm instanceof WordRef.Headword) {
-            WordRef.Headword ref = (WordRef.Headword) normalizedForm;
-            if (lookup.byHeadword(ref.getHeadword()) != null) {
-                return 0;
-            }
-            RawWordEntry copy = new RawWordEntry();
-            copy.headword = ref.getHeadword();
-            copy.reading = copy.headword;
-            copy.userData = "";
-            copy.leftId = -1;
-            copy.rightId = -1;
-            copy.cost = Short.MAX_VALUE;
-            copy.mode = "A";
-            copy.posId = posId;
-            RawWordEntry last = list.get(list.size() - 1);
-            copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
-            list.add(copy);
-            lookup.add(copy);
-            return 1;
-        } else {
-            return 0;
-        }
-    }
 }

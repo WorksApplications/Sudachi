@@ -105,12 +105,15 @@ public class LexiconSet implements Lexicon {
         int dictionaryId = WordId.dic(wordId);
         int internalId = WordId.word(wordId);
         WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(internalId);
+
+        // resolve wordinfo internal data
         short posId = wordInfo.getPOSId();
         if (dictionaryId > 0 && posId >= systemPartOfSpeechSize) { // user defined part-of-speech
             wordInfo.setPOSId((short) (wordInfo.getPOSId() - systemPartOfSpeechSize + posOffsets.get(dictionaryId)));
         }
         convertSplit(wordInfo.getAunitSplit(), dictionaryId);
         convertSplit(wordInfo.getBunitSplit(), dictionaryId);
+        convertSplit(wordInfo.getCunitSplit(), dictionaryId);
         convertSplit(wordInfo.getWordStructure(), dictionaryId);
         return wordInfo;
     }

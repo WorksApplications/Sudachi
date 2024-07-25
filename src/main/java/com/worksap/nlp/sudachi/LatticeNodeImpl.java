@@ -222,6 +222,8 @@ public class LatticeNodeImpl implements LatticeNode {
             appendSplitsTo(result, getWordInfo().getAunitSplit());
         } else if (mode == Tokenizer.SplitMode.B) {
             appendSplitsTo(result, getWordInfo().getBunitSplit());
+        } else if (mode == Tokenizer.SplitMode.C) {
+            appendSplitsTo(result, getWordInfo().getCunitSplit());
         } else {
             result.add(this);
         }
@@ -305,10 +307,10 @@ public class LatticeNodeImpl implements LatticeNode {
             String s = normalizedForm;
             if (s == null) {
                 WordInfo wi = node.getWordInfo();
-                int dicEntryPtr = wi.getNormalizedForm();
-                int dic = WordId.blendDic(dicEntryPtr, WordId.dic(node.wordId));
-                int surface = lexicon.wordInfos(dic).surfacePtr(dicEntryPtr);
-                s = lexicon.string(dic, surface);
+                int wordref = wi.getNormalizedForm();
+                int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
+                int surfacePtr = lexicon.wordInfos(dic).surfacePtr(WordId.word(wordref));
+                s = lexicon.string(dic, surfacePtr);
                 normalizedForm = s;
             }
             return s;
@@ -318,10 +320,10 @@ public class LatticeNodeImpl implements LatticeNode {
             String s = dictionaryForm;
             if (s == null) {
                 WordInfo wi = node.getWordInfo();
-                int dicEntryPtr = wi.getDictionaryForm();
-                int dic = WordId.blendDic(dicEntryPtr, WordId.dic(node.wordId));
-                int surface = lexicon.wordInfos(dic).surfacePtr(dicEntryPtr);
-                s = lexicon.string(dic, surface);
+                int wordref = wi.getDictionaryForm();
+                int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
+                int surfacePtr = lexicon.wordInfos(dic).surfacePtr(WordId.word(wordref));
+                s = lexicon.string(dic, surfacePtr);
                 dictionaryForm = s;
             }
             return s;

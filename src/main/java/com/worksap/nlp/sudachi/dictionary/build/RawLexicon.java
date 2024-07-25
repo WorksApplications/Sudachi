@@ -31,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Dictionary part: Lexicon loaded from csv files.
@@ -47,19 +45,18 @@ public class RawLexicon {
 
     // full list of word entries, in the order in csv.
     private final List<RawWordEntry> entries = new ArrayList<>();
+    // entries loaded from the referencing system dictionary (for user
+    // dict build).
+    private final List<CompiledWordEntry> preloadedEntries = new ArrayList<>();
 
     private final Index index = new Index();
     private final List<RawWordEntry> notIndexed = new ArrayList<>();
     private final StringStorage strings = new StringStorage();
-    private boolean user = false;
+    private boolean isUser = false;
 
     // offset for next entry
     private long offset = INITIAL_OFFSET;
     private boolean runtimeCosts = false;
-
-    // entries loaded from the referencing system dictionary (for user
-    // dict build).
-    private final List<CompiledWordEntry> preloadedEntries = new ArrayList<>();
 
     /**
      * Preload entries from the lexicon (of the system dictionary). They are only
@@ -69,6 +66,8 @@ public class RawLexicon {
      * @return number of entries read.
      */
     public int preloadFrom(Lexicon lexicon, Progress progress) {
+        this.isUser = true;
+
         Ints allIds = new Ints(lexicon.size());
         Iterator<Ints> ids = lexicon.wordIds(0);
         while (ids.hasNext()) {
@@ -80,11 +79,6 @@ public class RawLexicon {
             progress.progress(i, allIds.length());
         }
         return preloadedEntries.size();
-    }
-
-    /** Full list of entries in referencing system and target lexicon. */
-    private List<Lookup2.Entry> lookupEntries() {
-        return Stream.concat(preloadedEntries.stream(), entries.stream()).collect(Collectors.toList());
     }
 
     /**
@@ -110,7 +104,7 @@ public class RawLexicon {
     public void read(String name, Reader data, POSTable posTable) throws IOException {
         CSVParser parser = new CSVParser(data);
         parser.setName(name);
-        RawLexiconReader reader = new RawLexiconReader(parser, posTable, user);
+        RawLexiconReader reader = new RawLexiconReader(parser, posTable, isUser);
 
         long offset = this.offset;
         RawWordEntry entry;
@@ -164,11 +158,19 @@ public class RawLexicon {
         layout.block(Blocks.ENTRIES, (p) -> writeEntries(pos, p));
     }
 
+    private Void writeStrings(BlockOutput blockOutput) throws IOException {
+        return blockOutput.measured("Strings", (p) -> {
+            strings.compile(p);
+            strings.writeCompact(blockOutput.getChannel());
+            return null;
+        });
+    }
+
     private Void writeEntries(POSTable pos, BlockOutput blockOutput) throws IOException {
         return blockOutput.measured("Word Entries", (p) -> {
             List<RawWordEntry> list = entries;
-            Lookup2 lookup = new Lookup2(lookupEntries(), preloadedEntries.size());
-            WordRef.Parser refParser = WordRef.parser(pos, !user, false, false);
+            Lookup2 lookup = isUser ? new Lookup2(preloadedEntries, list) : new Lookup2(list, new ArrayList<>());
+            WordRef.Parser refParser = WordRef.parser(pos, true, false, false);
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
             WordEntryLayout layout = new WordEntryLayout(lookup, strings, refParser, buf);
@@ -180,7 +182,7 @@ public class RawLexicon {
                     throw new IllegalStateException("expected entry pointer != actual pointer, i=" + i);
                 }
                 // size may increases with phantom entry
-                size += e.addPhantomEntries(list, lookup);
+                size += addPhantomEntries(e, list, lookup);
                 ptr = layout.put(e);
                 p.progress(i, size);
             }
@@ -189,12 +191,36 @@ public class RawLexicon {
         });
     }
 
-    private Void writeStrings(BlockOutput blockOutput) throws IOException {
-        return blockOutput.measured("Strings", (p) -> {
-            strings.compile(p);
-            strings.writeCompact(blockOutput.getChannel());
-            return null;
-        });
+    /**
+     * Add surface-only entry to access via normalized_form reference if necessary.
+     * 
+     * @param list
+     * @param lookup
+     * @return 1 if phantom entry added, 0 otherwise
+     */
+    private int addPhantomEntries(RawWordEntry entry, List<RawWordEntry> list, Lookup2 lookup) {
+        if (entry.normalizedForm instanceof WordRef.Headword) {
+            WordRef.Headword ref = (WordRef.Headword) entry.normalizedForm;
+            if (lookup.byHeadword(ref.getHeadword()) != null) {
+                return 0;
+            }
+            RawWordEntry copy = new RawWordEntry();
+            copy.headword = ref.getHeadword();
+            copy.reading = copy.headword;
+            copy.userData = "";
+            copy.leftId = -1;
+            copy.rightId = -1;
+            copy.cost = Short.MAX_VALUE;
+            copy.mode = "A";
+            copy.posId = entry.posId;
+            RawWordEntry last = list.get(list.size() - 1);
+            copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
+            list.add(copy);
+            lookup.add(copy, isUser);
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     /** @return number of entries in the TRIE index */

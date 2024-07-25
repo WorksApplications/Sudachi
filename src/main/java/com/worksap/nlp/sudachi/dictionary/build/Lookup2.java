@@ -22,31 +22,65 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Utility to look up entries from the list.
+ * Utility to lookup entries from the list.
  */
 public class Lookup2 {
     public interface Entry {
+        /** @return wordid of the entry. */
         int pointer();
 
+        /** @return if has given pos and reading. */
         boolean matches(short posId, String reading);
 
+        /** @return headword of the entry. */
         String headword();
     }
 
-    private final List<? extends Entry> entries;
-    // number of reference system dictionary entries. only used to resolve user
-    // line-no ref.
-    private final int nbuiltin;
-    // mapping to entries that have same surfaces
-    private final Map<String, List<Entry>> bySurface;
+    /** Wrapper class to distinguish if the entry is system or user. */
+    public class EntryWithFlag implements Entry {
+        private Entry entry;
+        boolean isUser;
 
-    public Lookup2(List<? extends Entry> entries, int nbuiltin) {
-        this.entries = entries;
-        this.nbuiltin = nbuiltin;
-        HashMap<String, List<Entry>> result = new HashMap<>(entries.size() * 4 / 3);
-        for (Entry e : entries) {
-            List<Entry> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
-            sublist.add(e);
+        EntryWithFlag(Entry entry, boolean isUser) {
+            this.entry = entry;
+            this.isUser = isUser;
+        }
+
+        @Override
+        public int pointer() {
+            return entry.pointer();
+        }
+
+        @Override
+        public boolean matches(short posId, String reading) {
+            return entry.matches(posId, reading);
+        }
+
+        @Override
+        public String headword() {
+            return entry.headword();
+        }
+    }
+
+    // entries
+    private final List<? extends Entry> systemEntries;
+    private final List<? extends Entry> userEntries;
+    // mapping to entries that have same surfaces
+    private final Map<String, List<EntryWithFlag>> bySurface;
+
+    public Lookup2(List<? extends Entry> systemEntries, List<? extends Entry> userEntries) {
+        this.systemEntries = systemEntries;
+        this.userEntries = userEntries;
+
+        HashMap<String, List<EntryWithFlag>> result = new HashMap<>(
+                (systemEntries.size() + userEntries.size()) * 4 / 3);
+        for (Entry e : systemEntries) {
+            List<EntryWithFlag> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
+            sublist.add(new EntryWithFlag(e, false));
+        }
+        for (Entry e : userEntries) {
+            List<EntryWithFlag> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
+            sublist.add(new EntryWithFlag(e, true));
         }
         bySurface = result;
     }
@@ -56,11 +90,16 @@ public class Lookup2 {
      * the list.
      * 
      * @param index
+     * @param isUser
+     *            if true, lookup from the user lecixons, otherwise from reference
+     *            system dict.
      * @return
      */
-    public Entry byIndex(int index, boolean isUser) {
-        int offset = isUser ? nbuiltin : 0;
-        return entries.get(index + offset);
+    public EntryWithFlag byIndex(int index, boolean isUser) {
+        if (isUser) {
+            return new EntryWithFlag(userEntries.get(index), true);
+        }
+        return new EntryWithFlag(systemEntries.get(index), false);
     }
 
     /**
@@ -69,7 +108,7 @@ public class Lookup2 {
      * @param headword
      * @return
      */
-    public List<Entry> byHeadword(String headword) {
+    public List<EntryWithFlag> byHeadword(String headword) {
         return bySurface.get(headword);
     }
 
@@ -78,7 +117,7 @@ public class Lookup2 {
      * 
      * @param e
      */
-    public void add(Entry e) {
-        bySurface.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(e);
+    public void add(Entry e, boolean isUser) {
+        bySurface.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(new EntryWithFlag(e, isUser));
     }
 }

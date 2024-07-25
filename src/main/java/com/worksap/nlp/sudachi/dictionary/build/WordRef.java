@@ -17,11 +17,11 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.StringUtil;
+import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -30,6 +30,21 @@ import java.util.regex.Pattern;
 public abstract class WordRef {
     /** resolve word ref into pointer (word id) using resolver. */
     public abstract int resolve(Lookup2 resolver);
+
+    /**
+     * Encode the target entry as wordref.
+     * 
+     * wordref (32 bits) has similar structure as combined word id, but its dict
+     * part contains a flag that indicates if the referencing entry is in the same
+     * dict or referencing system dict.
+     * 
+     * @param entry
+     *            to encode
+     * @return encoded wordref
+     */
+    public int intoWordRef(Lookup2.EntryWithFlag entry) {
+        return WordId.make(entry.isUser ? 1 : 0, entry.pointer());
+    }
 
     /**
      * Reference written by line number of the lexicon csv file.
@@ -49,7 +64,7 @@ public abstract class WordRef {
 
         @Override
         public int resolve(Lookup2 resolver) {
-            return resolver.byIndex(line, isUser).pointer();
+            return intoWordRef(resolver.byIndex(line, isUser));
         }
 
         @Override
@@ -74,8 +89,8 @@ public abstract class WordRef {
 
         @Override
         public int resolve(Lookup2 resolver) {
-            List<Lookup2.Entry> entries = resolver.byHeadword(headword);
-            return entries.get(0).pointer();
+            List<Lookup2.EntryWithFlag> entries = resolver.byHeadword(headword);
+            return intoWordRef(entries.get(0));
         }
 
         @Override
@@ -112,10 +127,10 @@ public abstract class WordRef {
 
         @Override
         public int resolve(Lookup2 resolver) {
-            List<Lookup2.Entry> entries = resolver.byHeadword(headword);
-            for (Lookup2.Entry entry : entries) {
+            List<Lookup2.EntryWithFlag> entries = resolver.byHeadword(headword);
+            for (Lookup2.EntryWithFlag entry : entries) {
                 if (entry.matches(posId, reading)) {
-                    return entry.pointer();
+                    return intoWordRef(entry);
                 }
             }
             return -1;

@@ -57,6 +57,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.size();
     }
 
+    /** Returns the begin index of the specified morpheme in the input text. */
     int getBegin(int index) {
         int begin = inputText.getOriginalIndex(path.get(index).getBegin());
         if (!allowEmptyMorpheme) {
@@ -68,6 +69,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return begin;
     }
 
+    /** Returns the end index of the specified morpheme in the input text. */
     int getEnd(int index) {
         int end = inputText.getOriginalIndex(path.get(index).getEnd());
         if (!allowEmptyMorpheme) {

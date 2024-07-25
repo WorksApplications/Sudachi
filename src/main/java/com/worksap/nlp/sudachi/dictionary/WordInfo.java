@@ -29,10 +29,10 @@ import java.nio.ByteBuffer;
 public class WordInfo {
     private final short headwordLength;
     private short posId;
-    private final int surface;
-    private final int reading;
-    private final int normalizedForm;
-    private final int dictionaryForm;
+    private final int surface; // StringPtr
+    private final int reading; // StringPtr
+    private final int normalizedForm; // word ref
+    private final int dictionaryForm; // word ref
     private final int[] aUnitSplit;
     private final int[] bUnitSplit;
     private final int[] cUnitSplit;
@@ -125,19 +125,24 @@ public class WordInfo {
     }
 
     /**
-     * Returns the entry id of the normalized form of the morpheme.
+     * Returns the entry ref of the normalized form of the morpheme. The information
+     * of the dictionary form can be gotten with
+     * {@link com.worksap.nlp.sudachi.WordId#resolveRef} and
+     * {@link Lexicon#getWordInfo}.
      *
-     * @return the normalized form of the morpheme
+     * @return the word ref of the normalized form of the morpheme
      */
     public int getNormalizedForm() {
         return normalizedForm;
     }
 
     /**
-     * Returns the word ID of the dictionary form of the morpheme. The information
-     * of the dictionary form can be gotten with {@link Lexicon#getWordInfo}
+     * Returns the entry ref of the dictionary form of the morpheme. The information
+     * of the dictionary form can be gotten with
+     * {@link com.worksap.nlp.sudachi.WordId#resolveRef} and
+     * {@link Lexicon#getWordInfo}.
      *
-     * @return the word ID of the dictionary form of the morpheme
+     * @return the word ref of the dictionary form of the morpheme
      */
     public int getDictionaryForm() {
         return dictionaryForm;
@@ -169,6 +174,15 @@ public class WordInfo {
      */
     public int[] getBunitSplit() {
         return bUnitSplit;
+    }
+
+    /**
+     * Returns the array of word IDs which the morpheme is compounded of in C mode.
+     *
+     * @return the word IDs of C units
+     */
+    public int[] getCunitSplit() {
+        return cUnitSplit;
     }
 
     /**
