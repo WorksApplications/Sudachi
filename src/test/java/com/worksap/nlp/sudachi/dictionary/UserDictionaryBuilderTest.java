@@ -28,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import com.worksap.nlp.sudachi.TestDictionary;
+import com.worksap.nlp.sudachi.WordId;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,42 +59,50 @@ public class UserDictionaryBuilderTest {
                     "東京都市,0,0,0,東京都市,名詞,固有名詞,地名,一般,*,*,ヒガシキョウトシ,東京都市,*,B,\"東,名詞,普通名詞,一般,*,*,*,ヒガシ/3/U1\",*,\"4/3/市,名詞,普通名詞,一般,*,*,*,シ\",*\n");
             writer.write("市,-1,-1,0,市,名詞,普通名詞,一般,*,*,*,シ,市,*,A,*,*,*,*\n");
         }
+        int[] wordIds = { 4, 11 };
+        int[] systemWIs = { 4, 8, 12, 16, 21, 25, 29, 35, 39, 43 }; // first 10
 
         UserDictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-s", systemDictFile.getPath(), "-d",
                 "test", inputFile.getPath() });
 
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
             Description header = dictionary.getDictionaryHeader();
+            assertTrue(header.isUserDictionary());
             assertThat(header.getComment(), is("test"));
 
             Lexicon lexicon = dictionary.getLexicon();
             assertThat(lexicon.size(), is(2));
 
-            long param = lexicon.parameters(0);
+            // first entry
+            int wordId = wordIds[0];
+            long param = lexicon.parameters(wordId);
             assertThat(WordParameters.leftId(param), is((short) 0));
             assertThat(WordParameters.cost(param), is((short) 0));
-            WordInfo info = lexicon.getWordInfo(0);
-            assertThat(info.getSurface(), is("東京都市"));
-            assertThat(info.getNormalizedForm(), is("東京都市"));
-            assertThat(info.getDictionaryForm(), is(-1));
-            assertThat(info.getReadingForm(), is("ヒガシキョウトシ"));
+            WordInfo info = lexicon.getWordInfo(wordId);
+            assertThat(lexicon.string(0, info.getSurface()), is("東京都市"));
+            assertThat(info.getNormalizedForm(), is(WordId.make(1, wordId)));
+            assertThat(info.getDictionaryForm(), is(WordId.make(1, wordId)));
+            assertThat(lexicon.string(0, info.getReadingForm()), is("ヒガシキョウトシ"));
             assertThat(info.getPOSId(), is((short) 3));
-            assertThat(info.getAunitSplit(), is(new int[] { 4, 3, 1 | (1 << 28) }));
+            assertThat(info.getAunitSplit(), is(new int[] { systemWIs[4], systemWIs[3], WordId.make(1, wordIds[1]) }));
             assertThat(info.getBunitSplit().length, is(0));
-            assertThat(info.getWordStructure(), is(new int[] { 4, 3, 1 | (1 << 28) }));
+            assertThat(info.getWordStructure(),
+                    is(new int[] { systemWIs[4], systemWIs[3], WordId.make(1, wordIds[1]) }));
             Iterator<int[]> i = lexicon.lookup("東京都市".getBytes(StandardCharsets.UTF_8), 0);
             assertTrue(i.hasNext());
-            assertThat(i.next(), is(new int[] { 0, "東京都市".getBytes(StandardCharsets.UTF_8).length }));
+            assertThat(i.next(), is(new int[] { wordId, "東京都市".getBytes(StandardCharsets.UTF_8).length }));
             assertFalse(i.hasNext());
 
-            param = lexicon.parameters(1);
+            // second entry
+            wordId = wordIds[1];
+            param = lexicon.parameters(wordId);
             assertThat(WordParameters.leftId(param), is((short) -1));
             assertThat(WordParameters.cost(param), is((short) 0));
-            info = lexicon.getWordInfo(1);
-            assertThat(info.getSurface(), is("市"));
-            assertThat(info.getNormalizedForm(), is("市"));
-            assertThat(info.getDictionaryForm(), is(-1));
-            assertThat(info.getReadingForm(), is("シ"));
+            info = lexicon.getWordInfo(wordId);
+            assertThat(lexicon.string(0, info.getSurface()), is("市"));
+            assertThat(info.getNormalizedForm(), is(WordId.make(1, wordId)));
+            assertThat(info.getDictionaryForm(), is(WordId.make(1, wordId)));
+            assertThat(lexicon.string(0, info.getReadingForm()), is("シ"));
             assertThat(info.getPOSId(), is((short) 4));
             assertThat(info.getAunitSplit().length, is(0));
             assertThat(info.getBunitSplit().length, is(0));

@@ -82,9 +82,10 @@ public class WordInfo {
     }
 
     /**
-     * Returns the text of the morpheme.
+     * Returns raw string pointer to the text of the morpheme.
      *
-     * @return the text of the morpheme
+     * @return raw string pointer to the text
+     * @see StringPtr
      */
     public int getSurface() {
         return surface;

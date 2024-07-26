@@ -172,7 +172,7 @@ public class RawLexicon {
             Lookup2 lookup = isUser ? new Lookup2(preloadedEntries, list) : new Lookup2(list, new ArrayList<>());
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
-            WordEntryLayout layout = new WordEntryLayout(lookup, strings, buf);
+            WordEntryLayout layout = new WordEntryLayout(lookup, strings, buf, isUser);
             int size = list.size();
             int ptr = pointer(INITIAL_OFFSET);
             for (int i = 0; i < size; ++i) {

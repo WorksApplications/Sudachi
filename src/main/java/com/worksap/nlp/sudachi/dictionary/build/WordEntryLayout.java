@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.StringUtil;
+import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
@@ -30,6 +31,7 @@ public class WordEntryLayout {
     private final StringIndex index;
     private final Lookup2 lookup;
     private final BufferedChannel buffer;
+    private final boolean isUser;
 
     // caches
     private final Ints aSplits = new Ints(16);
@@ -41,10 +43,11 @@ public class WordEntryLayout {
             + Byte.MAX_VALUE * Integer.BYTES * 5 // splits and synonyms
             + (Short.MAX_VALUE + 1) * Character.BYTES; // user data
 
-    public WordEntryLayout(Lookup2 resolver, StringIndex index, BufferedChannel buffer) {
+    public WordEntryLayout(Lookup2 resolver, StringIndex index, BufferedChannel buffer, boolean isUser) {
         this.lookup = resolver;
         this.index = index;
         this.buffer = buffer;
+        this.isUser = isUser;
     }
 
     /**
@@ -65,11 +68,12 @@ public class WordEntryLayout {
 
         buf.putInt(index.resolve(entry.headword).encode()); // surfacePtr
         buf.putInt(index.resolve(entry.reading).encode()); // readingPtr
-        int normFormPtr = entry.pointer;
+        int selfWordRef = isUser ? WordId.make(1, entry.pointer) : entry.pointer;
+        int normFormPtr = selfWordRef;
         if (entry.normalizedForm != null) {
             normFormPtr = entry.normalizedForm.resolve(lookup);
         }
-        int dicFormPtr = entry.pointer;
+        int dicFormPtr = selfWordRef;
         if (entry.dictionaryForm != null) {
             dicFormPtr = entry.dictionaryForm.resolve(lookup);
         }

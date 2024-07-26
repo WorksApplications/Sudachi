@@ -32,6 +32,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.worksap.nlp.sudachi.WordId;
+
 public class DictionaryBuilderTest {
 
     @Rule
@@ -52,13 +54,14 @@ public class DictionaryBuilderTest {
             writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*,*\n");
             writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*\n");
         }
+        int[] wordIds = { 4, 11, 15, 19 };
 
         DictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-m", matrixFile.getPath(), "-d", "test",
                 inputFile.getPath() });
 
         try (BinaryDictionary dictionary = new BinaryDictionary(outputFile.getPath())) {
-
             Description header = dictionary.getDictionaryHeader();
+            assertTrue(header.isSystemDictionary());
             assertThat(header.getComment(), is("test"));
 
             Grammar grammar = dictionary.getGrammar();
@@ -68,33 +71,37 @@ public class DictionaryBuilderTest {
             assertThat(grammar.getConnectCost((short) 0, (short) 0), is((short) 200));
 
             Lexicon lexicon = dictionary.getLexicon();
-            assertThat(lexicon.size(), is(3));
-            long params = lexicon.parameters(0);
+            assertThat(lexicon.size(), is(4)); // 3 + phantom for "ひがし"
 
+            // first entry
+            int wordId = wordIds[0];
+            long params = lexicon.parameters(wordId);
             assertThat(WordParameters.leftId(params), is((short) 0));
             assertThat(WordParameters.cost(params), is((short) 0));
-            WordInfo info = lexicon.getWordInfo(0);
-            assertThat(info.getSurface(), is("東京都"));
-            assertThat(info.getNormalizedForm(), is("東京都"));
-            assertThat(info.getDictionaryForm(), is(-1));
-            assertThat(info.getReadingForm(), is("ヒガシキョウト"));
+            WordInfo info = lexicon.getWordInfo(wordId);
+            assertThat(lexicon.string(0, info.getSurface()), is("東京都"));
+            assertThat(info.getNormalizedForm(), is(WordId.make(0, wordId)));
+            assertThat(info.getDictionaryForm(), is(WordId.make(0, wordId)));
+            assertThat(lexicon.string(0, info.getReadingForm()), is("ヒガシキョウト"));
             assertThat(info.getPOSId(), is((short) 0));
-            assertThat(info.getAunitSplit(), is(new int[] { 1, 2 }));
+            assertThat(info.getAunitSplit(), is(new int[] { wordIds[1], wordIds[2] }));
             assertThat(info.getBunitSplit().length, is(0));
             assertThat(info.getSynonymGroupIds(), is(new int[] { 1, 2 }));
             Iterator<int[]> i = lexicon.lookup("東京都".getBytes(StandardCharsets.UTF_8), 0);
             assertTrue(i.hasNext());
-            assertThat(i.next(), is(new int[] { 0, "東京都".getBytes(StandardCharsets.UTF_8).length }));
+            assertThat(i.next(), is(new int[] { wordId, "東京都".getBytes(StandardCharsets.UTF_8).length }));
             assertFalse(i.hasNext());
 
-            params = lexicon.parameters(1);
+            // second entry
+            wordId = wordIds[1];
+            params = lexicon.parameters(wordId);
             assertThat(WordParameters.leftId(params), is((short) -1));
             assertThat(WordParameters.cost(params), is((short) 0));
-            info = lexicon.getWordInfo(1);
-            assertThat(info.getSurface(), is("東"));
-            assertThat(info.getNormalizedForm(), is("ひがし"));
-            assertThat(info.getDictionaryForm(), is(-1));
-            assertThat(info.getReadingForm(), is("ヒガシ"));
+            info = lexicon.getWordInfo(wordId);
+            assertThat(lexicon.string(0, info.getSurface()), is("東"));
+            assertThat(info.getNormalizedForm(), is(WordId.make(0, wordIds[3]))); // phantom entry
+            assertThat(info.getDictionaryForm(), is(WordId.make(0, wordId)));
+            assertThat(lexicon.string(0, info.getReadingForm()), is("ヒガシ"));
             assertThat(info.getPOSId(), is((short) 1));
             assertThat(info.getAunitSplit().length, is(0));
             assertThat(info.getBunitSplit().length, is(0));
