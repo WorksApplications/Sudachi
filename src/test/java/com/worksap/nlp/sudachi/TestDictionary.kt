@@ -38,17 +38,20 @@ object TestDictionary {
     chan
   }
 
+  val userDict2Data: MemChannel by lazy {
+    val chan = MemChannel()
+    DicBuilder.user().system(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
+    chan
+  }
+
   val systemDict: BinaryDictionary
     get() = BinaryDictionary.loadSystem(systemDictData.buffer())
 
   val userDict1: BinaryDictionary
     get() = BinaryDictionary.loadUser(userDict1Data.buffer())
 
-  val userDict2: BinaryDictionary by lazy {
-    val chan = MemChannel()
-    DicBuilder.user().system(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
-    BinaryDictionary.loadUser(chan.buffer())
-  }
+  val userDict2: BinaryDictionary
+    get() = BinaryDictionary.loadUser(userDict2Data.buffer())
 
   fun user0Cfg(): Config {
     return Config.defaultConfig().clearUserDictionaries().systemDictionary(systemDict)

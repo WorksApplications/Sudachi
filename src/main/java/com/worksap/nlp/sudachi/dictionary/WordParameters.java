@@ -38,15 +38,11 @@ public class WordParameters {
         data.putShort(addr, cost);
     }
 
-    public static WordParameters readOnly(ByteBuffer full, Description desc) {
-        ByteBuffer data = desc.slice(full, Blocks.ENTRIES);
-        data.order(ByteOrder.LITTLE_ENDIAN);
+    public static WordParameters readOnly(ByteBuffer data) {
         return new WordParameters(data);
     }
 
-    public static WordParameters readWrite(ByteBuffer full, Description desc) {
-        WordParameters ro = readOnly(full, desc);
-        ByteBuffer roBuf = ro.data;
+    public static WordParameters readWrite(ByteBuffer roBuf) {
         int lim = roBuf.limit();
         ByteBuffer buf = ByteBuffer.allocate(lim);
         buf.order(ByteOrder.LITTLE_ENDIAN);

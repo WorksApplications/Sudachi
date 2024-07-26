@@ -51,9 +51,9 @@ public class DoubleArrayLexicon implements Lexicon {
 
         WordParameters parms;
         if (header.isRuntimeCosts()) {
-            parms = WordParameters.readWrite(bytes, header);
+            parms = WordParameters.readWrite(header.slice(bytes, Blocks.ENTRIES));
         } else {
-            parms = WordParameters.readOnly(bytes, header);
+            parms = WordParameters.readOnly(header.slice(bytes, Blocks.ENTRIES));
         }
 
         WordIdTable idTable = new WordIdTable(header.slice(bytes, Blocks.WORD_POINTERS));
