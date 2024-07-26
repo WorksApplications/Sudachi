@@ -18,7 +18,6 @@ package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -122,7 +121,9 @@ public class RegexOovProvider extends OovProviderPlugin {
                 }
             }
 
-            LatticeNodeImpl node = factory.make(matcher.start(), matcher.end(), inputText);
+            int beginChar = matcher.start();
+            String s = text.substring(beginChar, endChar);
+            LatticeNodeImpl node = factory.make(offset, offset + oovLength, s);
             nodes.add(node);
             return 1;
         } else {
