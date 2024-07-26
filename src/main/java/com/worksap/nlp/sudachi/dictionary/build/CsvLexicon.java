@@ -18,8 +18,10 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.WordId;
+import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
+import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,8 +42,12 @@ public class CsvLexicon implements WriteDictionary {
     private final List<RawWordEntry> entries = new ArrayList<>();
     private WordIdResolver widResolver = null;
 
+    // temporal fix
+    private WordRef.Parser parser;
+
     public CsvLexicon(POSTable pos) {
         posTable = pos;
+        parser = WordRef.parser(pos, false, true, false);
     }
 
     public void setResolver(WordIdResolver widResolver) {
@@ -90,16 +96,31 @@ public class CsvLexicon implements WriteDictionary {
         POS pos = new POS(cols.get(5), cols.get(6), cols.get(7), cols.get(8), cols.get(9), cols.get(10));
         short posId = posTable.getId(pos);
 
-        entry.aUnitSplitString = cols.get(15);
-        entry.bUnitSplitString = cols.get(16);
-        entry.wordStructureString = cols.get(17);
-        checkSplitInfoFormat(entry.aUnitSplitString);
-        checkSplitInfoFormat(entry.bUnitSplitString);
-        checkSplitInfoFormat(entry.wordStructureString);
-        if (cols.get(14).equals("A") && (!entry.aUnitSplitString.equals("*") || !entry.bUnitSplitString.equals("*"))) {
+        entry.aUnitSplit = parseWordRefs(cols.get(15));
+        entry.bUnitSplit = parseWordRefs(cols.get(16));
+        entry.wordStructure = parseWordRefs(cols.get(17));
+        checkSplitInfoFormat(entry.aUnitSplit);
+        checkSplitInfoFormat(entry.bUnitSplit);
+        checkSplitInfoFormat(entry.wordStructure);
+        if (cols.get(14).equals("A") && (!entry.aUnitSplit.isEmpty() || !entry.bUnitSplit.isEmpty())) {
             throw new IllegalArgumentException("invalid splitting");
         }
         return entry;
+    }
+
+    private List<WordRef> parseWordRefs(String value) {
+        if (value == null || value.isEmpty() || "*".equals(value)) {
+            return new ArrayList<>();
+        }
+        String[] parts = value.split("/");
+        if (parts.length > Byte.MAX_VALUE) {
+            throw new IllegalArgumentException("reference list contained more than 127 entries: " + value);
+        }
+        List<WordRef> result = new ArrayList<>(parts.length);
+        for (String part : parts) {
+            result.add(parser.parse(part));
+        }
+        return result;
     }
 
     int[] parseSynonymGids(String str) {
@@ -129,8 +150,8 @@ public class CsvLexicon implements WriteDictionary {
         return widResolver.lookup(headword, posId, reading);
     }
 
-    void checkSplitInfoFormat(String info) {
-        if (StringUtil.count(info, '/') + 1 > ARRAY_MAX_LENGTH) {
+    void checkSplitInfoFormat(List<WordRef> info) {
+        if (info.size() > ARRAY_MAX_LENGTH) {
             throw new IllegalArgumentException("too many units");
         }
     }

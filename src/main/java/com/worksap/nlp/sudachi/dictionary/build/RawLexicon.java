@@ -155,7 +155,7 @@ public class RawLexicon {
         index.compile(layout, notIndexed);
         // entry layout requires stringstorage to be compiled beforehand.
         layout.block(Blocks.STRINGS, this::writeStrings);
-        layout.block(Blocks.ENTRIES, (p) -> writeEntries(pos, p));
+        layout.block(Blocks.ENTRIES, this::writeEntries);
     }
 
     private Void writeStrings(BlockOutput blockOutput) throws IOException {
@@ -166,14 +166,13 @@ public class RawLexicon {
         });
     }
 
-    private Void writeEntries(POSTable pos, BlockOutput blockOutput) throws IOException {
+    private Void writeEntries(BlockOutput blockOutput) throws IOException {
         return blockOutput.measured("Word Entries", (p) -> {
             List<RawWordEntry> list = entries;
             Lookup2 lookup = isUser ? new Lookup2(preloadedEntries, list) : new Lookup2(list, new ArrayList<>());
-            WordRef.Parser refParser = WordRef.parser(pos, true, false, false);
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
-            WordEntryLayout layout = new WordEntryLayout(lookup, strings, refParser, buf);
+            WordEntryLayout layout = new WordEntryLayout(lookup, strings, buf);
             int size = list.size();
             int ptr = pointer(INITIAL_OFFSET);
             for (int i = 0; i < size; ++i) {
@@ -204,14 +203,9 @@ public class RawLexicon {
             if (lookup.byHeadword(ref.getHeadword()) != null) {
                 return 0;
             }
-            RawWordEntry copy = new RawWordEntry();
+            RawWordEntry copy = RawWordEntry.makeEmpty();
             copy.headword = ref.getHeadword();
             copy.reading = copy.headword;
-            copy.userData = "";
-            copy.leftId = -1;
-            copy.rightId = -1;
-            copy.cost = Short.MAX_VALUE;
-            copy.mode = "A";
             copy.posId = entry.posId;
             RawWordEntry last = list.get(list.size() - 1);
             copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());

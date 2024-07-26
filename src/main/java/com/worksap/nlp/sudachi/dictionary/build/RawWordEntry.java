@@ -16,13 +16,13 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.StringUtil;
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 import com.worksap.nlp.sudachi.dictionary.WordInfoList;
+import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * Raw word info entry parsed from the lexicon csv.
@@ -34,11 +34,11 @@ public class RawWordEntry implements Lookup2.Entry {
     String reading;
     WordRef normalizedForm;
     WordRef dictionaryForm;
-    String aUnitSplitString;
-    String bUnitSplitString;
-    String cUnitSplitString;
-    String wordStructureString;
-    String synonymGroups;
+    List<WordRef> aUnitSplit;
+    List<WordRef> bUnitSplit;
+    List<WordRef> cUnitSplit;
+    List<WordRef> wordStructure;
+    Ints synonymGroups;
     String userData;
     String mode;
     short leftId;
@@ -47,17 +47,6 @@ public class RawWordEntry implements Lookup2.Entry {
     short posId;
     int sourceLine;
     String sourceName;
-
-    private int countRefs(String data, String prev) {
-        if (data == null || data.isEmpty() || "*".equals(data) || data.equals(prev)) {
-            return 0;
-        }
-        int nsplits = StringUtil.count(data, '/') + 1;
-        if (nsplits > CsvLexicon.ARRAY_MAX_LENGTH) {
-            throw new CsvFieldException("maximum number of splits were exceeded");
-        }
-        return nsplits;
-    }
 
     /**
      * Compute expected size of word entry when put in the binary dictionary. This
@@ -68,11 +57,11 @@ public class RawWordEntry implements Lookup2.Entry {
     public int computeExpectedSize() {
         int size = 32;
 
-        size += countRefs(cUnitSplitString, "") * 4;
-        size += countRefs(bUnitSplitString, cUnitSplitString) * 4;
-        size += countRefs(aUnitSplitString, bUnitSplitString) * 4;
-        size += countRefs(wordStructureString, aUnitSplitString) * 4;
-        size += countRefs(synonymGroups, "") * 4;
+        size += cUnitSplit.size() * 4;
+        size += (bUnitSplit.equals(cUnitSplit)) ? 0 : bUnitSplit.size() * 4;
+        size += (aUnitSplit.equals(bUnitSplit)) ? 0 : aUnitSplit.size() * 4;
+        size += (wordStructure.equals(aUnitSplit)) ? 0 : wordStructure.size() * 4;
+        size += synonymGroups.length() * 4;
         if (userData.length() != 0) {
             size += 2 + userData.length() * 2;
         }
@@ -132,5 +121,25 @@ public class RawWordEntry implements Lookup2.Entry {
             WordRef.Headword normalized = (WordRef.Headword) normalizedForm;
             strings.add(normalized.getHeadword());
         }
+    }
+
+    public static RawWordEntry makeEmpty() {
+        RawWordEntry entry = new RawWordEntry();
+        entry.headword = "";
+        entry.reading = "";
+        // entry.normalizedForm
+        // entry.dictionaryForm
+        entry.aUnitSplit = new ArrayList<>();
+        entry.bUnitSplit = new ArrayList<>();
+        entry.cUnitSplit = new ArrayList<>();
+        entry.wordStructure = new ArrayList<>();
+        entry.synonymGroups = Ints.wrap(Ints.EMPTY_ARRAY);
+        entry.userData = "";
+        entry.mode = "A";
+        entry.leftId = -1;
+        entry.rightId = -1;
+        entry.cost = Short.MAX_VALUE;
+        entry.posId = 0;
+        return entry;
     }
 }

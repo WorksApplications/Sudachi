@@ -66,7 +66,7 @@ public class BufWriter {
     }
 
     /**
-     * Envode long as LEB128
+     * Encode long as LEB128
      * 
      * @param val
      *            value to encode
@@ -90,6 +90,7 @@ public class BufWriter {
         putByte((byte) val);
     }
 
+    /** Encode int array of fixed length. */
     public BufWriter putInts(Ints value, int length) {
         if (length <= 0) {
             return this;

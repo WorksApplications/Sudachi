@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class RawLexiconReaderTest {
   companion object {
@@ -37,8 +38,8 @@ class RawLexiconReaderTest {
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
-      assertEquals("5/9", e.wordStructureString)
-      assertEquals("", e.cUnitSplitString)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertTrue(e.cUnitSplit.isEmpty())
       assertEquals("", e.userData)
     }
     assertNull(reader.nextEntry())
@@ -50,8 +51,8 @@ class RawLexiconReaderTest {
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
-      assertEquals("5/9", e.wordStructureString)
-      assertEquals("8/9", e.cUnitSplitString)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertEquals(listOf(WordRef.LineNo(8, false), WordRef.LineNo(9, false)), e.cUnitSplit)
       assertEquals("10", e.userData)
     }
     assertNull(reader.nextEntry())
@@ -65,10 +66,10 @@ class RawLexiconReaderTest {
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
-      assertEquals("5/9", e.aUnitSplitString)
-      assertEquals("5/10", e.bUnitSplitString)
-      assertEquals("5/11", e.cUnitSplitString)
-      assertEquals("6/7", e.wordStructureString)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.aUnitSplit)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(10, false)), e.bUnitSplit)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(11, false)), e.cUnitSplit)
+      assertEquals(listOf(WordRef.LineNo(6, false), WordRef.LineNo(7, false)), e.wordStructure)
       assertEquals("10", e.userData)
     }
     assertNull(reader.nextEntry())

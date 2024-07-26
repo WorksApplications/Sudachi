@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.CSVParser;
+import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class RawLexiconReader {
     private final POSTable posTable;
     private final WordRef.Parser normRefParser; // for normalized form
     private final WordRef.Parser dictRefParser; // for dictionary form
+    private final WordRef.Parser splitParser; // for splits
 
     public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
         this.parser = parser;
@@ -62,9 +64,11 @@ public class RawLexiconReader {
         if (isLegacyColumnLayout()) {
             normRefParser = WordRef.parser(pos, false, true, false);
             dictRefParser = WordRef.parser(pos, true, true, true);
+            splitParser = WordRef.parser(pos, true, false, false);
         } else {
             normRefParser = WordRef.parser(pos, false, false, false);
             dictRefParser = WordRef.parser(pos, !user, false, false);
+            splitParser = WordRef.parser(pos, false, false, false);
         }
     }
 
@@ -146,6 +150,40 @@ public class RawLexiconReader {
         }
     }
 
+    /** parse specified column as Ints. */
+    private Ints getInts(List<String> data, Column column) {
+        String value = get(data, column, false);
+        if (value == null || value.isEmpty() || "*".equals(value)) {
+            return Ints.wrap(Ints.EMPTY_ARRAY);
+        }
+        String[] parts = value.split("/");
+        if (parts.length > Byte.MAX_VALUE) {
+            throw new IllegalArgumentException("int list contained more than 127 entries: " + value);
+        }
+        Ints result = new Ints(parts.length);
+        for (String part : parts) {
+            result.append(Integer.parseInt(part));
+        }
+        return result;
+    }
+
+    /** parse specified column as WordRef list. */
+    private List<WordRef> getWordRefs(List<String> data, Column column, WordRef.Parser parser) {
+        String value = get(data, column, false);
+        if (value == null || value.isEmpty() || "*".equals(value)) {
+            return new ArrayList<>();
+        }
+        String[] parts = value.split("/");
+        if (parts.length > Byte.MAX_VALUE) {
+            throw new IllegalArgumentException("reference list contained more than 127 entries: " + value);
+        }
+        List<WordRef> result = new ArrayList<>(parts.length);
+        for (String part : parts) {
+            result.add(parser.parse(part));
+        }
+        return result;
+    }
+
     /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
@@ -166,11 +204,11 @@ public class RawLexiconReader {
         entry.posId = posTable.getId(pos);
 
         entry.mode = get(data, Column.Mode, false);
-        entry.aUnitSplitString = get(data, Column.SplitA, false);
-        entry.bUnitSplitString = get(data, Column.SplitB, false);
-        entry.cUnitSplitString = get(data, Column.SplitC, false);
-        entry.wordStructureString = get(data, Column.WordStructure, false);
-        entry.synonymGroups = get(data, Column.SynonymGroups, false);
+        entry.aUnitSplit = getWordRefs(data, Column.SplitA, splitParser);
+        entry.bUnitSplit = getWordRefs(data, Column.SplitB, splitParser);
+        entry.cUnitSplit = getWordRefs(data, Column.SplitC, splitParser);
+        entry.wordStructure = getWordRefs(data, Column.WordStructure, splitParser);
+        entry.synonymGroups = getInts(data, Column.SynonymGroups);
         entry.userData = get(data, Column.UserData, true);
 
         entry.validate();

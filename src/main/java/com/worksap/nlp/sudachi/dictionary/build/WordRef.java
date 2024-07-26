@@ -71,6 +71,16 @@ public abstract class WordRef {
         public String toString() {
             return String.format("WordRef/Line: %s%d", isUser ? "U" : "S", line);
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other)
+                return true;
+            if (other == null || getClass() != other.getClass())
+                return false;
+            LineNo o = (LineNo) other;
+            return (line == o.line) && (isUser == o.isUser);
+        }
     }
 
     /**
@@ -96,6 +106,16 @@ public abstract class WordRef {
         @Override
         public String toString() {
             return String.format("WordRef/Headword: %s", headword);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other)
+                return true;
+            if (other == null || getClass() != other.getClass())
+                return false;
+            Headword o = (Headword) other;
+            return headword.equals(o.headword);
         }
     }
 
@@ -139,6 +159,16 @@ public abstract class WordRef {
         @Override
         public String toString() {
             return String.format("WordRef: %s/%d/%s", headword, posId, reading);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other)
+                return true;
+            if (other == null || getClass() != other.getClass())
+                return false;
+            Triple o = (Triple) other;
+            return (headword.equals(o.headword)) && (posId == o.posId) && (reading.equals(o.reading));
         }
     }
 

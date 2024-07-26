@@ -21,8 +21,6 @@ import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
 
 /**
@@ -30,23 +28,22 @@ import java.util.List;
  */
 public class WordEntryLayout {
     private final StringIndex index;
-    private final WordRef.Parser wordRefParser;
     private final Lookup2 lookup;
     private final BufferedChannel buffer;
+
+    // caches
     private final Ints aSplits = new Ints(16);
     private final Ints bSplits = new Ints(16);
     private final Ints cSplits = new Ints(16);
     private final Ints wordStructure = new Ints(16);
-    private final Ints synonymGroups = new Ints(16);
 
     public static final int MAX_LENGTH = 32 // minimum size
             + Byte.MAX_VALUE * Integer.BYTES * 5 // splits and synonyms
             + (Short.MAX_VALUE + 1) * Character.BYTES; // user data
 
-    public WordEntryLayout(Lookup2 resolver, StringIndex index, WordRef.Parser parser, BufferedChannel buffer) {
+    public WordEntryLayout(Lookup2 resolver, StringIndex index, BufferedChannel buffer) {
         this.lookup = resolver;
         this.index = index;
-        this.wordRefParser = parser;
         this.buffer = buffer;
     }
 
@@ -82,11 +79,11 @@ public class WordEntryLayout {
 
         // length can't be more than ~4k utf-16 code units so the cast is safe
         short utf8Len = (short) StringUtil.countUtf8Bytes(entry.headword);
-        byte cSplitLen = parseWordRefList(entry.cUnitSplitString, "", cSplits);
-        byte bSplitLen = parseWordRefList(entry.bUnitSplitString, entry.cUnitSplitString, bSplits);
-        byte aSplitLen = parseWordRefList(entry.aUnitSplitString, entry.bUnitSplitString, aSplits);
-        byte wordStructureLen = parseWordRefList(entry.wordStructureString, entry.aUnitSplitString, wordStructure);
-        byte synonymLen = parseIntList(entry.synonymGroups, synonymGroups);
+        byte cSplitLen = resolveWordRefList(entry.cUnitSplit, null, cSplits);
+        byte bSplitLen = resolveWordRefList(entry.bUnitSplit, entry.cUnitSplit, bSplits);
+        byte aSplitLen = resolveWordRefList(entry.aUnitSplit, entry.bUnitSplit, aSplits);
+        byte wordStructureLen = resolveWordRefList(entry.wordStructure, entry.aUnitSplit, wordStructure);
+        byte synonymLen = (byte) entry.synonymGroups.length();
         int userDataLength = entry.userData.length();
         buf.putShort(utf8Len);
         buf.putByte(cSplitLen);
@@ -102,7 +99,7 @@ public class WordEntryLayout {
         buf.putInts(bSplits, bSplitLen);
         buf.putInts(aSplits, aSplitLen);
         buf.putInts(wordStructure, wordStructureLen);
-        buf.putInts(synonymGroups, synonymLen);
+        buf.putInts(entry.synonymGroups, synonymLen);
         if (userDataLength != 0) {
             buf.putShort((short) userDataLength);
             String userData = entry.userData;
@@ -115,52 +112,31 @@ public class WordEntryLayout {
         return RawLexicon.pointer(position);
     }
 
-    /** parse int list, i.e. synonym group ids */
-    private byte parseIntList(String data, Ints result) {
-        if (data == null || data.isEmpty() || "*".equals(data)) {
-            result.clear();
-            return 0;
-        }
-        String[] parts = data.split("/");
-        if (parts.length > Byte.MAX_VALUE) {
-            throw new IllegalArgumentException("reference list contained more than 127 entries: " + data);
-        }
-        result.clear();
-        for (String part : parts) {
-            result.append(Integer.parseInt(part));
-        }
-        return (byte) parts.length;
-    }
-
     /**
-     * Parse word ref list, i.e. A/B/C split and word structure.
+     * Resolve wordref list (A/B/C split and word structure) using the Lookup and
+     * returns its length.
      * 
      * If it is equivalent to the reference, return -1 without parsing.
      * 
-     * @param data
+     * @param refs
+     *            wordref list to resolve.
      * @param reference
+     *            wordref list of higher split unit.
      * @param result
-     * @return
+     *            Ints to save resolved wordrefs.
+     * @return -1 if equals to reference, otherwise length.
      */
-    byte parseWordRefList(String data, String reference, Ints result) {
-        if (data == null || data.isEmpty() || "*".equals(data)) {
-            result.clear();
+    private byte resolveWordRefList(List<WordRef> refs, List<WordRef> reference, Ints result) {
+        result.clear();
+        if (refs.isEmpty()) {
             return 0;
         }
-        if (data.equals(reference)) {
-            result.clear();
+        if (refs.equals(reference)) {
             return -1;
         }
-
-        String[] parts = data.split("/");
-        if (parts.length > Byte.MAX_VALUE) {
-            throw new IllegalArgumentException("reference list contained more than 127 entries: " + data);
-        }
-        result.clear();
-        for (String part : parts) {
-            WordRef ref = wordRefParser.parse(part);
+        for (WordRef ref : refs) {
             result.append(ref.resolve(lookup));
         }
-        return (byte) parts.length;
+        return (byte) refs.size();
     }
 }
