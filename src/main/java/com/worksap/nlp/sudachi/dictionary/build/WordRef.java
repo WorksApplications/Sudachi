@@ -175,21 +175,21 @@ public abstract class WordRef {
     private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
 
     /** Alias of WordRef.Parser constructor. */
-    public static Parser parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword,
+    public static Parser parser(POSTable posTable, boolean allowLineNo, boolean allowHeadword,
             boolean allowNullAsterisk) {
-        return new Parser(posTable, allowNumeric, allowHeadword, allowNullAsterisk);
+        return new Parser(posTable, allowLineNo, allowHeadword, allowNullAsterisk);
     }
 
     /** Parser to parse wordref from a string in the lexicon field. */
     public static class Parser {
         private final POSTable posTable;
-        private final boolean allowNumeric;
+        private final boolean allowLineNo;
         private final boolean allowHeadword;
         private final boolean allowNullAsterisk;
 
-        public Parser(POSTable posTable, boolean allowNumeric, boolean allowHeadword, boolean allowNullAsterisk) {
+        public Parser(POSTable posTable, boolean allowLineNo, boolean allowHeadword, boolean allowNullAsterisk) {
             this.posTable = posTable;
-            this.allowNumeric = allowNumeric;
+            this.allowLineNo = allowLineNo;
             this.allowHeadword = allowHeadword;
             this.allowNullAsterisk = allowNullAsterisk;
         }
@@ -200,7 +200,7 @@ public abstract class WordRef {
                 return null;
             }
 
-            if (allowNumeric && NUMERIC_RE.matcher(text).matches()) {
+            if (allowLineNo && NUMERIC_RE.matcher(text).matches()) {
                 boolean isUser = text.charAt(0) == 'U';
                 int offset = isUser ? 1 : 0;
                 int lineNum = Integer.parseInt(text.substring(offset));

@@ -68,7 +68,7 @@ public class RawLexiconReader {
         } else {
             normRefParser = WordRef.parser(pos, false, false, false);
             dictRefParser = WordRef.parser(pos, !user, false, false);
-            splitParser = WordRef.parser(pos, false, false, false);
+            splitParser = WordRef.parser(pos, !user, false, false);
         }
     }
 
