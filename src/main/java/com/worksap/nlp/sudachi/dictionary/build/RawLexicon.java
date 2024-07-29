@@ -48,6 +48,7 @@ public class RawLexicon {
     // entries loaded from the referencing system dictionary (for user
     // dict build).
     private final List<CompiledWordEntry> preloadedEntries = new ArrayList<>();
+    private int nPhantomEntries = 0;
 
     private final Index index = new Index();
     private final List<RawWordEntry> notIndexed = new ArrayList<>();
@@ -217,6 +218,7 @@ public class RawLexicon {
             copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
             list.add(copy);
             lookup.add(copy, isUser);
+            nPhantomEntries += 1;
             return 1;
         } else {
             return 0;
@@ -225,12 +227,12 @@ public class RawLexicon {
 
     /** @return number of entries in the TRIE index */
     public int getIndexedEntries() {
-        return this.entries.size() - this.notIndexed.size();
+        return this.entries.size() - this.notIndexed.size() - nPhantomEntries;
     }
 
     /** @return number of all entries including non-indexed ones */
     public int getTotalEntries() {
-        return this.entries.size();
+        return this.entries.size() - nPhantomEntries;
     }
 
     /** @return if lexicon has entries that need runtime cost caluculation */
