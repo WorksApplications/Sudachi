@@ -96,7 +96,8 @@ public class Lookup2 {
      * @return
      */
     public EntryWithFlag byIndex(int index, boolean isUser) {
-        if (isUser) {
+        // if userEntries is empty (i.e. building system), ignore isUser flag
+        if (isUser && !userEntries.isEmpty()) {
             return new EntryWithFlag(userEntries.get(index), true);
         }
         return new EntryWithFlag(systemEntries.get(index), false);
