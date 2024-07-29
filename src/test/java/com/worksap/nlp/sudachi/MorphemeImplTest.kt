@@ -23,9 +23,11 @@ class MorphemeImplTest {
   @Test
   fun useToString() {
     val dic = TestDictionary.user0()
+    // should be split into す/だ/ち, all of them are OOV
     val sudachi = dic.create().tokenize("すだち")
+    // wid of OOV is (0xf, posId)
     assertEquals(
-        "MorphemeImpl{begin=0, end=1, surface=す, pos=4/名詞,普通名詞,一般,*,*,*, wid=(0,0)}",
+        "MorphemeImpl{begin=0, end=1, surface=す, pos=4/名詞,普通名詞,一般,*,*,*, wid=(15,4)}",
         sudachi[0].toString())
   }
 }

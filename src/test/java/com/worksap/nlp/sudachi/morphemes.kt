@@ -16,12 +16,28 @@
 
 package com.worksap.nlp.sudachi
 
+import com.worksap.nlp.sudachi.dictionary.CharacterCategory
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.dictionary.WordInfo
+import java.net.URL
+
+fun DictionaryAccess.setCharacterCategory(
+    url: URL = javaClass.getResource("char.def")
+): DictionaryAccess {
+  val resource = Config.Resource.Classpath<CharacterCategory>(url)
+  this.grammar.setCharacterCategory(CharacterCategory.load(resource))
+  return this
+}
 
 fun DictionaryAccess.morpheme(id: Int): Morpheme {
   val node = LatticeNodeImpl(lexicon, 0, id)
+  node.setRange(0, node.getWordInfo().getLength().toInt())
+
+  // UTF8InputTextBuilder requires charcat
+  if (grammar.getCharacterCategory() == null) {
+    setCharacterCategory()
+  }
 
   val l =
       MorphemeList(

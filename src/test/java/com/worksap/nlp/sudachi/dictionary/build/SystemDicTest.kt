@@ -17,9 +17,11 @@
 package com.worksap.nlp.sudachi.dictionary.build
 
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
+import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.morpheme
 import com.worksap.nlp.sudachi.res
+import com.worksap.nlp.sudachi.setCharacterCategory
 import com.worksap.nlp.sudachi.wordInfo
 import kotlin.test.*
 
@@ -51,20 +53,21 @@ class SystemDicTest {
     repeat(10) { bldr.lexicon(javaClass.getResource("one.csv")) }
     bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7").build(data)
     val dic = BinaryDictionary(data.buffer())
-    assertEquals(11, dic.lexicon.size())
+    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
+    assertEquals(11, dic.lexicon.size()) // 10 + 南
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
-    val m = dic.morpheme(10)
+    val m = dic.morpheme(44) // 11th word (i.e. 南)
     val wi = m.wordInfo
-    assertEquals(m.surface(), "南")
-    assertEquals(wi.length, 3)
-    assertEquals(wi.posId, 0)
-    assertEquals(m.dictionaryForm(), "南")
-    assertEquals(m.normalizedForm(), "西")
-    assertEquals(m.readingForm(), "ミナミ")
-    assertContentEquals(wi.aunitSplit, intArrayOf(0, 1))
-    assertContentEquals(wi.bunitSplit, intArrayOf(2, 3))
-    assertContentEquals(wi.wordStructure, intArrayOf(4, 5))
-    assertContentEquals(m.synonymGroupIds, intArrayOf(6, 7))
+    assertEquals("南", m.surface())
+    assertEquals(3, wi.length)
+    assertEquals(0, wi.posId)
+    assertEquals("東", m.dictionaryForm())
+    assertEquals("西", m.normalizedForm())
+    assertEquals("ミナミ", m.readingForm())
+    assertContentEquals(intArrayOf(4, 8), wi.aunitSplit)
+    assertContentEquals(intArrayOf(12, 16), wi.bunitSplit)
+    assertContentEquals(intArrayOf(20, 24), wi.wordStructure)
+    assertContentEquals(intArrayOf(6, 7), m.synonymGroupIds)
   }
 
   @Test
@@ -73,13 +76,15 @@ class SystemDicTest {
     val data = MemChannel()
     bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,南,南,*,C,*,*,*,*").build(data)
     val dic = BinaryDictionary(data.buffer())
+    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
+    val wordIds = intArrayOf(4)
     assertEquals(1, dic.lexicon.size())
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
-    val m = dic.morpheme(0)
-    assertEquals(m.surface(), "南")
-    assertEquals(m.dictionaryForm(), "南")
-    assertEquals(m.normalizedForm(), "南")
-    assertEquals(m.readingForm(), "南")
+    val m = dic.morpheme(wordIds[0])
+    assertEquals("南", m.surface())
+    assertEquals("南", m.dictionaryForm())
+    assertEquals("南", m.normalizedForm())
+    assertEquals("南", m.readingForm())
   }
 
   @Test
@@ -96,14 +101,15 @@ class SystemDicTest {
     bldr
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                        東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/2,*,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/2,*,0/2,*
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
+    val wordIds = intArrayOf(4, 8, 13)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
-    val wi = dic.lexicon.getWordInfo(1)
-    assertContentEquals(wi.aunitSplit, intArrayOf(0, 2))
-    assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    val wi = dic.lexicon.getWordInfo(wordIds[1])
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.aunitSplit)
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.wordStructure)
   }
 
   @Test
@@ -113,14 +119,15 @@ class SystemDicTest {
     bldr
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                        東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/2",*,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/2",*,0/2,*
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
+    val wordIds = intArrayOf(4, 8, 14)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
-    val wi = dic.lexicon.getWordInfo(1)
-    assertContentEquals(wi.aunitSplit, intArrayOf(0, 2))
-    assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    val wi = dic.lexicon.getWordInfo(wordIds[1])
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.aunitSplit)
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.wordStructure)
   }
 
   @Test
@@ -130,14 +137,15 @@ class SystemDicTest {
     bldr
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                        東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,0/2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,0/2,*
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
+    val wordIds = intArrayOf(4, 8, 14)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
-    val wi = dic.lexicon.getWordInfo(1)
-    assertContentEquals(wi.bunitSplit, intArrayOf(0, 2))
-    assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    val wi = dic.lexicon.getWordInfo(wordIds[1])
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.bunitSplit)
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.wordStructure)
   }
 
   @Test
@@ -147,14 +155,15 @@ class SystemDicTest {
     bldr
         .lexicon(
             """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                        東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,U0/U2,*
-                        都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,0/2,U0/U2,*
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
         .build(data)
+    val wordIds = intArrayOf(4, 8, 14)
     val dic = BinaryDictionary(data.buffer())
     assertEquals(3, dic.lexicon.size())
-    val wi = dic.lexicon.getWordInfo(1)
-    assertContentEquals(wi.bunitSplit, intArrayOf(0, 2))
-    assertContentEquals(wi.wordStructure, intArrayOf(0, 2))
+    val wi = dic.lexicon.getWordInfo(wordIds[1])
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.bunitSplit)
+    assertContentEquals(intArrayOf(wordIds[0], wordIds[2]), wi.wordStructure)
   }
 
   @Test
@@ -167,8 +176,9 @@ class SystemDicTest {
   @Test
   fun failInvalidNumberOfInlineRefFields() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
-    bldr.lexicon("""東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"a,b,c,d,e",*,*""")
-    assertFails { bldr.build(MemChannel()) }
+    assertFails {
+      bldr.lexicon("""東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"a,b,c,d,e",*,*""")
+    }
   }
 
   @Test
@@ -176,7 +186,7 @@ class SystemDicTest {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     bldr.lexicon(
         """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-               東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"東京,名詞,固有名詞,地名,一般,*,*,a",*,*""".trimMargin())
+東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,"東京,名詞,固有名詞,地名,一般,*,*,a",*,*""".trimMargin())
     assertFails { bldr.build(MemChannel()) }
   }
 
@@ -193,8 +203,11 @@ class SystemDicTest {
     val ch = MemChannel()
     bldr.build(ch)
     val dic = BinaryDictionary(ch.buffer())
+    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
     assertEquals(dic.lexicon.size(), 101)
+
     (0..100).forEach { i ->
+      val wordId = i * 4 + 4
       val istr = String.format("%04x", i)
       val surf = "a".repeat(1024) + istr
       val read = "b".repeat(1024) + istr
@@ -203,13 +216,13 @@ class SystemDicTest {
       val surfArray = surf.encodeToByteArray()
       val iter = dic.lexicon.lookup(surfArray, 0)
       assertTrue { iter.hasNext() }
-      assertContentEquals(intArrayOf(i, surfArray.size), iter.next())
+      assertContentEquals(intArrayOf(wordId, surfArray.size), iter.next())
       assertFalse { iter.hasNext() }
 
-      val wi = dic.morpheme(i)
-      assertEquals(wi.surface(), surf)
-      assertEquals(wi.readingForm(), read)
-      assertEquals(wi.normalizedForm(), norm)
+      val m = dic.morpheme(wordId)
+      assertEquals(surf, m.surface())
+      assertEquals(read, m.readingForm())
+      assertEquals(norm, m.normalizedForm())
     }
   }
 }

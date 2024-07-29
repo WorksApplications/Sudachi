@@ -136,6 +136,10 @@ public class WordEntryLayout {
             return 0;
         }
         if (refs.equals(reference)) {
+            // this cannot capture the case different WordRef subclass refers to the same
+            // entry.
+            // allow this behaviour for the compatibility to
+            // {@link RawWordEntry.computeExpectedSize}.
             return -1;
         }
         for (WordRef ref : refs) {

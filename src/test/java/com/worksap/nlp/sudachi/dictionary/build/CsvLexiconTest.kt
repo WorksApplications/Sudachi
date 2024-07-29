@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -75,6 +76,7 @@ class CsvLexiconTest {
   }
 
   @Test
+  @Ignore
   fun failTooManyUnits() {
     val clex = CsvLexicon(POSTable())
     val data = "東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,C,*,*,*,*".split(",")

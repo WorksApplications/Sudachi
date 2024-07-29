@@ -54,7 +54,7 @@ public class DictionaryBuilderTest {
             writer.write("東,-1,-1,0,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*,*\n");
             writer.write("京都,0,0,0,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*\n");
         }
-        int[] wordIds = { 4, 11, 15, 19 };
+        int[] wordIds = { 4, 11, 15, 19 }; // 3 + phantom entry (ひがし)
 
         DictionaryBuilder.main(new String[] { "-o", outputFile.getPath(), "-m", matrixFile.getPath(), "-d", "test",
                 inputFile.getPath() });
@@ -71,7 +71,7 @@ public class DictionaryBuilderTest {
             assertThat(grammar.getConnectCost((short) 0, (short) 0), is((short) 200));
 
             Lexicon lexicon = dictionary.getLexicon();
-            assertThat(lexicon.size(), is(4)); // 3 + phantom for "ひがし"
+            assertThat(lexicon.size(), is(3));
 
             // first entry
             int wordId = wordIds[0];
@@ -99,7 +99,7 @@ public class DictionaryBuilderTest {
             assertThat(WordParameters.cost(params), is((short) 0));
             info = lexicon.getWordInfo(wordId);
             assertThat(lexicon.string(0, info.getSurface()), is("東"));
-            assertThat(info.getNormalizedForm(), is(WordId.make(0, wordIds[3]))); // phantom entry
+            assertThat(info.getNormalizedForm(), is(WordId.make(0, wordIds[3])));
             assertThat(info.getDictionaryForm(), is(WordId.make(0, wordId)));
             assertThat(lexicon.string(0, info.getReadingForm()), is("ヒガシ"));
             assertThat(info.getPOSId(), is((short) 1));

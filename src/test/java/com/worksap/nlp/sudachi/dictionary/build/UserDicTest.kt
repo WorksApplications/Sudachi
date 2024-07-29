@@ -66,15 +66,15 @@ class UserDicTest {
         TestDic()
             .system(
                 """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
             .user("""東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/1,*,0/1,*""".trimIndent())
             .load()
 
     val da = dic as DictionaryAccess
     assertEquals(dic.partOfSpeechSize, 2)
-    val wi = da.morpheme(WordId.make(1, 0))
-    assertEquals(wi.surface(), "東京都")
-    assertEquals(wi.readingForm(), "トウキョウト")
+    val m = da.morpheme(WordId.make(1, 4))
+    assertEquals("東京都", m.surface())
+    assertEquals("トウキョウト", m.readingForm())
   }
 
   @Test
@@ -84,13 +84,13 @@ class UserDicTest {
             .system("""東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent())
             .user(
                 """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,0/U1,0/U1,0/U1,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
             .load()
     val da = dic as DictionaryAccess
-    val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
-    assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
-    assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.bunitSplit)
-    assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.wordStructure)
+    val wi = da.lexicon.getWordInfo(WordId.make(1, 4))
+    assertContentEquals(intArrayOf(4, WordId.make(1, 9)), wi.aunitSplit)
+    assertContentEquals(intArrayOf(4, WordId.make(1, 9)), wi.bunitSplit)
+    assertContentEquals(intArrayOf(4, WordId.make(1, 9)), wi.wordStructure)
   }
 
   @Test
@@ -100,11 +100,11 @@ class UserDicTest {
             .system("""東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent())
             .user(
                 """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"東京,名詞,普通名詞,一般,*,*,*,トウキョウ/U1",*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
             .load()
     val da = dic as DictionaryAccess
-    val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
-    assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
+    val wi = da.lexicon.getWordInfo(WordId.make(1, 4))
+    assertContentEquals(intArrayOf(4, WordId.make(1, 9)), wi.aunitSplit)
   }
 
   @Test
@@ -114,11 +114,11 @@ class UserDicTest {
             .system("""東京,1,1,2816,東京,名詞,普通名詞,一般,*,*,*,トウキョウ,東京,*,A,*,*,*,*""".trimIndent())
             .user(
                 """東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,"0/都,名詞,普通名詞,一般,*,*,*,ト",*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
             .load()
     val da = dic as DictionaryAccess
-    val wi = da.lexicon.getWordInfo(WordId.make(1, 0))
-    assertContentEquals(intArrayOf(0, WordId.make(1, 1)), wi.aunitSplit)
+    val wi = da.lexicon.getWordInfo(WordId.make(1, 4))
+    assertContentEquals(intArrayOf(4, WordId.make(1, 9)), wi.aunitSplit)
   }
 
   @Test
@@ -127,15 +127,16 @@ class UserDicTest {
         TestDic()
             .system(
                 """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
             .user("""東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,0/1,*,0/1,*""".trimIndent())
             .load()
 
     val da = dic as DictionaryAccess
-    val wi = da.morpheme(WordId.make(1, 0))
     assertEquals(dic.partOfSpeechSize, 3)
-    assertEquals(wi.surface(), "東京都")
-    assertEquals(wi.partOfSpeech(), "a,b,c,d,e,f".pos)
+
+    val m = da.morpheme(WordId.make(1, 4))
+    assertEquals("東京都", m.surface())
+    assertEquals("a,b,c,d,e,f".pos, m.partOfSpeech())
   }
 
   @Test
@@ -144,7 +145,7 @@ class UserDicTest {
         TestDic()
             .system(
                 """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
 
     assertFails {
       bldr.user("""東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,5/1,*,*,*""".trimIndent())
@@ -157,7 +158,7 @@ class UserDicTest {
         TestDic()
             .system(
                 """東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京,*,A,*,*,*,*
-                   都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
+都,2,2,2914,都,名詞,普通名詞,一般,*,*,*,ト,都,*,A,*,*,*,*""".trimIndent())
 
     assertFails {
       bldr.user("""東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,0/U1,*,*,*""".trimIndent())

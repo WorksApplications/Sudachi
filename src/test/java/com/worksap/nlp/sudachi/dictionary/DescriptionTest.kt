@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary
 
+import com.worksap.nlp.sudachi.TestDictionary
 import com.worksap.nlp.sudachi.dictionary.build.InMemoryChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,5 +42,11 @@ class DescriptionTest {
     assertEquals(d.blocks[1].name, d2.blocks[1].name)
     assertEquals(d.blocks[1].start, d2.blocks[1].start)
     assertEquals(d.blocks[1].size, d2.blocks[1].size)
+  }
+
+  @Test
+  fun getComment() {
+    val desc: Description = TestDictionary.systemDict.getDictionaryHeader()
+    assertEquals(desc.getComment(), "the system dictionary for the unit tests")
   }
 }

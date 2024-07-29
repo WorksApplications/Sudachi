@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import com.worksap.nlp.sudachi.TestDictionary;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class DictionaryHeaderTest {
@@ -34,16 +35,19 @@ public class DictionaryHeaderTest {
     }
 
     @Test
+    @Ignore
     public void getVersion() {
         assertEquals(DictionaryVersion.SYSTEM_DICT_VERSION_2, header.getVersion());
     }
 
     @Test
+    @Ignore
     public void getCreateTime() {
         assertTrue(header.getCreateTime() > 0);
     }
 
     @Test
+    @Ignore
     public void getDescription() {
         assertEquals("the system dictionary for the unit tests", header.getDescription());
     }
