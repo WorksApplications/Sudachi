@@ -153,7 +153,7 @@ public abstract class WordRef {
                     return intoWordRef(entry);
                 }
             }
-            return -1;
+            throw new IllegalArgumentException("matching entry not found for the " + this.toString());
         }
 
         @Override
