@@ -89,8 +89,9 @@ public class RawLexicon {
      * @param posTable
      * @throws IOException
      */
-    public void read(String name, InputStream data, POSTable posTable) throws IOException {
-        read(name, new InputStreamReader(data, StandardCharsets.UTF_8), posTable);
+    public void read(String name, InputStream data, POSTable posTable, short numLeft, short numRight)
+            throws IOException {
+        read(name, new InputStreamReader(data, StandardCharsets.UTF_8), posTable, numLeft, numRight);
     }
 
     /**
@@ -101,7 +102,7 @@ public class RawLexicon {
      * @param posTable
      * @throws IOException
      */
-    public void read(String name, Reader data, POSTable posTable) throws IOException {
+    public void read(String name, Reader data, POSTable posTable, short numLeft, short numRight) throws IOException {
         CSVParser parser = new CSVParser(data);
         parser.setName(name);
         RawLexiconReader reader = new RawLexiconReader(parser, posTable, isUser);
@@ -109,6 +110,11 @@ public class RawLexicon {
         long offset = this.offset;
         RawWordEntry entry;
         while ((entry = reader.nextEntry()) != null) {
+            if (entry.leftId >= numLeft || entry.rightId >= numRight) {
+                throw new IllegalArgumentException(String.format("connection id out of range: %d, %d (line %d of %s)",
+                        entry.leftId, entry.rightId, entry.sourceLine, entry.sourceName));
+            }
+
             entry.publishStrings(strings);
             entries.add(entry);
             entry.pointer = pointer(offset);
