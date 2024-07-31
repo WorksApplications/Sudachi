@@ -34,9 +34,6 @@ public class DictionaryPrinter {
     public final String WordRefJoinerStr = String.valueOf(WordRefJoiner);
 
     private final PrintStream output;
-    private final boolean isUser;
-    private final BinaryDictionary dic;
-    private final BinaryDictionary base;
 
     private final GrammarImpl grammar;
     private final LexiconSet lex;
@@ -45,15 +42,11 @@ public class DictionaryPrinter {
 
     private DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) {
         this.output = output;
-        this.dic = dic;
-        this.base = base;
 
         if (base == null) {
-            isUser = false;
             grammar = dic.getGrammar();
             lex = new LexiconSet(dic.getLexicon(), grammar.getSystemPartOfSpeechSize());
         } else {
-            isUser = true;
             grammar = base.getGrammar();
             lex = new LexiconSet(base.getLexicon(), grammar.getSystemPartOfSpeechSize());
 
@@ -128,8 +121,8 @@ public class DictionaryPrinter {
         field(wordRefList(info.getBunitSplit()));
         field(wordRefList(info.getCunitSplit()));
         field(wordRefList(info.getWordStructure()));
-        field(intList(info.getSynonymGroupIds())); // synonym groups
-        lastField(info.getUserData()); // user data
+        field(intList(info.getSynonymGroupIds()));
+        lastField(info.getUserData());
         output.print("\n");
     }
 

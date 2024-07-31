@@ -52,7 +52,7 @@ public class RawWordEntry implements Lookup2.Entry {
      * Compute expected size of word entry when put in the binary dictionary. This
      * function additionally validates length of split entries.
      * 
-     * @return expected binary size of this entry, in bytes, will be always >=32
+     * @return expected binary size of this entry, in bytes (minimum 32).
      */
     public int computeExpectedSize() {
         int size = 32;

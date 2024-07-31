@@ -18,12 +18,18 @@ package com.worksap.nlp.sudachi.dictionary
 
 import com.worksap.nlp.sudachi.TestDictionary
 import com.worksap.nlp.sudachi.Utils
+import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
+import com.worksap.nlp.sudachi.dictionary.build.MemChannel
+import com.worksap.nlp.sudachi.res
 import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
 import java.io.PrintStream
+import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
@@ -88,5 +94,53 @@ class DictionaryPrinterTest {
     val ps = PrintStream(output)
 
     assertFails { DictionaryPrinter.printDictionary(filename, TestDictionary.systemDict, ps) }
+  }
+
+  @Test
+  fun rebuildAndReprintSystem() {
+    val dicfile = tempDir.resolve("system.dic").toString()
+
+    val lexfile = tempDir.resolve("system_lex.csv")
+    val output1 = FileOutputStream(lexfile.toFile())
+    val ps1 = PrintStream(output1)
+    DictionaryPrinter.printDictionary(dicfile, null, ps1)
+    output1.close()
+    val printed = Files.readString(lexfile).split(System.lineSeparator())
+
+    val dicfile2 = tempDir.resolve("system.dic2")
+    val reload = MemChannel()
+    DicBuilder.system().matrix(res("/dict/matrix.def")).lexicon(lexfile).build(reload)
+    reload.writeData(dicfile2)
+
+    val output2 = ByteArrayOutputStream()
+    val ps2 = PrintStream(output2)
+    DictionaryPrinter.printDictionary(dicfile2.toString(), null, ps2)
+    val reprinted = output2.toString().split(System.lineSeparator())
+
+    assertContentEquals(printed, reprinted)
+  }
+
+  @Test
+  fun rebuildAndReprintUser() {
+    val dicfile = tempDir.resolve("user.dic").toString()
+
+    val lexfile = tempDir.resolve("user_lex.csv")
+    val output1 = FileOutputStream(lexfile.toFile())
+    val ps1 = PrintStream(output1)
+    DictionaryPrinter.printDictionary(dicfile, TestDictionary.systemDict, ps1)
+    output1.close()
+    val printed = Files.readString(lexfile).split(System.lineSeparator())
+
+    val dicfile2 = tempDir.resolve("user.dic2")
+    val reload = MemChannel()
+    DicBuilder.user().system(TestDictionary.systemDict).lexicon(lexfile).build(reload)
+    reload.writeData(dicfile2)
+
+    val output2 = ByteArrayOutputStream()
+    val ps2 = PrintStream(output2)
+    DictionaryPrinter.printDictionary(dicfile2.toString(), TestDictionary.systemDict, ps2)
+    val reprinted = output2.toString().split(System.lineSeparator())
+
+    assertContentEquals(printed, reprinted)
   }
 }
