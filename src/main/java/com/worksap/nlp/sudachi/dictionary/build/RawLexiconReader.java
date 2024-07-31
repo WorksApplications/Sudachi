@@ -39,7 +39,7 @@ public class RawLexiconReader {
     public enum Column {
         Surface(true), LeftId(true), RightId(true), Cost(true), Writing(false), Pos1(true), Pos2(true), Pos3(
                 true), Pos4(true), Pos5(true), Pos6(true), ReadingForm(true), NormalizedForm(true), DictionaryForm(
-                        true), Mode(true), SplitA(true), SplitB(
+                        true), Mode(false), SplitA(true), SplitB(
                                 true), WordStructure(true), SynonymGroups(false), SplitC(false), UserData(false);
 
         private final boolean required;

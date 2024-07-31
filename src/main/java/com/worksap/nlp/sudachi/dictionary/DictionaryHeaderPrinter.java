@@ -35,6 +35,8 @@ public class DictionaryHeaderPrinter {
 
     /** print information in the dictionary Description part */
     static void printDescription(String filename, PrintStream output) throws IOException {
+        output.printf("File: %s%n", filename);
+
         ByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
@@ -42,6 +44,15 @@ public class DictionaryHeaderPrinter {
         }
         Description desc = Description.load(bytes);
 
+        if (desc.isSystemDictionary()) {
+            output.println("type: system dictionary");
+        } else if (desc.isUserDictionary()) {
+            output.println("type: user dictionary");
+        } else {
+            // should not happen
+            output.println("invalid file");
+            return;
+        }
         output.printf("Creation time: %s%n", desc.getCreationTime());
         output.printf("Comment: %s%n", desc.getComment());
         output.printf("Signature: %s%n", desc.getSignature());

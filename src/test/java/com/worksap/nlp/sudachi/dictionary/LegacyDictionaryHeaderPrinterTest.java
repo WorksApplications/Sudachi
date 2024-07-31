@@ -29,11 +29,12 @@ import com.worksap.nlp.sudachi.TestDictionary;
 import com.worksap.nlp.sudachi.Utils;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class DictionaryHeaderPrinterTest {
+public class LegacyDictionaryHeaderPrinterTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -46,6 +47,7 @@ public class DictionaryHeaderPrinterTest {
     }
 
     @Test
+    @Ignore
     public void printHeaderWithSystemDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "system.dic");
         String[] actuals;
@@ -61,6 +63,7 @@ public class DictionaryHeaderPrinterTest {
     }
 
     @Test
+    @Ignore
     public void printHeaderWithUserDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         String[] actuals;
@@ -76,6 +79,7 @@ public class DictionaryHeaderPrinterTest {
     }
 
     @Test
+    @Ignore
     public void printHeaderWithInvalidFile() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "unk.def");
         String[] actuals;

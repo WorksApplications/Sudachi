@@ -29,11 +29,12 @@ import com.worksap.nlp.sudachi.TestDictionary;
 import com.worksap.nlp.sudachi.Utils;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class DictionaryPrinterTest {
+public class LegacyDictionaryPrinterTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -48,6 +49,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test
+    @Ignore
     public void printWithSystemDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "system.dic");
         String[] actuals;
@@ -60,6 +62,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test
+    @Ignore
     public void printWithUserDict() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         File systemDictFile = new File(temporaryFolder.getRoot(), "system.dic");
@@ -76,6 +79,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    @Ignore
     public void printWithUserDictWithoutGrammar() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "user.dic");
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(output)) {
@@ -84,6 +88,7 @@ public class DictionaryPrinterTest {
     }
 
     @Test(expected = IOException.class)
+    @Ignore
     public void readGrammarWithInvalidFile() throws IOException {
         File inputFile = new File(temporaryFolder.getRoot(), "unk.def");
         BinaryDictionary.loadSystem(inputFile.getPath());

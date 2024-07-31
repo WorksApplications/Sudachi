@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
 import java.io.IOException;
@@ -27,13 +28,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DictionaryPrinter {
+    public final char WordRefDelimiter = '/';
+    public final String WordRefDelimiterStr = String.valueOf(WordRefDelimiter);
+    public final char WordRefJoiner = ',';
+    public final String WordRefJoinerStr = String.valueOf(WordRefJoiner);
 
     private final PrintStream output;
+    private final boolean isUser;
     private final BinaryDictionary dic;
     private final BinaryDictionary base;
 
     private final GrammarImpl grammar;
-    private final DoubleArrayLexicon lex;
+    private final LexiconSet lex;
+    // sorted raw word ids taken from the target dict.
     private final Ints wordIds;
 
     private DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) {
@@ -41,22 +48,25 @@ public class DictionaryPrinter {
         this.dic = dic;
         this.base = base;
 
-        if (base != null) {
-            GrammarImpl grammar = base.getGrammar();
-            grammar.addPosList(dic.getGrammar());
-            this.grammar = grammar;
-        } else {
+        if (base == null) {
+            isUser = false;
             grammar = dic.getGrammar();
+            lex = new LexiconSet(dic.getLexicon(), grammar.getSystemPartOfSpeechSize());
+        } else {
+            isUser = true;
+            grammar = base.getGrammar();
+            lex = new LexiconSet(base.getLexicon(), grammar.getSystemPartOfSpeechSize());
+
+            lex.add(dic.getLexicon(), (short) grammar.getPartOfSpeechSize());
+            grammar.addPosList(dic.getGrammar());
         }
 
-        lex = dic.getLexicon();
-
         // in order to output dictionary entries in in-dictionary order we need to sort
-        // them
-        // iterator over them will get them not in the sorted order, but grouped by
-        // surface (and sorted in groups)
-        Ints allIds = new Ints(lex.size());
-        Iterator<Ints> ids = lex.wordIds(0);
+        // them. iterator over them will get them not in the sorted order, but grouped
+        // by surface (and sorted in groups).
+        DoubleArrayLexicon targetLex = dic.getLexicon();
+        Ints allIds = new Ints(targetLex.size());
+        Iterator<Ints> ids = targetLex.wordIds(0);
         while (ids.hasNext()) {
             allIds.appendAll(ids.next());
         }
@@ -67,8 +77,8 @@ public class DictionaryPrinter {
     void printHeader() {
         // @formatter:off
         printColumnHeaders(Column.Surface, Column.LeftId, Column.RightId, Column.Cost, Column.Pos1, Column.Pos2,
-                Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6, Column.ReadingForm, Column.DictionaryForm,
-                Column.NormalizedForm, Column.Mode, Column.SplitA, Column.SplitB, Column.SplitC, Column.WordStructure,
+                Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6, Column.ReadingForm, Column.NormalizedForm,
+                Column.DictionaryForm, Column.SplitA, Column.SplitB, Column.SplitC, Column.WordStructure,
                 Column.SynonymGroups, Column.UserData);
         // @formatter:on
     }
@@ -79,23 +89,29 @@ public class DictionaryPrinter {
             if (isFirst) {
                 isFirst = false;
             } else {
-                output.print(",");
+                output.print(',');
             }
             output.print(c.name());
         }
         output.println();
     }
 
+    private void printEntries() {
+        // id of the target dic in LexiconSet
+        for (int i = 0; i < wordIds.length(); ++i) {
+            printEntry(wordIds.get(i));
+        }
+    }
+
     void printEntry(int wordId) {
+        int dic = WordId.dic(wordId);
         WordInfo info = lex.getWordInfo(wordId);
         POS pos = grammar.getPartOfSpeechString(info.getPOSId());
         long params = lex.parameters(wordId);
         short leftId = WordParameters.leftId(params);
         short rightId = WordParameters.rightId(params);
         short cost = WordParameters.cost(params);
-        String surface = lex.string(0, info.getSurface());
-        String reading = lex.string(0, info.getReadingForm());
-        field(surface);
+        field(lex.string(dic, info.getSurface()));
         field(leftId);
         field(rightId);
         field(cost);
@@ -105,39 +121,16 @@ public class DictionaryPrinter {
         field(pos.get(3));
         field(pos.get(4));
         field(pos.get(5));
-        field(reading);
-        entryPtr(info.getNormalizedForm(), ",");
-        entryPtr(info.getDictionaryForm(), ",");
-        // TODO:
-        field(""); // mode
-        field(""); // C split
-        field(""); // B split
-        field(""); // A split
-        field(""); // Word structure
-        field(""); // sysnonym groups
-        field(""); // user data
+        field(lex.string(dic, info.getReadingForm()));
+        field(wordRef(info.getNormalizedForm(), wordId));
+        field(wordRef(info.getDictionaryForm(), wordId));
+        field(wordRefList(info.getAunitSplit()));
+        field(wordRefList(info.getBunitSplit()));
+        field(wordRefList(info.getCunitSplit()));
+        field(wordRefList(info.getWordStructure()));
+        field(intList(info.getSynonymGroupIds())); // synonym groups
+        lastField(info.getUserData()); // user data
         output.print("\n");
-    }
-
-    void entryPtr(int wordId, String delimiter) {
-        WordInfo info = lex.getWordInfo(wordId);
-        POS pos = grammar.getPartOfSpeechString(info.getPOSId());
-        String surface = lex.string(0, info.getSurface());
-        String reading = lex.string(0, info.getReadingForm());
-        ptrPart(surface, "-");
-        ptrPart(pos.get(0), "-");
-        ptrPart(pos.get(1), "-");
-        ptrPart(pos.get(2), "-");
-        ptrPart(pos.get(3), "-");
-        ptrPart(pos.get(4), "-");
-        ptrPart(pos.get(5), "-");
-        ptrPart(reading, "");
-        output.print(delimiter);
-    }
-
-    void ptrPart(String part, String delimiter) {
-        output.print(part);
-        output.print(delimiter);
     }
 
     void field(short value) {
@@ -146,61 +139,93 @@ public class DictionaryPrinter {
     }
 
     void field(String value) {
-        output.print(maybeQuoteField(value));
+        output.print(maybeEscapeString(value));
         output.print(',');
     }
 
-    private String maybeQuoteField(String value) {
-        boolean hasCommas = value.indexOf(',') != -1;
-        boolean hasQuotes = value.indexOf('"') != -1;
-        if (hasCommas || hasQuotes) {
-            return escape(value, hasQuotes);
-        }
-        return value;
+    void lastField(String value) {
+        output.print(maybeEscapeString(value));
     }
 
-    private String maybeQuoteRefPart(String value) {
-        if (value.indexOf(',') != -1 || value.indexOf('"') != -1 || value.indexOf('-') != -1
-                || value.indexOf('/') != -1) {
-            return fullEscape(value);
+    /**
+     * encode word entry pointed by the wordId as WordRef.Triple. If it points to
+     * self, return empty string.
+     */
+    String wordRef(int wordId, int reference) {
+        if (wordId == reference) {
+            return "";
         }
-        return value;
+        return wordRef(wordId);
     }
 
-    private String escape(String value, boolean hasQuotes) {
+    /** encode word entry pointed by the wordId as WordRef.Triple. */
+    String wordRef(int wordId) {
+        WordInfo info = lex.getWordInfo(wordId);
+        POS pos = grammar.getPartOfSpeechString(info.getPOSId());
+        int dic = WordId.dic(wordId);
+        String surface = lex.string(dic, info.getSurface());
+        String reading = lex.string(dic, info.getReadingForm());
+
+        List<String> parts = new ArrayList<>(1 + POS.DEPTH + 1);
+        parts.add(surface);
+        parts.addAll(pos);
+        parts.add(reading);
+
+        // escape special chars
+        String wordRefTriple = String.join(WordRefJoinerStr,
+                parts.stream().map(p -> maybeEscapeRefPart(p)).collect(Collectors.toList()));
+        return wordRefTriple;
+    }
+
+    String wordRefList(int[] wordIds) {
+        return String.join(WordRefDelimiterStr,
+                Arrays.stream(wordIds).boxed().map(wi -> wordRef(wi)).collect(Collectors.toList()));
+    }
+
+    String intList(int[] ints) {
+        return String.join("/", Arrays.stream(ints).boxed().map(i -> i.toString()).collect(Collectors.toList()));
+    }
+
+    private static boolean hasCh(String value, int ch) {
+        return value.indexOf(ch) != -1;
+    }
+
+    /** escape string field of csv. */
+    private String maybeEscapeString(String value) {
+        boolean hasCommas = hasCh(value, ',');
+        boolean hasQuotes = hasCh(value, '"');
+        if (!hasCommas && !hasQuotes) {
+            return value;
+        }
         if (hasQuotes) {
-            return fullEscape(value);
+            return "\"" + unicodeEscape(value, Arrays.asList('"')) + "\"";
         }
-        // only commas
         return "\"" + value + "\"";
     }
 
-    private String fullEscape(String value) {
+    /** escape WordRef.Triple part. */
+    private String maybeEscapeRefPart(String value) {
+        boolean hasDelimiter = hasCh(value, WordRefDelimiter);
+        boolean hasJoiner = hasCh(value, WordRefJoiner);
+        if (!hasDelimiter && !hasJoiner) {
+            return value;
+        }
+        return unicodeEscape(value, Arrays.asList(WordRefDelimiter, WordRefJoiner));
+    }
+
+    /** escape specified chars as unicode codepoint */
+    private String unicodeEscape(String value, List<Character> targetChars) {
         StringBuilder sb = new StringBuilder(value.length() + 10);
         int len = value.length();
         for (int i = 0; i < len; ++i) {
             char c = value.charAt(i);
-            if (c != '"' && c != '-' && c != ',' && c != '/') {
-                sb.append(c);
-            } else {
+            if (targetChars.contains(c)) {
                 sb.append("\\u{").append(Integer.toHexString(c)).append('}');
+            } else {
+                sb.append(c);
             }
         }
         return sb.toString();
-    }
-
-    private void printEntries() {
-        for (int i = 0; i < wordIds.length(); ++i) {
-            printEntry(wordIds.get(i));
-        }
-    }
-
-    static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
-        try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
-            DictionaryPrinter dp = new DictionaryPrinter(output, dictionary, systemDict);
-            dp.printHeader();
-            dp.printEntries();
-        }
     }
 
     static char getUnitType(WordInfo info) {
@@ -220,6 +245,27 @@ public class DictionaryPrinter {
             return Arrays.stream(split)
                     .mapToObj(i -> (i >> 28 != 0) ? "U" + Integer.toString(i & ((1 << 28) - 1)) : Integer.toString(i))
                     .collect(Collectors.joining("/"));
+        }
+    }
+
+    static void printDictionary(String filename, BinaryDictionary systemDict, PrintStream output) throws IOException {
+        try (BinaryDictionary dictionary = new BinaryDictionary(filename)) {
+            DictionaryPrinter dp;
+            if (dictionary.getDictionaryHeader().isUserDictionary()) {
+                if (systemDict == null) {
+                    throw new IllegalArgumentException(
+                            "System dictionary (`-s` option) is required to print user dictionary: " + filename);
+                }
+                dp = new DictionaryPrinter(output, dictionary, systemDict);
+            } else if (dictionary.getDictionaryHeader().isSystemDictionary()) {
+                dp = new DictionaryPrinter(output, dictionary, null);
+            } else {
+                // should not happen
+                throw new IllegalStateException("Invalid dictionary");
+            }
+
+            dp.printHeader();
+            dp.printEntries();
         }
     }
 
