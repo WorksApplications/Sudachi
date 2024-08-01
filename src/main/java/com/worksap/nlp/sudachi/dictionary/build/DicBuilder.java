@@ -71,14 +71,15 @@ public class DicBuilder {
          *             when IO fails
          */
         public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
-            progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
+            int numEntryBefore = lexicon.getTotalEntries();
+            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
             short numLeft = connection.nonEmpty() ? connection.getNumLeft() : Short.MAX_VALUE;
             short numRight = connection.nonEmpty() ? connection.getNumRight() : Short.MAX_VALUE;
             try (InputStream is = input.get()) {
                 InputStream stream = new ProgressInputStream(is, size, progress);
                 lexicon.read(name, stream, pos, numLeft, numRight);
             }
-            progress.endBlock(size, nanoTime());
+            progress.endBlock(lexicon.getTotalEntries() - numEntryBefore, nanoTime());
             return self();
         }
 

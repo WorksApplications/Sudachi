@@ -17,6 +17,8 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import com.worksap.nlp.sudachi.WordId;
+import com.worksap.nlp.sudachi.dictionary.build.Progress;
+import com.worksap.nlp.sudachi.dictionary.DictionaryBuilder.StderrProgress;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
 import java.io.IOException;
@@ -34,6 +36,7 @@ public class DictionaryPrinter {
     public final String WordRefJoinerStr = String.valueOf(WordRefJoiner);
 
     private final PrintStream output;
+    private final Progress progress = new Progress(20, new StderrProgress());
 
     private final GrammarImpl grammar;
     private final LexiconSet lex;
@@ -90,10 +93,13 @@ public class DictionaryPrinter {
     }
 
     private void printEntries() {
-        // id of the target dic in LexiconSet
+        progress.startBlock("Entries", System.nanoTime(), Progress.Kind.ENTRY);
+        long size = wordIds.length();
         for (int i = 0; i < wordIds.length(); ++i) {
             printEntry(wordIds.get(i));
+            progress.progress(i, size);
         }
+        progress.endBlock(size, System.nanoTime());
     }
 
     void printEntry(int wordId) {
@@ -115,7 +121,7 @@ public class DictionaryPrinter {
         field(pos.get(4));
         field(pos.get(5));
         field(lex.string(dic, info.getReadingForm()));
-        field(wordRef(info.getNormalizedForm(), wordId));
+        field(wordRefHeadword(info.getNormalizedForm(), wordId));
         field(wordRef(info.getDictionaryForm(), wordId));
         field(wordRefList(info.getAunitSplit()));
         field(wordRefList(info.getBunitSplit()));
@@ -168,6 +174,17 @@ public class DictionaryPrinter {
         String wordRefTriple = String.join(WordRefJoinerStr,
                 parts.stream().map(p -> maybeEscapeRefPart(p)).collect(Collectors.toList()));
         return wordRefTriple;
+    }
+
+    /** encode word entry pointed by the wordId as WordRef.Headword. */
+    String wordRefHeadword(int wordId, int reference) {
+        if (wordId == reference) {
+            return "";
+        }
+        int dic = WordId.dic(wordId);
+        WordInfo info = lex.getWordInfo(wordId);
+        String surface = lex.string(dic, info.getSurface());
+        return surface;
     }
 
     String wordRefList(int[] wordIds) {

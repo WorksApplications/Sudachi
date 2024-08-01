@@ -63,10 +63,10 @@ public class RawLexiconReader {
         resolveColumnLayout();
         if (isLegacyColumnLayout()) {
             normRefParser = WordRef.parser(pos, false, true, false);
-            dictRefParser = WordRef.parser(pos, true, true, true);
+            dictRefParser = WordRef.parser(pos, true, false, true);
             splitParser = WordRef.parser(pos, true, false, false);
         } else {
-            normRefParser = WordRef.parser(pos, false, false, false);
+            normRefParser = WordRef.parser(pos, false, true, false);
             dictRefParser = WordRef.parser(pos, !user, false, false);
             splitParser = WordRef.parser(pos, !user, false, false);
         }
@@ -193,7 +193,14 @@ public class RawLexiconReader {
         entry.cost = getShort(data, Column.Cost);
 
         entry.reading = get(data, Column.ReadingForm, true);
-        entry.normalizedForm = normRefParser.parse(get(data, Column.NormalizedForm, false));
+        WordRef normalizedForm = normRefParser.parse(get(data, Column.NormalizedForm, false));
+        if (normalizedForm instanceof WordRef.Headword
+                && ((WordRef.Headword) normalizedForm).getHeadword().equals(entry.headword)) {
+            // mark as self-reference (headword ref may point different entry)
+            entry.normalizedForm = null;
+        } else {
+            entry.normalizedForm = normalizedForm;
+        }
         entry.dictionaryForm = dictRefParser.parse(get(data, Column.DictionaryForm, false));
 
         POS pos = new POS(

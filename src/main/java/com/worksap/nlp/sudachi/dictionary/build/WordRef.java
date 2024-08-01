@@ -148,6 +148,9 @@ public abstract class WordRef {
         @Override
         public int resolve(Lookup2 resolver) {
             List<Lookup2.EntryWithFlag> entries = resolver.byHeadword(headword);
+            if (entries == null) {
+                throw new IllegalArgumentException("matching entry not found for the " + this.toString());
+            }
             for (Lookup2.EntryWithFlag entry : entries) {
                 if (entry.matches(posId, reading)) {
                     return intoWordRef(entry);
@@ -221,7 +224,7 @@ public abstract class WordRef {
             }
 
             if (allowHeadword) {
-                return new Headword(text);
+                return new Headword(Unescape.unescape(text));
             } else {
                 throw new CsvFieldException(
                         String.format("invalid word reference: %s, it must contain POS tag and reading", text));
