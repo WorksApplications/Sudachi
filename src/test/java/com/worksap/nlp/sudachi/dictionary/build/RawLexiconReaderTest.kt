@@ -17,24 +17,31 @@
 package com.worksap.nlp.sudachi.dictionary.build
 
 import com.worksap.nlp.sudachi.dictionary.CSVParser
+import com.worksap.nlp.sudachi.dictionary.StringPtr
 import com.worksap.nlp.sudachi.resStream
+import java.io.StringReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class RawLexiconReaderTest {
   companion object {
-    fun csv(name: String): CSVParser {
+    fun csvfile(name: String): CSVParser {
       val stream = resStream(name)
       return CSVParser(stream.reader())
+    }
+
+    fun csvtext(content: String): CSVParser {
+      return CSVParser(StringReader(content))
     }
   }
 
   @Test
   fun legacyCsvWithMinimumFields() {
-    val reader = RawLexiconReader(csv("legacy-minimum.csv"), POSTable(), false)
+    val reader = RawLexiconReader(csvfile("legacy-minimum.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
@@ -47,7 +54,7 @@ class RawLexiconReaderTest {
 
   @Test
   fun legacyCsvWithAllFields() {
-    val reader = RawLexiconReader(csv("legacy-full.csv"), POSTable(), false)
+    val reader = RawLexiconReader(csvfile("legacy-full.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
@@ -62,7 +69,7 @@ class RawLexiconReaderTest {
 
   @Test
   fun headerCsvAllFields() {
-    val reader = RawLexiconReader(csv("headers-all.csv"), POSTable(), false)
+    val reader = RawLexiconReader(csvfile("headers-all.csv"), POSTable(), false)
     assertNotNull(reader.nextEntry()).let { e ->
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
@@ -73,5 +80,127 @@ class RawLexiconReaderTest {
       assertEquals("10", e.userData)
     }
     assertNull(reader.nextEntry())
+  }
+
+  @Test
+  fun failMissingRequiredEntry() {
+    val columns =
+        "Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure".split(
+            ",")
+    val values = "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,".split(",")
+
+    for (i in columns.indices) {
+      val skipCols = columns.toMutableList() // copy
+      skipCols.removeAt(i)
+      val skipVals = values.toMutableList() // copy
+      skipVals.removeAt(i)
+
+      val text = skipCols.joinToString(",") + "\n" + skipVals.joinToString(",")
+      assertFails {
+        val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      }
+    }
+  }
+
+  @Test
+  fun failTooLongValue() {
+    val oversizeWord = "a".repeat(StringPtr.MAX_LENGTH + 1);
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,${oversizeWord},,,1,,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,${oversizeWord},,1,,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+  }
+
+  @Test
+  fun failEmptyHeadword() {
+    val text =
+        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,"""
+    val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+    assertFails { reader.nextEntry() }
+  }
+
+  @Test
+  fun failSingleSplit() {
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,1,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,1,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,,1"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+  }
+
+  @Test
+  fun failTooManySplit() {
+    val oversizeSplit: String =
+        generateSequence { "1" }.take(Byte.MAX_VALUE.toInt() + 1).joinToString("/");
+
+    {
+      var text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,${oversizeSplit},,,"""
+      var reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,${oversizeSplit},,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,${oversizeSplit},"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
+    {
+      val text =
+          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,,${oversizeSplit}"""
+      val reader = RawLexiconReader(csvtext(text), POSTable(), false)
+      assertFails { reader.nextEntry() }
+    }
   }
 }

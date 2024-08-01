@@ -22,7 +22,6 @@ import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -36,7 +35,7 @@ import java.util.*;
  * WordIdTable also contins word-ids that are not indexed in TRIE, so that we
  * can iterate over all word entries.
  */
-public class Index implements WriteDictionary {
+public class Index {
     private final SortedMap<byte[], Ints> elements = new TreeMap<>((byte[] l, byte[] r) -> {
         int llen = l.length;
         int rlen = r.length;
@@ -47,8 +46,6 @@ public class Index implements WriteDictionary {
         }
         return l.length - r.length;
     });
-
-    private int count = 0;
 
     /**
      * Add a (headword, wordid) pair to the index
@@ -61,52 +58,7 @@ public class Index implements WriteDictionary {
         byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
         Ints entries = elements.computeIfAbsent(bytes, k -> new Ints(4));
         entries.append(wordId);
-        count += 1;
         return bytes.length;
-    }
-
-    public void writeTo(ModelOutput output) throws IOException {
-        DoubleArray trie = new DoubleArray();
-
-        int size = this.elements.size();
-
-        byte[][] keys = new byte[size][];
-        int[] values = new int[size];
-        ByteBuffer wordIdTable = ByteBuffer.allocate(count * (4 + 2));
-        wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
-
-        output.withSizedPart("WordId table", () -> {
-            int i = 0;
-            int numEntries = this.elements.entrySet().size();
-            for (Map.Entry<byte[], Ints> entry : this.elements.entrySet()) {
-                keys[i] = entry.getKey();
-                values[i] = wordIdTable.position();
-                i++;
-                Ints wordIds = entry.getValue();
-                int length = wordIds.length();
-                wordIdTable.put((byte) length);
-                for (int word = 0; word < length; ++word) {
-                    int wid = wordIds.get(word);
-                    wordIdTable.putInt(wid);
-                }
-                output.progress(i, numEntries);
-            }
-            return wordIdTable.position() + 4;
-        });
-
-        DicBuffer buffer = new DicBuffer(4);
-        output.withPart("double array Trie", () -> {
-            trie.build(keys, values, output::progress);
-            buffer.putInt(trie.size());
-            buffer.consume(output::write);
-            output.write(trie.byteArray());
-        });
-
-        buffer.putInt(wordIdTable.position());
-        buffer.consume(output::write);
-
-        wordIdTable.flip();
-        output.write(wordIdTable);
     }
 
     /**

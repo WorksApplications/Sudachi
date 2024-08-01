@@ -16,17 +16,10 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.CSVParser;
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 /**
@@ -150,25 +143,6 @@ public class StringStorage implements StringIndex {
     }
 
     /**
-     * legacy string compilation. only for comparison purpose.
-     * 
-     * @param channel
-     * @throws IOException
-     */
-    public void writeLengthPrefixedCompact(SeekableByteChannel channel) throws IOException {
-        DicBuffer buf = new DicBuffer(64 * 1024);
-        for (Map.Entry<String, Item> item : strings.entrySet()) {
-            Item value = item.getValue();
-            String sub = value.data.substring(value.start, value.end);
-            if (buf.wontFit(sub.length() * 2)) {
-                buf.consume(channel::write);
-            }
-            buf.put(sub);
-        }
-        buf.consume(channel::write);
-    }
-
-    /**
      * Data class of string and its pointer.
      */
     public static class Item {
@@ -205,38 +179,4 @@ public class StringStorage implements StringIndex {
         }
     }
 
-    /**
-     * Save strings in the lexicon csv (first arg) with legacy/compressed format
-     * with given name (second arg).
-     * 
-     * Use this to compare output size of each format.
-     */
-    public static void main(String[] args) throws IOException {
-        StringStorage strings = new StringStorage();
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(args[0]))) {
-            CSVParser parser = new CSVParser(reader);
-            List<String> record;
-            while ((record = parser.getNextRecord()) != null) {
-                strings.add(record.get(0));
-                strings.add(record.get(4));
-                strings.add(record.get(11));
-                strings.add(record.get(12));
-            }
-            parser.close();
-        }
-        strings.compile(null);
-
-        Path fullName = Paths.get(args[1] + ".lpf");
-        try (SeekableByteChannel chan = Files.newByteChannel(fullName, StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            strings.writeLengthPrefixedCompact(chan);
-        }
-
-        Path compactName = Paths.get(args[1] + ".cmp");
-        try (SeekableByteChannel chan = Files.newByteChannel(compactName, StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            strings.writeCompact(chan);
-        }
-        System.out.printf("wasted bytes=%d, slots=%d%n", strings.layout.wastedBytes(), strings.layout.numSlots());
-    }
 }

@@ -164,6 +164,7 @@ public class DicBuilder {
          */
         public void build(SeekableByteChannel channel) throws IOException {
             BlockLayout layout = new BlockLayout(channel, progress);
+            layout.keepBlocks(1); // keep space for the Description.
             if (connection.nonEmpty()) {
                 layout.block(Blocks.CONNECTION_MATRIX, connection::compile);
             }

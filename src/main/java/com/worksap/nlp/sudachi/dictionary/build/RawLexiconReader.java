@@ -188,6 +188,10 @@ public class RawLexiconReader {
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
         entry.headword = get(data, Column.Surface, true);
+        if (entry.headword.isEmpty()) {
+            throw new IllegalArgumentException("headword cannot be empty");
+        }
+
         entry.leftId = getShort(data, Column.LeftId);
         entry.rightId = getShort(data, Column.RightId);
         entry.cost = getShort(data, Column.Cost);

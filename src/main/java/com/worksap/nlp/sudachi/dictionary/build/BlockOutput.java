@@ -26,11 +26,14 @@ public class BlockOutput {
     private SeekableByteChannel chan;
     private Progress progress;
 
-    private Stats stats;
-
     public BlockOutput(SeekableByteChannel chan, Progress progress) {
         this.chan = chan;
         this.progress = progress;
+    }
+
+    public BlockOutput(SeekableByteChannel chan) {
+        this.chan = chan;
+        this.progress = Progress.NOOP;
     }
 
     public SeekableByteChannel getChannel() {

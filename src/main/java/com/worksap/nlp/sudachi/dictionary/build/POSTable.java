@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Dictionary parts: List of part-of-speeches.
  */
-public class POSTable implements WriteDictionary {
+public class POSTable {
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
     private int builtin = 0;
@@ -68,24 +68,6 @@ public class POSTable implements WriteDictionary {
     /** @return full POS list that contains builtin and newly added POSs */
     List<POS> getList() {
         return table;
-    }
-
-    @Override
-    public void writeTo(ModelOutput output) throws IOException {
-        output.withPart("POS table", () -> {
-            DicBuffer buffer = new DicBuffer(128 * 1024);
-            buffer.putShort((short) ownedLength());
-            for (int i = builtin; i < table.size(); ++i) {
-                for (String s : table.get(i)) {
-                    if (!buffer.put(s)) {
-                        // handle buffer overflow, this should be extremely rare
-                        buffer.consume(output::write);
-                        buffer.put(s);
-                    }
-                }
-            }
-            buffer.consume(output::write);
-        });
     }
 
     /**

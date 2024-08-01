@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.dictionary.Blocks
+import com.worksap.nlp.sudachi.dictionary.Description
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl
 import com.worksap.nlp.sudachi.dictionary.POS
 import kotlin.test.assertEquals
@@ -30,11 +32,17 @@ class GrammarTest {
     val pos = POSTable()
     assertEquals(0, pos.getId(POS("a", "b", "c", "d", "e", "f")))
     val outbuf = MemChannel()
-    val out = ModelOutput(outbuf)
-    pos.writeTo(out)
-    cm.writeTo(out)
-    val gram = GrammarImpl(outbuf.buffer(), 0)
-    assertEquals(gram.getPartOfSpeechString(0), POS("a", "b", "c", "d", "e", "f"))
+    val layout = BlockLayout(outbuf)
+    layout.block(Blocks.POS_TABLE, pos::compile)
+    layout.block(Blocks.CONNECTION_MATRIX, cm::compile)
+    val description = Description()
+    description.setBlocks(layout.blocks())
+    val grammar = GrammarImpl.load(outbuf.buffer(), description)
+    // val out = ModelOutput(outbuf)
+    // pos.writeTo(out)
+    // cm.writeTo(out)
+    // val gram = GrammarImpl(outbuf.buffer(), 0)
+    assertEquals(grammar.getPartOfSpeechString(0), POS("a", "b", "c", "d", "e", "f"))
   }
 
   @Test
@@ -71,14 +79,23 @@ class GrammarTest {
     val cm = ConnectionMatrix()
     Res("test.matrix") { cm.readEntries(it) }
     val outbuf = MemChannel()
-    val out = ModelOutput(outbuf)
-    posTable.writeTo(out)
-    cm.writeTo(out)
-    val gram = GrammarImpl(outbuf.buffer(), 0)
-    assertEquals(gram.partOfSpeechSize, 1024)
+
+    val layout = BlockLayout(outbuf)
+    layout.block(Blocks.POS_TABLE, posTable::compile)
+    layout.block(Blocks.CONNECTION_MATRIX, cm::compile)
+    val description = Description()
+    description.setBlocks(layout.blocks())
+    val grammar = GrammarImpl.load(outbuf.buffer(), description)
+
+    // val out = ModelOutput(outbuf)
+    // posTable.writeTo(out)
+    // cm.writeTo(out)
+    // val gram = GrammarImpl(outbuf.buffer(), 0)
+
+    assertEquals(grammar.partOfSpeechSize, 1024)
     repeat(1024) {
       val pos = POS(e, e, e, e, e, it.toString())
-      assertEquals(pos, gram.getPartOfSpeechString(it.toShort()))
+      assertEquals(pos, grammar.getPartOfSpeechString(it.toShort()))
     }
   }
 }

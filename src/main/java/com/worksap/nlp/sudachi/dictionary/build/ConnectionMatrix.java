@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Dictionary parts: left/right id connection cost matrix.
  */
-public class ConnectionMatrix implements WriteDictionary {
+public class ConnectionMatrix {
     private short numLeft;
     private short numRight;
     private ByteBuffer compiled;
@@ -137,11 +137,6 @@ public class ConnectionMatrix implements WriteDictionary {
         data.putShort((short) 0);
         data.flip();
         compiled = data;
-    }
-
-    @Override
-    public void writeTo(ModelOutput output) throws IOException {
-        output.write(compiled);
     }
 
     /** @return number of left id */

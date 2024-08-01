@@ -22,8 +22,6 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.time.Instant;
-import java.time.ZoneId;
 
 /**
  * A dictionary header printing tool.
@@ -64,30 +62,6 @@ public class DictionaryHeaderPrinter {
             output.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
         }
         output.printf("Flag isRuntimeCosts: %s%n", desc.isRuntimeCosts());
-    }
-
-    static void printHeader(String filename, PrintStream output) throws IOException {
-        ByteBuffer bytes;
-        try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
-            bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
-            bytes.order(ByteOrder.LITTLE_ENDIAN);
-        }
-        DictionaryHeader header = new DictionaryHeader(bytes, 0);
-
-        output.println("filename: " + filename);
-
-        if (header.isSystemDictionary()) {
-            output.println("type: system dictionary");
-        } else if (header.isUserDictionary()) {
-            output.println("type: user dictionary");
-        } else {
-            output.println("invalid file");
-            return;
-        }
-
-        output.println("createTime: "
-                + Instant.ofEpochSecond(header.getCreateTime()).atZone(ZoneId.systemDefault()).toString());
-        output.println("description: " + header.getDescription());
     }
 
     /**

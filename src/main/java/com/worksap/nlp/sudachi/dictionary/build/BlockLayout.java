@@ -37,7 +37,11 @@ public class BlockLayout {
     public BlockLayout(SeekableByteChannel channel, Progress progress) throws IOException {
         this.channel = channel;
         this.progress = progress;
-        channel.position(BLOCK_SIZE); // keep first block for the description
+    }
+
+    public BlockLayout(SeekableByteChannel channel) throws IOException {
+        this.channel = channel;
+        this.progress = Progress.NOOP;
     }
 
     /**
@@ -51,6 +55,18 @@ public class BlockLayout {
         long newPosition = Align.align(end, BLOCK_SIZE);
         chan.position(newPosition);
         return newPosition;
+    }
+
+    /**
+     * Keep space for the specified number of blocks for the later use.
+     * 
+     * @return start position of keeped blocks.
+     */
+    public long keepBlocks(int numBlocks) throws IOException {
+        long blockSize = numBlocks * BLOCK_SIZE;
+        long startPosition = Align.align(channel.position(), BLOCK_SIZE);
+        channel.position(startPosition + blockSize);
+        return startPosition;
     }
 
     /** Function that works with BlockOutput */
