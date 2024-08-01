@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
-import com.worksap.nlp.sudachi.dictionary.CSVParser
 import com.worksap.nlp.sudachi.dictionary.StringPtr
 import com.worksap.nlp.sudachi.resStream
 import java.io.StringReader

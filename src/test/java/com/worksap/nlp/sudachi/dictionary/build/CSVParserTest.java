@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi.dictionary;
+package com.worksap.nlp.sudachi.dictionary.build;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;

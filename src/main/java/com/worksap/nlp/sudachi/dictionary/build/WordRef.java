@@ -226,8 +226,7 @@ public abstract class WordRef {
             if (allowHeadword) {
                 return new Headword(Unescape.unescape(text));
             } else {
-                throw new CsvFieldException(
-                        String.format("invalid word reference: %s, it must contain POS tag and reading", text));
+                throw new IllegalArgumentException(String.format("invalid word reference: %s", text));
             }
         }
 

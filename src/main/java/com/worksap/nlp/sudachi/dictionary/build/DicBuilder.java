@@ -39,6 +39,11 @@ import static java.lang.System.nanoTime;
  * for the format of the CSV dictionary.
  */
 public class DicBuilder {
+    @FunctionalInterface
+    public interface IOSupplier<T> {
+        T get() throws IOException;
+    }
+
     private DicBuilder() {
         // no instances
     }

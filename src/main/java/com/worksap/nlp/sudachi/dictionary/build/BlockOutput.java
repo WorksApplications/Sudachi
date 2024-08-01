@@ -44,6 +44,11 @@ public class BlockOutput {
         return progress;
     }
 
+    @FunctionalInterface
+    public interface IOFunction<R, T> {
+        R apply(T arg) throws IOException;
+    }
+
     /**
      * Function decorator to measure output progress.
      * 

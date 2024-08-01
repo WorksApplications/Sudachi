@@ -96,7 +96,7 @@ public class RawWordEntry implements Lookup2.Entry {
 
     private void checkString(String value, String name) {
         if (value.length() > StringPtr.MAX_LENGTH) {
-            throw new CsvFieldException(
+            throw new IllegalArgumentException(
                     String.format("field %s had value which exceeded the maximum length %d (actual length: %d)", name,
                             StringPtr.MAX_LENGTH, value.length()));
         }

@@ -17,11 +17,13 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 /**
- * Versions of dictionaries.
+ * Versions of (legacy) dictionaries.
+ * 
+ * This is kept to detect legacy dictionary binary.
  */
-public class DictionaryVersion {
+public class LegacyDictionaryVersion {
 
-    private DictionaryVersion() {
+    private LegacyDictionaryVersion() {
     }
 
     /** the first version of system dictionries */

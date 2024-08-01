@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 public class CsvFieldException extends IllegalArgumentException {
-    public CsvFieldException(String s) {
-        super(s);
+    public CsvFieldException(String file, int line, String column, Exception cause) {
+        super(String.format("[%s line %d, %s]", file, line, column), cause);
     }
 }

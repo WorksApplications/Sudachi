@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.Blocks;
-import com.worksap.nlp.sudachi.dictionary.CSVParser;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;

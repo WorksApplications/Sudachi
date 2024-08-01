@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.worksap.nlp.sudachi.dictionary;
+package com.worksap.nlp.sudachi.dictionary.build;
 
 import java.io.BufferedReader;
 import java.io.Closeable;

@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.CSVParser;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.POS;
 
@@ -31,7 +30,6 @@ import java.util.regex.Pattern;
  * Reader for the lexicon csv file.
  */
 public class RawLexiconReader {
-
     /**
      * Enum order is in legacy csv order. If a header is present, fields will be
      * reordered with respect to the header.
@@ -103,14 +101,15 @@ public class RawLexiconReader {
                     continue outer;
                 }
             }
-            throw new IllegalArgumentException(String.format("column [%s] is not recognized", field));
+            throw new CsvFieldException(parser.getName(), 0, field,
+                    new IllegalArgumentException("Invalid column name"));
         }
 
         for (Column column : remaining) {
             if (column.required) {
                 StringJoiner joiner = new StringJoiner(", ", "required columns [", "] were not present in the header");
                 remaining.stream().filter(c -> c.required).forEach(c -> joiner.add(c.name()));
-                throw new IllegalArgumentException(joiner.toString());
+                throw new CsvFieldException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
             }
         }
 
@@ -125,8 +124,8 @@ public class RawLexiconReader {
         }
         if (index < 0 || index >= data.size()) {
             if (column.required) {
-                throw new CsvFieldException(
-                        String.format("column [%s] (index=%d) was not present", column.name(), index));
+                throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                        new IllegalArgumentException(String.format("column [%s] was not present", column.name())));
             } else {
                 return "";
             }
@@ -139,14 +138,23 @@ public class RawLexiconReader {
         }
     }
 
+    private String getNonEmpty(List<String> data, Column column, boolean unescape) {
+        String value = get(data, column, unescape);
+        if (value.isEmpty()) {
+            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                    new IllegalArgumentException(String.format("Column %s cannot be empty", column.name())));
+        }
+        return value;
+    }
+
     /** parse specified column as short */
     private short getShort(List<String> data, Column column) {
         String value = get(data, column, false);
         try {
             return Short.parseShort(value);
         } catch (NumberFormatException e) {
-            throw new CsvFieldException(
-                    String.format("failed to parse '%s' as a short value in column: %s", value, column.name()));
+            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                    new IllegalArgumentException(String.format("failed to parse '%s' as a short value", value)));
         }
     }
 
@@ -158,7 +166,8 @@ public class RawLexiconReader {
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new IllegalArgumentException("int list contained more than 127 entries: " + value);
+            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                    new IllegalArgumentException("int list contained more than 127 entries: " + value));
         }
         Ints result = new Ints(parts.length);
         for (String part : parts) {
@@ -168,36 +177,48 @@ public class RawLexiconReader {
     }
 
     /** parse specified column as WordRef list. */
-    private List<WordRef> getWordRefs(List<String> data, Column column, WordRef.Parser parser) {
+    private List<WordRef> getWordRefs(List<String> data, Column column, WordRef.Parser refParser) {
         String value = get(data, column, false);
         if (value == null || value.isEmpty() || "*".equals(value)) {
             return new ArrayList<>();
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new IllegalArgumentException("reference list contained more than 127 entries: " + value);
+            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                    new IllegalArgumentException("reference list contained more than 127 entries: " + value));
         }
         List<WordRef> result = new ArrayList<>(parts.length);
         for (String part : parts) {
-            result.add(parser.parse(part));
+            try {
+                result.add(refParser.parse(part));
+            } catch (IllegalArgumentException e) {
+                throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(), e);
+            }
         }
         return result;
+    }
+
+    /** parse specified column as WordRef. */
+    private WordRef getWordRef(List<String> data, Column column, WordRef.Parser refParser) {
+        String value = get(data, column, false);
+        try {
+            return refParser.parse(value);
+        } catch (IllegalArgumentException e) {
+            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(), e);
+        }
     }
 
     /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
-        entry.headword = get(data, Column.Surface, true);
-        if (entry.headword.isEmpty()) {
-            throw new IllegalArgumentException("headword cannot be empty");
-        }
+        entry.headword = getNonEmpty(data, Column.Surface, true);
 
         entry.leftId = getShort(data, Column.LeftId);
         entry.rightId = getShort(data, Column.RightId);
         entry.cost = getShort(data, Column.Cost);
 
         entry.reading = get(data, Column.ReadingForm, true);
-        WordRef normalizedForm = normRefParser.parse(get(data, Column.NormalizedForm, false));
+        WordRef normalizedForm = getWordRef(data, Column.NormalizedForm, normRefParser);
         if (normalizedForm instanceof WordRef.Headword
                 && ((WordRef.Headword) normalizedForm).getHeadword().equals(entry.headword)) {
             // mark as self-reference (headword ref may point different entry)
@@ -205,7 +226,7 @@ public class RawLexiconReader {
         } else {
             entry.normalizedForm = normalizedForm;
         }
-        entry.dictionaryForm = dictRefParser.parse(get(data, Column.DictionaryForm, false));
+        entry.dictionaryForm = getWordRef(data, Column.DictionaryForm, dictRefParser);
 
         POS pos = new POS(
                 // comment for line break
@@ -222,8 +243,11 @@ public class RawLexiconReader {
         entry.synonymGroups = getInts(data, Column.SynonymGroups);
         entry.userData = get(data, Column.UserData, true);
 
-        entry.validate();
-
+        try {
+            entry.validate();
+        } catch (IllegalArgumentException e) {
+            throw new CsvFieldException(parser.getName(), parser.getRow(), "", e);
+        }
         return entry;
     }
 

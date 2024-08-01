@@ -211,10 +211,10 @@ public class Description {
 
     private static void checkLegacyDictionaryFormat(ByteBuffer raw) {
         long version = raw.getLong(0);
-        if (DictionaryVersion.isSystemDictionary(version)) {
+        if (LegacyDictionaryVersion.isSystemDictionary(version)) {
             throw new IllegalArgumentException("passed dictionary is a legacy system dictionary, please rebuild it");
         }
-        if (DictionaryVersion.isUserDictionary(version)) {
+        if (LegacyDictionaryVersion.isUserDictionary(version)) {
             throw new IllegalArgumentException("passed dictionary is a legacy user dictionary, please rebuild it");
         }
     }
