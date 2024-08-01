@@ -37,6 +37,11 @@ public class Progress {
     public static final Progress NOOP = new Progress(1, progress -> {
     });
 
+    /** Progress with stderr. */
+    public static final Progress syserr(int maxUpdates) {
+        return new Progress(maxUpdates, new StderrProgress());
+    }
+
     public Progress(int maxUpdates, Callback callback) {
         this.maxUpdates = maxUpdates;
         this.callback = callback;
@@ -138,6 +143,41 @@ public class Progress {
          * @param time
          */
         default void end(long size, Duration time) {
+        }
+    }
+
+    public static class StderrProgress implements Callback {
+        float last = 0;
+        String unit = "bytes";
+
+        @Override
+        public void start(String name, Progress.Kind kind) {
+            System.err.printf("%s\t", name);
+            last = 0;
+            switch (kind) {
+            case BYTE:
+                unit = "bytes";
+                break;
+            case ENTRY:
+                unit = "entries";
+                break;
+            }
+        }
+
+        @Override
+        public void progress(float progress) {
+            while (last < progress) {
+                last += 0.05f;
+                System.err.print(".");
+            }
+        }
+
+        static final double NANOS_PER_SECOND = 1000_000_000;
+
+        @Override
+        public void end(long size, Duration time) {
+            double seconds = time.getSeconds() + time.getNano() / NANOS_PER_SECOND;
+            System.err.printf("\tDone! (%d %s, %.3f sec)%n", size, unit, seconds);
         }
     }
 }

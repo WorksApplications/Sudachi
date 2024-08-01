@@ -18,7 +18,6 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.build.Progress;
-import com.worksap.nlp.sudachi.dictionary.DictionaryBuilder.StderrProgress;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class DictionaryPrinter {
     public final String WordRefJoinerStr = String.valueOf(WordRefJoiner);
 
     private final PrintStream output;
-    private final Progress progress = new Progress(20, new StderrProgress());
+    private final Progress progress = Progress.syserr(20);
 
     private final GrammarImpl grammar;
     private final LexiconSet lex;

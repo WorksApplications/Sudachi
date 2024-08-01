@@ -94,8 +94,8 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DicBuilder.System builder = DicBuilder.system().progress(new Progress(20, new StderrProgress()))
-                .matrix(Paths.get(matrixPath)).comment(description);
+        DicBuilder.System builder = DicBuilder.system().progress(Progress.syserr(20)).matrix(Paths.get(matrixPath))
+                .comment(description);
 
         if (signature != null) {
             builder.signature(signature);
@@ -111,38 +111,4 @@ public class DictionaryBuilder {
         }
     }
 
-    public static class StderrProgress implements Progress.Callback {
-        float last = 0;
-        String unit = "bytes";
-
-        @Override
-        public void start(String name, Progress.Kind kind) {
-            System.err.printf("%s\t", name);
-            last = 0;
-            switch (kind) {
-            case BYTE:
-                unit = "bytes";
-                break;
-            case ENTRY:
-                unit = "entries";
-                break;
-            }
-        }
-
-        @Override
-        public void progress(float progress) {
-            while (last < progress) {
-                last += 0.05f;
-                System.err.print(".");
-            }
-        }
-
-        static final double NANOS_PER_SECOND = 1000_000_000;
-
-        @Override
-        public void end(long size, Duration time) {
-            double seconds = time.getSeconds() + time.getNano() / NANOS_PER_SECOND;
-            System.err.printf("\tDone! (%d %s, %.3f sec)%n", size, unit, seconds);
-        }
-    }
 }
