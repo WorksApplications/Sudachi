@@ -20,6 +20,7 @@ import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.build.Progress;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
+import java.io.Console;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -67,6 +68,12 @@ public class DictionaryPrinter {
         }
         allIds.sort();
         wordIds = allIds;
+    }
+
+    static void printUsage() {
+        Console console = System.console();
+        console.printf("usage: PrintDictionary [-s file] file\n");
+        console.printf("\t-s file\tsystem dictionary\n");
     }
 
     void printHeader() {
@@ -306,8 +313,7 @@ public class DictionaryPrinter {
                 if (args[i].equals("-s") && i + 1 < args.length) {
                     systemDict = BinaryDictionary.loadSystem(args[++i]);
                 } else if (args[i].equals("-h")) {
-                    System.err.println("usage: PrintDictionary [-s file] file");
-                    System.err.println("\t-s file\tsystem dictionary");
+                    printUsage();
                     return;
                 } else {
                     break;
