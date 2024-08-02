@@ -45,6 +45,7 @@ public class Description {
     private long flags;
     private int numTotalEntries;
     private int numIndexedEntries;
+    private Random random = new Random();
 
     /**
      * Return a slice of the full dictionary with the provided name
@@ -196,7 +197,7 @@ public class Description {
         channel.position(pos);
     }
 
-    private final static byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
 
     private static void checkMagic(ByteBuffer raw) {
         assert MAGIC_BYTES.length == 16;
@@ -222,7 +223,7 @@ public class Description {
     private String defaultSignature(Instant date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
         return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())),
-                new Random().nextLong());
+                random.nextLong());
     }
 
     public Instant getCreationTime() {
@@ -233,6 +234,9 @@ public class Description {
         this.creationTime = creationTime;
     }
 
+    /**
+     * @deprecated use {@link #getComment} instead.
+     */
     @Deprecated
     public String getDescription() {
         return getComment();

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -136,25 +137,28 @@ public class WordLayout {
                 if (fs.length < length) {
                     continue;
                 }
+
                 int end = fs.start + fs.length;
                 int start = allocateInBlock(length, alignment, fs.start, end);
-                if (start != -1) {
-                    int remaining = end - start - length;
-                    if (remaining > 0) {
-                        fs.start = start + length;
-                        fs.length = remaining;
-                        freeDirty = true;
-                        // we need to recompute maxLength only if modifying the last (maximum) element
-                        // in free lists
-                        if (i == numFree - 1) {
-                            maxLength = computeNewMaxLength(i);
-                        }
-                    } else {
-                        free.remove(i);
-                        maxLength = computeNewMaxLength(numFree - 2);
-                    }
-                    return start;
+                if (start == -1) {
+                    continue;
                 }
+
+                int remaining = end - start - length;
+                if (remaining > 0) {
+                    fs.start = start + length;
+                    fs.length = remaining;
+                    freeDirty = true;
+                    // we need to recompute maxLength only if modifying the last (maximum) element
+                    // in free lists
+                    if (i == numFree - 1) {
+                        maxLength = computeNewMaxLength(i);
+                    }
+                } else {
+                    free.remove(i);
+                    maxLength = computeNewMaxLength(numFree - 2);
+                }
+                return start;
             }
             maxLength = Math.max(0, maxLength - 1);
         }
@@ -236,6 +240,23 @@ public class WordLayout {
             if (comparison != 0)
                 return comparison;
             return Integer.compare(start, o.start);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || !(obj instanceof FreeSpace)) {
+                return false;
+            }
+            FreeSpace other = (FreeSpace) obj;
+            return this.start == other.start && this.length == other.length;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(start, length);
         }
 
         @Override

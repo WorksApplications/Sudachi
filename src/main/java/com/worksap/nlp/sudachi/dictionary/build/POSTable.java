@@ -29,7 +29,7 @@ import java.util.List;
  * Dictionary parts: List of part-of-speeches.
  */
 public class POSTable {
-    final static int MAX_POS_NUMBER = Short.MAX_VALUE;
+    static final int MAX_POS_NUMBER = Short.MAX_VALUE;
 
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
@@ -126,7 +126,7 @@ public class POSTable {
      * @throws IOException
      */
     public Void compile(BlockOutput out) throws IOException {
-        return out.measured("POS Table", (p) -> {
+        return out.measured("POS Table", p -> {
             BufferedChannel cbuf = new BufferedChannel(out.getChannel());
             cbuf.byteBuffer(2).putShort((short) ownedLength());
             for (int i = 0; i < ownedLength(); ++i) {

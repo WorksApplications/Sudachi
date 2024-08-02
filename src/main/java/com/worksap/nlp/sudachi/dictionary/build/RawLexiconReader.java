@@ -35,10 +35,10 @@ public class RawLexiconReader {
      * reordered with respect to the header.
      */
     public enum Column {
-        Surface(true), LeftId(true), RightId(true), Cost(true), Writing(false), Pos1(false), Pos2(false), Pos3(
-                false), Pos4(false), Pos5(false), Pos6(false), ReadingForm(true), NormalizedForm(true), DictionaryForm(
-                        true), Mode(false), SplitA(true), SplitB(true), WordStructure(
-                                true), SynonymGroups(false), SplitC(false), UserData(false), PosId(false);
+        SURFACE(true), LEFT_ID(true), RIGHT_ID(true), COST(true), WRITING(false), POS1(false), POS2(false), POS3(
+                false), POS4(false), POS5(false), POS6(false), READING_FORM(true), NORMALIZED_FORM(
+                        true), DICTIONARY_FORM(true), MODE(false), SPLIT_A(true), SPLIT_B(true), WORD_STRUCTURE(
+                                true), SYNONYM_GROUPS(false), SPLIT_C(false), USER_DATA(false), POS_ID(false);
 
         private final boolean required;
 
@@ -47,7 +47,7 @@ public class RawLexiconReader {
         }
     }
 
-    private List<String> cachedRecord;
+    private List<String> cachedRow;
     private int[] mapping;
     private final CSVParser parser;
     private final POSTable posTable;
@@ -81,30 +81,34 @@ public class RawLexiconReader {
 
     /** resolve header line and set to mapping if it exists. */
     private void resolveColumnLayout() throws IOException {
-        List<String> record = parser.getNextRecord();
+        List<String> row = parser.getNextRow();
 
-        String leftId = record.get(Column.LeftId.ordinal());
+        String leftId = row.get(Column.LEFT_ID.ordinal());
         if (INTEGER_REGEX.matcher(leftId).matches()) {
-            this.cachedRecord = record;
+            this.cachedRow = row;
             return;
         }
 
         List<Column> remaining = new ArrayList<>(Arrays.asList(Column.values()));
-        int[] mapping = new int[remaining.size()];
+        mapping = new int[remaining.size()];
         Arrays.fill(mapping, -1);
 
-        outer: for (int fieldId = 0; fieldId < record.size(); ++fieldId) {
-            String field = record.get(fieldId).replaceAll("_", "");
+        for (int fieldId = 0; fieldId < row.size(); ++fieldId) {
+            String field = row.get(fieldId).replace("_", "");
+            boolean columnFound = false;
             for (int colId = 0; colId < remaining.size(); ++colId) {
                 Column col = remaining.get(colId);
-                if (col.name().equalsIgnoreCase(field)) {
+                if (col.name().replace("_", "").equalsIgnoreCase(field)) {
                     mapping[col.ordinal()] = fieldId;
                     remaining.remove(colId);
-                    continue outer;
+                    columnFound = true;
+                    break;
                 }
             }
-            throw new CsvFieldException(parser.getName(), 0, field,
-                    new IllegalArgumentException("Invalid column name"));
+            if (!columnFound) {
+                throw new CsvFieldException(parser.getName(), 0, field,
+                        new IllegalArgumentException("Invalid column name"));
+            }
         }
 
         for (Column column : remaining) {
@@ -115,9 +119,9 @@ public class RawLexiconReader {
             }
         }
 
-        this.posIdExists = mapping[Column.PosId.ordinal()] >= 0;
+        this.posIdExists = mapping[Column.POS_ID.ordinal()] >= 0;
         long numPosColumnsFound = Arrays
-                .asList(Column.Pos1, Column.Pos2, Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6).stream()
+                .asList(Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5, Column.POS6).stream()
                 .filter(c -> mapping[c.ordinal()] >= 0).count();
         if (numPosColumnsFound != 0 && numPosColumnsFound != POS.DEPTH) {
             throw new CsvFieldException(parser.getName(), 0, "POS",
@@ -128,8 +132,6 @@ public class RawLexiconReader {
             throw new CsvFieldException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Both or either PosId column or Pos1~Pos6 columns are required."));
         }
-
-        this.mapping = mapping;
     }
 
     /** parse specified column as string */
@@ -140,7 +142,7 @@ public class RawLexiconReader {
         }
         if (index < 0 || index >= data.size()) {
             if (column.required) {
-                throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+                throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
                         new IllegalArgumentException(String.format("column [%s] was not present", column.name())));
             } else {
                 return "";
@@ -157,7 +159,7 @@ public class RawLexiconReader {
     private String getNonEmpty(List<String> data, Column column, boolean unescape) {
         String value = get(data, column, unescape);
         if (value.isEmpty()) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException(String.format("Column %s cannot be empty", column.name())));
         }
         return value;
@@ -169,7 +171,7 @@ public class RawLexiconReader {
         try {
             return Short.parseShort(value);
         } catch (NumberFormatException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException(String.format("failed to parse '%s' as a short value", value)));
         }
     }
@@ -182,7 +184,7 @@ public class RawLexiconReader {
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("int list contained more than 127 entries: " + value));
         }
         Ints result = new Ints(parts.length);
@@ -200,7 +202,7 @@ public class RawLexiconReader {
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(),
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("reference list contained more than 127 entries: " + value));
         }
         List<WordRef> result = new ArrayList<>(parts.length);
@@ -208,7 +210,7 @@ public class RawLexiconReader {
             try {
                 result.add(refParser.parse(part));
             } catch (IllegalArgumentException e) {
-                throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(), e);
+                throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(), e);
             }
         }
         return result;
@@ -221,7 +223,7 @@ public class RawLexiconReader {
         try {
             ref = refParser.parse(value);
         } catch (IllegalArgumentException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(), e);
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(), e);
         }
 
         // if parsed ref seems to refering current entry, return self-reference (null),
@@ -247,17 +249,17 @@ public class RawLexiconReader {
         short posStrId = -1;
 
         if (this.posIdExists) {
-            posId = getShort(data, Column.PosId);
+            posId = getShort(data, Column.POS_ID);
         }
         if (this.posStrExists) {
             POS pos = new POS(
                     // comment for line break
-                    get(data, Column.Pos1, true), get(data, Column.Pos2, true), get(data, Column.Pos3, true),
-                    get(data, Column.Pos4, true), get(data, Column.Pos5, true), get(data, Column.Pos6, true));
+                    get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
+                    get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
             posStrId = posTable.getId(pos);
         }
         if (this.posIdExists && this.posStrExists && posId != posStrId) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), "POS", new IllegalArgumentException(
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
                     String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
         }
 
@@ -267,48 +269,48 @@ public class RawLexiconReader {
     /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
-        entry.headword = getNonEmpty(data, Column.Surface, true);
+        entry.headword = getNonEmpty(data, Column.SURFACE, true);
 
-        entry.leftId = getShort(data, Column.LeftId);
-        entry.rightId = getShort(data, Column.RightId);
-        entry.cost = getShort(data, Column.Cost);
+        entry.leftId = getShort(data, Column.LEFT_ID);
+        entry.rightId = getShort(data, Column.RIGHT_ID);
+        entry.cost = getShort(data, Column.COST);
 
-        entry.reading = get(data, Column.ReadingForm, true);
+        entry.reading = get(data, Column.READING_FORM, true);
         entry.posId = getPos(data);
 
         // headword, pos, reading must be parsed before these.
-        entry.normalizedForm = getWordRef(data, Column.NormalizedForm, normRefParser, entry);
-        entry.dictionaryForm = getWordRef(data, Column.DictionaryForm, dictRefParser, entry);
+        entry.normalizedForm = getWordRef(data, Column.NORMALIZED_FORM, normRefParser, entry);
+        entry.dictionaryForm = getWordRef(data, Column.DICTIONARY_FORM, dictRefParser, entry);
 
-        entry.mode = get(data, Column.Mode, false);
-        entry.aUnitSplit = getWordRefs(data, Column.SplitA, splitParser);
-        entry.bUnitSplit = getWordRefs(data, Column.SplitB, splitParser);
-        entry.cUnitSplit = getWordRefs(data, Column.SplitC, splitParser);
-        entry.wordStructure = getWordRefs(data, Column.WordStructure, splitParser);
-        entry.synonymGroups = getInts(data, Column.SynonymGroups);
-        entry.userData = get(data, Column.UserData, true);
+        entry.mode = get(data, Column.MODE, false);
+        entry.aUnitSplit = getWordRefs(data, Column.SPLIT_A, splitParser);
+        entry.bUnitSplit = getWordRefs(data, Column.SPLIT_B, splitParser);
+        entry.cUnitSplit = getWordRefs(data, Column.SPLIT_C, splitParser);
+        entry.wordStructure = getWordRefs(data, Column.WORD_STRUCTURE, splitParser);
+        entry.synonymGroups = getInts(data, Column.SYNONYM_GROUPS);
+        entry.userData = get(data, Column.USER_DATA, true);
 
         try {
             entry.validate();
         } catch (IllegalArgumentException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRow(), "", e);
+            throw new CsvFieldException(parser.getName(), parser.getRowCount(), "", e);
         }
         return entry;
     }
 
     /** @return next entry parsed */
     public RawWordEntry nextEntry() throws IOException {
-        List<String> record = cachedRecord;
-        if (record != null) {
-            cachedRecord = null;
+        List<String> row = cachedRow;
+        if (row != null) {
+            cachedRow = null;
         } else {
-            record = parser.getNextRecord();
+            row = parser.getNextRow();
         }
-        if (record == null) {
+        if (row == null) {
             return null;
         }
-        RawWordEntry entry = convertEntry(record);
-        entry.sourceLine = parser.getRow();
+        RawWordEntry entry = convertEntry(row);
+        entry.sourceLine = parser.getRowCount();
         entry.sourceName = parser.getName();
         return entry;
     }

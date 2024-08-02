@@ -31,91 +31,91 @@ public class CSVParserTest {
     @Test
     public void empty() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader(""))) {
-            assertNull(parser.getNextRecord());
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("\n"))) {
-            assertTrue(parser.getNextRecord().isEmpty());
-            assertNull(parser.getNextRecord());
+            assertTrue(parser.getNextRow().isEmpty());
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("\n\n"))) {
-            assertTrue(parser.getNextRecord().isEmpty());
-            assertTrue(parser.getNextRecord().isEmpty());
-            assertNull(parser.getNextRecord());
+            assertTrue(parser.getNextRow().isEmpty());
+            assertTrue(parser.getNextRow().isEmpty());
+            assertNull(parser.getNextRow());
         }
     }
 
     @Test
     public void unescapedField() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,ghi\nabc,def,ghi"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", "ghi"));
-            assertThat(parser.getNextRecord(), contains("abc", "def", "ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", "ghi"));
+            assertThat(parser.getNextRow(), contains("abc", "def", "ghi"));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", ""));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", ""));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,\n"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", ""));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", ""));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader(",,ghi"))) {
-            assertThat(parser.getNextRecord(), contains("", "", "ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("", "", "ghi"));
+            assertNull(parser.getNextRow());
         }
     }
 
     @Test
     public void escapedField() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader("abc,\"def\",ghi\nabc,def,ghi"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", "ghi"));
-            assertThat(parser.getNextRecord(), contains("abc", "def", "ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", "ghi"));
+            assertThat(parser.getNextRow(), contains("abc", "def", "ghi"));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,\"ghi\nabc\",def,ghi"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", "ghi\nabc", "def", "ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", "ghi\nabc", "def", "ghi"));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,\"def,ghi\""))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def,ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def,ghi"));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,\"def\"\"ghi\""))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def\"ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def\"ghi"));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,\"\""))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", ""));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", ""));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("abc,def,\"\"\n"))) {
-            assertThat(parser.getNextRecord(), contains("abc", "def", ""));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("abc", "def", ""));
+            assertNull(parser.getNextRow());
         }
         try (CSVParser parser = new CSVParser(new StringReader("\"\",\"\",ghi"))) {
-            assertThat(parser.getNextRecord(), contains("", "", "ghi"));
-            assertNull(parser.getNextRecord());
+            assertThat(parser.getNextRow(), contains("", "", "ghi"));
+            assertNull(parser.getNextRow());
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void escapedFieldWithExtraText() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader("\"abc\"def"))) {
-            parser.getNextRecord();
+            parser.getNextRow();
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void unClosedEscapedField() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader("\"abc"))) {
-            parser.getNextRecord();
+            parser.getNextRow();
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void unscapedFieldWithDoubleQuote() throws IOException {
         try (CSVParser parser = new CSVParser(new StringReader("a\"bc"))) {
-            parser.getNextRecord();
+            parser.getNextRow();
         }
     }
 }

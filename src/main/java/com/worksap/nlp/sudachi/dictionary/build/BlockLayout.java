@@ -34,12 +34,12 @@ public class BlockLayout {
     private final Progress progress;
     private final List<BlockInfo> info = new ArrayList<>();
 
-    public BlockLayout(SeekableByteChannel channel, Progress progress) throws IOException {
+    public BlockLayout(SeekableByteChannel channel, Progress progress) {
         this.channel = channel;
         this.progress = progress;
     }
 
-    public BlockLayout(SeekableByteChannel channel) throws IOException {
+    public BlockLayout(SeekableByteChannel channel) {
         this.channel = channel;
         this.progress = Progress.NOOP;
     }

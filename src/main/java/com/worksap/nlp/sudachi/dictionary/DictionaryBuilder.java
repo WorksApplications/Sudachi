@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +44,26 @@ public class DictionaryBuilder {
         console.printf("\t-d description\tcomment\n");
         console.printf("\t-p file\tpos file (optional)\n");
         console.printf("\t-s signature\tsignature\n");
+    }
+
+    private static void build(Path matrixPath, String description, String posPath, String signature,
+            List<String> lexiconPaths, Path outputPath) throws IOException {
+        DicBuilder.System builder = DicBuilder.system().progress(Progress.syserr(20)).matrix(matrixPath)
+                .comment(description);
+        if (posPath != null) {
+            builder = builder.posTable(Paths.get(posPath));
+        }
+        if (signature != null) {
+            builder = builder.signature(signature);
+        }
+        for (String lexiconPath : lexiconPaths) {
+            builder = builder.lexicon(Paths.get(lexiconPath));
+        }
+
+        try (SeekableByteChannel ch = Files.newByteChannel(outputPath, StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            builder.build(ch);
+        }
     }
 
     /**
@@ -97,22 +118,7 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DicBuilder.System builder = DicBuilder.system().progress(Progress.syserr(20)).matrix(Paths.get(matrixPath))
-                .comment(description);
-        if (posPath != null) {
-            builder = builder.posTable(Paths.get(posPath));
-        }
-        if (signature != null) {
-            builder.signature(signature);
-        }
-        for (String lexiconPath : lexiconPaths) {
-            builder = builder.lexicon(Paths.get(lexiconPath));
-        }
-
-        try (SeekableByteChannel ch = Files.newByteChannel(Paths.get(outputPath), StandardOpenOption.WRITE,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            builder.build(ch);
-        }
+        build(Paths.get(matrixPath), description, posPath, signature, lexiconPaths, Paths.get(outputPath));
     }
 
 }

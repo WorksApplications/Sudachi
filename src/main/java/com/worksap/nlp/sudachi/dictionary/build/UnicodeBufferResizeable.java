@@ -18,9 +18,7 @@ package com.worksap.nlp.sudachi.dictionary.build;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 /** Resizable byte buffer to store string */

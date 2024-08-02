@@ -151,10 +151,11 @@ public class StringUtil {
         }
 
         int result = 0;
-        for (int i = start; i < end;) {
-            int cpt = Character.codePointAt(seq, i);
+        int idx = start;
+        while (idx < end) {
+            int cpt = Character.codePointAt(seq, idx);
             result += utf8Length(cpt);
-            i += Character.charCount(cpt);
+            idx += Character.charCount(cpt);
         }
         return result;
     }

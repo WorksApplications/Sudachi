@@ -98,10 +98,8 @@ class LatticeImpl implements Lattice {
         ArrayList<LatticeNodeImpl> ends = endLists.get(end);
         LatticeNodeImpl result = null;
         for (LatticeNodeImpl node : ends) {
-            if (node.begin == begin) {
-                if (result == null || result.totalCost >= node.cost) {
-                    result = node;
-                }
+            if (node.begin == begin && (result == null || result.totalCost >= node.cost)) {
+                result = node;
             }
         }
         return result;

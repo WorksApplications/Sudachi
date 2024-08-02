@@ -92,9 +92,10 @@ public abstract class OovProviderPlugin extends Plugin {
     }
 
     /**
-     * Use {@link LatticeNodeImpl#oovFactory(short, short, short, short)} instead.
-     *
      * @return throws an exception
+     * @deprecated Use
+     *             {@link LatticeNodeImpl#oovFactory(short, short, short, short)}
+     *             instead.
      */
     @Deprecated
     protected LatticeNodeImpl createNode() {

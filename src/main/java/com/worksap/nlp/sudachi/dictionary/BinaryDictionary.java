@@ -40,7 +40,7 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
         this(MMap.map(filename));
     }
 
-    public BinaryDictionary(ByteBuffer dictionary) throws IOException {
+    public BinaryDictionary(ByteBuffer dictionary) {
         bytes = dictionary;
 
         header = Description.load(dictionary);

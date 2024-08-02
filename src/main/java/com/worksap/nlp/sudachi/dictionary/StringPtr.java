@@ -152,8 +152,7 @@ public class StringPtr {
 
     public boolean isSubseqValid(int start, int end) {
         int realStart = offset + start;
-        int length = end - start;
-        return isValid(realStart, length);
+        return isValid(realStart, end - start);
     }
 
     public StringPtr subPtr(int start, int end) {

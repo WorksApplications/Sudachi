@@ -54,7 +54,7 @@ class DictionaryPrinterTest {
 
     assertEquals(41, lines.size) // header + entries + trailing new line
     assertEquals(
-        "Surface,LeftId,RightId,Cost,Pos1,Pos2,Pos3,Pos4,Pos5,Pos6,ReadingForm,NormalizedForm,DictionaryForm,SplitA,SplitB,SplitC,WordStructure,SynonymGroups,UserData",
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
     assertEquals("た,1,1,8729,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
     assertEquals("に,2,2,11406,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
@@ -70,7 +70,7 @@ class DictionaryPrinterTest {
 
     assertEquals(6, lines.size) // header + entries + trailing new line
     assertEquals(
-        "Surface,LeftId,RightId,Cost,Pos1,Pos2,Pos3,Pos4,Pos5,Pos6,ReadingForm,NormalizedForm,DictionaryForm,SplitA,SplitB,SplitC,WordStructure,SynonymGroups,UserData",
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
     assertEquals(
         "東京府,6,6,2816,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",1/3,",

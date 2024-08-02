@@ -69,7 +69,7 @@ public class Index {
      * @throws IOException
      */
     public void compile(BlockLayout layout, List<RawWordEntry> notIndexed) throws IOException {
-        TrieData data = layout.block(Blocks.WORD_POINTERS, (o) -> writeWordTable(o, notIndexed));
+        TrieData data = layout.block(Blocks.WORD_POINTERS, o -> writeWordTable(o, notIndexed));
         layout.block(Blocks.TRIE_INDEX, data::writeTrie);
     }
 
@@ -83,7 +83,7 @@ public class Index {
         int nis = notIndexed.size();
         int fullsize = size + nis;
 
-        out.measured("Word Id table", (p) -> {
+        out.measured("Word Id table", p -> {
             int i = 0;
             for (Map.Entry<byte[], Ints> entry : this.elements.entrySet()) {
                 keys[i] = entry.getKey();
@@ -142,7 +142,7 @@ public class Index {
          * @throws IOException
          */
         public Void writeTrie(BlockOutput block) throws IOException {
-            return block.measured("Trie Index", (p) -> {
+            return block.measured("Trie Index", p -> {
                 DoubleArray trie = new DoubleArray();
                 trie.build(keys, values, p::progress);
                 ByteBuffer buf = trie.byteArray().duplicate();

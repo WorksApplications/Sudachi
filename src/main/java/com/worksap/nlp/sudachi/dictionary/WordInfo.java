@@ -249,9 +249,7 @@ public class WordInfo {
 
     // see dictionary.build.WordEntryLayout
     private WordInfo(ByteBuffer buffer, int pos) {
-        // short leftId = buffer.getShort(pos);
-        // short rightId = buffer.getShort(pos + 2);
-        // short cost = buffer.getShort(pos + 4);
+        // first 2*3 bytes are filled by word paramters.
         // do not modify buffer metadata for better performance
         posId = buffer.getShort(pos + 6);
 

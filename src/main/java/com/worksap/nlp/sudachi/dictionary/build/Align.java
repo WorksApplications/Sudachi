@@ -57,8 +57,13 @@ public class Align {
      * @return aligned value, it should be greater or equal than the passed value
      */
     public static long align(long value, long alignment) {
-        assert isPowerOf2(alignment);
-        assert value >= 0;
+        if (!isPowerOf2(alignment)) {
+            throw new IllegalArgumentException(
+                    String.format("alignment must be power of 2, but actualy: %d", alignment));
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(String.format("value must not be negative, but actualy: %d", value));
+        }
 
         // Compute alignment mask, it is the inverse of the mask for the bits that must
         // be 0 for alignment to be correct

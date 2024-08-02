@@ -18,7 +18,6 @@ package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.util.List;
 

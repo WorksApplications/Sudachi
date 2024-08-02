@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi;
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.io.IOException;
 import java.io.InputStream;

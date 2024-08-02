@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DictionaryPrinter {
-    public final char WordRefDelimiter = '/';
-    public final String WordRefDelimiterStr = String.valueOf(WordRefDelimiter);
-    public final char WordRefJoiner = ',';
-    public final String WordRefJoinerStr = String.valueOf(WordRefJoiner);
+    public static final char wordRefDelimiter = '/';
+    public static final String wordRefDelimiterStr = String.valueOf(wordRefDelimiter);
+    public static final char wordRefJoiner = ',';
+    public static final String wordRefJoinerStr = String.valueOf(wordRefJoiner);
 
     private final PrintStream output;
     private final Progress progress = Progress.syserr(20);
@@ -78,10 +78,10 @@ public class DictionaryPrinter {
 
     void printHeader() {
         // @formatter:off
-        printColumnHeaders(Column.Surface, Column.LeftId, Column.RightId, Column.Cost, Column.Pos1, Column.Pos2,
-                Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6, Column.ReadingForm, Column.NormalizedForm,
-                Column.DictionaryForm, Column.SplitA, Column.SplitB, Column.SplitC, Column.WordStructure,
-                Column.SynonymGroups, Column.UserData);
+        printColumnHeaders(Column.SURFACE, Column.LEFT_ID, Column.RIGHT_ID, Column.COST, Column.POS1, Column.POS2,
+                Column.POS3, Column.POS4, Column.POS5, Column.POS6, Column.READING_FORM, Column.NORMALIZED_FORM,
+                Column.DICTIONARY_FORM, Column.SPLIT_A, Column.SPLIT_B, Column.SPLIT_C, Column.WORD_STRUCTURE,
+                Column.SYNONYM_GROUPS, Column.USER_DATA);
         // @formatter:on
     }
 
@@ -176,10 +176,7 @@ public class DictionaryPrinter {
         parts.addAll(pos);
         parts.add(reading);
 
-        // escape special chars
-        String wordRefTriple = String.join(WordRefJoinerStr,
-                parts.stream().map(p -> maybeEscapeRefPart(p)).collect(Collectors.toList()));
-        return wordRefTriple;
+        return String.join(wordRefJoinerStr, parts.stream().map(this::maybeEscapeRefPart).collect(Collectors.toList()));
     }
 
     /** encode word entry pointed by the wordId as WordRef.Headword. */
@@ -189,17 +186,16 @@ public class DictionaryPrinter {
         }
         int dic = WordId.dic(wordId);
         WordInfo info = lex.getWordInfo(wordId);
-        String surface = lex.string(dic, info.getSurface());
-        return surface;
+        return lex.string(dic, info.getSurface());
     }
 
     String wordRefList(int[] wordIds) {
-        return String.join(WordRefDelimiterStr,
-                Arrays.stream(wordIds).boxed().map(wi -> wordRef(wi)).collect(Collectors.toList()));
+        return String.join(wordRefDelimiterStr,
+                Arrays.stream(wordIds).boxed().map(this::wordRef).collect(Collectors.toList()));
     }
 
     String intList(int[] ints) {
-        return String.join("/", Arrays.stream(ints).boxed().map(i -> i.toString()).collect(Collectors.toList()));
+        return String.join("/", Arrays.stream(ints).boxed().map(Object::toString).collect(Collectors.toList()));
     }
 
     private static boolean hasCh(String value, int ch) {
@@ -221,12 +217,12 @@ public class DictionaryPrinter {
 
     /** escape WordRef.Triple part. */
     private String maybeEscapeRefPart(String value) {
-        boolean hasDelimiter = hasCh(value, WordRefDelimiter);
-        boolean hasJoiner = hasCh(value, WordRefJoiner);
+        boolean hasDelimiter = hasCh(value, wordRefDelimiter);
+        boolean hasJoiner = hasCh(value, wordRefJoiner);
         if (!hasDelimiter && !hasJoiner) {
             return value;
         }
-        return unicodeEscape(value, Arrays.asList(WordRefDelimiter, WordRefJoiner));
+        return unicodeEscape(value, Arrays.asList(wordRefDelimiter, wordRefJoiner));
     }
 
     /** escape specified chars as unicode codepoint */

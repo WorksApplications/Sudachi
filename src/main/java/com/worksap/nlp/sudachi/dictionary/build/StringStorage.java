@@ -109,10 +109,8 @@ public class StringStorage implements StringIndex {
         int len = str.length();
         for (int i = 0; i < len; ++i) {
             char ch = str.charAt(i);
-            if (Character.isLowSurrogate(ch)) {
-                if (i + 1 < len && Character.isHighSurrogate(str.charAt(i + 1))) {
-                    i += 1;
-                }
+            if (Character.isLowSurrogate(ch) && i + 1 < len && Character.isHighSurrogate(str.charAt(i + 1))) {
+                i += 1;
             }
             offsets[count] = i;
             count += 1;
@@ -128,7 +126,7 @@ public class StringStorage implements StringIndex {
     }
 
     /** @return string hash map */
-    public HashMap<String, Item> getStrings() {
+    public Map<String, Item> getStrings() {
         return strings;
     }
 

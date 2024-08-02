@@ -129,7 +129,7 @@ public class DicBuilder {
                 InputStream stream = new ProgressInputStream(is, size, progress);
                 lexicon.read(name, stream, pos, numLeft, numRight);
             }
-            progress.endBlock(lexicon.getTotalEntries() - numEntryBefore, nanoTime());
+            progress.endBlock((long) lexicon.getTotalEntries() - numEntryBefore, nanoTime());
             return self();
         }
 
@@ -207,7 +207,7 @@ public class DicBuilder {
                 layout.block(Blocks.CONNECTION_MATRIX, connection::compile);
             }
             layout.block(Blocks.POS_TABLE, pos::compile);
-            lexicon.compile(pos, layout);
+            lexicon.compile(layout);
             description.setBlocks(layout.blocks());
             description.setNumberOfEntries(lexicon.getIndexedEntries(), lexicon.getTotalEntries());
             description.setRuntimeCosts(lexicon.hasRuntimeCosts());

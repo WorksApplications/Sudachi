@@ -40,7 +40,9 @@ public class Ints {
     }
 
     public int get(int index) {
-        assert index < length;
+        if (index >= length) {
+            throw new IndexOutOfBoundsException(String.format("index %d is larger than Ints length %d", index, length));
+        }
         return data[index];
     }
 

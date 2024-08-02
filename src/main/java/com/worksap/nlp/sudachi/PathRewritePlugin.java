@@ -22,7 +22,6 @@ import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 /**
  * A plugin that rewrite the best path of the lattice.

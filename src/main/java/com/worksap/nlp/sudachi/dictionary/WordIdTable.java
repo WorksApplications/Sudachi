@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi.dictionary;
 import com.worksap.nlp.sudachi.WordId;
 
 import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
+import java.util.NoSuchElementException;
 import java.util.Iterator;
 
 class WordIdTable {
@@ -99,7 +101,12 @@ class WordIdTable {
             @Override
             public Ints next() {
                 BufReader r = buf;
-                int size = r.readVarint32();
+                int size;
+                try {
+                    size = r.readVarint32();
+                } catch (BufferUnderflowException e) {
+                    throw new NoSuchElementException();
+                }
                 ints.clear();
                 int[] data = ints.prepare(size);
                 readDeltaCompressed(data, size, dicIdMask, r);

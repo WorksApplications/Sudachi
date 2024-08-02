@@ -107,7 +107,6 @@ public class RawLexicon {
         parser.setName(name);
         RawLexiconReader reader = new RawLexiconReader(parser, posTable, isUser);
 
-        long offset = this.offset;
         RawWordEntry entry;
         while ((entry = reader.nextEntry()) != null) {
             if (entry.leftId >= numLeft || entry.rightId >= numRight) {
@@ -127,7 +126,6 @@ public class RawLexicon {
             }
             this.runtimeCosts |= !DoubleArrayLexicon.isNormalCost(entry.cost);
         }
-        this.offset = offset;
     }
 
     /**
@@ -153,11 +151,10 @@ public class RawLexicon {
     /**
      * Write lexicon to the provided block layout.
      * 
-     * @param pos
      * @param layout
      * @throws IOException
      */
-    public void compile(POSTable pos, BlockLayout layout) throws IOException {
+    public void compile(BlockLayout layout) throws IOException {
         index.compile(layout, notIndexed);
         // entry layout requires stringstorage to be compiled beforehand.
         layout.block(Blocks.STRINGS, this::writeStrings);
@@ -165,7 +162,7 @@ public class RawLexicon {
     }
 
     private Void writeStrings(BlockOutput blockOutput) throws IOException {
-        return blockOutput.measured("Strings", (p) -> {
+        return blockOutput.measured("Strings", p -> {
             strings.compile(p);
             strings.writeCompact(blockOutput.getChannel());
             return null;
@@ -173,7 +170,7 @@ public class RawLexicon {
     }
 
     private Void writeEntries(BlockOutput blockOutput) throws IOException {
-        return blockOutput.measured("Word Entries", (p) -> {
+        return blockOutput.measured("Word Entries", p -> {
             List<RawWordEntry> list = entries;
             Lookup2 lookup = isUser ? new Lookup2(preloadedEntries, list) : new Lookup2(list, new ArrayList<>());
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
@@ -214,7 +211,8 @@ public class RawLexicon {
             copy.reading = copy.headword;
             copy.posId = entry.posId;
             RawWordEntry last = list.get(list.size() - 1);
-            copy.pointer = RawLexicon.pointer(WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
+            copy.pointer = RawLexicon
+                    .pointer((long) WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
             list.add(copy);
             lookup.add(copy, isUser);
             nPhantomEntries += 1;

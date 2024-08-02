@@ -22,6 +22,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -81,6 +82,12 @@ public abstract class WordRef {
             LineNo o = (LineNo) other;
             return (line == o.line) && (isUser == o.isUser);
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(line, isUser);
+        }
+
     }
 
     /**
@@ -116,6 +123,11 @@ public abstract class WordRef {
                 return false;
             Headword o = (Headword) other;
             return headword.equals(o.headword);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(headword);
         }
     }
 
@@ -172,6 +184,11 @@ public abstract class WordRef {
                 return false;
             Triple o = (Triple) other;
             return (headword.equals(o.headword)) && (posId == o.posId) && (reading.equals(o.reading));
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(headword, posId, reading);
         }
     }
 

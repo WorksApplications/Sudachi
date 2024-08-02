@@ -162,7 +162,7 @@ public class ConnectionMatrix {
      * @throws IOException
      */
     public Void compile(BlockOutput out) throws IOException {
-        return out.measured("Connection Matrix", (p) -> {
+        return out.measured("Connection Matrix", p -> {
             out.getChannel().write(compiled.duplicate());
             return null;
         });

@@ -56,7 +56,7 @@ public class CSVParser implements Closeable {
     private BufferedReader reader;
     private Deque<Token> tokenBuffer = new ArrayDeque<>();
     private boolean hasNextField = false;
-    private int row = -1;
+    private int rowCount = -1;
 
     private String name = "<unknown>";
 
@@ -69,22 +69,22 @@ public class CSVParser implements Closeable {
         reader.close();
     }
 
-    public List<String> getNextRecord() throws IOException {
-        List<String> record = new ArrayList<>();
+    public List<String> getNextRow() throws IOException {
+        List<String> row = new ArrayList<>();
         hasNextField = false;
         String field;
         while ((field = getField()) != null) {
             if (field.equals("\n")) {
-                row += 1;
-                return record;
+                rowCount += 1;
+                return row;
             }
-            record.add(field);
+            row.add(field);
         }
         return null;
     }
 
-    public int getRow() {
-        return row;
+    public int getRowCount() {
+        return rowCount;
     }
 
     private String getField() throws IOException {

@@ -23,7 +23,7 @@ import java.time.Duration;
  */
 public class Progress {
     // minimum time delta for callback.progress call
-    private final static long MS_100 = 100_000_000L; // 100ms in nanos
+    private static final long MS_100 = 100_000_000L; // 100ms in nanos
     // resolution of progress step.
     private final int maxUpdates;
     private final Callback callback;
@@ -154,13 +154,10 @@ public class Progress {
         public void start(String name, Progress.Kind kind) {
             System.err.printf("%s\t", name);
             last = 0;
-            switch (kind) {
-            case BYTE:
+            if (kind == Kind.BYTE) {
                 unit = "bytes";
-                break;
-            case ENTRY:
+            } else if (kind == Kind.ENTRY) {
                 unit = "entries";
-                break;
             }
         }
 

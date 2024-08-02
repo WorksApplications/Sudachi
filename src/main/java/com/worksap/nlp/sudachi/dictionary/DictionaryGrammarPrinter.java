@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import com.worksap.nlp.sudachi.PathAnchor;
 import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.DictionaryFactory;
+import com.worksap.nlp.sudachi.Dictionary;
 import com.worksap.nlp.sudachi.Settings;
 
 /**
@@ -44,7 +45,7 @@ public class DictionaryGrammarPrinter {
         console.printf("\t-u file\tpath to an additional user dictionary (appended to -s)\n");
     }
 
-    static void printPos(GrammarImpl grammar, PrintStream output) throws IOException {
+    static void printPos(GrammarImpl grammar, PrintStream output) {
         int numPos = grammar.getPartOfSpeechSize();
         for (int i = 0; i < numPos; i++) {
             POS pos = grammar.getPartOfSpeechString((short) i);
@@ -102,9 +103,10 @@ public class DictionaryGrammarPrinter {
         }
 
         Config config = additional.withFallback(Config.fromSettings(current));
-        DictionaryAccess dict = (DictionaryAccess) new DictionaryFactory().create(config);
-        GrammarImpl grammar = dict.getGrammar();
 
-        printPos(grammar, System.out);
+        try (Dictionary dict = new DictionaryFactory().create(config)) {
+            GrammarImpl grammar = ((DictionaryAccess) dict).getGrammar();
+            printPos(grammar, System.out);
+        }
     }
 }

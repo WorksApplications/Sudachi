@@ -25,6 +25,9 @@ import java.util.regex.Pattern;
 public class Unescape {
     private static final Pattern unicodeLiteral = Pattern.compile("\\\\u(?:[0-9a-fA-F]{4}|\\{[0-9a-fA-F]+})");
 
+    private Unescape() {
+    }
+
     /**
      * Resolve unicode escape sequences in the string
      * <p>
