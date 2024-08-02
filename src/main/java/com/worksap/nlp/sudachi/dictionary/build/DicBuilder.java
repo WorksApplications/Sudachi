@@ -49,15 +49,60 @@ public class DicBuilder {
     }
 
     private static class Base<T extends Base<T>> {
-        protected final POSTable pos = new POSTable();
-        protected final ConnectionMatrix connection = new ConnectionMatrix();
         protected Progress progress = Progress.NOOP;
-        protected RawLexicon lexicon = new RawLexicon();
         protected final Description description = new Description();
+        protected final ConnectionMatrix connection = new ConnectionMatrix();
+        protected final POSTable pos = new POSTable();
+        protected final RawLexicon lexicon = new RawLexicon();
 
         @SuppressWarnings("unchecked")
         private T self() {
             return (T) this;
+        }
+
+        /**
+         * Set the progress handler to the provided one.
+         * 
+         * @param progress
+         *            progress handler
+         * @return current object
+         */
+        public T progress(Progress progress) {
+            this.progress = Objects.requireNonNull(progress);
+            return self();
+        }
+
+        /**
+         * Read POS list from the csv file.
+         */
+        public T posTable(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
+            int nRead;
+            try (InputStream is = input.get()) {
+                InputStream stream = new ProgressInputStream(is, size, progress);
+                nRead = pos.readEntries(stream);
+            }
+            progress.endBlock(nRead, nanoTime());
+            return self();
+        }
+
+        /**
+         * Read POS list from the csv file.
+         */
+        public T posTable(URL url) throws IOException {
+            String name = url.getPath();
+            URLConnection conn = url.openConnection();
+            long size = conn.getContentLengthLong();
+            return posTable(name, conn::getInputStream, size);
+        }
+
+        /**
+         * Read POS list from the csv file.
+         */
+        public T posTable(Path path) throws IOException {
+            String name = path.getFileName().toString();
+            long size = Files.size(path);
+            return posTable(name, () -> Files.newInputStream(path), size);
         }
 
         /**
@@ -124,18 +169,6 @@ public class DicBuilder {
         }
 
         /**
-         * Set the progress handler to the provided one
-         * 
-         * @param progress
-         *            handler
-         * @return current object
-         */
-        public T progress(Progress progress) {
-            this.progress = Objects.requireNonNull(progress);
-            return self();
-        }
-
-        /**
          * Set the comment string in the binary dictionary
          * 
          * @param comment
@@ -188,6 +221,9 @@ public class DicBuilder {
      * Instanciate via SystemNoMatrix.
      */
     public static final class System extends Base<System> {
+        /**
+         * Read connection matrix from MeCab matrix.def format text file.
+         */
         private System readMatrix(String name, IOSupplier<InputStream> input, long size) throws IOException {
             progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
             try (InputStream is = input.get()) {
@@ -285,7 +321,7 @@ public class DicBuilder {
          * Set the progress handler to the provided one
          * 
          * @param progress
-         *            handler
+         *            progress handler
          * @return current object
          */
         public SystemNoMatrix progress(Progress progress) {
@@ -297,7 +333,7 @@ public class DicBuilder {
     /**
      * Create a new system dictionary compiler
      * 
-     * @return new dictionary compiler object
+     * @return new system dictionary compiler object
      */
     public static SystemNoMatrix system() {
         return new SystemNoMatrix(new System());
@@ -309,6 +345,10 @@ public class DicBuilder {
      * Instanciate via UserNoSystem.
      */
     public static final class User extends Base<User> {
+        /**
+         * Preload data from given system dictionary.
+         * 
+         */
         public User system(BinaryDictionary system) {
             progress.startBlock("system dict entries", nanoTime(), Progress.Kind.ENTRY);
             int nread = lexicon.preloadFrom(system.getLexicon(), progress);
@@ -350,7 +390,7 @@ public class DicBuilder {
          * Set the progress handler to the provided one
          * 
          * @param progress
-         *            handler
+         *            progress handler
          * @return current object
          */
         public UserNoSystem progress(Progress progress) {

@@ -19,7 +19,8 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +29,11 @@ import java.util.List;
  * Dictionary parts: List of part-of-speeches.
  */
 public class POSTable {
+    final static int MAX_POS_NUMBER = Short.MAX_VALUE;
+
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
+    // number of pos loaded from the system dictionary.
     private int builtin = 0;
 
     /**
@@ -41,28 +45,12 @@ public class POSTable {
     short getId(POS s) {
         return lookup.computeIfAbsent(s, p -> {
             int next = table.size();
-            if (next >= Short.MAX_VALUE) {
+            if (next >= MAX_POS_NUMBER) {
                 throw new IllegalArgumentException("maximum POS number exceeded by " + s);
             }
             table.add(s);
             return (short) next;
         });
-    }
-
-    /**
-     * Load pos table from the grammar (of the system dictionary). They are
-     * considered as built-in pos.
-     * 
-     * @param grammar
-     */
-    public void preloadFrom(Grammar grammar) {
-        int partOfSpeechSize = grammar.getPartOfSpeechSize();
-        for (short i = 0; i < partOfSpeechSize; ++i) {
-            POS pos = grammar.getPartOfSpeechString(i);
-            table.add(pos);
-            lookup.put(pos, i);
-        }
-        builtin += partOfSpeechSize;
     }
 
     /** @return full POS list that contains builtin and newly added POSs */
@@ -75,6 +63,59 @@ public class POSTable {
      */
     public int ownedLength() {
         return table.size() - builtin;
+    }
+
+    /**
+     * Load pos table from the grammar (of the system dictionary). They are
+     * considered as built-in pos.
+     * 
+     * @param grammar
+     * @return number read.
+     */
+    public int preloadFrom(Grammar grammar) {
+        int partOfSpeechSize = grammar.getPartOfSpeechSize();
+        for (short i = 0; i < partOfSpeechSize; ++i) {
+            POS pos = grammar.getPartOfSpeechString(i);
+            table.add(pos);
+            lookup.put(pos, i);
+        }
+        builtin += partOfSpeechSize;
+        return partOfSpeechSize;
+    }
+
+    /**
+     * Load pos table from the text format.
+     * 
+     * Assume 6-column csv without header.
+     * 
+     * @param data
+     * @return number read.
+     */
+    public int readEntries(InputStream data) throws IOException {
+        LineNumberReader reader = new LineNumberReader(new InputStreamReader(data, StandardCharsets.UTF_8));
+
+        int baseSize = table.size();
+        int numLines = 0;
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+
+            String[] cols = line.split(",");
+            if (cols.length != 6) {
+                throw new InputFileException(numLines, line,
+                        new IllegalArgumentException("each POS must have 6 columns."));
+            }
+
+            int posid = getId(new POS(cols));
+            if (posid != baseSize + numLines) {
+                throw new InputFileException(numLines, line,
+                        new IllegalArgumentException(String.format("POS already exists (%s).", posid)));
+            }
+            numLines += 1;
+        }
+        return numLines;
     }
 
     /**

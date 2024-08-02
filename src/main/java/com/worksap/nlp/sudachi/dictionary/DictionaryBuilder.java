@@ -22,7 +22,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,6 +41,7 @@ public class DictionaryBuilder {
         console.printf("\t-o file\toutput to file\n");
         console.printf("\t-m file\tmatrix file\n");
         console.printf("\t-d description\tcomment\n");
+        console.printf("\t-p file\tpos file (optional)\n");
         console.printf("\t-s signature\tsignature\n");
     }
 
@@ -67,6 +67,7 @@ public class DictionaryBuilder {
         String description = "";
         String outputPath = null;
         String matrixPath = null;
+        String posPath = null;
         String signature = null;
 
         int i;
@@ -75,6 +76,8 @@ public class DictionaryBuilder {
                 outputPath = args[++i];
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 matrixPath = args[++i];
+            } else if (args[i].equals("-p") && i + 1 < args.length) {
+                posPath = args[++i];
             } else if (args[i].equals("-d") && i + 1 < args.length) {
                 description = args[++i];
             } else if (args[i].equals("-s")) {
@@ -96,11 +99,12 @@ public class DictionaryBuilder {
 
         DicBuilder.System builder = DicBuilder.system().progress(Progress.syserr(20)).matrix(Paths.get(matrixPath))
                 .comment(description);
-
+        if (posPath != null) {
+            builder = builder.posTable(Paths.get(posPath));
+        }
         if (signature != null) {
             builder.signature(signature);
         }
-
         for (String lexiconPath : lexiconPaths) {
             builder = builder.lexicon(Paths.get(lexiconPath));
         }
