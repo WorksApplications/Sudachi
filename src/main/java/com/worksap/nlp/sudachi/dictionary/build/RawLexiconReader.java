@@ -35,10 +35,10 @@ public class RawLexiconReader {
      * reordered with respect to the header.
      */
     public enum Column {
-        Surface(true), LeftId(true), RightId(true), Cost(true), Writing(false), Pos1(true), Pos2(true), Pos3(
-                true), Pos4(true), Pos5(true), Pos6(true), ReadingForm(true), NormalizedForm(true), DictionaryForm(
-                        true), Mode(false), SplitA(true), SplitB(
-                                true), WordStructure(true), SynonymGroups(false), SplitC(false), UserData(false);
+        Surface(true), LeftId(true), RightId(true), Cost(true), Writing(false), Pos1(false), Pos2(false), Pos3(
+                false), Pos4(false), Pos5(false), Pos6(false), ReadingForm(true), NormalizedForm(true), DictionaryForm(
+                        true), Mode(false), SplitA(true), SplitB(true), WordStructure(
+                                true), SynonymGroups(false), SplitC(false), UserData(false), PosId(false);
 
         private final boolean required;
 
@@ -54,6 +54,8 @@ public class RawLexiconReader {
     private final WordRef.Parser normRefParser; // for normalized form
     private final WordRef.Parser dictRefParser; // for dictionary form
     private final WordRef.Parser splitParser; // for splits
+    private boolean posIdExists = false;
+    private boolean posStrExists = true;
 
     public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
         this.parser = parser;
@@ -93,7 +95,7 @@ public class RawLexiconReader {
 
         outer: for (int fieldId = 0; fieldId < record.size(); ++fieldId) {
             String field = record.get(fieldId).replaceAll("_", "");
-            for (int colId = 0; colId < record.size(); ++colId) {
+            for (int colId = 0; colId < remaining.size(); ++colId) {
                 Column col = remaining.get(colId);
                 if (col.name().equalsIgnoreCase(field)) {
                     mapping[col.ordinal()] = fieldId;
@@ -111,6 +113,20 @@ public class RawLexiconReader {
                 remaining.stream().filter(c -> c.required).forEach(c -> joiner.add(c.name()));
                 throw new CsvFieldException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
             }
+        }
+
+        this.posIdExists = mapping[Column.PosId.ordinal()] >= 0;
+        long numPosColumnsFound = Arrays
+                .asList(Column.Pos1, Column.Pos2, Column.Pos3, Column.Pos4, Column.Pos5, Column.Pos6).stream()
+                .filter(c -> mapping[c.ordinal()] >= 0).count();
+        if (numPosColumnsFound != 0 && numPosColumnsFound != POS.DEPTH) {
+            throw new CsvFieldException(parser.getName(), 0, "POS",
+                    new IllegalArgumentException("Pos1 ~ Pos6 columns must appear as a set."));
+        }
+        this.posStrExists = numPosColumnsFound == POS.DEPTH;
+        if (!posIdExists && !posStrExists) {
+            throw new CsvFieldException(parser.getName(), 0, "POS",
+                    new IllegalArgumentException("Both or either PosId column or Pos1~Pos6 columns are required."));
         }
 
         this.mapping = mapping;
@@ -198,14 +214,54 @@ public class RawLexiconReader {
         return result;
     }
 
-    /** parse specified column as WordRef. */
-    private WordRef getWordRef(List<String> data, Column column, WordRef.Parser refParser) {
+    /** parse specified column as WordRef, also checks self-reference. */
+    private WordRef getWordRef(List<String> data, Column column, WordRef.Parser refParser, RawWordEntry entry) {
         String value = get(data, column, false);
+        WordRef ref;
         try {
-            return refParser.parse(value);
+            ref = refParser.parse(value);
         } catch (IllegalArgumentException e) {
             throw new CsvFieldException(parser.getName(), parser.getRow(), column.name(), e);
         }
+
+        // if parsed ref seems to refering current entry, return self-reference (null),
+        // because headword/triple ref may resolved to other entry.
+        if (ref instanceof WordRef.Headword) {
+            WordRef.Headword headword = (WordRef.Headword) ref;
+            if (headword.getHeadword().equals(entry.headword)) {
+                return null;
+            }
+        } else if (ref instanceof WordRef.Triple) {
+            WordRef.Triple triple = (WordRef.Triple) ref;
+            if (triple.getHeadword().equals(entry.headword) && triple.getPosId() == entry.posId
+                    && triple.getReading().equals(entry.reading)) {
+                return null;
+            }
+        }
+        return ref;
+    }
+
+    /** parse POS columns. */
+    private short getPos(List<String> data) {
+        short posId = -1;
+        short posStrId = -1;
+
+        if (this.posIdExists) {
+            posId = getShort(data, Column.PosId);
+        }
+        if (this.posStrExists) {
+            POS pos = new POS(
+                    // comment for line break
+                    get(data, Column.Pos1, true), get(data, Column.Pos2, true), get(data, Column.Pos3, true),
+                    get(data, Column.Pos4, true), get(data, Column.Pos5, true), get(data, Column.Pos6, true));
+            posStrId = posTable.getId(pos);
+        }
+        if (this.posIdExists && this.posStrExists && posId != posStrId) {
+            throw new CsvFieldException(parser.getName(), parser.getRow(), "POS", new IllegalArgumentException(
+                    String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
+        }
+
+        return this.posIdExists ? posId : posStrId;
     }
 
     /** convert csv row to RawWordEntry */
@@ -218,22 +274,11 @@ public class RawLexiconReader {
         entry.cost = getShort(data, Column.Cost);
 
         entry.reading = get(data, Column.ReadingForm, true);
-        WordRef normalizedForm = getWordRef(data, Column.NormalizedForm, normRefParser);
-        if (normalizedForm instanceof WordRef.Headword
-                && ((WordRef.Headword) normalizedForm).getHeadword().equals(entry.headword)) {
-            // mark as self-reference (headword ref may point different entry)
-            entry.normalizedForm = null;
-        } else {
-            entry.normalizedForm = normalizedForm;
-        }
-        entry.dictionaryForm = getWordRef(data, Column.DictionaryForm, dictRefParser);
+        entry.posId = getPos(data);
 
-        POS pos = new POS(
-                // comment for line break
-                get(data, Column.Pos1, true), get(data, Column.Pos2, true), get(data, Column.Pos3, true),
-                get(data, Column.Pos4, true), get(data, Column.Pos5, true), get(data, Column.Pos6, true));
-
-        entry.posId = posTable.getId(pos);
+        // headword, pos, reading must be parsed before these.
+        entry.normalizedForm = getWordRef(data, Column.NormalizedForm, normRefParser, entry);
+        entry.dictionaryForm = getWordRef(data, Column.DictionaryForm, dictRefParser, entry);
 
         entry.mode = get(data, Column.Mode, false);
         entry.aUnitSplit = getWordRefs(data, Column.SplitA, splitParser);
