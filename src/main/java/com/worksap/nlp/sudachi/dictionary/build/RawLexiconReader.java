@@ -54,8 +54,6 @@ public class RawLexiconReader {
     private final WordRef.Parser normRefParser; // for normalized form
     private final WordRef.Parser dictRefParser; // for dictionary form
     private final WordRef.Parser splitParser; // for splits
-    private boolean posIdExists = false;
-    private boolean posStrExists = true;
 
     public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
         this.parser = parser;
@@ -86,6 +84,7 @@ public class RawLexiconReader {
         String leftId = row.get(Column.LEFT_ID.ordinal());
         if (INTEGER_REGEX.matcher(leftId).matches()) {
             this.cachedRow = row;
+            this.mapping = null;
             return;
         }
 
@@ -119,7 +118,7 @@ public class RawLexiconReader {
             }
         }
 
-        this.posIdExists = mapping[Column.POS_ID.ordinal()] >= 0;
+        boolean posIdExists = mapping[Column.POS_ID.ordinal()] >= 0;
         long numPosColumnsFound = Arrays
                 .asList(Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5, Column.POS6).stream()
                 .filter(c -> mapping[c.ordinal()] >= 0).count();
@@ -127,7 +126,7 @@ public class RawLexiconReader {
             throw new CsvFieldException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Pos1 ~ Pos6 columns must appear as a set."));
         }
-        this.posStrExists = numPosColumnsFound == POS.DEPTH;
+        boolean posStrExists = numPosColumnsFound == POS.DEPTH;
         if (!posIdExists && !posStrExists) {
             throw new CsvFieldException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Both or either PosId column or Pos1~Pos6 columns are required."));
@@ -245,25 +244,33 @@ public class RawLexiconReader {
 
     /** parse POS columns. */
     private short getPos(List<String> data) {
+        boolean idColumnExists = false;
+        boolean strColumnExists = true;
+        if (!isLegacyColumnLayout()) {
+            idColumnExists = mapping[Column.POS_ID.ordinal()] >= 0;
+            // existance of POS1-6 is checked in column layout resolution
+            strColumnExists = mapping[Column.POS1.ordinal()] >= 0;
+        }
+
         short posId = -1;
         short posStrId = -1;
 
-        if (this.posIdExists) {
+        if (idColumnExists) {
             posId = getShort(data, Column.POS_ID);
         }
-        if (this.posStrExists) {
+        if (strColumnExists) {
             POS pos = new POS(
                     // comment for line break
                     get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
                     get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
             posStrId = posTable.getId(pos);
         }
-        if (this.posIdExists && this.posStrExists && posId != posStrId) {
+        if (idColumnExists && strColumnExists && posId != posStrId) {
             throw new CsvFieldException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
                     String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
         }
 
-        return this.posIdExists ? posId : posStrId;
+        return idColumnExists ? posId : posStrId;
     }
 
     /** convert csv row to RawWordEntry */

@@ -33,6 +33,7 @@ public class POSTable {
 
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
+    public boolean allowNewPos = true;
     // number of pos loaded from the system dictionary.
     private int builtin = 0;
 
@@ -44,6 +45,11 @@ public class POSTable {
      */
     short getId(POS s) {
         return lookup.computeIfAbsent(s, p -> {
+            if (!allowNewPos) {
+                throw new IllegalArgumentException(
+                        String.format("POS %s is not present in the table and new POS is not allowed", s));
+            }
+
             int next = table.size();
             if (next >= MAX_POS_NUMBER) {
                 throw new IllegalArgumentException("maximum POS number exceeded by " + s);

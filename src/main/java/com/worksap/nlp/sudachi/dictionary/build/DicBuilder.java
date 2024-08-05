@@ -73,39 +73,6 @@ public class DicBuilder {
         }
 
         /**
-         * Read POS list from the csv file.
-         */
-        public T posTable(String name, IOSupplier<InputStream> input, long size) throws IOException {
-            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
-            int nRead;
-            try (InputStream is = input.get()) {
-                InputStream stream = new ProgressInputStream(is, size, progress);
-                nRead = pos.readEntries(stream);
-            }
-            progress.endBlock(nRead, nanoTime());
-            return self();
-        }
-
-        /**
-         * Read POS list from the csv file.
-         */
-        public T posTable(URL url) throws IOException {
-            String name = url.getPath();
-            URLConnection conn = url.openConnection();
-            long size = conn.getContentLengthLong();
-            return posTable(name, conn::getInputStream, size);
-        }
-
-        /**
-         * Read POS list from the csv file.
-         */
-        public T posTable(Path path) throws IOException {
-            String name = path.getFileName().toString();
-            long size = Files.size(path);
-            return posTable(name, () -> Files.newInputStream(path), size);
-        }
-
-        /**
          * Import words from the csv lexicon into the binary dictionary compiler.
          *
          * @param name
@@ -251,6 +218,38 @@ public class DicBuilder {
             }
             description.setSignature(signature);
             return this;
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            if (!pos.allowNewPos) {
+                throw new IllegalArgumentException("POS list already loaded (only single POS file is allowed).");
+            }
+            pos.allowNewPos = false;
+
+            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
+            int nRead;
+            try (InputStream is = input.get()) {
+                InputStream stream = new ProgressInputStream(is, size, progress);
+                nRead = pos.readEntries(stream);
+            }
+            progress.endBlock(nRead, nanoTime());
+            return this;
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(URL url) throws IOException {
+            String name = url.getPath();
+            URLConnection conn = url.openConnection();
+            long size = conn.getContentLengthLong();
+            return posTable(name, conn::getInputStream, size);
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(Path path) throws IOException {
+            String name = path.getFileName().toString();
+            long size = Files.size(path);
+            return posTable(name, () -> Files.newInputStream(path), size);
         }
     }
 
