@@ -109,8 +109,8 @@ public class ConnectionMatrix {
             }
             String[] cols = WHITESPACE.split(line);
             if (cols.length < 3) {
-                throw new InputFileException(reader.getLineNumber(), line,
-                        new IllegalArgumentException("not enough entries"));
+                throw new InputFileException(reader.getLineNumber(),
+                        new IllegalArgumentException(String.format("not enough entries: %s", line)));
             }
 
             try {
@@ -119,7 +119,7 @@ public class ConnectionMatrix {
                 short cost = Short.parseShort(cols[2]);
                 conn.setCost(left, right, cost);
             } catch (NumberFormatException e) {
-                throw new InputFileException(reader.getLineNumber(), "", e);
+                throw new InputFileException(reader.getLineNumber(), e);
             }
 
             numLines += 1;

@@ -105,7 +105,7 @@ public class RawLexiconReader {
                 }
             }
             if (!columnFound) {
-                throw new CsvFieldException(parser.getName(), 0, field,
+                throw new InputFileException(parser.getName(), 0, field,
                         new IllegalArgumentException("Invalid column name"));
             }
         }
@@ -114,7 +114,7 @@ public class RawLexiconReader {
             if (column.required) {
                 StringJoiner joiner = new StringJoiner(", ", "required columns [", "] were not present in the header");
                 remaining.stream().filter(c -> c.required).forEach(c -> joiner.add(c.name()));
-                throw new CsvFieldException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
+                throw new InputFileException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
             }
         }
 
@@ -123,12 +123,12 @@ public class RawLexiconReader {
                 .asList(Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5, Column.POS6).stream()
                 .filter(c -> mapping[c.ordinal()] >= 0).count();
         if (numPosColumnsFound != 0 && numPosColumnsFound != POS.DEPTH) {
-            throw new CsvFieldException(parser.getName(), 0, "POS",
+            throw new InputFileException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Pos1 ~ Pos6 columns must appear as a set."));
         }
         boolean posStrExists = numPosColumnsFound == POS.DEPTH;
         if (!posIdExists && !posStrExists) {
-            throw new CsvFieldException(parser.getName(), 0, "POS",
+            throw new InputFileException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Both or either PosId column or Pos1~Pos6 columns are required."));
         }
     }
@@ -141,7 +141,7 @@ public class RawLexiconReader {
         }
         if (index < 0 || index >= data.size()) {
             if (column.required) {
-                throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
+                throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                         new IllegalArgumentException(String.format("column [%s] was not present", column.name())));
             } else {
                 return "";
@@ -158,7 +158,7 @@ public class RawLexiconReader {
     private String getNonEmpty(List<String> data, Column column, boolean unescape) {
         String value = get(data, column, unescape);
         if (value.isEmpty()) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
+            throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException(String.format("Column %s cannot be empty", column.name())));
         }
         return value;
@@ -170,7 +170,7 @@ public class RawLexiconReader {
         try {
             return Short.parseShort(value);
         } catch (NumberFormatException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
+            throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException(String.format("failed to parse '%s' as a short value", value)));
         }
     }
@@ -183,7 +183,7 @@ public class RawLexiconReader {
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
+            throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("int list contained more than 127 entries: " + value));
         }
         Ints result = new Ints(parts.length);
@@ -201,7 +201,7 @@ public class RawLexiconReader {
         }
         String[] parts = value.split("/");
         if (parts.length > Byte.MAX_VALUE) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(),
+            throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("reference list contained more than 127 entries: " + value));
         }
         List<WordRef> result = new ArrayList<>(parts.length);
@@ -209,7 +209,7 @@ public class RawLexiconReader {
             try {
                 result.add(refParser.parse(part));
             } catch (IllegalArgumentException e) {
-                throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(), e);
+                throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(), e);
             }
         }
         return result;
@@ -222,7 +222,7 @@ public class RawLexiconReader {
         try {
             ref = refParser.parse(value);
         } catch (IllegalArgumentException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), column.name(), e);
+            throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(), e);
         }
 
         // if parsed ref seems to refering current entry, return self-reference (null),
@@ -266,7 +266,7 @@ public class RawLexiconReader {
             posStrId = posTable.getId(pos);
         }
         if (idColumnExists && strColumnExists && posId != posStrId) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
+            throw new InputFileException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
                     String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
         }
 
@@ -300,7 +300,7 @@ public class RawLexiconReader {
         try {
             entry.validate();
         } catch (IllegalArgumentException e) {
-            throw new CsvFieldException(parser.getName(), parser.getRowCount(), "", e);
+            throw new InputFileException(parser.getName(), parser.getRowCount(), "", e);
         }
         return entry;
     }

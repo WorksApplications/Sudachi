@@ -110,14 +110,14 @@ public class POSTable {
 
             String[] cols = line.split(",");
             if (cols.length != 6) {
-                throw new InputFileException(numLines, line,
-                        new IllegalArgumentException("each POS must have 6 columns."));
+                throw new InputFileException(numLines,
+                        new IllegalArgumentException(String.format("each POS must have 6 columns: %s", line)));
             }
 
             int posid = getId(new POS(cols));
             if (posid != baseSize + numLines) {
-                throw new InputFileException(numLines, line,
-                        new IllegalArgumentException(String.format("POS already exists (%s).", posid)));
+                throw new InputFileException(numLines,
+                        new IllegalArgumentException(String.format("POS already exists (%s): %s", posid, line)));
             }
             numLines += 1;
         }
