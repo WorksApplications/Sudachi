@@ -30,7 +30,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 /**
  * Description of the dictionary blocks, in-memory representation. Basically, an
@@ -39,13 +38,12 @@ import java.util.Random;
 public class Description {
     private Instant creationTime = Instant.now();
     private String comment = "";
-    private String signature = defaultSignature(creationTime);
+    private String signature = defaultSignature(creationTime, comment);
     private String reference = "";
     private List<Block> blocks = new ArrayList<>();
     private long flags;
     private int numTotalEntries;
     private int numIndexedEntries;
-    private Random random = new Random();
 
     /**
      * Return a slice of the full dictionary with the provided name
@@ -220,10 +218,10 @@ public class Description {
         }
     }
 
-    private String defaultSignature(Instant date) {
+    private String defaultSignature(Instant date, String comment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
         return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())),
-                random.nextLong());
+                comment.hashCode());
     }
 
     public Instant getCreationTime() {
@@ -256,6 +254,14 @@ public class Description {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    /**
+     * Overwrite signature by the default value with the current creationTime and
+     * comment.
+     */
+    public void setDefaultSignature() {
+        this.signature = defaultSignature(creationTime, comment);
     }
 
     public String getReference() {

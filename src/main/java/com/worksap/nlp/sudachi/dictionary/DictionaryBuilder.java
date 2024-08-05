@@ -53,12 +53,10 @@ public class DictionaryBuilder {
         if (posPath != null) {
             builder = builder.posTable(Paths.get(posPath));
         }
-        if (signature != null) {
-            builder = builder.signature(signature);
-        }
         for (String lexiconPath : lexiconPaths) {
             builder = builder.lexicon(Paths.get(lexiconPath));
         }
+        builder = builder.signature(signature);
 
         try (SeekableByteChannel ch = Files.newByteChannel(outputPath, StandardOpenOption.WRITE,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {

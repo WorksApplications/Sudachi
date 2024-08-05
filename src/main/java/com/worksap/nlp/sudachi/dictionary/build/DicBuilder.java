@@ -202,8 +202,10 @@ public class DicBuilder {
         }
 
         /**
-         * Set the system dictionary signature to the provided string. By default, it is
-         * current timestamp and a random 8 hexadecimal characters.
+         * Set the system dictionary signature to the provided string.
+         * 
+         * If null is provided, set the default value that consists of current timestamp
+         * and a 8 hexadecimal hashcode calculated from the comment.
          * 
          * @param signature
          *            provided dictionary signature. Can not be empty.
@@ -211,8 +213,10 @@ public class DicBuilder {
          */
         public System signature(String signature) {
             if (signature == null) {
-                throw new IllegalArgumentException("signature can not be null");
+                description.setDefaultSignature();
+                return this;
             }
+
             if (signature.isEmpty()) {
                 throw new IllegalArgumentException("signature can not be empty");
             }
