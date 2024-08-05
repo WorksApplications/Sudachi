@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
-import com.worksap.nlp.sudachi.dictionary.Blocks;
+import com.worksap.nlp.sudachi.dictionary.Block;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.io.IOException;
@@ -69,11 +69,11 @@ public class Index {
      * @throws IOException
      */
     public void compile(BlockLayout layout, List<RawWordEntry> notIndexed) throws IOException {
-        TrieData data = layout.block(Blocks.WORD_POINTERS, o -> writeWordTable(o, notIndexed));
-        layout.block(Blocks.TRIE_INDEX, data::writeTrie);
+        TrieData data = layout.block(Block.WORD_POINTERS, o -> writeWordTable(o, notIndexed));
+        layout.block(Block.TRIE_INDEX, data::writeTrie);
     }
 
-    private TrieData writeWordTable(BlockOutput out, List<? extends Lookup2.Entry> notIndexed) throws IOException {
+    private TrieData writeWordTable(BlockOutput out, List<? extends EntryLookup.Entry> notIndexed) throws IOException {
         int size = this.elements.size();
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
@@ -107,7 +107,7 @@ public class Index {
             BufWriter buf = buffer.writer((nis + 1) * 5);
             buf.putVarint32(nis);
             int prevId = 0;
-            for (Lookup2.Entry e : notIndexed) {
+            for (EntryLookup.Entry e : notIndexed) {
                 int wid = e.pointer();
                 buf.putVarint32(wid - prevId);
                 prevId = wid;

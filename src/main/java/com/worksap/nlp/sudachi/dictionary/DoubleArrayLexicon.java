@@ -44,21 +44,21 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     public static DoubleArrayLexicon load(ByteBuffer bytes, Description header) {
-        ByteBuffer trieBuf = header.slice(bytes, Blocks.TRIE_INDEX);
+        ByteBuffer trieBuf = header.slice(bytes, Block.TRIE_INDEX);
         DoubleArray da = new DoubleArray();
         IntBuffer array = trieBuf.asIntBuffer();
         da.setArray(array, array.limit());
 
         WordParameters parms;
         if (header.isRuntimeCosts()) {
-            parms = WordParameters.readWrite(header.slice(bytes, Blocks.ENTRIES));
+            parms = WordParameters.readWrite(header.slice(bytes, Block.ENTRIES));
         } else {
-            parms = WordParameters.readOnly(header.slice(bytes, Blocks.ENTRIES));
+            parms = WordParameters.readOnly(header.slice(bytes, Block.ENTRIES));
         }
 
-        WordIdTable idTable = new WordIdTable(header.slice(bytes, Blocks.WORD_POINTERS));
-        WordInfoList infos = new WordInfoList(header.slice(bytes, Blocks.ENTRIES));
-        CompactedStrings strings = new CompactedStrings(header.slice(bytes, Blocks.STRINGS).asCharBuffer());
+        WordIdTable idTable = new WordIdTable(header.slice(bytes, Block.WORD_POINTERS));
+        WordInfoList infos = new WordInfoList(header.slice(bytes, Block.ENTRIES));
+        CompactedStrings strings = new CompactedStrings(header.slice(bytes, Block.STRINGS).asCharBuffer());
 
         return new DoubleArrayLexicon(header, idTable, parms, infos, da, strings);
     }

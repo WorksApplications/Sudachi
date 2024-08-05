@@ -16,13 +16,12 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.Description;
+import com.worksap.nlp.sudachi.dictionary.Description.BlockInfo;
 
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Output channel wrapper to write dictionary parts in block layout. Also
@@ -91,39 +90,16 @@ public class BlockLayout {
         long start = alignPosition();
         T result = handler.apply(new BlockOutput(chan, progress));
         long end = chan.position();
-        info.add(new BlockInfo(name, start, end));
+        info.add(new BlockInfo(name, start, end - start));
         return result;
     }
 
     /**
      * Returns the summary of block written.
      * 
-     * @return block information in the Description.Block format.
+     * @return block information list.
      */
-    public List<Description.Block> blocks() {
-        List<Description.Block> result = new ArrayList<>();
-        for (BlockInfo b : info) {
-            Description.Block published = new Description.Block(b.name, b.start, b.end - b.start);
-            result.add(published);
-        }
-        return result;
-    }
-
-    private static class BlockInfo {
-        String name;
-        long start;
-        long end;
-
-        public BlockInfo(String name, long start, long end) {
-            this.name = name;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", BlockInfo.class.getSimpleName() + "[", "]").add("name='" + name + "'")
-                    .add("start=" + start).add("end=" + end).toString();
-        }
+    public List<BlockInfo> blocks() {
+        return info;
     }
 }

@@ -16,7 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.Blocks;
+import com.worksap.nlp.sudachi.dictionary.Block;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Ints;
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
@@ -157,8 +157,8 @@ public class RawLexicon {
     public void compile(BlockLayout layout) throws IOException {
         index.compile(layout, notIndexed);
         // entry layout requires stringstorage to be compiled beforehand.
-        layout.block(Blocks.STRINGS, this::writeStrings);
-        layout.block(Blocks.ENTRIES, this::writeEntries);
+        layout.block(Block.STRINGS, this::writeStrings);
+        layout.block(Block.ENTRIES, this::writeEntries);
     }
 
     private Void writeStrings(BlockOutput blockOutput) throws IOException {
@@ -172,7 +172,8 @@ public class RawLexicon {
     private Void writeEntries(BlockOutput blockOutput) throws IOException {
         return blockOutput.measured("Word Entries", p -> {
             List<RawWordEntry> list = entries;
-            Lookup2 lookup = isUser ? new Lookup2(preloadedEntries, list) : new Lookup2(list, new ArrayList<>());
+            EntryLookup lookup = isUser ? new EntryLookup(preloadedEntries, list)
+                    : new EntryLookup(list, new ArrayList<>());
             BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), WordEntryLayout.MAX_LENGTH * 4);
             buf.position(INITIAL_OFFSET);
             WordEntryLayout layout = new WordEntryLayout(lookup, strings, buf, isUser);
@@ -200,7 +201,7 @@ public class RawLexicon {
      * @param lookup
      * @return 1 if phantom entry added, 0 otherwise
      */
-    private int addPhantomEntries(RawWordEntry entry, List<RawWordEntry> list, Lookup2 lookup) {
+    private int addPhantomEntries(RawWordEntry entry, List<RawWordEntry> list, EntryLookup lookup) {
         if (entry.normalizedForm instanceof WordRef.Headword) {
             WordRef.Headword ref = (WordRef.Headword) entry.normalizedForm;
             if (lookup.byHeadword(ref.getHeadword()) != null) {

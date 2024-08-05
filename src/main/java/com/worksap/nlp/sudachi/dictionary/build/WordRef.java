@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public abstract class WordRef {
     /** resolve word ref into pointer (word id) using resolver. */
-    public abstract int resolve(Lookup2 resolver);
+    public abstract int resolve(EntryLookup resolver);
 
     /**
      * Encode the target entry as wordref.
@@ -43,7 +43,7 @@ public abstract class WordRef {
      *            to encode
      * @return encoded wordref
      */
-    public int intoWordRef(Lookup2.EntryWithFlag entry) {
+    public int intoWordRef(EntryLookup.EntryWithFlag entry) {
         return WordId.make(entry.isUser ? 1 : 0, entry.pointer());
     }
 
@@ -64,7 +64,7 @@ public abstract class WordRef {
         }
 
         @Override
-        public int resolve(Lookup2 resolver) {
+        public int resolve(EntryLookup resolver) {
             return intoWordRef(resolver.byIndex(line, isUser));
         }
 
@@ -105,8 +105,8 @@ public abstract class WordRef {
         }
 
         @Override
-        public int resolve(Lookup2 resolver) {
-            List<Lookup2.EntryWithFlag> entries = resolver.byHeadword(headword);
+        public int resolve(EntryLookup resolver) {
+            List<EntryLookup.EntryWithFlag> entries = resolver.byHeadword(headword);
             return intoWordRef(entries.get(0));
         }
 
@@ -158,12 +158,12 @@ public abstract class WordRef {
         }
 
         @Override
-        public int resolve(Lookup2 resolver) {
-            List<Lookup2.EntryWithFlag> entries = resolver.byHeadword(headword);
+        public int resolve(EntryLookup resolver) {
+            List<EntryLookup.EntryWithFlag> entries = resolver.byHeadword(headword);
             if (entries == null) {
                 throw new IllegalArgumentException("matching entry not found for the " + this.toString());
             }
-            for (Lookup2.EntryWithFlag entry : entries) {
+            for (EntryLookup.EntryWithFlag entry : entries) {
                 if (entry.matches(posId, reading)) {
                     return intoWordRef(entry);
                 }

@@ -23,7 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class WordLayoutTest {
+class StringLayoutTest {
   companion object {
     fun CharBuffer.read(ptr: StringPtr): String {
       return substring(ptr.offset, ptr.offset + ptr.length)
@@ -32,7 +32,7 @@ class WordLayoutTest {
 
   @Test
   fun alignmentBasedPlacement() {
-    val layout = WordLayout()
+    val layout = StringLayout()
     val p1 = layout.add("0".repeat(25))
     val p2 = layout.add("1".repeat(23))
     val p3 = layout.add("2".repeat(15))
@@ -55,7 +55,7 @@ class WordLayoutTest {
 
   @Test
   fun alignmentPlacedPlacementLarge() {
-    val layout = WordLayout()
+    val layout = StringLayout()
     val ptrs = ArrayList<StringPtr>()
     for (i in 0..499) {
       val char = 500 - i
@@ -75,7 +75,7 @@ class WordLayoutTest {
 
   @Test
   fun alignmentPlacedPlacementHoles() {
-    val layout = WordLayout()
+    val layout = StringLayout()
     val ptrs = ArrayList<StringPtr>()
     for (i in 0..3) {
       val count = 200 - 5 * i
@@ -108,7 +108,7 @@ class WordLayoutTest {
 
   @Test
   fun coverage() {
-    val layout = WordLayout()
+    val layout = StringLayout()
     assertEquals(0, layout.wastedBytes())
     assertEquals(0, layout.numSlots())
     assertNotNull(layout.toString())

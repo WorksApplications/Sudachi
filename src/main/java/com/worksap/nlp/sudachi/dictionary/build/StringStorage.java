@@ -30,7 +30,7 @@ public class StringStorage implements StringIndex {
     private final HashMap<String, Item> strings = new HashMap<>();
     private final HashMap<String, Item> candidates = new HashMap<>();
     // compacted strings layout
-    private final WordLayout layout = new WordLayout();
+    private final StringLayout layout = new StringLayout();
 
     /**
      * Add string to the storage.

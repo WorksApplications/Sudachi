@@ -25,7 +25,7 @@ class DescriptionTest {
   @Test
   fun serialization() {
     val d = Description()
-    d.blocks = listOf(Description.Block("test", 5, 15), Description.Block("test2", 30, 25))
+    d.blocks = listOf(Description.BlockInfo("test", 5, 15), Description.BlockInfo("test2", 30, 25))
     d.reference = "testref"
     d.comment = "コメント"
     val chan = InMemoryChannel(4096)

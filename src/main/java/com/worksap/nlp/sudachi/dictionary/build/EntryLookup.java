@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Utility to lookup entries from the list.
  */
-public class Lookup2 {
+public class EntryLookup {
     public interface Entry {
         /** @return wordid of the entry. */
         int pointer();
@@ -68,7 +68,7 @@ public class Lookup2 {
     // mapping to entries that have same surfaces
     private final Map<String, List<EntryWithFlag>> bySurface;
 
-    public Lookup2(List<? extends Entry> systemEntries, List<? extends Entry> userEntries) {
+    public EntryLookup(List<? extends Entry> systemEntries, List<? extends Entry> userEntries) {
         this.systemEntries = systemEntries;
         this.userEntries = userEntries;
 

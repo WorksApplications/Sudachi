@@ -30,20 +30,159 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringJoiner;
 
 /**
  * Description of the dictionary blocks, in-memory representation. Basically, an
  * extended version of the dictionary header.
  */
 public class Description {
+    private static final byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
+
     private Instant creationTime = Instant.now();
     private String comment = "";
     private String signature = defaultSignature(creationTime, comment);
     private String reference = "";
-    private List<Block> blocks = new ArrayList<>();
+    private List<BlockInfo> blocks = new ArrayList<>();
     private long flags;
     private int numTotalEntries;
     private int numIndexedEntries;
+
+    /** Load Description from bytes. */
+    public static Description load(ByteBuffer raw) {
+        checkLegacyDictionaryFormat(raw);
+        checkMagic(raw);
+        long version = raw.getLong();
+        if (version == 1) {
+            return loadV1(raw);
+        } else {
+            throw new IllegalArgumentException(String.format("invalid version %d, corrupted dictionary", version));
+        }
+    }
+
+    /** Load Description from the first block of the channel. */
+    public static Description load(SeekableByteChannel channel) throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(4096);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        if (channel.read(buf) == -1) {
+            throw new IllegalArgumentException("end of channel");
+        }
+        buf.flip();
+        return load(buf);
+    }
+
+    private static void checkMagic(ByteBuffer raw) {
+        assert MAGIC_BYTES.length == 16;
+        byte[] expected = new byte[MAGIC_BYTES.length];
+        raw.get(expected);
+        for (int i = 0; i < expected.length; i++) {
+            if (MAGIC_BYTES[i] != expected[i]) {
+                throw new IllegalArgumentException("invalid magic string, dictionary is corrupted");
+            }
+        }
+    }
+
+    private static void checkLegacyDictionaryFormat(ByteBuffer raw) {
+        long version = raw.getLong(0);
+        if (LegacyDictionaryVersion.isSystemDictionary(version)) {
+            throw new IllegalArgumentException("passed dictionary is a legacy system dictionary, please rebuild it");
+        }
+        if (LegacyDictionaryVersion.isUserDictionary(version)) {
+            throw new IllegalArgumentException("passed dictionary is a legacy user dictionary, please rebuild it");
+        }
+    }
+
+    /** Load V1 format description. */
+    private static Description loadV1(ByteBuffer raw) {
+        Description desc = new Description();
+        BufReader reader = new BufReader(raw);
+        desc.creationTime = Instant.ofEpochSecond(reader.readLong());
+        desc.flags = reader.readLong();
+        desc.comment = reader.readUtf8String();
+        desc.signature = reader.readUtf8String();
+        desc.reference = reader.readUtf8String();
+        desc.numIndexedEntries = reader.readVarint32();
+        desc.numTotalEntries = reader.readVarint32();
+        int length = reader.readVarint32();
+        for (int i = 0; i < length; ++i) {
+            BlockInfo b = new BlockInfo(reader.readUtf8String(), reader.readVarint64(), reader.readVarint64());
+            desc.blocks.add(b);
+        }
+
+        return desc;
+    }
+
+    /** Save this Description (V1 format). */
+    public void save(SeekableByteChannel channel) throws IOException {
+        ByteBuffer buff = ByteBuffer.allocate(4096);
+        buff.order(ByteOrder.LITTLE_ENDIAN);
+        buff.put(MAGIC_BYTES);
+        BufWriter writer = new BufWriter(buff);
+        writer.putLong(1); // version
+        writer.putLong(creationTime.getEpochSecond());
+        writer.putLong(flags);
+        writer.putUtf8String(comment);
+        writer.putUtf8String(signature);
+        writer.putUtf8String(reference);
+        writer.putVarint32(numIndexedEntries);
+        writer.putVarint32(numTotalEntries);
+        int length = blocks.size();
+        writer.putVarint32(length);
+        for (BlockInfo b : blocks) {
+            writer.putUtf8String(b.getName());
+            writer.putVarint64(b.getStart());
+            writer.putVarint64(b.getSize());
+        }
+
+        // write to the first block
+        long pos = channel.position();
+        channel.position(0);
+        buff.flip();
+        channel.write(buff);
+        channel.position(pos);
+    }
+
+    public static class BlockInfo {
+        private final String name;
+        private final long start;
+        private final long size;
+
+        public BlockInfo(String name, long start, long size) {
+            this.name = name;
+            this.start = start;
+            this.size = size;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getStart() {
+            return start;
+        }
+
+        public long getSize() {
+            return size;
+        }
+
+        public long getEnd() {
+            return start + size;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", BlockInfo.class.getSimpleName() + "[", "]").add("name='" + name + "'")
+                    .add("start=" + start).add("end=" + getEnd()).toString();
+        }
+    }
+
+    public boolean isSystemDictionary() {
+        return reference.isEmpty();
+    }
+
+    public boolean isUserDictionary() {
+        return !reference.isEmpty();
+    }
 
     /**
      * Return a slice of the full dictionary with the provided name
@@ -76,10 +215,10 @@ public class Description {
      * @return slice of the ByteBuffer or null if not found
      */
     public ByteBuffer sliceOrNull(ByteBuffer full, String part) {
-        for (Block b : blocks) {
-            if (b.name.equals(part)) {
-                int start = (int) b.start;
-                int end = (int) (b.start + b.size);
+        for (BlockInfo b : blocks) {
+            if (b.getName().equals(part)) {
+                int start = (int) b.getStart();
+                int end = (int) (b.getEnd());
                 int position = full.position();
                 int limit = full.limit();
                 full.position(start);
@@ -94,141 +233,11 @@ public class Description {
         return null;
     }
 
-    public boolean isSystemDictionary() {
-        return reference.isEmpty();
-    }
-
-    public boolean isUserDictionary() {
-        return !reference.isEmpty();
-    }
-
-    public static class Block {
-        private final String name;
-        private final long start;
-        private final long size;
-
-        public Block(String name, long start, long size) {
-            this.name = name;
-            this.start = start;
-            this.size = size;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public long getStart() {
-            return start;
-        }
-
-        public long getSize() {
-            return size;
-        }
-    }
-
-    public static Description load(SeekableByteChannel channel) throws IOException {
-        ByteBuffer buf = ByteBuffer.allocate(4096);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        if (channel.read(buf) == -1) {
-            throw new IllegalArgumentException("end of channel");
-        }
-        buf.flip();
-        return load(buf);
-    }
-
-    public static Description load(ByteBuffer raw) {
-        checkLegacyDictionaryFormat(raw);
-        checkMagic(raw);
-        long version = raw.getLong();
-        if (version == 1) {
-            return loadV1(raw);
-        } else {
-            throw new IllegalArgumentException(String.format("invalid version %d, corrupted dictionary", version));
-        }
-    }
-
-    private static Description loadV1(ByteBuffer raw) {
-        Description desc = new Description();
-        BufReader reader = new BufReader(raw);
-        desc.creationTime = Instant.ofEpochSecond(reader.readLong());
-        desc.flags = reader.readLong();
-        desc.comment = reader.readUtf8String();
-        desc.signature = reader.readUtf8String();
-        desc.reference = reader.readUtf8String();
-        desc.numIndexedEntries = reader.readVarint32();
-        desc.numTotalEntries = reader.readVarint32();
-        int length = reader.readVarint32();
-        for (int i = 0; i < length; ++i) {
-            Block b = new Block(reader.readUtf8String(), reader.readVarint64(), reader.readVarint64());
-            desc.blocks.add(b);
-        }
-
-        return desc;
-    }
-
-    public void save(SeekableByteChannel channel) throws IOException {
-        ByteBuffer buff = ByteBuffer.allocate(4096);
-        buff.order(ByteOrder.LITTLE_ENDIAN);
-        buff.put(MAGIC_BYTES);
-        BufWriter writer = new BufWriter(buff);
-        writer.putLong(1); // version
-        writer.putLong(creationTime.getEpochSecond());
-        writer.putLong(flags);
-        writer.putUtf8String(comment);
-        writer.putUtf8String(signature);
-        writer.putUtf8String(reference);
-        writer.putVarint32(numIndexedEntries);
-        writer.putVarint32(numTotalEntries);
-        int length = blocks.size();
-        writer.putVarint32(length);
-        for (Block b : blocks) {
-            writer.putUtf8String(b.name);
-            writer.putVarint64(b.start);
-            writer.putVarint64(b.size);
-        }
-
-        // write to the first block
-        long pos = channel.position();
-        channel.position(0);
-        buff.flip();
-        channel.write(buff);
-        channel.position(pos);
-    }
-
-    private static final byte[] MAGIC_BYTES = "SudachiBinaryDic".getBytes(StandardCharsets.UTF_8);
-
-    private static void checkMagic(ByteBuffer raw) {
-        assert MAGIC_BYTES.length == 16;
-        byte[] expected = new byte[MAGIC_BYTES.length];
-        raw.get(expected);
-        for (int i = 0; i < expected.length; i++) {
-            if (MAGIC_BYTES[i] != expected[i]) {
-                throw new IllegalArgumentException("invalid magic string, dictionary is corrupted");
-            }
-        }
-    }
-
-    private static void checkLegacyDictionaryFormat(ByteBuffer raw) {
-        long version = raw.getLong(0);
-        if (LegacyDictionaryVersion.isSystemDictionary(version)) {
-            throw new IllegalArgumentException("passed dictionary is a legacy system dictionary, please rebuild it");
-        }
-        if (LegacyDictionaryVersion.isUserDictionary(version)) {
-            throw new IllegalArgumentException("passed dictionary is a legacy user dictionary, please rebuild it");
-        }
-    }
-
-    private String defaultSignature(Instant date, String comment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
-        return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())),
-                comment.hashCode());
-    }
-
     public Instant getCreationTime() {
         return creationTime;
     }
 
-    public void setCompilationTime(Instant creationTime) {
+    public void setCreationTime(Instant creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -246,6 +255,12 @@ public class Description {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    private String defaultSignature(Instant date, String comment) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
+        return String.format("%s-%08x", formatter.format(LocalDateTime.ofInstant(date, ZoneId.systemDefault())),
+                comment.hashCode());
     }
 
     public String getSignature() {
@@ -272,11 +287,11 @@ public class Description {
         this.reference = reference;
     }
 
-    public List<Block> getBlocks() {
+    public List<BlockInfo> getBlocks() {
         return blocks;
     }
 
-    public void setBlocks(List<Block> blocks) {
+    public void setBlocks(List<BlockInfo> blocks) {
         this.blocks = blocks;
     }
 

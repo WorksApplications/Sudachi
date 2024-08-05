@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
-import com.worksap.nlp.sudachi.dictionary.Blocks;
+import com.worksap.nlp.sudachi.dictionary.Block;
 import com.worksap.nlp.sudachi.dictionary.Description;
 
 import java.io.IOException;
@@ -154,8 +154,8 @@ public class DicBuilder {
          *            time to set
          * @return current object
          */
-        public T compilationTime(Instant instant) {
-            description.setCompilationTime(Objects.requireNonNull(instant));
+        public T creationTime(Instant instant) {
+            description.setCreationTime(Objects.requireNonNull(instant));
             return self();
         }
 
@@ -171,9 +171,9 @@ public class DicBuilder {
             BlockLayout layout = new BlockLayout(channel, progress);
             layout.keepBlocks(1); // keep space for the Description.
             if (connection.nonEmpty()) {
-                layout.block(Blocks.CONNECTION_MATRIX, connection::compile);
+                layout.block(Block.CONNECTION_MATRIX, connection::compile);
             }
-            layout.block(Blocks.POS_TABLE, pos::compile);
+            layout.block(Block.POS_TABLE, pos::compile);
             lexicon.compile(layout);
             description.setBlocks(layout.blocks());
             description.setNumberOfEntries(lexicon.getIndexedEntries(), lexicon.getTotalEntries());

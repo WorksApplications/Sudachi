@@ -16,7 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
-import com.worksap.nlp.sudachi.dictionary.Blocks
+import com.worksap.nlp.sudachi.dictionary.Block
 import com.worksap.nlp.sudachi.dictionary.Description
 import com.worksap.nlp.sudachi.dictionary.GrammarImpl
 import com.worksap.nlp.sudachi.dictionary.POS
@@ -33,8 +33,8 @@ class GrammarTest {
     assertEquals(0, pos.getId(POS("a", "b", "c", "d", "e", "f")))
     val outbuf = MemChannel()
     val layout = BlockLayout(outbuf)
-    layout.block(Blocks.POS_TABLE, pos::compile)
-    layout.block(Blocks.CONNECTION_MATRIX, cm::compile)
+    layout.block(Block.POS_TABLE, pos::compile)
+    layout.block(Block.CONNECTION_MATRIX, cm::compile)
     val description = Description()
     description.setBlocks(layout.blocks())
     val grammar = GrammarImpl.load(outbuf.buffer(), description)
@@ -81,8 +81,8 @@ class GrammarTest {
     val outbuf = MemChannel()
 
     val layout = BlockLayout(outbuf)
-    layout.block(Blocks.POS_TABLE, posTable::compile)
-    layout.block(Blocks.CONNECTION_MATRIX, cm::compile)
+    layout.block(Block.POS_TABLE, posTable::compile)
+    layout.block(Block.CONNECTION_MATRIX, cm::compile)
     val description = Description()
     description.setBlocks(layout.blocks())
     val grammar = GrammarImpl.load(outbuf.buffer(), description)

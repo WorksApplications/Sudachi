@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class WordEntryLayout {
     private final StringIndex index;
-    private final Lookup2 lookup;
+    private final EntryLookup lookup;
     private final BufferedChannel buffer;
     private final boolean isUser;
 
@@ -43,7 +43,7 @@ public class WordEntryLayout {
             + Byte.MAX_VALUE * Integer.BYTES * 5 // splits and synonyms
             + (Short.MAX_VALUE + 1) * Character.BYTES; // user data
 
-    public WordEntryLayout(Lookup2 resolver, StringIndex index, BufferedChannel buffer, boolean isUser) {
+    public WordEntryLayout(EntryLookup resolver, StringIndex index, BufferedChannel buffer, boolean isUser) {
         this.lookup = resolver;
         this.index = index;
         this.buffer = buffer;

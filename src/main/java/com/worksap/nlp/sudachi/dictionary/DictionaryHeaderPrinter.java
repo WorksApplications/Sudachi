@@ -57,7 +57,7 @@ public class DictionaryHeaderPrinter {
         output.printf("Reference: %s%n", desc.getReference());
         output.printf("Entries total: %d%n", desc.getNumTotalEntries());
         output.printf("Entries indexed: %d%n", desc.getNumIndexedEntries());
-        for (Description.Block b : desc.getBlocks()) {
+        for (Description.BlockInfo b : desc.getBlocks()) {
             long start = b.getStart();
             output.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
         }

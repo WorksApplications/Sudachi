@@ -27,10 +27,10 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * Used to resolve wordref that references entry in the system dictionary
  * (during user dictinary build).
  */
-public class CompiledWordEntry implements Lookup2.Entry {
+public class CompiledWordEntry implements EntryLookup.Entry {
     private final Lexicon lexicon;
     private final int wordId;
-    private WordInfo wiCache = null;
+    private WordInfo wordInfo = null;
 
     public CompiledWordEntry(Lexicon lexicon, int wordId) {
         this.lexicon = lexicon;
@@ -38,11 +38,11 @@ public class CompiledWordEntry implements Lookup2.Entry {
     }
 
     private WordInfo wordInfo() {
-        if (wiCache != null) {
-            return wiCache;
+        if (wordInfo != null) {
+            return wordInfo;
         }
-        wiCache = lexicon.getWordInfo(wordId);
-        return wiCache;
+        wordInfo = lexicon.getWordInfo(wordId);
+        return wordInfo;
     }
 
     @Override

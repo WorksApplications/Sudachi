@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * Raw word info entry parsed from the lexicon csv.
  */
 @SuppressWarnings("jol")
-public class RawWordEntry implements Lookup2.Entry {
+public class RawWordEntry implements EntryLookup.Entry {
     int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
     String headword;
     String reading;

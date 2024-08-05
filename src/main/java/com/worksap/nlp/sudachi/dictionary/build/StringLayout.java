@@ -19,6 +19,8 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.StringPtr;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +47,7 @@ import java.util.StringJoiner;
  * needed and guarding against relatively expensive checking free lists with
  * additional conditions.
  */
-public class WordLayout {
+public class StringLayout {
     private final UnicodeBufferResizeable buffer = new UnicodeBufferResizeable();
     private final ArrayList<FreeSpace> free = new ArrayList<>();
     private boolean freeDirty = false;
@@ -271,5 +273,34 @@ public class WordLayout {
 
     int numSlots() {
         return free.size();
+    }
+
+    /** Resizable byte buffer to store string */
+    private class UnicodeBufferResizeable {
+        private ResizableBuffer buffer;
+
+        public UnicodeBufferResizeable(int size) {
+            this.buffer = new ResizableBuffer(size);
+        }
+
+        public UnicodeBufferResizeable() {
+            this(64 * 1024);
+        }
+
+        /** put specified (char) range of the string to the buffer from offset */
+        public void put(int offset, String data, int start, int end) {
+            CharBuffer chars = prepare(offset, end - start);
+            chars.put(data, start, end);
+        }
+
+        private CharBuffer prepare(int offset, int numChars) {
+            ByteBuffer buf = buffer.prepare(offset * 2, numChars * 2);
+            return buf.asCharBuffer();
+        }
+
+        /** write specified (byte) range of the buffer to the channel */
+        public void write(WritableByteChannel channel, int start, int end) throws IOException {
+            buffer.write(channel, start, end);
+        }
     }
 }
