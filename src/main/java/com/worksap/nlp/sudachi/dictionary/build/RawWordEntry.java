@@ -106,6 +106,9 @@ public class RawWordEntry implements Lookup2.Entry {
     public void validate() {
         checkString(headword, "headword");
         checkString(reading, "reading");
+        if (normalizedForm instanceof WordRef.Headword) {
+            checkString(((WordRef.Headword) normalizedForm).getHeadword(), "normalized form");
+        }
     }
 
     /**

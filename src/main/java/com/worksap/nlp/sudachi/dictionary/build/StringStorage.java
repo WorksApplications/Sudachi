@@ -88,10 +88,11 @@ public class StringStorage implements StringIndex {
                 int end = offsets[j];
                 String sub = str.substring(start, end);
                 // Create a possible substring only if
-                // 1. It does not exist yet
-                // 2. Can form a valid pointer to it (string pointer requires aligned offset
+                // 1. It will be used later
+                // 2. It does not exist yet
+                // 3. Can form a valid pointer to it (string pointer requires aligned offset
                 // based on str length)
-                if (!candidates.containsKey(sub) && ptr.isSubseqValid(start, end)) {
+                if (strings.containsKey(sub) && !candidates.containsKey(sub) && ptr.isSubseqValid(start, end)) {
                     Item item = new Item(str, start, end);
                     item.root = full;
                     candidates.put(sub, item);
