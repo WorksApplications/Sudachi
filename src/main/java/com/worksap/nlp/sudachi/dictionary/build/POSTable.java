@@ -64,6 +64,11 @@ public class POSTable {
         return table;
     }
 
+    /** @return number of all POSs in the table. */
+    int size() {
+        return table.size();
+    }
+
     /**
      * @return number of non-builtin POSs.
      */
@@ -90,9 +95,9 @@ public class POSTable {
     }
 
     /**
-     * Load pos table from the text format.
+     * Load pos table from the text. Assume 6-column csv without header.
      * 
-     * Assume 6-column csv without header.
+     * After load, set allowNewPos false and inhibit adding new POS.
      * 
      * @param data
      * @return number read.
@@ -121,6 +126,7 @@ public class POSTable {
             }
             numLines += 1;
         }
+        allowNewPos = false;
         return numLines;
     }
 

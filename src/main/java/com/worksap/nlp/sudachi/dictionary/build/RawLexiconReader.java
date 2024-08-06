@@ -255,22 +255,38 @@ public class RawLexiconReader {
         short posId = -1;
         short posStrId = -1;
 
-        if (idColumnExists) {
+        if (idColumnExists && (!strColumnExists || !get(data, Column.POS_ID, false).isEmpty())) {
+            // if both id/parts exist, allow empty (-1)
             posId = getShort(data, Column.POS_ID);
+
+            if (posId >= posTable.size()) {
+                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
+                        new IllegalArgumentException(
+                                String.format("POS for id %d is not present in the table.", posId)));
+            }
         }
-        if (strColumnExists) {
+        if (strColumnExists && (!idColumnExists || !get(data, Column.POS1, false).isEmpty())) {
+            // if both id/parts exist, allow empty (-1)
             POS pos = new POS(
                     // comment for line break
                     get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
                     get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
             posStrId = posTable.getId(pos);
         }
-        if (idColumnExists && strColumnExists && posId != posStrId) {
-            throw new InputFileException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
-                    String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
+
+        if (idColumnExists && strColumnExists) {
+            if (posId < 0 && posStrId < 0) {
+                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
+                        new IllegalArgumentException("Both PosId and Pos1-6 are empty."));
+            }
+            if (posId >= 0 && posStrId >= 0 && posId != posStrId) {
+                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
+                        new IllegalArgumentException(
+                                String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
+            }
         }
 
-        return idColumnExists ? posId : posStrId;
+        return posId >= 0 ? posId : posStrId;
     }
 
     /** convert csv row to RawWordEntry */
