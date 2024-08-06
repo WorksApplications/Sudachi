@@ -128,7 +128,7 @@ public class WordInfo {
     /**
      * Returns the entry ref of the normalized form of the morpheme. The information
      * of the dictionary form can be gotten with
-     * {@link com.worksap.nlp.sudachi.WordId#resolveRef} and
+     * {@link com.worksap.nlp.sudachi.WordId#refDic} and
      * {@link Lexicon#getWordInfo}.
      *
      * @return the word ref of the normalized form of the morpheme
@@ -140,7 +140,7 @@ public class WordInfo {
     /**
      * Returns the entry ref of the dictionary form of the morpheme. The information
      * of the dictionary form can be gotten with
-     * {@link com.worksap.nlp.sudachi.WordId#resolveRef} and
+     * {@link com.worksap.nlp.sudachi.WordId#refDic} and
      * {@link Lexicon#getWordInfo}.
      *
      * @return the word ref of the dictionary form of the morpheme

@@ -97,8 +97,6 @@ public class POSTable {
     /**
      * Load pos table from the text. Assume 6-column csv without header.
      * 
-     * After load, set allowNewPos false and inhibit adding new POS.
-     * 
      * @param data
      * @return number read.
      */
@@ -126,7 +124,6 @@ public class POSTable {
             }
             numLines += 1;
         }
-        allowNewPos = false;
         return numLines;
     }
 

@@ -26,7 +26,6 @@ import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.MMap;
 
 public class BinaryDictionary implements Closeable, DictionaryAccess {
-
     private final ByteBuffer bytes;
     private final Description header;
     private final GrammarImpl grammar;

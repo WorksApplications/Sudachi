@@ -120,45 +120,22 @@ public class WordId {
         return (wordId & MAX_WORD_ID) | dicIdMask;
     }
 
-    /** Override dictionary part of the word id with given dic id. */
-    public static int overrideDic(int wordId, int dicId) {
-        return applyMask(wordId, dicIdMask(dicId));
-    }
-
     /**
-     * Resolve dic id to refer.
+     * Resolve dic id that the wordRef points to.
+     * 
+     * Dict part of WordRef only contains a flag whether if it points to system or
+     * user dict.
      * 
      * @param wordRef
      *            word ref taken from word entry.
      * @param actualDicId
      *            dic id of the dict which the word entry comes from.
-     * @return dic id which the wordid referring to.
+     * @return dic id that the wordref refers to.
      */
     public static int refDic(int wordRef, int actualDicId) {
-        // 1 if wordref refers to the entry inside same dict, 0 otherwise (i.e. refers
-        // to system dict entry)
-        boolean isReferringUser = dic(wordRef) == 1;
-        if (isReferringUser) {
-            return actualDicId;
-        }
-        return 0; // system dict id
-    }
-
-    /**
-     * Fill flag part of word ref with actual dic id.
-     * 
-     * @param wordRef
-     *            word ref taken from word entry.
-     * @param actualDicId
-     *            dic id of the dict which the word entry comes from.
-     * @return dic id which the wordid referring to.
-     */
-    public static int resolveRef(int wordRef, int actualDicId) {
-        boolean isReferringUser = dic(wordRef) == 1;
-        if (isReferringUser) {
-            return overrideDic(wordRef, actualDicId);
-        }
-        return wordRef; // dict part is 0 and thus no need to change.
+        // dic(wordRef) == 1 if wordref refers to the entry inside same dict, 0
+        // otherwise (i.e. refers to system dict entry)
+        return dic(wordRef) * actualDicId;
     }
 
     /** @return if given word id represents OOV. */

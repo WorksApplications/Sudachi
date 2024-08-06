@@ -44,8 +44,8 @@ public class BufWriter {
         return this;
     }
 
-    public BufWriter putLong(long x) {
-        buffer.putLong(x);
+    public BufWriter putLong(long val) {
+        buffer.putLong(val);
         return this;
     }
 
@@ -105,7 +105,7 @@ public class BufWriter {
     }
 
     /**
-     * Encode string which has length is shorter than Short.MAX_VALUE
+     * Encode string which has length shorter than Short.MAX_VALUE
      * 
      * @param s
      *            string to put in the buffer. Must be shorter than Short.MAX_VALUE.

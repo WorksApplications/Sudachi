@@ -229,13 +229,13 @@ public class DicBuilder {
             if (!pos.allowNewPos) {
                 throw new IllegalArgumentException("POS list already loaded (only single POS file is allowed).");
             }
-            pos.allowNewPos = false;
 
             progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
             int nRead;
             try (InputStream is = input.get()) {
                 InputStream stream = new ProgressInputStream(is, size, progress);
                 nRead = pos.readEntries(stream);
+                pos.allowNewPos = false;
             }
             progress.endBlock(nRead, nanoTime());
             return this;

@@ -192,8 +192,6 @@ public abstract class WordRef {
         }
     }
 
-    private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
-
     /** Alias of WordRef.Parser constructor. */
     public static Parser parser(POSTable posTable, boolean allowLineNo, boolean allowHeadword,
             boolean allowNullAsterisk) {
@@ -202,6 +200,9 @@ public abstract class WordRef {
 
     /** Parser to parse wordref from a string in the lexicon field. */
     public static class Parser {
+        public static final char WORDREF_DELIMITER = ',';
+        private static final Pattern NUMERIC_RE = Pattern.compile("^U?\\d+$");
+
         private final POSTable posTable;
         private final boolean allowLineNo;
         private final boolean allowHeadword;
@@ -227,8 +228,8 @@ public abstract class WordRef {
                 return new LineNo(lineNum, isUser);
             }
 
-            if (StringUtil.count(text, ',') == 7) {
-                String[] cols = text.split(",", 8);
+            if (StringUtil.count(text, WORDREF_DELIMITER) == 7) {
+                String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 8);
                 String headword = Unescape.unescape(cols[0]);
                 String[] posElems = Arrays.copyOfRange(cols, 1, 7);
                 for (int i = 0; i < POS.DEPTH; ++i) {
