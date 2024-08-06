@@ -17,7 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary
 
 import com.worksap.nlp.sudachi.TestDictionary
-import com.worksap.nlp.sudachi.dictionary.build.InMemoryChannel
+import com.worksap.nlp.sudachi.dictionary.build.MemChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,7 +28,7 @@ class DescriptionTest {
     d.blocks = listOf(Description.BlockInfo("test", 5, 15), Description.BlockInfo("test2", 30, 25))
     d.reference = "testref"
     d.comment = "コメント"
-    val chan = InMemoryChannel(4096)
+    val chan = MemChannel(4096)
     d.save(chan)
     chan.position(0)
     val d2 = Description.load(chan)

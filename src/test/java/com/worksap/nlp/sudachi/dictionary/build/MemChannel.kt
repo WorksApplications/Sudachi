@@ -23,28 +23,33 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-class MemChannel : SeekableByteChannel {
-  private var buffer: ByteBuffer = ByteBuffer.allocate(1024 * 1024)
+class MemChannel(bufSize: Int = 1024 * 1024) : SeekableByteChannel {
+  private var buffer: ByteBuffer = ByteBuffer.allocate(bufSize)
   private var size = 0L
 
   init {
     buffer.order(ByteOrder.LITTLE_ENDIAN)
   }
 
+  // always open
   override fun close() {}
 
   override fun isOpen(): Boolean {
     return true
   }
 
-  override fun read(p0: ByteBuffer?): Int {
-    throw UnsupportedOperationException()
+  override fun read(dst: ByteBuffer?): Int {
+    val src = buffer
+    val position = src.position()
+    dst!!.put(src)
+    val newPosition = src.position()
+    return newPosition - position
   }
 
-  override fun write(p0: ByteBuffer?): Int {
-    val remaining = p0!!.remaining()
+  override fun write(src: ByteBuffer?): Int {
+    val remaining = src!!.remaining()
     reserve(remaining)
-    buffer.put(p0)
+    buffer.put(src)
     val pos = buffer.position().toLong()
     if (pos > size) {
       size = pos

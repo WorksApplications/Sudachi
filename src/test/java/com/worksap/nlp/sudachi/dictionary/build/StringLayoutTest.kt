@@ -39,7 +39,7 @@ class StringLayoutTest {
     val p4 = layout.add("3".repeat(4))
     val p5 = layout.add("4".repeat(1))
     val p6 = layout.add("5".repeat(2))
-    val chan = InMemoryChannel()
+    val chan = MemChannel()
     layout.write(chan)
     val chars = chan.buffer().asCharBuffer()
     assertEquals("0".repeat(25), chars.read(p1))
@@ -62,7 +62,7 @@ class StringLayoutTest {
       val str = char.toChar().toString().repeat(char)
       ptrs.add(layout.add(str))
     }
-    val chan = InMemoryChannel()
+    val chan = MemChannel()
     layout.write(chan)
     val chars = chan.buffer().asCharBuffer()
     for (i in 0..499) {
@@ -87,7 +87,7 @@ class StringLayoutTest {
       val str = (20 + i).toChar().toString().repeat(count)
       ptrs.add(layout.add(str))
     }
-    val chan = InMemoryChannel()
+    val chan = MemChannel()
     layout.write(chan)
     val chars = chan.buffer().asCharBuffer()
     for (i in 0..3) {
