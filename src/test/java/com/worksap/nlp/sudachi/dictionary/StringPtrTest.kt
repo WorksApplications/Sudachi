@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary
 
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test
@@ -102,5 +103,11 @@ class StringPtrTest {
     assertFalse { StringPtr.isValid(1, 23) }
     assertFalse { StringPtr.isValid(2, 23) }
     assertTrue { StringPtr.isValid(4, 23) }
+  }
+
+  @Test
+  fun checkedFails() {
+    assertFails { StringPtr.checked(StringPtr.MAX_LENGTH + 1, 0) }
+    assertFails { StringPtr.checked(19 + 16, 1) }
   }
 }

@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.dictionary.StringPtr
 import com.worksap.nlp.sudachi.resStream
 import java.io.StringReader
@@ -65,7 +66,19 @@ class RawLexiconReaderTest {
     assertNull(reader.nextEntry())
   }
 
-  @Test fun headerCsvMinimumFields() {}
+  @Test
+  fun headerCsvMinimumFields() {
+    val reader = RawLexiconReader(csvfile("headers-minimum.csv"), POSTable(), false)
+    assertNotNull(reader.nextEntry()).let { e ->
+      assertEquals("東京都", e.headword)
+      assertEquals("トウキョウト", e.reading)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.aUnitSplit)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(10, false)), e.bUnitSplit)
+      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(11, false)), e.wordStructure)
+    }
+    assertNotNull(reader.nextEntry())
+    assertNull(reader.nextEntry())
+  }
 
   @Test
   fun headerCsvAllFields() {
@@ -79,11 +92,13 @@ class RawLexiconReaderTest {
       assertEquals(listOf(WordRef.LineNo(6, false), WordRef.LineNo(7, false)), e.wordStructure)
       assertEquals("10", e.userData)
     }
+    assertNotNull(reader.nextEntry())
     assertNull(reader.nextEntry())
   }
 
   @Test
   fun failMissingRequiredEntry() {
+    // pos1-6 are not required (because of posId), but must be used as a set
     val columns =
         "Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure".split(
             ",")
@@ -97,6 +112,74 @@ class RawLexiconReaderTest {
 
       val text = skipCols.joinToString(",") + "\n" + skipVals.joinToString(",")
       assertFails { RawLexiconReader(csvtext(text), POSTable(), false) }
+    }
+  }
+
+  @Test
+  fun posIdColumn() {
+    val text =
+        """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+東京都,6,8,5320,0,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable, false)
+    assertNotNull(reader.nextEntry()).let { e -> assertEquals(0, e.posId) }
+    assertNull(reader.nextEntry())
+  }
+
+  @Test
+  fun failNewPosId() {
+    val text =
+        """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+東京都,6,8,5320,1,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    assertFails {
+      val reader = RawLexiconReader(csvtext(text), posTable, false)
+      reader.nextEntry()
+    }
+  }
+
+  @Test
+  fun posIdAndParts() {
+    val text =
+        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,0,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("名詞", "固有名詞", "地名", "一般", "*", "*"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable, false)
+    assertNotNull(reader.nextEntry()).let { e -> assertEquals(0, e.posId) }
+    assertNull(reader.nextEntry())
+  }
+
+  @Test
+  fun failPosIdAndPartsNotMatch() {
+    val text =
+        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,0,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    assertFails {
+      val reader = RawLexiconReader(csvtext(text), posTable, false)
+      reader.nextEntry()
+    }
+  }
+
+  @Test
+  fun failPosColumnMissing() {
+    val text =
+        """Surface,LeftId,RightId,Cost,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+東京都,6,8,5320,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    assertFails {
+      val reader = RawLexiconReader(csvtext(text), posTable, false)
+      reader.nextEntry()
     }
   }
 

@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi
 
+import com.worksap.nlp.sudachi.dictionary.build.BufWriter
+import java.nio.ByteBuffer
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -72,5 +74,16 @@ class StringUtilTest {
     assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("", 0, 1) }
     assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("test", 0, 6) }
     assertFailsWith<IllegalArgumentException> { StringUtil.countUtf8Bytes("test", 6, 0) }
+  }
+
+  @Test
+  fun readLengthPrefixed() {
+    val bb = ByteBuffer.allocate(32)
+    val w = BufWriter(bb)
+
+    val text = "test"
+    w.putShortString(text)
+    bb.flip()
+    assertEquals(text, StringUtil.readLengthPrefixed(bb))
   }
 }
