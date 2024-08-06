@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * 
  * <pre>
  * {@code
- *  {
+ *   {
  *      "class": "com.worksap.nlp.sudachi.RegexOovProvider",
  *      "regex": "[0-9a-z-]+",
  *      "oovPOS": [ "補助記号", "一般", "*", "*", "*", "*" ],
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  *      "cost": 5000,
  *      "maxLength": 32,
  *      "boundaries": "relaxed"
- * }
+ *   }
  * }
  * </pre>
  *

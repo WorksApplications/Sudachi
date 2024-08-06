@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  *     "class"   : "com.worksap.nlp.sudachi.MeCabOovProviderPlugin",
  *     "charDef" : "char.def",
  *     "unkDef"  : "unk.def"
- * }
+ *   }
  * }
  * </pre>
  *

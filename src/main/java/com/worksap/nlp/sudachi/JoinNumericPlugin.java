@@ -36,7 +36,7 @@ import java.util.Set;
  *   {
  *     "class" : "com.worksap.nlp.sudachi.JoinNumericPlugin",
  *     "enableNormalize" : true,
- * }
+ *   }
  * }
  * </pre>
  *
