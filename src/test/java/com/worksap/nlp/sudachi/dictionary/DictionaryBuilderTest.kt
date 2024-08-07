@@ -31,9 +31,6 @@ class DictionaryBuilderTest {
   @BeforeTest
   fun setup() {
     tempDir = createTempDirectory()
-    // TestDictionary.systemDictData.writeData(tempDir.resolve("system.dic"))
-    // TestDictionary.userDict1Data.writeData(tempDir.resolve("user.dic"))
-    // Utils.copyResource(tempDir, "/unk.def")
   }
 
   @Test
