@@ -47,6 +47,9 @@ public class RawLexiconReader {
         }
     }
 
+    private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
+    public static final char LIST_DELIMITER = '/';
+
     private List<String> cachedRow;
     private int[] mapping;
     private final CSVParser parser;
@@ -69,8 +72,6 @@ public class RawLexiconReader {
             splitParser = WordRef.parser(pos, !user, false, false);
         }
     }
-
-    private static final Pattern INTEGER_REGEX = Pattern.compile("^-?\\d+$");
 
     /** assume legacy column layout if header line is not present */
     private boolean isLegacyColumnLayout() {
@@ -181,7 +182,7 @@ public class RawLexiconReader {
         if (value == null || value.isEmpty() || "*".equals(value)) {
             return Ints.wrap(Ints.EMPTY_ARRAY);
         }
-        String[] parts = value.split("/");
+        String[] parts = value.split(String.valueOf(LIST_DELIMITER));
         if (parts.length > Byte.MAX_VALUE) {
             throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("int list contained more than 127 entries: " + value));
@@ -199,7 +200,7 @@ public class RawLexiconReader {
         if (value == null || value.isEmpty() || "*".equals(value)) {
             return new ArrayList<>();
         }
-        String[] parts = value.split("/");
+        String[] parts = value.split(String.valueOf(LIST_DELIMITER));
         if (parts.length > Byte.MAX_VALUE) {
             throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(),
                     new IllegalArgumentException("reference list contained more than 127 entries: " + value));

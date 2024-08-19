@@ -18,6 +18,8 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.build.Progress;
+import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader;
+import com.worksap.nlp.sudachi.dictionary.build.WordRef;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
 
 import java.io.Console;
@@ -30,11 +32,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DictionaryPrinter {
-    public static final char wordRefDelimiter = '/';
-    public static final String wordRefDelimiterStr = String.valueOf(wordRefDelimiter);
-    public static final char wordRefJoiner = ',';
-    public static final String wordRefJoinerStr = String.valueOf(wordRefJoiner);
-
     private final PrintStream output;
     private final Progress progress = Progress.syserr(20);
 
@@ -176,7 +173,8 @@ public class DictionaryPrinter {
         parts.addAll(pos);
         parts.add(reading);
 
-        return String.join(wordRefJoinerStr, parts.stream().map(this::maybeEscapeRefPart).collect(Collectors.toList()));
+        return String.join(String.valueOf(WordRef.Parser.WORDREF_DELIMITER),
+                parts.stream().map(this::maybeEscapeRefPart).collect(Collectors.toList()));
     }
 
     /** encode word entry pointed by the wordId as WordRef.Headword. */
@@ -190,7 +188,7 @@ public class DictionaryPrinter {
     }
 
     String wordRefList(int[] wordIds) {
-        return String.join(wordRefDelimiterStr,
+        return String.join(String.valueOf(RawLexiconReader.LIST_DELIMITER),
                 Arrays.stream(wordIds).boxed().map(this::wordRef).collect(Collectors.toList()));
     }
 
@@ -217,12 +215,12 @@ public class DictionaryPrinter {
 
     /** escape WordRef.Triple part. */
     private String maybeEscapeRefPart(String value) {
-        boolean hasDelimiter = hasCh(value, wordRefDelimiter);
-        boolean hasJoiner = hasCh(value, wordRefJoiner);
+        boolean hasDelimiter = hasCh(value, RawLexiconReader.LIST_DELIMITER);
+        boolean hasJoiner = hasCh(value, WordRef.Parser.WORDREF_DELIMITER);
         if (!hasDelimiter && !hasJoiner) {
             return value;
         }
-        return unicodeEscape(value, Arrays.asList(wordRefDelimiter, wordRefJoiner));
+        return unicodeEscape(value, Arrays.asList(RawLexiconReader.LIST_DELIMITER, WordRef.Parser.WORDREF_DELIMITER));
     }
 
     /** escape specified chars as unicode codepoint */
