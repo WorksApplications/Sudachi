@@ -372,6 +372,14 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
+    public void splitC() {
+        MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東東京都");
+        assertThat(morphemesC.get(0).surface(), is("東"));
+        assertThat(morphemesC.get(1).surface(), is("東"));
+        assertThat(morphemesC.get(2).surface(), is("京都"));
+    }
+
+    @Test
     public void splitAfterTokenizeCtoA() {
         MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
         assertThat(morphemesC.size(), is(1));

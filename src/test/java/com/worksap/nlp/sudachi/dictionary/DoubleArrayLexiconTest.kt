@@ -46,7 +46,7 @@ class DoubleArrayLexiconTest {
 
   @Test
   fun iterWordIds() {
-    assertEquals(39, systemWordIds.length())
+    assertEquals(40, systemWordIds.length())
     for (i in 0..(systemWordIds.length() - 1)) {
       lexicon.getWordInfo(systemWordIds.get(i))
     }
@@ -136,7 +136,7 @@ class DoubleArrayLexiconTest {
 
   @Test
   fun size() {
-    assertEquals(39, lexicon.size())
+    assertEquals(40, lexicon.size())
   }
 
   @Test fun string() {}

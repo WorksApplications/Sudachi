@@ -52,7 +52,7 @@ class DictionaryPrinterTest {
     DictionaryPrinter.printDictionary(filename, null, ps)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(41, lines.size) // header + entries + trailing new line
+    assertEquals(42, lines.size) // header + entries + trailing new line
     assertEquals(
         "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])

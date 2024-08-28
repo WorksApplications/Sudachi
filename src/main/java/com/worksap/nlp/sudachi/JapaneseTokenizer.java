@@ -188,9 +188,7 @@ class JapaneseTokenizer implements Tokenizer {
         }
         lattice.clear();
 
-        if (mode != Tokenizer.SplitMode.C) {
-            path = splitPath(path, mode);
-        }
+        path = splitPath(path, mode);
 
         if (dumpOutput != null) {
             dumpOutput.println("=== After rewriting:");
