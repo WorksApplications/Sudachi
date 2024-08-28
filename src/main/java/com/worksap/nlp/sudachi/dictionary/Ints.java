@@ -120,6 +120,24 @@ public class Ints {
         return joiner.toString();
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        if (other == null || getClass() != other.getClass())
+            return false;
+        Ints o = (Ints) other;
+        if (this.length != o.length) {
+            return false;
+        }
+        for (int i = 0; i < this.length; i++) {
+            if (this.get(i) != o.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Make sure the internal buffer has enough capacity for the specified size.
      * This also increases length and they should be filled using {@code set} or

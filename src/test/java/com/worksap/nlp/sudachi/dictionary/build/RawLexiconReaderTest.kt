@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.dictionary.Ints
 import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.dictionary.StringPtr
 import com.worksap.nlp.sudachi.resStream
@@ -47,6 +48,7 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertEquals(0, e.synonymGroups.length())
       assertTrue(e.cUnitSplit.isEmpty())
       assertEquals("", e.userData)
     }
@@ -60,6 +62,7 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword)
       assertEquals("トウキョウト", e.reading)
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertEquals(Ints.wrap(intArrayOf(6, 7)), e.synonymGroups)
       assertEquals(listOf(WordRef.LineNo(8, false), WordRef.LineNo(9, false)), e.cUnitSplit)
       assertEquals("10", e.userData)
     }
@@ -90,6 +93,7 @@ class RawLexiconReaderTest {
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(10, false)), e.bUnitSplit)
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(11, false)), e.cUnitSplit)
       assertEquals(listOf(WordRef.LineNo(6, false), WordRef.LineNo(7, false)), e.wordStructure)
+      assertEquals(Ints.wrap(intArrayOf(8, 9)), e.synonymGroups)
       assertEquals("10", e.userData)
     }
     assertNotNull(reader.nextEntry())
