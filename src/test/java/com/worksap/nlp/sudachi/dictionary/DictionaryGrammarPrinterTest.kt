@@ -32,6 +32,9 @@ class DictionaryGrammarPrinterTest {
     val lines = output.toString().split(System.lineSeparator())
 
     assertEquals(8 + 1, lines.size) // system 8 + last newline
+
+    val cols = lines.get(0).split(",")
+    assertEquals(7, cols.size) // id + 6 parts
   }
 
   @Test

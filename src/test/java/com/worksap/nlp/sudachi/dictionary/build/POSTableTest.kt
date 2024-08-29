@@ -36,9 +36,75 @@ class POSTableTest {
   }
 
   @Test
-  fun inhibitReadingDuplicatePos() {
-    val dupPoss = """名詞,普通名詞,一般,*,*,*\n名詞,普通名詞,一般,*,*,*"""
+  fun allowNoHeaderWithPosId() {
+    val poss = """0,名詞,普通名詞,一般,*,*,*
+1,助詞,接続助詞,*,*,*,*"""
+    val posTable = POSTable()
+    posTable.readEntries(poss.byteInputStream())
 
+    val pos = POS("名詞", "普通名詞", "一般", "*", "*", "*")
+    assertEquals(0, posTable.getId(pos))
+  }
+
+  @Test
+  fun allowNoHeaderWithoutPosId() {
+    val poss = """名詞,普通名詞,一般,*,*,*
+助詞,接続助詞,*,*,*,*"""
+    val posTable = POSTable()
+    posTable.readEntries(poss.byteInputStream())
+
+    val pos = POS("名詞", "普通名詞", "一般", "*", "*", "*")
+    assertEquals(0, posTable.getId(pos))
+  }
+
+  @Test
+  fun allowNotOrderedColumnsWithPosid() {
+    val poss = """pos5,pos6,posId,pos1,pos2,pos3,pos4
+*,*,0,名詞,普通名詞,一般,*
+*,*,1,助詞,接続助詞,*,*"""
+    val posTable = POSTable()
+    posTable.readEntries(poss.byteInputStream())
+
+    val pos = POS("名詞", "普通名詞", "一般", "*", "*", "*")
+    assertEquals(0, posTable.getId(pos))
+  }
+
+  @Test
+  fun allowNotOrderedColumnsWithoutPosid() {
+    val poss = """pos5,pos6,pos1,pos2,pos3,pos4
+*,*,名詞,普通名詞,一般,*
+*,*,助詞,接続助詞,*,*"""
+    val posTable = POSTable()
+    posTable.readEntries(poss.byteInputStream())
+
+    val pos = POS("名詞", "普通名詞", "一般", "*", "*", "*")
+    assertEquals(0, posTable.getId(pos))
+  }
+
+  @Test
+  fun allowNotOrderedPosIds() {
+    val poss = """posId,pos1,pos2,pos3,pos4,pos5,pos6
+1,名詞,普通名詞,一般,*,*,*
+0,助詞,接続助詞,*,*,*,*"""
+    val posTable = POSTable()
+    posTable.readEntries(poss.byteInputStream())
+
+    val pos = POS("名詞", "普通名詞", "一般", "*", "*", "*")
+    assertEquals(1, posTable.getId(pos))
+  }
+
+  @Test
+  fun inhibitMissingPosId() {
+    val poss = """posId,pos1,pos2,pos3,pos4,pos5,pos6
+1,名詞,普通名詞,一般,*,*,*"""
+    val posTable = POSTable()
+    assertFails { posTable.readEntries(poss.byteInputStream()) }
+  }
+
+  @Test
+  fun inhibitReadingDuplicatePos() {
+    val dupPoss = """名詞,普通名詞,一般,*,*,*
+名詞,普通名詞,一般,*,*,*"""
     val posTable = POSTable()
     assertFails { posTable.readEntries(dupPoss.byteInputStream()) }
   }

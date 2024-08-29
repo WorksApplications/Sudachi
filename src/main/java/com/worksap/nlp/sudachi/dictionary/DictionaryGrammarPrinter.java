@@ -19,6 +19,11 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.Console;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.worksap.nlp.sudachi.dictionary.build.POSTable;
 
 /**
  * A dictionary grammar printing tool.
@@ -32,11 +37,17 @@ public class DictionaryGrammarPrinter {
         console.printf("usage: DictionaryGrammarPrinter files... \n");
     }
 
+    static void printHeader(PrintStream output) {
+        List<String> columnNames = Arrays.asList(POSTable.POSCSVReader.Column.values()).stream().map(c -> c.name())
+                .collect(Collectors.toList());
+        output.println(String.join(",", columnNames));
+    }
+
     static void printPos(GrammarImpl grammar, PrintStream output) {
         int numPos = grammar.getPartOfSpeechSize();
         for (int i = 0; i < numPos; i++) {
             POS pos = grammar.getPartOfSpeechString((short) i);
-            output.println(pos.toString());
+            output.println(i + "," + pos);
         }
     }
 
@@ -59,7 +70,9 @@ public class DictionaryGrammarPrinter {
 
             BinaryDictionary dict = new BinaryDictionary(args[i]);
             GrammarImpl grammar = dict.getGrammar();
-            printPos(grammar, System.out);
+            PrintStream output = System.out;
+            printHeader(output);
+            printPos(grammar, output);
             dict.close();
         }
     }
