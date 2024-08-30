@@ -336,9 +336,9 @@ public class DictionaryPrinter {
      * This tool requires the system dictionary when it dumps an user dictionary.
      *
      * @param args
-     *             the option and the input filename
+     *            the option and the input filename
      * @throws IOException
-     *                     if IO
+     *             if IO
      */
     public static void main(String[] args) throws IOException {
         String systemDictPath = null;

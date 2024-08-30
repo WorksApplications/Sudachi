@@ -28,12 +28,14 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.Arrays
 import kotlin.io.path.createTempDirectory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class DictionaryPrinterTest {
   lateinit var tempDir: Path
@@ -62,13 +64,18 @@ class DictionaryPrinterTest {
     dict.close()
   }
 
+  fun wordInfoString(lex: DoubleArrayLexicon, wordId: Int): String {
+    val wi = lex.getWordInfo(wordId)
+    return "${wordId}, ${lex.string(0, wi.getSurface())}, ${wi.getLength()}, ${wi.getPOSId()}, ${wi.getNormalizedForm()}, ${wi.getDictionaryForm()}, ${lex.string(0, wi.getReadingForm())}, ${Arrays.toString(wi.getAunitSplit())}, ${Arrays.toString(wi.getBunitSplit())}, ${Arrays.toString(wi.getCunitSplit())}, ${Arrays.toString(wi.getWordStructure())}, ${Arrays.toString(wi.getSynonymGroupIds())}, ${wi.getUserData()}"
+  }
+
   @Test
   fun printSystemDict() {
     val output = ByteArrayOutputStream()
     printDictionary(output, "system.dic")
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
         "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
@@ -85,7 +92,7 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.ID)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
         "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
@@ -99,7 +106,7 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.BOTH)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
         "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
@@ -113,7 +120,7 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", wordRefMode = DictionaryPrinter.WordRefMode.TRIPLE_ID)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
         "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
@@ -170,9 +177,7 @@ class DictionaryPrinterTest {
   }
 
   @Test
-  fun rebuildAndReprintSystem() {
-    val dicfile = tempDir.resolve("system.dic").toString()
-
+  fun rebuildSystem() {
     val lexfile = tempDir.resolve("system_lex.csv")
     val output1 = FileOutputStream(lexfile.toFile())
     printDictionary(output1, "system.dic")
@@ -185,17 +190,45 @@ class DictionaryPrinterTest {
     DicBuilder.system().matrix(res("/dict/matrix.def")).lexicon(lexfile).build(reload)
     reload.writeData(dicfile2)
 
-    val output2 = ByteArrayOutputStream()
-    printDictionary(output2, "system.dic2")
-    val reprinted = output2.toString().split(System.lineSeparator())
+    val original = BinaryDictionary(tempDir.resolve("system.dic").toString())
+    val rebuilt = BinaryDictionary(tempDir.resolve("system.dic2").toString())
 
-    assertContentEquals(printed, reprinted)
+    val headerO = original.getDictionaryHeader()
+    val headerR = rebuilt.getDictionaryHeader()
+    assertEquals(headerO.getReference(), headerR.getReference())
+    assertEquals(headerO.isRuntimeCosts(), headerR.isRuntimeCosts())
+    assertEquals(headerO.getNumTotalEntries(), headerR.getNumTotalEntries())
+    assertEquals(headerO.getNumIndexedEntries(), headerR.getNumIndexedEntries())
+
+    val grammarO = original.getGrammar()
+    val grammarR = rebuilt.getGrammar()
+    val posSize = grammarO.getPartOfSpeechSize()
+    assertEquals(posSize, grammarR.getPartOfSpeechSize())
+    for (i in 0..(posSize - 1)) {
+      assertEquals(
+          grammarO.getPartOfSpeechString(i.toShort()), grammarR.getPartOfSpeechString(i.toShort()))
+    }
+
+    val lexO = original.getLexicon()
+    val lexR = rebuilt.getLexicon()
+    val wiIterO = lexO.wordIds(0)
+    val wiIterR = lexR.wordIds(0)
+
+    while (wiIterO.hasNext()) {
+      assertTrue(wiIterR.hasNext())
+      val wisO = wiIterO.next()
+      val wisR = wiIterR.next()
+
+      assertEquals(wisO, wisR)
+      for (i in 0..(wisO.length() - 1)) {
+        assertEquals(wordInfoString(lexO, wisO.get(i)), wordInfoString(lexR, wisR.get(i)))
+      }
+    }
+    assertFalse(wiIterR.hasNext())
   }
 
   @Test
-  fun rebuildAndReprintUser() {
-    val dicfile = tempDir.resolve("user.dic").toString()
-
+  fun rebuildUser() {
     val lexfile = tempDir.resolve("user_lex.csv")
     val output1 = FileOutputStream(lexfile.toFile())
     printDictionary(output1, "user.dic", TestDictionary.systemDict)
@@ -208,10 +241,40 @@ class DictionaryPrinterTest {
     DicBuilder.user().system(TestDictionary.systemDict).lexicon(lexfile).build(reload)
     reload.writeData(dicfile2)
 
-    val output2 = ByteArrayOutputStream()
-    printDictionary(output2, "user.dic2", TestDictionary.systemDict)
-    val reprinted = output2.toString().split(System.lineSeparator())
+    val original = BinaryDictionary(tempDir.resolve("user.dic").toString())
+    val rebuilt = BinaryDictionary(tempDir.resolve("user.dic2").toString())
 
-    assertContentEquals(printed, reprinted)
+    val headerO = original.getDictionaryHeader()
+    val headerR = rebuilt.getDictionaryHeader()
+    assertEquals(headerO.getReference(), headerR.getReference())
+    assertEquals(headerO.isRuntimeCosts(), headerR.isRuntimeCosts())
+    assertEquals(headerO.getNumTotalEntries(), headerR.getNumTotalEntries())
+    assertEquals(headerO.getNumIndexedEntries(), headerR.getNumIndexedEntries())
+
+    val grammarO = original.getGrammar()
+    val grammarR = rebuilt.getGrammar()
+    val posSize = grammarO.getPartOfSpeechSize()
+    assertEquals(posSize, grammarR.getPartOfSpeechSize())
+    for (i in 0..(posSize - 1)) {
+      assertEquals(
+          grammarO.getPartOfSpeechString(i.toShort()), grammarR.getPartOfSpeechString(i.toShort()))
+    }
+
+    val lexO = original.getLexicon()
+    val lexR = rebuilt.getLexicon()
+    val wiIterO = lexO.wordIds(0)
+    val wiIterR = lexR.wordIds(0)
+
+    while (wiIterO.hasNext()) {
+      assertTrue(wiIterR.hasNext())
+      val wisO = wiIterO.next()
+      val wisR = wiIterR.next()
+
+      assertEquals(wisO, wisR)
+      for (i in 0..(wisO.length() - 1)) {
+        assertEquals(wordInfoString(lexO, wisO.get(i)), wordInfoString(lexR, wisR.get(i)))
+      }
+    }
+    assertFalse(wiIterR.hasNext())
   }
 }
