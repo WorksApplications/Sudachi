@@ -241,6 +241,14 @@ public abstract class WordRef {
                 return new Triple(headword, posId, reading);
             }
 
+            if (StringUtil.count(text, WORDREF_DELIMITER) == 2) {
+                String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 3);
+                String headword = Unescape.unescape(cols[0]);
+                short posId = Short.parseShort(cols[1]);
+                String reading = Unescape.unescape(cols[2]);
+                return new Triple(headword, posId, reading);
+            }
+
             if (allowHeadword) {
                 return new Headword(Unescape.unescape(text));
             } else {

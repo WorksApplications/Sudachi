@@ -167,6 +167,17 @@ class SystemDicTest {
   }
 
   @Test
+  fun variousWordReferences() {
+    val dictData = MemChannel()
+    val bldr = DicBuilder.system().matrix(res("test.matrix"))
+    bldr.lexicon(javaClass.getResource("wordref.csv")).build(dictData)
+
+    val wordIds = intArrayOf(4, 8, 12, 16, 20, 24, 28, 33)
+    val dic = BinaryDictionary(dictData.buffer())
+    assertEquals(wordIds.size, dic.lexicon.size())
+  }
+
+  @Test
   fun failSplitBoundsCheck() {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     bldr.lexicon("""東京都,2,2,5320,東京都,名詞,固有名詞,地名,一般,*,*,トウキョウト,東京都,*,B,*,1,*,*""")

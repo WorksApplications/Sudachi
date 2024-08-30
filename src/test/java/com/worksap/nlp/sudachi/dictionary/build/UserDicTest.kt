@@ -44,8 +44,24 @@ class TestDic {
     return this
   }
 
+  fun systemUrl(url: URL): TestDic {
+    val bldr = DicBuilder.system().matrix(matrixUrl).lexicon(url)
+    val ch = MemChannel()
+    bldr.build(ch)
+    this.systemDic = BinaryDictionary(ch.buffer())
+    return this
+  }
+
   fun user(data: String): TestDic {
     val bldr = DicBuilder.user().system(systemDic).lexicon(data)
+    val ch = MemChannel()
+    bldr.build(ch)
+    this.userDics.add(BinaryDictionary(ch.buffer()))
+    return this
+  }
+
+  fun userUrl(url: URL): TestDic {
+    val bldr = DicBuilder.user().system(systemDic).lexicon(url)
     val ch = MemChannel()
     bldr.build(ch)
     this.userDics.add(BinaryDictionary(ch.buffer()))
@@ -137,6 +153,20 @@ class UserDicTest {
     val m = da.morpheme(WordId.make(1, 4))
     assertEquals("東京都", m.surface())
     assertEquals("a,b,c,d,e,f".pos, m.partOfSpeech())
+  }
+
+  @Test
+  fun variousWordReferences() {
+    val dictData = MemChannel()
+    val dic =
+        TestDic()
+            .systemUrl(javaClass.getResource("wordref.csv"))
+            .userUrl(javaClass.getResource("wordref-user.csv"))
+            .load()
+
+    val da = dic as DictionaryAccess
+    val m = da.morpheme(WordId.make(1, 8))
+    assertEquals("東京府", m.surface())
   }
 
   @Test

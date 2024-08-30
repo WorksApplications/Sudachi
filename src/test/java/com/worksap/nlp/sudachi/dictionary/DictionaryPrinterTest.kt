@@ -20,9 +20,11 @@ import com.worksap.nlp.sudachi.TestDictionary
 import com.worksap.nlp.sudachi.Utils
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import com.worksap.nlp.sudachi.dictionary.build.MemChannel
+import com.worksap.nlp.sudachi.dictionary.build.Progress
 import com.worksap.nlp.sudachi.res
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
+import java.io.OutputStream
 import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -44,12 +46,26 @@ class DictionaryPrinterTest {
     Utils.copyResource(tempDir, "/unk.def")
   }
 
+  fun printDictionary(
+      output: OutputStream,
+      filename: String,
+      system: BinaryDictionary? = null,
+      posMode: DictionaryPrinter.POSMode = DictionaryPrinter.POSMode.DEFAULT,
+      wordRefMode: DictionaryPrinter.WordRefMode = DictionaryPrinter.WordRefMode.DEFAULT
+  ) {
+    val ps = PrintStream(output)
+    val filepath = tempDir.resolve(filename).toString()
+    val dict = BinaryDictionary(filepath)
+    val printer = DictionaryPrinter(ps, dict, system, posMode, wordRefMode)
+    printer.setProgress(Progress.NOOP) // suppress progress
+    printer.printDictionary()
+    dict.close()
+  }
+
   @Test
   fun printSystemDict() {
-    val filename = tempDir.resolve("system.dic").toString()
     val output = ByteArrayOutputStream()
-    val ps = PrintStream(output)
-    DictionaryPrinter.printDictionary(filename, null, ps)
+    printDictionary(output, "system.dic")
     val lines = output.toString().split(System.lineSeparator())
 
     assertEquals(42, lines.size) // header + entries + trailing new line
@@ -58,14 +74,58 @@ class DictionaryPrinterTest {
         lines[0])
     assertEquals("た,1,1,8729,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
     assertEquals("に,2,2,11406,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+    assertEquals(
+        "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,",
+        lines[7])
+  }
+
+  @Test
+  fun printSystemDictPosIdColumn() {
+    val output = ByteArrayOutputStream()
+    printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.ID)
+    val lines = output.toString().split(System.lineSeparator())
+
+    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        lines[0])
+    assertEquals("た,1,1,8729,0,タ,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,1,ニ,,,,,,,,", lines[2])
+  }
+
+  @Test
+  fun printSystemDictBothPosColumn() {
+    val output = ByteArrayOutputStream()
+    printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.BOTH)
+    val lines = output.toString().split(System.lineSeparator())
+
+    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        lines[0])
+    assertEquals("た,1,1,8729,0,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,1,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+  }
+
+  @Test
+  fun printSystemDictPosIdRef() {
+    val output = ByteArrayOutputStream()
+    printDictionary(output, "system.dic", wordRefMode = DictionaryPrinter.WordRefMode.TRIPLE_ID)
+    val lines = output.toString().split(System.lineSeparator())
+
+    assertEquals(42, lines.size) // header + entries + trailing new line
+    assertEquals(
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        lines[0])
+    assertEquals(
+        "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト\",,,\"東京,3,トウキョウ/都,4,ト\",,",
+        lines[7])
   }
 
   @Test
   fun printUserDict() {
-    val filename = tempDir.resolve("user.dic").toString()
     val output = ByteArrayOutputStream()
-    val ps = PrintStream(output)
-    DictionaryPrinter.printDictionary(filename, TestDictionary.systemDict, ps)
+    printDictionary(output, "user.dic", TestDictionary.systemDict)
     val lines = output.toString().split(System.lineSeparator())
 
     assertEquals(6, lines.size) // header + entries + trailing new line
@@ -79,21 +139,34 @@ class DictionaryPrinterTest {
   }
 
   @Test
-  fun printUserDictWithoutSystem() {
-    val filename = tempDir.resolve("user.dic").toString()
+  fun printUserDictPosIdRef() {
     val output = ByteArrayOutputStream()
-    val ps = PrintStream(output)
+    printDictionary(
+        output,
+        "user.dic",
+        TestDictionary.systemDict,
+        wordRefMode = DictionaryPrinter.WordRefMode.TRIPLE_ID)
+    val lines = output.toString().split(System.lineSeparator())
 
-    assertFails { DictionaryPrinter.printDictionary(filename, null, ps) }
+    assertEquals(6, lines.size) // header + entries + trailing new line
+    assertEquals(
+        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        lines[0])
+    assertEquals(
+        "東京府,6,6,2816,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,3,トウキョウ/府,4,フ\",,,\"東京,3,トウキョウ/府,4,フ\",1/3,",
+        lines[3])
+  }
+
+  @Test
+  fun printUserDictWithoutSystem() {
+    val output = ByteArrayOutputStream()
+    assertFails { printDictionary(output, "user.dic", null) }
   }
 
   @Test
   fun failToPrintInvalidFile() {
-    val filename = tempDir.resolve("unk.def").toString()
     val output = ByteArrayOutputStream()
-    val ps = PrintStream(output)
-
-    assertFails { DictionaryPrinter.printDictionary(filename, TestDictionary.systemDict, ps) }
+    assertFails { printDictionary(output, "unk.def", TestDictionary.systemDict) }
   }
 
   @Test
@@ -102,9 +175,9 @@ class DictionaryPrinterTest {
 
     val lexfile = tempDir.resolve("system_lex.csv")
     val output1 = FileOutputStream(lexfile.toFile())
-    val ps1 = PrintStream(output1)
-    DictionaryPrinter.printDictionary(dicfile, null, ps1)
+    printDictionary(output1, "system.dic")
     output1.close()
+
     val printed = Files.readString(lexfile).split(System.lineSeparator())
 
     val dicfile2 = tempDir.resolve("system.dic2")
@@ -113,8 +186,7 @@ class DictionaryPrinterTest {
     reload.writeData(dicfile2)
 
     val output2 = ByteArrayOutputStream()
-    val ps2 = PrintStream(output2)
-    DictionaryPrinter.printDictionary(dicfile2.toString(), null, ps2)
+    printDictionary(output2, "system.dic2")
     val reprinted = output2.toString().split(System.lineSeparator())
 
     assertContentEquals(printed, reprinted)
@@ -126,9 +198,9 @@ class DictionaryPrinterTest {
 
     val lexfile = tempDir.resolve("user_lex.csv")
     val output1 = FileOutputStream(lexfile.toFile())
-    val ps1 = PrintStream(output1)
-    DictionaryPrinter.printDictionary(dicfile, TestDictionary.systemDict, ps1)
+    printDictionary(output1, "user.dic", TestDictionary.systemDict)
     output1.close()
+
     val printed = Files.readString(lexfile).split(System.lineSeparator())
 
     val dicfile2 = tempDir.resolve("user.dic2")
@@ -137,8 +209,7 @@ class DictionaryPrinterTest {
     reload.writeData(dicfile2)
 
     val output2 = ByteArrayOutputStream()
-    val ps2 = PrintStream(output2)
-    DictionaryPrinter.printDictionary(dicfile2.toString(), TestDictionary.systemDict, ps2)
+    printDictionary(output2, "user.dic2", TestDictionary.systemDict)
     val reprinted = output2.toString().split(System.lineSeparator())
 
     assertContentEquals(printed, reprinted)

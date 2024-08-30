@@ -256,6 +256,14 @@ public class RawLexiconReader {
         short posId = -1;
         short posStrId = -1;
 
+        if (strColumnExists && (!idColumnExists || !get(data, Column.POS1, false).isEmpty())) {
+            // if both id/parts exist, allow empty (-1)
+            POS pos = new POS(
+                    // comment for line break
+                    get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
+                    get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
+            posStrId = posTable.getId(pos);
+        }
         if (idColumnExists && (!strColumnExists || !get(data, Column.POS_ID, false).isEmpty())) {
             // if both id/parts exist, allow empty (-1)
             posId = getShort(data, Column.POS_ID);
@@ -265,14 +273,6 @@ public class RawLexiconReader {
                         new IllegalArgumentException(
                                 String.format("POS for id %d is not present in the table.", posId)));
             }
-        }
-        if (strColumnExists && (!idColumnExists || !get(data, Column.POS1, false).isEmpty())) {
-            // if both id/parts exist, allow empty (-1)
-            POS pos = new POS(
-                    // comment for line break
-                    get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
-                    get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
-            posStrId = posTable.getId(pos);
         }
 
         if (idColumnExists && strColumnExists) {
