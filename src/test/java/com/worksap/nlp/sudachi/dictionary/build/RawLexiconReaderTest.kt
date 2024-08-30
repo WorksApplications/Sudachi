@@ -133,7 +133,7 @@ class RawLexiconReaderTest {
   }
 
   @Test
-  fun failNewPosId() {
+  fun failNonExistingPosId() {
     val text =
         """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,1,トウキョウト,,,,,"""
@@ -152,7 +152,6 @@ class RawLexiconReaderTest {
         """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,0,トウキョウト,,,,,"""
     val posTable = POSTable()
-    posTable.getId(POS("名詞", "固有名詞", "地名", "一般", "*", "*"))
 
     val reader = RawLexiconReader(csvtext(text), posTable, false)
     assertNotNull(reader.nextEntry()).let { e -> assertEquals(0, e.posId) }

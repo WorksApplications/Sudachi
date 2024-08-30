@@ -120,6 +120,19 @@ class DoubleArrayLexiconTest {
   }
 
   @Test
+  fun userWordInfo() {
+    val bytes = TestDictionary.userDict1Data.buffer()
+    val desc = Description.load(bytes)
+    val userlex = DoubleArrayLexicon.load(bytes, desc)
+
+    // すだち
+    val wi = userlex.getWordInfo(18)
+    assertEquals("すだち", userlex.string(0, wi.getSurface()))
+    assertEquals(8, wi.getPOSId())
+    assertEquals("徳島県産", wi.getUserData())
+  }
+
+  @Test
   fun wordInfoLong() {
     // 0123456789 * 30
     val wi = lexicon.getWordInfo(getWordId(36))
