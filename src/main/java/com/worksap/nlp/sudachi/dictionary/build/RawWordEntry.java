@@ -31,20 +31,20 @@ import java.util.ArrayList;
 public class RawWordEntry implements EntryLookup.Entry {
     int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
     String headword;
+    short leftId;
+    short rightId;
+    short cost;
+    short posId;
     String reading;
     WordRef normalizedForm;
     WordRef dictionaryForm;
+    String mode;
     List<WordRef> aUnitSplit;
     List<WordRef> bUnitSplit;
     List<WordRef> cUnitSplit;
     List<WordRef> wordStructure;
     Ints synonymGroups;
     String userData;
-    String mode;
-    short leftId;
-    short rightId;
-    short cost;
-    short posId;
     int sourceLine;
     String sourceName;
 
@@ -126,23 +126,53 @@ public class RawWordEntry implements EntryLookup.Entry {
         }
     }
 
+    /**
+     * Create empty RawWordEntry.
+     */
     public static RawWordEntry makeEmpty() {
         RawWordEntry entry = new RawWordEntry();
         entry.headword = "";
+        entry.leftId = -1;
+        entry.rightId = -1;
+        entry.cost = Short.MAX_VALUE;
+        entry.posId = 0;
         entry.reading = "";
+        //// null wordRef refers to self
         // entry.normalizedForm
         // entry.dictionaryForm
+        entry.mode = "A";
         entry.aUnitSplit = new ArrayList<>();
         entry.bUnitSplit = new ArrayList<>();
         entry.cUnitSplit = new ArrayList<>();
         entry.wordStructure = new ArrayList<>();
         entry.synonymGroups = Ints.wrap(Ints.EMPTY_ARRAY);
         entry.userData = "";
-        entry.mode = "A";
+        return entry;
+    }
+
+    /**
+     * Create phantom entry, that is referred for the normalized form of the base
+     * entry.
+     */
+    public static RawWordEntry makePhantom(RawWordEntry base, String surface) {
+        RawWordEntry entry = new RawWordEntry();
+        entry.headword = surface;
+        // phantom entry should not be used in the analysis
         entry.leftId = -1;
         entry.rightId = -1;
         entry.cost = Short.MAX_VALUE;
-        entry.posId = 0;
+        entry.posId = base.posId;
+        entry.reading = base.reading;
+        // phantom.normalized should be phantom itself
+        // entry.normalizedForm = base.normalizedForm;
+        entry.dictionaryForm = base.dictionaryForm;
+        entry.mode = base.mode;
+        entry.aUnitSplit = base.aUnitSplit;
+        entry.bUnitSplit = base.bUnitSplit;
+        entry.cUnitSplit = base.cUnitSplit;
+        entry.wordStructure = base.wordStructure;
+        entry.synonymGroups = base.synonymGroups;
+        entry.userData = base.userData;
         return entry;
     }
 }

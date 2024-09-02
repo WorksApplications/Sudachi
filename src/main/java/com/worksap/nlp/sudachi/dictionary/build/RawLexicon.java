@@ -207,15 +207,13 @@ public class RawLexicon {
             if (lookup.byHeadword(ref.getHeadword()) != null) {
                 return 0;
             }
-            RawWordEntry copy = RawWordEntry.makeEmpty();
-            copy.headword = ref.getHeadword();
-            copy.reading = copy.headword;
-            copy.posId = entry.posId;
+
+            RawWordEntry phantom = RawWordEntry.makePhantom(entry, ref.getHeadword());
             RawWordEntry last = list.get(list.size() - 1);
-            copy.pointer = RawLexicon
+            phantom.pointer = RawLexicon
                     .pointer((long) WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
-            list.add(copy);
-            lookup.add(copy, isUser);
+            list.add(phantom);
+            lookup.add(phantom, isUser);
             nPhantomEntries += 1;
             return 1;
         } else {
