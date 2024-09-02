@@ -99,6 +99,12 @@ class MorphemeImpl implements Morpheme {
         return wi.getSynonymGroupIds();
     }
 
+    @Override
+    public String getUserData() {
+        WordInfo wi = getWordInfo();
+        return wi.getUserData();
+    }
+
     private LatticeNodeImpl node() {
         LatticeNodeImpl n = node;
         if (n == null) {

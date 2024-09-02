@@ -147,4 +147,14 @@ public interface Morpheme {
      * @return the array of synonym group IDs
      */
     public int[] getSynonymGroupIds();
+
+    /**
+     * Returns the user custamized data of the morpheme.
+     * 
+     * If the morpheme is in the system dictionary, is an oov, or user data is not
+     * set, returns a empty string.
+     * 
+     * @return the user data String
+     */
+    public String getUserData();
 }
