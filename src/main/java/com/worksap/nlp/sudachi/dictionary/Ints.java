@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi.dictionary;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -136,6 +137,11 @@ public class Ints {
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.length, Arrays.copyOfRange(this.data, 0, this.length));
     }
 
     /**

@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Reader for the lexicon csv file.
@@ -40,10 +41,24 @@ public class RawLexiconReader {
                         true), DICTIONARY_FORM(true), MODE(false), SPLIT_A(true), SPLIT_B(true), WORD_STRUCTURE(
                                 true), SYNONYM_GROUPS(false), SPLIT_C(false), USER_DATA(false), POS_ID(false);
 
+        private static final List<Column> POS_PARTS = Arrays.asList(POS1, POS2, POS3, POS4, POS5, POS6);
         private final boolean required;
 
         Column(boolean required) {
             this.required = required;
+        }
+
+        /**
+         * Parse string as Column, ignoring "_" and cases.
+         */
+        private static Column fromString(String str) {
+            String processed = str.replace("_", "");
+            for (Column col : Column.values()) {
+                if (col.name().replace("_", "").equalsIgnoreCase(processed)) {
+                    return col;
+                }
+            }
+            return null;
         }
     }
 
@@ -94,41 +109,40 @@ public class RawLexiconReader {
         Arrays.fill(mapping, -1);
 
         for (int fieldId = 0; fieldId < row.size(); ++fieldId) {
-            String field = row.get(fieldId).replace("_", "");
-            boolean columnFound = false;
-            for (int colId = 0; colId < remaining.size(); ++colId) {
-                Column col = remaining.get(colId);
-                if (col.name().replace("_", "").equalsIgnoreCase(field)) {
-                    mapping[col.ordinal()] = fieldId;
-                    remaining.remove(colId);
-                    columnFound = true;
-                    break;
-                }
-            }
-            if (!columnFound) {
+            String field = row.get(fieldId);
+            Column parsed = Column.fromString(field);
+            if (parsed == null || !remaining.contains(parsed)) {
                 throw new InputFileException(parser.getName(), 0, field,
                         new IllegalArgumentException("Invalid column name"));
             }
+            mapping[parsed.ordinal()] = fieldId;
+            remaining.remove(remaining.indexOf(parsed));
         }
 
-        for (Column column : remaining) {
-            if (column.required) {
-                StringJoiner joiner = new StringJoiner(", ", "required columns [", "] were not present in the header");
-                remaining.stream().filter(c -> c.required).forEach(c -> joiner.add(c.name()));
-                throw new InputFileException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
-            }
+        List<Column> missings = remaining.stream().filter(c -> c.required).collect(Collectors.toList());
+        if (!missings.isEmpty()) {
+            StringJoiner joiner = new StringJoiner(", ", "required columns [", "] were not present in the header");
+            missings.stream().forEach(c -> joiner.add(c.name()));
+            throw new InputFileException(parser.getName(), 0, "", new IllegalArgumentException(joiner.toString()));
+        }
+
+        verifyPosColumns();
+    }
+
+    private void verifyPosColumns() {
+        if (mapping == null) {
+            return;
+        }
+
+        long numPosColumnsFound = Column.POS_PARTS.stream().filter(c -> mapping[c.ordinal()] >= 0).count();
+        if (numPosColumnsFound != 0 && numPosColumnsFound != POS.DEPTH) {
+            throw new InputFileException(parser.getName(), 0, "POS_PARTS",
+                    new IllegalArgumentException("Pos1 ~ Pos6 columns must appear as a set."));
         }
 
         boolean posIdExists = mapping[Column.POS_ID.ordinal()] >= 0;
-        long numPosColumnsFound = Arrays
-                .asList(Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5, Column.POS6).stream()
-                .filter(c -> mapping[c.ordinal()] >= 0).count();
-        if (numPosColumnsFound != 0 && numPosColumnsFound != POS.DEPTH) {
-            throw new InputFileException(parser.getName(), 0, "POS",
-                    new IllegalArgumentException("Pos1 ~ Pos6 columns must appear as a set."));
-        }
-        boolean posStrExists = numPosColumnsFound == POS.DEPTH;
-        if (!posIdExists && !posStrExists) {
+        boolean posPartsExists = numPosColumnsFound == POS.DEPTH;
+        if (!posIdExists && !posPartsExists) {
             throw new InputFileException(parser.getName(), 0, "POS",
                     new IllegalArgumentException("Both or either PosId column or Pos1~Pos6 columns are required."));
         }
@@ -245,46 +259,33 @@ public class RawLexiconReader {
 
     /** parse POS columns. */
     private short getPos(List<String> data) {
-        boolean idColumnExists = false;
-        boolean strColumnExists = true;
-        if (!isLegacyColumnLayout()) {
-            idColumnExists = mapping[Column.POS_ID.ordinal()] >= 0;
-            // existance of POS1-6 is checked in column layout resolution
-            strColumnExists = mapping[Column.POS1.ordinal()] >= 0;
-        }
-
-        short posId = -1;
         short posStrId = -1;
-
-        if (strColumnExists && (!idColumnExists || !get(data, Column.POS1, false).isEmpty())) {
-            // if both id/parts exist, allow empty (-1)
+        if (!get(data, Column.POS1, false).isEmpty()) {
             POS pos = new POS(
                     // comment for line break
                     get(data, Column.POS1, true), get(data, Column.POS2, true), get(data, Column.POS3, true),
                     get(data, Column.POS4, true), get(data, Column.POS5, true), get(data, Column.POS6, true));
             posStrId = posTable.getId(pos);
         }
-        if (idColumnExists && (!strColumnExists || !get(data, Column.POS_ID, false).isEmpty())) {
-            // if both id/parts exist, allow empty (-1)
+
+        short posId = -1;
+        if (!get(data, Column.POS_ID, false).isEmpty()) {
             posId = getShort(data, Column.POS_ID);
 
             if (posId >= posTable.size()) {
-                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
+                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS_ID",
                         new IllegalArgumentException(
                                 String.format("POS for id %d is not present in the table.", posId)));
             }
         }
 
-        if (idColumnExists && strColumnExists) {
-            if (posId < 0 && posStrId < 0) {
-                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
-                        new IllegalArgumentException("Both PosId and Pos1-6 are empty."));
-            }
-            if (posId >= 0 && posStrId >= 0 && posId != posStrId) {
-                throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
-                        new IllegalArgumentException(
-                                String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
-            }
+        if (posId < 0 && posStrId < 0) {
+            throw new InputFileException(parser.getName(), parser.getRowCount(), "POS",
+                    new IllegalArgumentException("Both PosId and Pos1-6 are missing."));
+        }
+        if (posId >= 0 && posStrId >= 0 && posId != posStrId) {
+            throw new InputFileException(parser.getName(), parser.getRowCount(), "POS", new IllegalArgumentException(
+                    String.format("PosId (%d) and id from Pos1-6 (%d) does not match.", posId, posStrId)));
         }
 
         return posId >= 0 ? posId : posStrId;

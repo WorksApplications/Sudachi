@@ -99,11 +99,8 @@ public class ConnectionMatrix {
 
         long numLines = 0;
 
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
+        String line;
+        while ((line = reader.readLine()) != null) {
             if (OPT_WHITESPACE.matcher(line).matches()) {
                 continue;
             }

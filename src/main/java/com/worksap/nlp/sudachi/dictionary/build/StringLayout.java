@@ -249,7 +249,7 @@ public class StringLayout {
             if (this == obj) {
                 return true;
             }
-            if (obj == null || !(obj instanceof FreeSpace)) {
+            if (!(obj instanceof FreeSpace)) {
                 return false;
             }
             FreeSpace other = (FreeSpace) obj;

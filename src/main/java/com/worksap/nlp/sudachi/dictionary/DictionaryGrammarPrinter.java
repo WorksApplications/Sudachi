@@ -38,7 +38,7 @@ public class DictionaryGrammarPrinter {
     }
 
     static void printHeader(PrintStream output) {
-        List<String> columnNames = Arrays.asList(POSTable.POSCSVReader.Column.values()).stream().map(c -> c.name())
+        List<String> columnNames = Arrays.asList(POSTable.POSCSVReader.Column.values()).stream().map(Enum::name)
                 .collect(Collectors.toList());
         output.println(String.join(",", columnNames));
     }

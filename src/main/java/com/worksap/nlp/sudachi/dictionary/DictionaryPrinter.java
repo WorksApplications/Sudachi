@@ -47,13 +47,13 @@ public class DictionaryPrinter {
     public enum POSMode {
         PARTS, ID, BOTH;
 
-        public static POSMode DEFAULT = PARTS;
+        public static final POSMode DEFAULT = PARTS;
     }
 
     public enum WordRefMode {
         TRIPLE_PARTS, TRIPLE_ID;
 
-        public static WordRefMode DEFAULT = TRIPLE_PARTS;
+        public static final WordRefMode DEFAULT = TRIPLE_PARTS;
     }
 
     DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) {

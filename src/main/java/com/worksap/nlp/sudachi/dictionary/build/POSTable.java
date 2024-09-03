@@ -35,7 +35,7 @@ public class POSTable {
 
     private final List<POS> table = new ArrayList<>();
     private final HashMap<POS, Short> lookup = new HashMap<>();
-    public boolean allowNewPos = true;
+    private boolean allowNewPos = true;
     // number of pos loaded from the system dictionary.
     private short builtin = 0;
 
@@ -78,6 +78,14 @@ public class POSTable {
         return table.size() - builtin;
     }
 
+    public void setAllowNewPos(boolean value) {
+        this.allowNewPos = value;
+    }
+
+    public boolean isNewPosAllowed() {
+        return this.allowNewPos;
+    }
+
     /**
      * Add pos at the index `id` of the table. This may creates null entry in the
      * table.
@@ -90,7 +98,7 @@ public class POSTable {
      */
     private short addPosAt(POS pos, short id) {
         if (!allowNewPos) {
-            throw new IllegalArgumentException(String.format("new POS is not allowed", pos));
+            throw new IllegalArgumentException("new POS is not allowed: " + pos);
         }
         if (id >= MAX_POS_NUMBER) {
             throw new IllegalArgumentException("id " + id + " exceeds the maximum POS number");
@@ -181,10 +189,9 @@ public class POSTable {
     /**
      * Data class for pos read from csv.
      */
-    static class POSWithId {
-        public POS pos;
-        public short id = -1;
-        public int sourceLine;
+    private static class POSWithId {
+        public final POS pos;
+        public final short id;
 
         POSWithId(POS pos, short id) {
             this.pos = pos;
@@ -192,7 +199,7 @@ public class POSTable {
         }
 
         POSWithId(POS pos) {
-            this.pos = pos;
+            this(pos, (short) -1);
         }
     }
 
@@ -205,9 +212,10 @@ public class POSTable {
         private CSVParser parser;
         private int[] columnMapping;
         private List<String> cachedRow;
-        public boolean hasIdColumn = true;
+        private boolean hasIdColumn = true;
 
-        public Column[] PART_COLUMNS = { Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5, Column.POS6 };
+        public static final Column[] PART_COLUMNS = { Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5,
+                Column.POS6 };
 
         public enum Column {
             POS_ID(false), POS1(true), POS2(true), POS3(true), POS4(true), POS5(true), POS6(true);
@@ -262,7 +270,7 @@ public class POSTable {
             for (int colIdx = 0; colIdx < row.size(); colIdx++) {
                 String elem = row.get(colIdx);
                 parsed = Column.fromString(elem);
-                if (!remaining.contains(parsed)) {
+                if (parsed == null || !remaining.contains(parsed)) {
                     throw new InputFileException(parser.getName(), 0, elem,
                             new IllegalArgumentException("Invalid column name"));
                 }
@@ -314,7 +322,7 @@ public class POSTable {
          * 
          * returned pos-id is -1 when pos-id column is missing.
          */
-        POSWithId nextPos() throws IOException {
+        private POSWithId nextPos() throws IOException {
             List<String> row = cachedRow;
             if (row == null) {
                 row = parser.getNextRow();
@@ -324,9 +332,7 @@ public class POSTable {
             if (row == null) {
                 return null;
             }
-            POSWithId pos = convertRow(row);
-            pos.sourceLine = parser.getRowCount();
-            return pos;
+            return convertRow(row);
         }
     }
 

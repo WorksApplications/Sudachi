@@ -163,8 +163,7 @@ public class RawWordEntry implements EntryLookup.Entry {
         entry.cost = Short.MAX_VALUE;
         entry.posId = base.posId;
         entry.reading = base.reading;
-        // phantom.normalized should be phantom itself
-        // entry.normalizedForm = base.normalizedForm;
+        // normalizedForm = null: refer to itself
         entry.dictionaryForm = base.dictionaryForm;
         entry.mode = base.mode;
         entry.aUnitSplit = base.aUnitSplit;

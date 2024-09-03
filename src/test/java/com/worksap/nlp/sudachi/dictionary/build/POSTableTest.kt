@@ -112,7 +112,7 @@ class POSTableTest {
   @Test
   fun inhibitNewPos() {
     val posTable = POSTable()
-    posTable.allowNewPos = false
+    posTable.setAllowNewPos(false)
 
     val newPos = POS("a", "a", "a", "a", "a", "a")
     assertFails { posTable.getId(newPos) }

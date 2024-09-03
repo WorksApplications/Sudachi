@@ -226,7 +226,7 @@ public class DicBuilder {
 
         /** Read POS list from the csv file. */
         public System posTable(String name, IOSupplier<InputStream> input, long size) throws IOException {
-            if (!pos.allowNewPos) {
+            if (!pos.isNewPosAllowed()) {
                 throw new IllegalArgumentException("POS list already loaded (only single POS file is allowed).");
             }
 
@@ -235,7 +235,7 @@ public class DicBuilder {
             try (InputStream is = input.get()) {
                 InputStream stream = new ProgressInputStream(is, size, progress);
                 nRead = pos.readEntries(stream);
-                pos.allowNewPos = false;
+                pos.setAllowNewPos(false);
             }
             progress.endBlock(nRead, nanoTime());
             return this;
