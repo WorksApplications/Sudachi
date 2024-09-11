@@ -43,16 +43,16 @@ import java.util.logging.Logger;
 public class SudachiCommandLine {
     static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
-    static class FileOrStdoutPrintStream extends PrintStream {
+    public static class FileOrStdoutPrintStream extends PrintStream {
 
         private boolean isFile;
 
-        FileOrStdoutPrintStream() {
+        public FileOrStdoutPrintStream() {
             super(System.out, true);
             isFile = false;
         }
 
-        FileOrStdoutPrintStream(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
+        public FileOrStdoutPrintStream(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
             super(new FileOutputStream(fileName), false, "UTF-8");
             isFile = true;
         }

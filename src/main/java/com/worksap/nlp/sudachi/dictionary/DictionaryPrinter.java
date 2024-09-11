@@ -16,6 +16,7 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import com.worksap.nlp.sudachi.SudachiCommandLine.FileOrStdoutPrintStream;
 import com.worksap.nlp.sudachi.WordId;
 import com.worksap.nlp.sudachi.dictionary.build.Progress;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader;
@@ -44,12 +45,24 @@ public class DictionaryPrinter {
     private POSMode posMode = POSMode.DEFAULT;
     private WordRefMode wordRefMode = WordRefMode.DEFAULT;
 
+    /**
+     * POS print mode
+     * 
+     * PARTS: print 6 pos parts (column: POS1-6). ID: print pos-id (column: POS_ID).
+     * BOTH: print both parts and id.
+     */
     public enum POSMode {
         PARTS, ID, BOTH;
 
         public static final POSMode DEFAULT = PARTS;
     }
 
+    /**
+     * WordRef print mode
+     * 
+     * TRIPLE_PARTS: print as (surface, pos1, .., pos6, reading) tuple. TRIPLE_ID:
+     * print as (surface, pos-id, reading) tuple.
+     */
     public enum WordRefMode {
         TRIPLE_PARTS, TRIPLE_ID;
 
@@ -100,7 +113,8 @@ public class DictionaryPrinter {
 
     static void printUsage() {
         Console console = System.console();
-        console.printf("usage: PrintDictionary [-s file] [--posMode mode] [--wordRefMode mode] file\n");
+        console.printf("usage: PrintDictionary [-o file] [-s file] [--posMode mode] [--wordRefMode mode] file\n");
+        console.printf("\t-o file\toutput file.\n");
         console.printf("\t-s file\tsystem dictionary. required to print user dictionary.\n");
         console.printf("\t--posMode [PARTS, ID, BOTH]\tprint specified POS column (default PARTS).\n");
         console.printf(
@@ -341,6 +355,7 @@ public class DictionaryPrinter {
      *             if IO
      */
     public static void main(String[] args) throws IOException {
+        String outputPath = null;
         String systemDictPath = null;
         POSMode posMode = POSMode.PARTS;
         WordRefMode wordRefMode = WordRefMode.TRIPLE_PARTS;
@@ -350,6 +365,8 @@ public class DictionaryPrinter {
             if (args[i].equals("-h")) {
                 printUsage();
                 return;
+            } else if (args[i].equals("-o") && i + 1 < args.length) {
+                outputPath = args[++i];
             } else if (args[i].equals("-s") && i + 1 < args.length) {
                 systemDictPath = args[++i];
             } else if (args[i].equals("--posMode") && i + 1 < args.length) {
@@ -367,12 +384,14 @@ public class DictionaryPrinter {
 
         String dictPath = args[i];
         BinaryDictionary systemDict = null;
-        try (BinaryDictionary dict = new BinaryDictionary(dictPath)) {
+        try (BinaryDictionary dict = new BinaryDictionary(dictPath);
+                PrintStream output = outputPath == null ? new FileOrStdoutPrintStream()
+                        : new FileOrStdoutPrintStream(outputPath);) {
             if (systemDictPath != null) {
                 systemDict = BinaryDictionary.loadSystem(systemDictPath);
             }
 
-            DictionaryPrinter printer = new DictionaryPrinter(System.out, dict, systemDict, posMode, wordRefMode);
+            DictionaryPrinter printer = new DictionaryPrinter(output, dict, systemDict, posMode, wordRefMode);
             printer.printDictionary();
         } finally {
             if (systemDict != null) {
