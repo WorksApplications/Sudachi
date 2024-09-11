@@ -105,7 +105,7 @@ public class RawLexicon {
     public void read(String name, Reader data, POSTable posTable, short numLeft, short numRight) throws IOException {
         CSVParser parser = new CSVParser(data);
         parser.setName(name);
-        RawLexiconReader reader = new RawLexiconReader(parser, posTable, isUser);
+        RawLexiconReader reader = new RawLexiconReader(parser, posTable);
 
         RawWordEntry entry;
         while ((entry = reader.nextEntry()) != null) {

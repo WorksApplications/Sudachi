@@ -44,10 +44,10 @@ class DictionaryBuilderTest {
     inputFile
         .toFile()
         .writeText(
-            """東京都,0,0,100,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,*,B,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/2",*,1/2,1/2
-東,-1,-1,200,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,*,A,*,*,*,*
-京都,0,0,300,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,*,A,*,*,*,*""")
-    val wordIds = listOf(4, 11, 15, 19) // 3 + phantom entry (ひがし)
+            """東京都,0,0,100,東京都,名詞,固有名詞,地名,一般,*,*,ヒガシキョウト,東京都,,B,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,名詞,固有名詞,地名,一般,*,*,キョウト",,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,名詞,固有名詞,地名,一般,*,*,キョウト",1/2
+東,-1,-1,200,東,名詞,普通名詞,一般,*,*,*,ヒガシ,ひがし,,A,,,,
+京都,0,0,300,京都,名詞,固有名詞,地名,一般,*,*,キョウト,京都,,A,,,,""")
+    val wordIds = listOf(4, 10, 14, 18) // 3 + phantom entry (ひがし)
 
     DictionaryBuilder.main(
         arrayOf(
@@ -124,15 +124,17 @@ class DictionaryBuilderTest {
     val inputFile = tempDir.resolve("lex.csv")
 
     matrixFile.toFile().writeText("1 1\n0 0 200\n")
-    posFile.toFile().writeText("名詞,普通名詞,一般,*,*,*\n名詞,固有名詞,地名,一般,*,*\n")
+    posFile
+        .toFile()
+        .writeText("pos1,pos2,pos3,pos4,pos5,pos6\n名詞,普通名詞,一般,*,*,*\n名詞,固有名詞,地名,一般,*,*\n")
     inputFile
         .toFile()
         .writeText(
             """Surface,leftId,rightId,cost,writing,posId,readingform,normalizedform,dictionaryform,mode,splitA,splitB,wordstructure,synonymgroups
-東京都,0,0,100,東京都,1,ヒガシキョウト,東京都,,B,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/2",,1/2,1/2
+東京都,0,0,100,東京都,1,ヒガシキョウト,東京都,,B,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,1,キョウト",,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,1,キョウト",1/2
 東,-1,-1,200,東,0,ヒガシ,ひがし,,A,,,,
 京都,0,0,300,京都,1,キョウト,京都,,A,,,,""")
-    val wordIds = listOf(4, 11, 15, 19) // 3 + phantom entry (ひがし)
+    val wordIds = listOf(4, 10, 14, 18) // 3 + phantom entry (ひがし)
 
     DictionaryBuilder.main(
         arrayOf(

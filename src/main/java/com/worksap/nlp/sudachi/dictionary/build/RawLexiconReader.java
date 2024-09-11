@@ -73,7 +73,7 @@ public class RawLexiconReader {
     private final WordRef.Parser dictRefParser; // for dictionary form
     private final WordRef.Parser splitParser; // for splits
 
-    public RawLexiconReader(CSVParser parser, POSTable pos, boolean user) throws IOException {
+    public RawLexiconReader(CSVParser parser, POSTable pos) throws IOException {
         this.parser = parser;
         this.posTable = pos;
         resolveColumnLayout();
@@ -83,8 +83,8 @@ public class RawLexiconReader {
             splitParser = WordRef.parser(pos, true, false, false);
         } else {
             normRefParser = WordRef.parser(pos, false, true, false);
-            dictRefParser = WordRef.parser(pos, !user, false, false);
-            splitParser = WordRef.parser(pos, !user, false, false);
+            dictRefParser = WordRef.parser(pos, false, false, false);
+            splitParser = WordRef.parser(pos, false, false, false);
         }
     }
 
