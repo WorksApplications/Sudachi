@@ -107,53 +107,49 @@ EOS
 $ git clone https://github.com/WorksApplications/Sudachi
 $ cd Sudachi/
 ```
+
 ビルド
+
 ```
-$ mvn clean package
+$ ./gradlew build
 ```
-この時点で実行しようとすると、依存ライブラリがないという以下のエラーが発生する。
+
+配布用アーカイブの展開
+
 ```
-$ java -jar target/sudachi-0.5.2-SNAPSHOT.jar
-Exception in thread "main" java.lang.NoClassDefFoundError: javax/json/JsonValue
-        at com.worksap.nlp.sudachi.JapaneseDictionary.buildSettings(JapaneseDictionary.java:92)
-        at com.worksap.nlp.sudachi.SudachiCommandLine.getFormatter(SudachiCommandLine.java:82)
-        at com.worksap.nlp.sudachi.SudachiCommandLine.main(SudachiCommandLine.java:196)
-Caused by: java.lang.ClassNotFoundException: javax.json.JsonValue
-        at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
-        at java.lang.ClassLoader.loadClass(ClassLoader.java:418)
-        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:352)
-        at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
-        ... 3 more
+$ unzip build/distributions/sudachi-executable-0.7.4.zip -d ./target
+# もしくは
+$ mkdir ./target
+$ tar -xf build/distributions/sudachi-executable-0.7.4.tar --directory ./target
 ```
-以下を実行し依存ライブラリを target に取得
-```
-$ mvn -DoutputDirectory=target dependency:copy-dependencies
-```
+
 この時点で実行すると、辞書がないという以下のエラーが発生する。
+
 ```
-$ java -jar target/sudachi-0.5.2-SNAPSHOT.jar
-Exception in thread "main" java.io.FileNotFoundException: system_core.dic (No such file or directory)
-        at java.io.FileInputStream.open0(Native Method)
-        at java.io.FileInputStream.open(FileInputStream.java:195)
-        at java.io.FileInputStream.<init>(FileInputStream.java:138)
-        at java.io.FileInputStream.<init>(FileInputStream.java:93)
-        at com.worksap.nlp.sudachi.MMap.map(MMap.java:52)
-        at com.worksap.nlp.sudachi.dictionary.BinaryDictionary.<init>(BinaryDictionary.java:33)
-        at com.worksap.nlp.sudachi.dictionary.BinaryDictionary.readSystemDictionary(BinaryDictionary.java:54)
-        at com.worksap.nlp.sudachi.JapaneseDictionary.readSystemDictionary(JapaneseDictionary.java:109)
-        at com.worksap.nlp.sudachi.JapaneseDictionary.<init>(JapaneseDictionary.java:57)
-        at com.worksap.nlp.sudachi.DictionaryFactory.create(DictionaryFactory.java:81)
-        at com.worksap.nlp.sudachi.SudachiCommandLine.main(SudachiCommandLine.java:202)
+$ java -jar target/sudachi-0.7.4.jar
+Exception in thread "main" java.lang.IllegalArgumentException: Failed to resolve file: system_core.dic
+Tried roots: [Classpath{prefix=}, None{}]
+        at com.worksap.nlp.sudachi.Config$Resource$NotFound.makeException(Config.java:1060)
+        at com.worksap.nlp.sudachi.Config$Resource$NotFound.consume(Config.java:1040)
+        at com.worksap.nlp.sudachi.dictionary.BinaryDictionary.loadSystem(BinaryDictionary.java:85)
+        at com.worksap.nlp.sudachi.JapaneseDictionary.setupSystemDictionary(JapaneseDictionary.java:78)
+        at com.worksap.nlp.sudachi.JapaneseDictionary.<init>(JapaneseDictionary.java:44)
+        at com.worksap.nlp.sudachi.DictionaryFactory.create(DictionaryFactory.java:52)
+        at com.worksap.nlp.sudachi.SudachiCommandLine.main(SudachiCommandLine.java:294)
 ```
+
 core 辞書をダウンロードし、実行ディレクトリに配置<br>
 http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/
+
 ```
 $ ls
-LICENSE-2.0.txt  README.md  docs  licenses  pom.xml  src  system_core.dic  target
+... system_core.dic ...
 ```
+
 実行
+
 ```
-$ java -jar target/sudachi-0.5.2-SNAPSHOT.jar
+$ java -jar target/sudachi-0.7.4.jar
 国会議事堂
 国会議事堂      名詞,固有名詞,一般,*,*,*        国会議事堂
 EOS

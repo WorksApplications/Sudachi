@@ -44,7 +44,6 @@ public class SudachiCommandLine {
     static Logger logger = Logger.getLogger(SudachiCommandLine.class.getName());
 
     public static class FileOrStdoutPrintStream extends PrintStream {
-
         private boolean isFile;
 
         public FileOrStdoutPrintStream() {

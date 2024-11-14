@@ -325,16 +325,6 @@ public class DictionaryPrinter {
         }
     }
 
-    static String splitToString(int[] split) {
-        if (split.length == 0) {
-            return "*";
-        } else {
-            return Arrays.stream(split)
-                    .mapToObj(i -> (i >> 28 != 0) ? "U" + Integer.toString(i & ((1 << 28) - 1)) : Integer.toString(i))
-                    .collect(Collectors.joining("/"));
-        }
-    }
-
     /**
      * Prints the contents of dictionary.
      *

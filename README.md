@@ -71,7 +71,7 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - `-s json` additional settings (overrides -r)
 - `-p directory` root directory of resources
 - `-m {A|B|C}` specifies the mode of splitting
-- `-a` outputs the dictionary form and the reading form
+- `-a` outputs the dictionary form, the reading form, the dictionary id, the synonym group id list, and OOV flag.
 - `-d` dump the debug outputs
 - `-o file` specifies output file (default: the standard output)
 - `-t` separate words with spaces
@@ -90,9 +90,9 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -a
-    東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト
-    へ      助詞,格助詞,*,*,*,*     へ      へ      エ
-    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
+    へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
@@ -237,7 +237,7 @@ If the number of characters increases as a result of character normalization, Su
 
 ## User Dictionary
 
-To create and use your own dictionaries, please refer to [docs/user_dict.md](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md).
+To create and use your own dictionaries, please refer to [docs/user_dict.md](/docs/user_dict.md).
 
 ## Comparison with MeCab and Kuromoji
 
@@ -302,11 +302,11 @@ We release a plug-in for Elasticsearch.
 
 - https://github.com/WorksApplications/elasticsearch-sudachi
 
-## Python
+## Python / Rust
 
-An implementation of Sudachi in Python
+An implementation of Sudachi in Python and Rust
 
-- https://github.com/WorksApplications/SudachiPy
+- https://github.com/WorksApplications/sudachi.rs
 
 
 ## Slack
@@ -406,7 +406,7 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - -s json デフォルト設定の上書き (-r と排他)
 - -p directory リソースの起点となるディレクトリを指定
 - -m {A|B|C} 分割モード
-- -a 読み、辞書形も出力
+- -a 追加で辞書形、読み、辞書ID、同義語グループID、OOV フラグを出力
 - -d デバッグ情報の出力
 - -o 出力ファイル (指定がない場合は標準出力)
 - -t 単語をスペース区切りで出力
@@ -422,9 +422,9 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -a
-    東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト
-    へ      助詞,格助詞,*,*,*,*     へ      へ      エ
-    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
+    へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
@@ -575,7 +575,7 @@ A' Ā
 
 ## ユーザー辞書
 
-ユーザー辞書の作成と利用方法については、[docs/user_dict.md](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)をご覧ください。
+ユーザー辞書の作成と利用方法については、[docs/user_dict.md](/docs/user_dict.md)をご覧ください。
 
 ## MeCab / kuromoji との比較
 
@@ -610,11 +610,11 @@ Elasticsearch で Sudachi をつかうためのプラグインも公開してい
 
 - https://github.com/WorksApplications/elasticsearch-sudachi
 
-## Python
+## Python / Rust
 
-Python 版も公開しています。
+Python 版および Rust 版も公開しています。
 
-- https://github.com/WorksApplications/SudachiPy
+- https://github.com/WorksApplications/sudachi.rs
 
 
 ## Slack

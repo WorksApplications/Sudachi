@@ -29,6 +29,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -866,7 +867,8 @@ public class Config {
         /**
          * Get view of this resource as a ByteBuffer. When it is possible, the data will
          * be memory mapped, if it is not possible, it will be fully read into the
-         * memory. Will not work for files more than 2^31 bytes (2 GB) in size.
+         * memory. Will not work for files more than 2^31 bytes (2 GB) in size. The
+         * ByteOrder is set to little endian.
          *
          * @return ByteBuffer containing the whole contents of the file
          * @throws IOException

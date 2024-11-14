@@ -170,6 +170,18 @@ class UserDicTest {
   }
 
   @Test
+  fun failDictionaryFormInSystem() {
+    val bldr =
+        TestDic()
+            .system("""行く,1,1,5105,行く,動詞,非自立可能,*,*,五段-カ行,終止形-一般,イク,行く,*,A,*,*,*,*""".trimIndent())
+
+    assertFails {
+      bldr.user(
+          """行っ,2,2,5122,行っ,動詞,非自立可能,*,*,五段-カ行,連用形-促音便,イッ,行く,\"行く,動詞,非自立可能,*,*,五段-カ行,終止形-一般,イク\",A,*,*,*,*""".trimIndent())
+    }
+  }
+
+  @Test
   fun failWithNonExistingWordInSystem() {
     val bldr =
         TestDic()

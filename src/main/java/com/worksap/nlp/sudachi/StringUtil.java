@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -56,12 +57,20 @@ public class StringUtil {
     }
 
     public static ByteBuffer readAllBytes(URL url) throws IOException {
+        return readAllBytes(url, ByteOrder.LITTLE_ENDIAN);
+    }
+
+    public static ByteBuffer readAllBytes(URL url, ByteOrder order) throws IOException {
         try (InputStream is = url.openStream()) {
-            return readAllBytes(is);
+            return readAllBytes(is, order);
         }
     }
 
     public static ByteBuffer readAllBytes(InputStream inputStream) throws IOException {
+        return readAllBytes(inputStream, ByteOrder.LITTLE_ENDIAN);
+    }
+
+    public static ByteBuffer readAllBytes(InputStream inputStream, ByteOrder order) throws IOException {
         byte[] buffer = new byte[inputStream.available() + 1024];
         int offset = 0;
 
@@ -78,6 +87,7 @@ public class StringUtil {
         }
         ByteBuffer bbuf = ByteBuffer.wrap(buffer);
         bbuf.limit(offset);
+        bbuf.order(order);
         return bbuf;
     }
 
