@@ -90,15 +90,24 @@ public class BufWriter {
         putByte((byte) val);
     }
 
-    /** Encode int array of fixed length. */
-    public BufWriter putInts(Ints value, int length) {
+    /**
+     * Encode int array of fixed length. This does not put the number of values and
+     * is no-op if the length is 0. The length should be known or kept in some way
+     * to read them safely.
+     * 
+     * @param values
+     *            list of ints to put. It must have enough number of values.
+     * @param length
+     *            number of ints to put. noop if this is less than 1.
+     */
+    public BufWriter putInts(Ints values, int length) {
         if (length <= 0) {
             return this;
         }
         ByteBuffer buf = buffer; // read field only once
         int pos = buf.position();
         for (int i = 0; i < length; ++i) {
-            buf.putInt(pos + i * 4, value.get(i));
+            buf.putInt(pos + i * 4, values.get(i));
         }
         buf.position(pos + length * 4);
         return this;

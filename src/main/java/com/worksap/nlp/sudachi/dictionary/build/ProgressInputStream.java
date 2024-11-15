@@ -68,10 +68,10 @@ public class ProgressInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        int read = inner.read();
-        if (read != -1) {
+        int nread = inner.read();
+        if (nread != -1) {
             position += 1;
         }
-        return read;
+        return nread;
     }
 }
