@@ -250,8 +250,8 @@ public class DictionaryPrinter {
             parts.add(reading);
         }
 
-        return String.join(String.valueOf(WordRef.Parser.WORDREF_DELIMITER),
-                parts.stream().map(this::maybeEscapeRefPart).collect(Collectors.toList()));
+        return parts.stream().map(this::maybeEscapeRefPart)
+                .collect(Collectors.joining(String.valueOf(WordRef.Parser.WORDREF_DELIMITER)));
     }
 
     /** encode word entry pointed by the wordId as WordRef.Headword. */
@@ -265,12 +265,12 @@ public class DictionaryPrinter {
     }
 
     String wordRefList(int[] wordIds) {
-        return String.join(String.valueOf(RawLexiconReader.LIST_DELIMITER),
-                Arrays.stream(wordIds).boxed().map(this::wordRef).collect(Collectors.toList()));
+        return Arrays.stream(wordIds).boxed().map(this::wordRef)
+                .collect(Collectors.joining(String.valueOf(RawLexiconReader.LIST_DELIMITER)));
     }
 
     String intList(int[] ints) {
-        return String.join("/", Arrays.stream(ints).boxed().map(Object::toString).collect(Collectors.toList()));
+        return Arrays.stream(ints).boxed().map(Object::toString).collect(Collectors.joining("/"));
     }
 
     private static boolean hasCh(String value, int ch) {
