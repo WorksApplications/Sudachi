@@ -214,8 +214,8 @@ public class POSTable {
         private List<String> cachedRow;
         private boolean hasIdColumn = true;
 
-        public static final Column[] PART_COLUMNS = { Column.POS1, Column.POS2, Column.POS3, Column.POS4, Column.POS5,
-                Column.POS6 };
+        protected static final Column[] PART_COLUMNS = { Column.POS1, Column.POS2, Column.POS3, Column.POS4,
+                Column.POS5, Column.POS6 };
 
         public enum Column {
             POS_ID(false), POS1(true), POS2(true), POS3(true), POS4(true), POS5(true), POS6(true);

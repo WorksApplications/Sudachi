@@ -37,8 +37,8 @@ public class RawWordEntry implements EntryLookup.Entry {
     short cost;
     short posId;
     String reading;
-    WordRef normalizedForm;
-    WordRef dictionaryForm;
+    WordRef normalizedFormRef;
+    WordRef dictionaryFormRef;
     String mode;
     List<WordRef> aUnitSplit;
     List<WordRef> bUnitSplit;
@@ -109,8 +109,8 @@ public class RawWordEntry implements EntryLookup.Entry {
         checkString(surface, "surface");
         checkString(writing, "writing");
         checkString(reading, "reading");
-        if (normalizedForm instanceof WordRef.Headword) {
-            checkString(((WordRef.Headword) normalizedForm).getHeadword(), "normalized form");
+        if (normalizedFormRef instanceof WordRef.RefByHeadword) {
+            checkString(((WordRef.RefByHeadword) normalizedFormRef).getHeadword(), "normalized form");
         }
     }
 
@@ -124,9 +124,8 @@ public class RawWordEntry implements EntryLookup.Entry {
         // surface is used only for indexing and is not necessary to store
         strings.add(writing);
         strings.add(reading);
-        if (normalizedForm instanceof WordRef.Headword) {
-            WordRef.Headword normalized = (WordRef.Headword) normalizedForm;
-            strings.add(normalized.getHeadword());
+        if (normalizedFormRef instanceof WordRef.RefByHeadword) {
+            strings.add(((WordRef.RefByHeadword) normalizedFormRef).getHeadword());
         }
     }
 
@@ -173,8 +172,8 @@ public class RawWordEntry implements EntryLookup.Entry {
         // other data should be equivalent to the base entry
         entry.posId = base.posId;
         entry.reading = base.reading;
-        entry.dictionaryForm = base.dictionaryForm;
-        entry.normalizedForm = null; // refer to itself
+        entry.dictionaryFormRef = base.dictionaryFormRef;
+        entry.normalizedFormRef = null; // refer to itself
         entry.mode = base.mode;
         entry.aUnitSplit = base.aUnitSplit;
         entry.bUnitSplit = base.bUnitSplit;

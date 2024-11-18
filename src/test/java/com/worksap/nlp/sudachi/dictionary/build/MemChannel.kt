@@ -50,7 +50,6 @@ class MemChannel(bufSize: Int = 1024 * 1024) : SeekableByteChannel {
     val remaining = src!!.remaining()
     reserve(remaining)
     buffer.put(src)
-    val pos = buffer.position().toLong()
     return remaining
   }
 

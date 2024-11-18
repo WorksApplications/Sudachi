@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.io.PrintStream
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Arrays
 import kotlin.io.path.createTempDirectory
@@ -183,8 +182,6 @@ class DictionaryPrinterTest {
     printDictionary(output1, "system.dic")
     output1.close()
 
-    val printed = Files.readString(lexfile).split(System.lineSeparator())
-
     val dicfile2 = tempDir.resolve("system.dic2")
     val reload = MemChannel()
     DicBuilder.system().matrix(res("/dict/matrix.def")).lexicon(lexfile).build(reload)
@@ -233,8 +230,6 @@ class DictionaryPrinterTest {
     val output1 = FileOutputStream(lexfile.toFile())
     printDictionary(output1, "user.dic", TestDictionary.systemDict)
     output1.close()
-
-    val printed = Files.readString(lexfile).split(System.lineSeparator())
 
     val dicfile2 = tempDir.resolve("user.dic2")
     val reload = MemChannel()

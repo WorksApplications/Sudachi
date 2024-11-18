@@ -48,7 +48,8 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.surface)
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
-      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertEquals(
+          listOf(WordRef.RefByLineNo(5, false), WordRef.RefByLineNo(9, false)), e.wordStructure)
       assertEquals(0, e.synonymGroups.length())
       assertTrue(e.cUnitSplit.isEmpty())
       assertEquals("", e.userData)
@@ -63,9 +64,11 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.surface)
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
-      assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
+      assertEquals(
+          listOf(WordRef.RefByLineNo(5, false), WordRef.RefByLineNo(9, false)), e.wordStructure)
       assertEquals(Ints.wrap(intArrayOf(6, 7)), e.synonymGroups)
-      assertEquals(listOf(WordRef.LineNo(8, false), WordRef.LineNo(9, false)), e.cUnitSplit)
+      assertEquals(
+          listOf(WordRef.RefByLineNo(8, false), WordRef.RefByLineNo(9, false)), e.cUnitSplit)
       assertEquals("10", e.userData)
     }
     assertNull(reader.nextEntry())
@@ -79,11 +82,14 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword()) // surface is used for missing writing
       assertEquals("トウキョウト", e.reading)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 1, "ト")), e.aUnitSplit)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 1, "ト")),
+          e.aUnitSplit)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 2, "ト")), e.bUnitSplit)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 2, "ト")),
+          e.bUnitSplit)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 3, "ト")), e.wordStructure)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 3, "ト")),
+          e.wordStructure)
     }
     assertNotNull(reader.nextEntry())
     assertNull(reader.nextEntry())
@@ -97,13 +103,17 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 1, "ト")), e.aUnitSplit)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 1, "ト")),
+          e.aUnitSplit)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 2, "ト")), e.bUnitSplit)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 2, "ト")),
+          e.bUnitSplit)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 3, "ト")), e.cUnitSplit)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 3, "ト")),
+          e.cUnitSplit)
       assertEquals(
-          listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 4, "ト")), e.wordStructure)
+          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 4, "ト")),
+          e.wordStructure)
       assertEquals(Ints.wrap(intArrayOf(8, 9)), e.synonymGroups)
       assertEquals("10", e.userData)
     }

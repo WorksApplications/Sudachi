@@ -202,23 +202,22 @@ public class RawLexicon {
      * @return 1 if phantom entry added, 0 otherwise
      */
     private int addPhantomEntries(RawWordEntry entry, List<RawWordEntry> list, EntryLookup lookup) {
-        if (entry.normalizedForm instanceof WordRef.Headword) {
-            WordRef.Headword ref = (WordRef.Headword) entry.normalizedForm;
-            if (lookup.byHeadword(ref.getHeadword()) != null) {
-                return 0;
-            }
-
-            RawWordEntry phantom = RawWordEntry.makePhantom(entry, ref.getHeadword());
-            RawWordEntry last = list.get(list.size() - 1);
-            phantom.pointer = RawLexicon
-                    .pointer((long) WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
-            list.add(phantom);
-            lookup.add(phantom, isUser);
-            nPhantomEntries += 1;
-            return 1;
-        } else {
+        if (!(entry.normalizedFormRef instanceof WordRef.RefByHeadword)) {
             return 0;
         }
+
+        WordRef.RefByHeadword ref = (WordRef.RefByHeadword) entry.normalizedFormRef;
+        if (lookup.byHeadword(ref.getHeadword()) != null) {
+            return 0;
+        }
+
+        RawWordEntry phantom = RawWordEntry.makePhantom(entry, ref.getHeadword());
+        RawWordEntry last = list.get(list.size() - 1);
+        phantom.pointer = pointer((long) WordInfoList.wordId2offset(last.pointer) + last.computeExpectedSize());
+        list.add(phantom);
+        lookup.add(phantom, isUser);
+        nPhantomEntries += 1;
+        return 1;
     }
 
     /** @return number of entries in the TRIE index */

@@ -157,7 +157,6 @@ class UserDicTest {
 
   @Test
   fun variousWordReferences() {
-    val dictData = MemChannel()
     val dic =
         TestDic()
             .systemUrl(javaClass.getResource("wordref.csv"))

@@ -50,11 +50,11 @@ public abstract class WordRef {
     /**
      * Reference written by line number of the lexicon csv file.
      */
-    public static final class LineNo extends WordRef {
+    public static final class RefByLineNo extends WordRef {
         private final int line;
         private final boolean isUser;
 
-        public LineNo(int line, boolean isUser) {
+        public RefByLineNo(int line, boolean isUser) {
             this.line = line;
             this.isUser = isUser;
         }
@@ -79,7 +79,7 @@ public abstract class WordRef {
                 return true;
             if (other == null || getClass() != other.getClass())
                 return false;
-            LineNo o = (LineNo) other;
+            RefByLineNo o = (RefByLineNo) other;
             return (line == o.line) && (isUser == o.isUser);
         }
 
@@ -93,10 +93,10 @@ public abstract class WordRef {
     /**
      * Reference written by surface.
      */
-    public static final class Headword extends WordRef {
+    public static final class RefByHeadword extends WordRef {
         private final String headword;
 
-        public Headword(String headword) {
+        public RefByHeadword(String headword) {
             this.headword = headword;
         }
 
@@ -121,7 +121,7 @@ public abstract class WordRef {
                 return true;
             if (other == null || getClass() != other.getClass())
                 return false;
-            Headword o = (Headword) other;
+            RefByHeadword o = (RefByHeadword) other;
             return headword.equals(o.headword);
         }
 
@@ -134,12 +134,12 @@ public abstract class WordRef {
     /**
      * Reference written by surface-pos-reading tuple.
      */
-    public static final class Triple extends WordRef {
+    public static final class RefByTriple extends WordRef {
         private final String headword;
         private final short posId;
         private final String reading;
 
-        public Triple(String headword, short posId, String reading) {
+        public RefByTriple(String headword, short posId, String reading) {
             this.headword = headword;
             this.posId = posId;
             this.reading = reading;
@@ -182,7 +182,7 @@ public abstract class WordRef {
                 return true;
             if (other == null || getClass() != other.getClass())
                 return false;
-            Triple o = (Triple) other;
+            RefByTriple o = (RefByTriple) other;
             return (headword.equals(o.headword)) && (posId == o.posId) && (reading.equals(o.reading));
         }
 
@@ -225,7 +225,7 @@ public abstract class WordRef {
                 boolean isUser = text.charAt(0) == 'U';
                 int offset = isUser ? 1 : 0;
                 int lineNum = Integer.parseInt(text.substring(offset));
-                return new LineNo(lineNum, isUser);
+                return new RefByLineNo(lineNum, isUser);
             }
 
             if (StringUtil.count(text, WORDREF_DELIMITER) == 7) {
@@ -238,7 +238,7 @@ public abstract class WordRef {
                 POS pos = new POS(posElems);
                 short posId = posTable.getId(pos);
                 String reading = Unescape.unescape(cols[7]);
-                return new Triple(headword, posId, reading);
+                return new RefByTriple(headword, posId, reading);
             }
 
             if (StringUtil.count(text, WORDREF_DELIMITER) == 2) {
@@ -246,11 +246,11 @@ public abstract class WordRef {
                 String headword = Unescape.unescape(cols[0]);
                 short posId = Short.parseShort(cols[1]);
                 String reading = Unescape.unescape(cols[2]);
-                return new Triple(headword, posId, reading);
+                return new RefByTriple(headword, posId, reading);
             }
 
             if (allowHeadword) {
-                return new Headword(Unescape.unescape(text));
+                return new RefByHeadword(Unescape.unescape(text));
             } else {
                 throw new IllegalArgumentException(String.format("invalid word reference: %s", text));
             }

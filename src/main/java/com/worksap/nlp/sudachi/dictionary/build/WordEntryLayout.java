@@ -68,9 +68,9 @@ public class WordEntryLayout {
 
         buf.putInt(index.resolve(entry.writing).encode()); // surface StringPtr
         buf.putInt(index.resolve(entry.reading).encode()); // reading StringPtr
-        int selfWordRef = isUser ? WordId.make(1, entry.pointer) : entry.pointer;
-        int normFormPtr = entry.normalizedForm == null ? selfWordRef : entry.normalizedForm.resolve(lookup);
-        int dictFormPtr = entry.dictionaryForm == null ? selfWordRef : entry.dictionaryForm.resolve(lookup);
+        int selfPtr = isUser ? WordId.make(1, entry.pointer) : entry.pointer;
+        int normFormPtr = entry.normalizedFormRef == null ? selfPtr : entry.normalizedFormRef.resolve(lookup);
+        int dictFormPtr = entry.dictionaryFormRef == null ? selfPtr : entry.dictionaryFormRef.resolve(lookup);
         buf.putInt(normFormPtr); // normalized form WordRef
         buf.putInt(dictFormPtr); // dictionary form WordRef
         // 8 + 4*4 = 24 bytes
@@ -107,7 +107,7 @@ public class WordEntryLayout {
         }
 
         int position = this.buffer.alignTo(WordInfoList.OFFSET_ALIGNMENT);
-        return RawLexicon.pointer(position);
+        return WordInfoList.offset2wordId(position);
     }
 
     /**

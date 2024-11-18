@@ -221,8 +221,8 @@ public class DictionaryPrinter {
     }
 
     /**
-     * encode word entry pointed by the wordId as WordRef.Triple. If it points to
-     * self, return empty string.
+     * encode word entry pointed by the wordId as WordRef.RefByTriple. If it points
+     * to self, return empty string.
      */
     String wordRef(int wordId, int reference) {
         if (wordId == reference) {
@@ -231,7 +231,7 @@ public class DictionaryPrinter {
         return wordRef(wordId);
     }
 
-    /** encode word entry pointed by the wordId as WordRef.Triple. */
+    /** encode word entry pointed by the wordId as WordRef.RefByTriple. */
     String wordRef(int wordId) {
         WordInfo info = lex.getWordInfo(wordId);
         int dic = WordId.dic(wordId);
@@ -254,7 +254,7 @@ public class DictionaryPrinter {
                 .collect(Collectors.joining(String.valueOf(WordRef.Parser.WORDREF_DELIMITER)));
     }
 
-    /** encode word entry pointed by the wordId as WordRef.Headword. */
+    /** encode word entry pointed by the wordId as WordRef.RefByHeadword. */
     String wordRefHeadword(int wordId, int reference) {
         if (wordId == reference) {
             return "";
@@ -290,7 +290,7 @@ public class DictionaryPrinter {
         return "\"" + value + "\"";
     }
 
-    /** escape WordRef.Triple part. */
+    /** escape WordRef.RefByTriple part. */
     private String maybeEscapeRefPart(String value) {
         boolean hasDelimiter = hasCh(value, RawLexiconReader.LIST_DELIMITER);
         boolean hasJoiner = hasCh(value, WordRef.Parser.WORDREF_DELIMITER);
