@@ -65,8 +65,8 @@ public class EntryLookup {
     // entries
     private final List<? extends Entry> systemEntries;
     private final List<? extends Entry> userEntries;
-    // mapping to entries that have same surfaces
-    private final Map<String, List<EntryWithFlag>> bySurface;
+    // mapping to entries that have same headwords
+    private final Map<String, List<EntryWithFlag>> byHeadword;
 
     public EntryLookup(List<? extends Entry> systemEntries, List<? extends Entry> userEntries) {
         this.systemEntries = systemEntries;
@@ -82,7 +82,7 @@ public class EntryLookup {
             List<EntryWithFlag> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
             sublist.add(new EntryWithFlag(e, true));
         }
-        bySurface = result;
+        byHeadword = result;
     }
 
     /**
@@ -96,7 +96,7 @@ public class EntryLookup {
      * @return
      */
     public EntryWithFlag byIndex(int index, boolean isUser) {
-        // if userEntries is empty (i.e. building system), ignore isUser flag
+        // if userEntries is empty (i.e. building system dict), ignore isUser flag
         if (isUser && !userEntries.isEmpty()) {
             return new EntryWithFlag(userEntries.get(index), true);
         }
@@ -110,7 +110,7 @@ public class EntryLookup {
      * @return
      */
     public List<EntryWithFlag> byHeadword(String headword) {
-        return bySurface.get(headword);
+        return byHeadword.get(headword);
     }
 
     /**
@@ -119,6 +119,6 @@ public class EntryLookup {
      * @param e
      */
     public void add(Entry e, boolean isUser) {
-        bySurface.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(new EntryWithFlag(e, isUser));
+        byHeadword.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(new EntryWithFlag(e, isUser));
     }
 }

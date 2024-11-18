@@ -120,7 +120,7 @@ public class RawLexicon {
             offset += entry.computeExpectedSize();
             checkOffset(offset);
             if (entry.shouldBeIndexed()) {
-                index.add(entry.headword, entry.pointer);
+                index.add(entry.surface, entry.pointer);
             } else {
                 notIndexed.add(entry);
             }

@@ -45,7 +45,8 @@ class RawLexiconReaderTest {
   fun legacyCsvWithMinimumFields() {
     val reader = RawLexiconReader(csvfile("legacy-minimum.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.headword)
+      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
       assertEquals(0, e.synonymGroups.length())
@@ -59,7 +60,8 @@ class RawLexiconReaderTest {
   fun legacyCsvWithAllFields() {
     val reader = RawLexiconReader(csvfile("legacy-full.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.headword)
+      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(listOf(WordRef.LineNo(5, false), WordRef.LineNo(9, false)), e.wordStructure)
       assertEquals(Ints.wrap(intArrayOf(6, 7)), e.synonymGroups)
@@ -73,7 +75,8 @@ class RawLexiconReaderTest {
   fun headerCsvMinimumFields() {
     val reader = RawLexiconReader(csvfile("headers-minimum.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.headword)
+      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.headword()) // surface is used for missing writing
       assertEquals("トウキョウト", e.reading)
       assertEquals(
           listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 1, "ト")), e.aUnitSplit)
@@ -90,7 +93,8 @@ class RawLexiconReaderTest {
   fun headerCsvAllFields() {
     val reader = RawLexiconReader(csvfile("headers-all.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.headword)
+      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
           listOf(WordRef.Triple("東京", 0, "トウキョウ"), WordRef.Triple("都", 1, "ト")), e.aUnitSplit)
@@ -104,6 +108,22 @@ class RawLexiconReaderTest {
       assertEquals("10", e.userData)
     }
     assertNotNull(reader.nextEntry())
+    assertNull(reader.nextEntry())
+  }
+
+  @Test
+  fun parseWriting() {
+    val text =
+        """Surface,LeftId,RightId,Cost,writing,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable)
+    assertNotNull(reader.nextEntry()).let { e ->
+      assertEquals("abc", e.surface)
+      assertEquals("AbC", e.headword())
+    }
     assertNull(reader.nextEntry())
   }
 
@@ -127,7 +147,7 @@ class RawLexiconReaderTest {
   }
 
   @Test
-  fun posIdColumn() {
+  fun posIdOnly() {
     val text =
         """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,0,トウキョウト,,,,,"""
@@ -152,7 +172,6 @@ class RawLexiconReaderTest {
       reader.nextEntry()
     }
   }
-
   @Test
   fun posIdAndParts() {
     val text =
@@ -244,6 +263,13 @@ ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウ�
     }
     run {
       val text =
+          """Surface,LeftId,RightId,Cost,writing,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+東京都,6,8,5320,${oversizeWord},名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
+      val reader = RawLexiconReader(csvtext(text), POSTable())
+      assertFails { reader.nextEntry() }
+    }
+    run {
+      val text =
           """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,${oversizeWord},,,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
@@ -259,7 +285,7 @@ ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウ�
   }
 
   @Test
-  fun failEmptyHeadword() {
+  fun failEmptySurface() {
     val text =
         """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 ,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,"""

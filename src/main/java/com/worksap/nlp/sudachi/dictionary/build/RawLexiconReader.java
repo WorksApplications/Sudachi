@@ -244,12 +244,12 @@ public class RawLexiconReader {
         // because headword/triple ref may resolved to other entry.
         if (ref instanceof WordRef.Headword) {
             WordRef.Headword headword = (WordRef.Headword) ref;
-            if (headword.getHeadword().equals(entry.headword)) {
+            if (headword.getHeadword().equals(entry.headword())) {
                 return null;
             }
         } else if (ref instanceof WordRef.Triple) {
             WordRef.Triple triple = (WordRef.Triple) ref;
-            if (triple.getHeadword().equals(entry.headword) && triple.getPosId() == entry.posId
+            if (triple.getHeadword().equals(entry.headword()) && triple.getPosId() == entry.posId
                     && triple.getReading().equals(entry.reading)) {
                 return null;
             }
@@ -294,7 +294,9 @@ public class RawLexiconReader {
     /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
-        entry.headword = getNonEmpty(data, Column.SURFACE, true);
+        entry.surface = getNonEmpty(data, Column.SURFACE, true);
+        String writing = get(data, Column.WRITING, true);
+        entry.writing = writing.isEmpty() ? entry.surface : writing;
 
         entry.leftId = getShort(data, Column.LEFT_ID);
         entry.rightId = getShort(data, Column.RIGHT_ID);
@@ -303,7 +305,7 @@ public class RawLexiconReader {
         entry.reading = get(data, Column.READING_FORM, true);
         entry.posId = getPos(data);
 
-        // headword, pos, reading must be parsed before these.
+        // writing, pos, reading must be parsed before these to resolve wordref.
         entry.normalizedForm = getWordRef(data, Column.NORMALIZED_FORM, normRefParser, entry);
         entry.dictionaryForm = getWordRef(data, Column.DICTIONARY_FORM, dictRefParser, entry);
 

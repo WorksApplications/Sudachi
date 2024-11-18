@@ -22,7 +22,7 @@ import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 /**
- * WordInfo wrapper for Lookup2.Entry interface.
+ * WordInfo wrapper for EntryLookup.Entry interface.
  * 
  * Used to resolve wordref that references entry in the system dictionary
  * (during user dictinary build).

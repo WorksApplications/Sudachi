@@ -30,7 +30,8 @@ import java.util.ArrayList;
 @SuppressWarnings("jol")
 public class RawWordEntry implements EntryLookup.Entry {
     int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
-    String headword;
+    String surface;
+    String writing;
     short leftId;
     short rightId;
     short cost;
@@ -91,7 +92,8 @@ public class RawWordEntry implements EntryLookup.Entry {
 
     @Override
     public String headword() {
-        return headword;
+        // use writing for entry lookup
+        return writing;
     }
 
     private void checkString(String value, String name) {
@@ -104,7 +106,8 @@ public class RawWordEntry implements EntryLookup.Entry {
 
     /** check if sudachi dictionary can handle this entry */
     public void validate() {
-        checkString(headword, "headword");
+        checkString(surface, "surface");
+        checkString(writing, "writing");
         checkString(reading, "reading");
         if (normalizedForm instanceof WordRef.Headword) {
             checkString(((WordRef.Headword) normalizedForm).getHeadword(), "normalized form");
@@ -118,7 +121,8 @@ public class RawWordEntry implements EntryLookup.Entry {
      *            storage to publish strings.
      */
     public void publishStrings(StringStorage strings) {
-        strings.add(headword);
+        // surface is used only for indexing and is not necessary to store
+        strings.add(writing);
         strings.add(reading);
         if (normalizedForm instanceof WordRef.Headword) {
             WordRef.Headword normalized = (WordRef.Headword) normalizedForm;
@@ -131,7 +135,8 @@ public class RawWordEntry implements EntryLookup.Entry {
      */
     public static RawWordEntry makeEmpty() {
         RawWordEntry entry = new RawWordEntry();
-        entry.headword = "";
+        entry.surface = "";
+        entry.writing = "";
         entry.leftId = -1;
         entry.rightId = -1;
         entry.cost = Short.MAX_VALUE;
@@ -156,15 +161,20 @@ public class RawWordEntry implements EntryLookup.Entry {
      */
     public static RawWordEntry makePhantom(RawWordEntry base, String surface) {
         RawWordEntry entry = new RawWordEntry();
-        entry.headword = surface;
+        // keep surface empty, phantom entry will only be accessed via normalized form
+        entry.surface = "";
+        entry.writing = surface;
+
         // phantom entry should not be used in the analysis
         entry.leftId = -1;
         entry.rightId = -1;
         entry.cost = Short.MAX_VALUE;
+
+        // other data should be equivalent to the base entry
         entry.posId = base.posId;
         entry.reading = base.reading;
-        // normalizedForm = null: refer to itself
         entry.dictionaryForm = base.dictionaryForm;
+        entry.normalizedForm = null; // refer to itself
         entry.mode = base.mode;
         entry.aUnitSplit = base.aUnitSplit;
         entry.bUnitSplit = base.bUnitSplit;

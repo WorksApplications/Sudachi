@@ -66,23 +66,17 @@ public class WordEntryLayout {
         buf.putShort(entry.posId);
         // 2*4 = 8 bytes
 
-        buf.putInt(index.resolve(entry.headword).encode()); // surfacePtr
-        buf.putInt(index.resolve(entry.reading).encode()); // readingPtr
+        buf.putInt(index.resolve(entry.writing).encode()); // surface StringPtr
+        buf.putInt(index.resolve(entry.reading).encode()); // reading StringPtr
         int selfWordRef = isUser ? WordId.make(1, entry.pointer) : entry.pointer;
-        int normFormPtr = selfWordRef;
-        if (entry.normalizedForm != null) {
-            normFormPtr = entry.normalizedForm.resolve(lookup);
-        }
-        int dicFormPtr = selfWordRef;
-        if (entry.dictionaryForm != null) {
-            dicFormPtr = entry.dictionaryForm.resolve(lookup);
-        }
-        buf.putInt(normFormPtr); // normalized entry
-        buf.putInt(dicFormPtr); // dictionary form
+        int normFormPtr = entry.normalizedForm == null ? selfWordRef : entry.normalizedForm.resolve(lookup);
+        int dictFormPtr = entry.dictionaryForm == null ? selfWordRef : entry.dictionaryForm.resolve(lookup);
+        buf.putInt(normFormPtr); // normalized form WordRef
+        buf.putInt(dictFormPtr); // dictionary form WordRef
         // 8 + 4*4 = 24 bytes
 
         // length can't be more than ~4k utf-16 code units so the cast is safe
-        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.headword);
+        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.surface);
         byte cSplitLen = resolveWordRefList(entry.cUnitSplit, null, cSplits);
         byte bSplitLen = resolveWordRefList(entry.bUnitSplit, entry.cUnitSplit, bSplits);
         byte aSplitLen = resolveWordRefList(entry.aUnitSplit, entry.bUnitSplit, aSplits);
