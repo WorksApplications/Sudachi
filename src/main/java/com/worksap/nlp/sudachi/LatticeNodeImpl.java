@@ -283,9 +283,9 @@ public class LatticeNodeImpl implements LatticeNode {
             String s = surface;
             if (s == null) {
                 WordInfo wi = node.getWordInfo();
-                int surfacePtr = wi.getSurface();
+                int headwordPtr = wi.getHeadword();
                 int dic = WordId.dic(node.getWordId());
-                s = lexicon.string(dic, surfacePtr);
+                s = lexicon.string(dic, headwordPtr);
                 surface = s;
             }
             return s;
@@ -309,8 +309,8 @@ public class LatticeNodeImpl implements LatticeNode {
                 WordInfo wi = node.getWordInfo();
                 int wordref = wi.getNormalizedForm();
                 int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
-                int surfacePtr = lexicon.wordInfos(dic).surfacePtr(WordId.word(wordref));
-                s = lexicon.string(dic, surfacePtr);
+                int headwordPtr = lexicon.wordInfos(dic).headwordPtr(WordId.word(wordref));
+                s = lexicon.string(dic, headwordPtr);
                 normalizedForm = s;
             }
             return s;
@@ -322,8 +322,8 @@ public class LatticeNodeImpl implements LatticeNode {
                 WordInfo wi = node.getWordInfo();
                 int wordref = wi.getDictionaryForm();
                 int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
-                int surfacePtr = lexicon.wordInfos(dic).surfacePtr(WordId.word(wordref));
-                s = lexicon.string(dic, surfacePtr);
+                int headwordPtr = lexicon.wordInfos(dic).headwordPtr(WordId.word(wordref));
+                s = lexicon.string(dic, headwordPtr);
                 dictionaryForm = s;
             }
             return s;

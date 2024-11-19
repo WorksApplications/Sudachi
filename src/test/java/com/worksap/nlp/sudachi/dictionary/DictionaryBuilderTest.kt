@@ -83,7 +83,7 @@ class DictionaryBuilderTest {
     assertEquals(0, WordParameters.leftId(params))
     assertEquals(100, WordParameters.cost(params))
     var wi = lexicon.getWordInfo(wordId)
-    assertEquals("東京都", lexicon.string(0, wi.getSurface()))
+    assertEquals("東京都", lexicon.string(0, wi.getHeadword()))
     assertEquals("ヒガシキョウト", lexicon.string(0, wi.getReadingForm()))
     assertEquals(WordId.make(0, wordId), wi.getNormalizedForm())
     assertEquals(WordId.make(0, wordId), wi.getDictionaryForm())
@@ -103,7 +103,7 @@ class DictionaryBuilderTest {
     assertEquals(-1, WordParameters.leftId(params))
     assertEquals(200, WordParameters.cost(params))
     wi = lexicon.getWordInfo(wordId)
-    assertEquals("東", lexicon.string(0, wi.getSurface()))
+    assertEquals("東", lexicon.string(0, wi.getHeadword()))
     assertEquals("ヒガシ", lexicon.string(0, wi.getReadingForm()))
     assertEquals(WordId.make(0, wordIds[3]), wi.getNormalizedForm())
     assertEquals(WordId.make(0, wordId), wi.getDictionaryForm())
@@ -130,7 +130,7 @@ class DictionaryBuilderTest {
     inputFile
         .toFile()
         .writeText(
-            """Surface,leftId,rightId,cost,writing,posId,readingform,normalizedform,dictionaryform,mode,splitA,splitB,wordstructure,synonymgroups
+            """Index_Form,leftId,rightId,cost,Headword,posId,readingform,normalizedform,dictionaryform,mode,splitA,splitB,wordstructure,synonymgroups
 東京都,0,0,100,東京都,1,ヒガシキョウト,東京都,,B,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,1,キョウト",,"東,名詞,普通名詞,一般,*,*,*,ヒガシ/京都,1,キョウト",1/2
 東,-1,-1,200,東,0,ヒガシ,ひがし,,A,,,,
 京都,0,0,300,京都,1,キョウト,京都,,A,,,,""")
@@ -167,7 +167,7 @@ class DictionaryBuilderTest {
     assertEquals(0, WordParameters.leftId(params))
     assertEquals(100, WordParameters.cost(params))
     var wi = lexicon.getWordInfo(wordId)
-    assertEquals("東京都", lexicon.string(0, wi.getSurface()))
+    assertEquals("東京都", lexicon.string(0, wi.getHeadword()))
     assertEquals("ヒガシキョウト", lexicon.string(0, wi.getReadingForm()))
     assertEquals(WordId.make(0, wordId), wi.getNormalizedForm())
     assertEquals(WordId.make(0, wordId), wi.getDictionaryForm())

@@ -91,7 +91,7 @@ public abstract class WordRef {
     }
 
     /**
-     * Reference written by surface.
+     * Reference written by headword.
      */
     public static final class RefByHeadword extends WordRef {
         private final String headword;
@@ -107,6 +107,8 @@ public abstract class WordRef {
         @Override
         public int resolve(EntryLookup resolver) {
             List<EntryLookup.EntryWithFlag> entries = resolver.byHeadword(headword);
+            // Use the first entry. This is ok since RefByHeadword is only allowed for the
+            // normalized form and only the headword of the referred entry will be used.
             return intoWordRef(entries.get(0));
         }
 
@@ -132,7 +134,7 @@ public abstract class WordRef {
     }
 
     /**
-     * Reference written by surface-pos-reading tuple.
+     * Reference written by headword-pos-reading tuple.
      */
     public static final class RefByTriple extends WordRef {
         private final String headword;
@@ -173,7 +175,7 @@ public abstract class WordRef {
 
         @Override
         public String toString() {
-            return String.format("WordRef: %s/%d/%s", headword, posId, reading);
+            return String.format("WordRef/Triple: %s/%d/%s", headword, posId, reading);
         }
 
         @Override
@@ -228,6 +230,7 @@ public abstract class WordRef {
                 return new RefByLineNo(lineNum, isUser);
             }
 
+            // triple, pos is written as 6-parts
             if (StringUtil.count(text, WORDREF_DELIMITER) == 7) {
                 String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 8);
                 String headword = Unescape.unescape(cols[0]);
@@ -241,6 +244,7 @@ public abstract class WordRef {
                 return new RefByTriple(headword, posId, reading);
             }
 
+            // triple, pos is written as pos-id
             if (StringUtil.count(text, WORDREF_DELIMITER) == 2) {
                 String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 3);
                 String headword = Unescape.unescape(cols[0]);
@@ -251,10 +255,9 @@ public abstract class WordRef {
 
             if (allowHeadword) {
                 return new RefByHeadword(Unescape.unescape(text));
-            } else {
-                throw new IllegalArgumentException(String.format("invalid word reference: %s", text));
             }
-        }
 
+            throw new IllegalArgumentException(String.format("invalid word reference: %s", text));
+        }
     }
 }

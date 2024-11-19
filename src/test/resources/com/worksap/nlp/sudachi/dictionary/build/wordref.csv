@@ -1,4 +1,4 @@
-Surface,LeftId,RightId,Cost,pos_id,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,Split_C,WordStructure,SynonymGroups
+IndexForm,LeftId,RightId,Cost,pos_id,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,Split_C,WordStructure,SynonymGroups
 京都,0,0,5293,0,名詞,固有名詞,地名,一般,*,*,キョウト,,,A,,,,,
 東,1,1,4675,1,名詞,普通名詞,一般,*,*,*,ヒガシ,,,A,,,,,
 東京,0,0,2816,0,名詞,固有名詞,地名,一般,*,*,トウキョウ,,,A,,,,,

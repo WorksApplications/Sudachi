@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Utility to lookup entries from the list.
+ * Utility to lookup entries from the list. Used to resolve {@link WordRef}.
  */
 public class EntryLookup {
     public interface Entry {
@@ -104,7 +104,7 @@ public class EntryLookup {
     }
 
     /**
-     * Lookup entries by the headword (surface).
+     * Lookup entries by the headword.
      * 
      * @param headword
      * @return

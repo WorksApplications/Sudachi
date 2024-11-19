@@ -65,7 +65,7 @@ class DictionaryPrinterTest {
 
   fun wordInfoString(lex: DoubleArrayLexicon, wordId: Int): String {
     val wi = lex.getWordInfo(wordId)
-    return "${wordId}, ${lex.string(0, wi.getSurface())}, ${wi.getLength()}, ${wi.getPOSId()}, ${wi.getNormalizedForm()}, ${wi.getDictionaryForm()}, ${lex.string(0, wi.getReadingForm())}, ${Arrays.toString(wi.getAunitSplit())}, ${Arrays.toString(wi.getBunitSplit())}, ${Arrays.toString(wi.getCunitSplit())}, ${Arrays.toString(wi.getWordStructure())}, ${Arrays.toString(wi.getSynonymGroupIds())}, ${wi.getUserData()}"
+    return "${wordId}, ${lex.string(0, wi.getHeadword())}, ${wi.getLength()}, ${wi.getPOSId()}, ${wi.getNormalizedForm()}, ${wi.getDictionaryForm()}, ${lex.string(0, wi.getReadingForm())}, ${Arrays.toString(wi.getAunitSplit())}, ${Arrays.toString(wi.getBunitSplit())}, ${Arrays.toString(wi.getCunitSplit())}, ${Arrays.toString(wi.getWordStructure())}, ${Arrays.toString(wi.getSynonymGroupIds())}, ${wi.getUserData()}"
   }
 
   @Test
@@ -76,13 +76,15 @@ class DictionaryPrinterTest {
 
     assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
-    assertEquals("た,1,1,8729,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
     assertEquals(
-        "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,",
+        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,",
         lines[7])
+    // assertEquals("特a,8,8,2914,特A,名詞,普通名詞,一般,*,*,*,トクエー,,,,,,,", lines[38]) // TODO: after #241
+    // fixed
   }
 
   @Test
@@ -93,10 +95,10 @@ class DictionaryPrinterTest {
 
     assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
-    assertEquals("た,1,1,8729,0,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,1,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,0,タ,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,1,ニ,,,,,,,,", lines[2])
   }
 
   @Test
@@ -107,10 +109,10 @@ class DictionaryPrinterTest {
 
     assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
-    assertEquals("た,1,1,8729,0,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,1,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,0,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,1,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
   }
 
   @Test
@@ -121,10 +123,10 @@ class DictionaryPrinterTest {
 
     assertEquals(43, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
     assertEquals(
-        "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト\",,,\"東京,3,トウキョウ/都,4,ト\",,",
+        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト\",,,\"東京,3,トウキョウ/都,4,ト\",,",
         lines[7])
   }
 
@@ -136,12 +138,12 @@ class DictionaryPrinterTest {
 
     assertEquals(6, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
     assertEquals(
-        "東京府,6,6,2816,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",1/3,",
+        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",1/3,",
         lines[3])
-    assertEquals("すだち,6,6,2816,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ,スダチ,,,,,,,,徳島県産", lines[4])
+    assertEquals("すだち,6,6,2816,,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ,スダチ,,,,,,,,徳島県産", lines[4])
   }
 
   @Test
@@ -156,10 +158,10 @@ class DictionaryPrinterTest {
 
     assertEquals(6, lines.size) // header + entries + trailing new line
     assertEquals(
-        "SURFACE,LEFT_ID,RIGHT_ID,COST,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
         lines[0])
     assertEquals(
-        "東京府,6,6,2816,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,3,トウキョウ/府,4,フ\",,,\"東京,3,トウキョウ/府,4,フ\",1/3,",
+        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,3,トウキョウ/府,4,フ\",,,\"東京,3,トウキョウ/府,4,フ\",1/3,",
         lines[3])
   }
 

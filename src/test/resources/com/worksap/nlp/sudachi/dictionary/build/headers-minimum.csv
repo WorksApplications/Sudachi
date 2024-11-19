@@ -1,3 +1,3 @@
-Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordStructure
+IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordStructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,"東京,0,トウキョウ/都,1,ト","東京,0,トウキョウ/都,2,ト","東京,0,トウキョウ/都,3,ト"
 行く,4,4,5105,動詞,非自立可能,*,*,五段-カ行,終止形-一般,イク,,,,,

@@ -36,7 +36,7 @@ public class RawLexiconReader {
      * reordered with respect to the header.
      */
     public enum Column {
-        SURFACE(true), LEFT_ID(true), RIGHT_ID(true), COST(true), WRITING(false), POS1(false), POS2(false), POS3(
+        INDEX_FORM(true), LEFT_ID(true), RIGHT_ID(true), COST(true), HEADWORD(false), POS1(false), POS2(false), POS3(
                 false), POS4(false), POS5(false), POS6(false), READING_FORM(true), NORMALIZED_FORM(
                         true), DICTIONARY_FORM(true), MODE(false), SPLIT_A(true), SPLIT_B(true), WORD_STRUCTURE(
                                 true), SYNONYM_GROUPS(false), SPLIT_C(false), USER_DATA(false), POS_ID(false);
@@ -294,9 +294,9 @@ public class RawLexiconReader {
     /** convert csv row to RawWordEntry */
     private RawWordEntry convertEntry(List<String> data) {
         RawWordEntry entry = new RawWordEntry();
-        entry.surface = getNonEmpty(data, Column.SURFACE, true);
-        String writing = get(data, Column.WRITING, true);
-        entry.writing = writing.isEmpty() ? entry.surface : writing;
+        entry.indexForm = getNonEmpty(data, Column.INDEX_FORM, true);
+        String headword = get(data, Column.HEADWORD, true);
+        entry.headword = headword.isEmpty() ? entry.indexForm : headword;
 
         entry.leftId = getShort(data, Column.LEFT_ID);
         entry.rightId = getShort(data, Column.RIGHT_ID);
@@ -305,7 +305,7 @@ public class RawLexiconReader {
         entry.reading = get(data, Column.READING_FORM, true);
         entry.posId = getPos(data);
 
-        // writing, pos, reading must be parsed before these to resolve wordref.
+        // headword, pos, reading must be parsed before these to resolve wordref.
         entry.normalizedFormRef = getWordRef(data, Column.NORMALIZED_FORM, normRefParser, entry);
         entry.dictionaryFormRef = getWordRef(data, Column.DICTIONARY_FORM, dictRefParser, entry);
 

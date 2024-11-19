@@ -79,7 +79,7 @@ public class UserDictionaryBuilderTest {
             assertThat(WordParameters.leftId(param), is((short) 0));
             assertThat(WordParameters.cost(param), is((short) 0));
             WordInfo info = lexicon.getWordInfo(wordId);
-            assertThat(lexicon.string(0, info.getSurface()), is("東京都市"));
+            assertThat(lexicon.string(0, info.getHeadword()), is("東京都市"));
             assertThat(info.getNormalizedForm(), is(WordId.make(1, wordId)));
             assertThat(info.getDictionaryForm(), is(WordId.make(1, wordId)));
             assertThat(lexicon.string(0, info.getReadingForm()), is("ヒガシキョウトシ"));
@@ -99,7 +99,7 @@ public class UserDictionaryBuilderTest {
             assertThat(WordParameters.leftId(param), is((short) -1));
             assertThat(WordParameters.cost(param), is((short) 0));
             info = lexicon.getWordInfo(wordId);
-            assertThat(lexicon.string(0, info.getSurface()), is("市"));
+            assertThat(lexicon.string(0, info.getHeadword()), is("市"));
             assertThat(info.getNormalizedForm(), is(WordId.make(1, wordId)));
             assertThat(info.getDictionaryForm(), is(WordId.make(1, wordId)));
             assertThat(lexicon.string(0, info.getReadingForm()), is("シ"));

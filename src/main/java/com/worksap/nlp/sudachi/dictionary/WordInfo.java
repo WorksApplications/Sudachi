@@ -27,9 +27,9 @@ import java.nio.ByteBuffer;
  * This class holds morpheme data which is not used in the viterbi search.
  */
 public class WordInfo {
-    private final short headwordLength;
+    private final short indexFormLength;
     private short posId;
-    private final int surface; // StringPtr
+    private final int headword; // StringPtr
     private final int reading; // StringPtr
     private final int normalizedForm; // word ref
     private final int dictionaryForm; // word ref
@@ -40,12 +40,12 @@ public class WordInfo {
     private final int[] synonymGids;
     private final String userData;
 
-    public WordInfo(short headwordLength, short posId, int surface, int reading, int normalizedForm, int dictionaryForm,
-            int[] aUnitSplit, int[] bUnitSplit, int[] cUnitSplit, int[] wordStructure, int[] synonymGids,
-            String userData) {
-        this.headwordLength = headwordLength;
+    public WordInfo(short indexFormLength, short posId, int headword, int reading, int normalizedForm,
+            int dictionaryForm, int[] aUnitSplit, int[] bUnitSplit, int[] cUnitSplit, int[] wordStructure,
+            int[] synonymGids, String userData) {
+        this.indexFormLength = indexFormLength;
         this.posId = posId;
-        this.surface = surface;
+        this.headword = headword;
         this.reading = reading;
         this.normalizedForm = normalizedForm;
         this.dictionaryForm = dictionaryForm;
@@ -61,15 +61,15 @@ public class WordInfo {
      * Allocates morpheme information for ones not in the lexicon. For example,
      * OOVs.
      *
-     * @param headwordLength
+     * @param indexFormLength
      *            the length of the morpheme
      * @param posId
      *            the ID of the part-of-speech of the morpheme
      */
-    public WordInfo(short headwordLength, short posId) {
-        this.headwordLength = headwordLength;
+    public WordInfo(short indexFormLength, short posId) {
+        this.indexFormLength = indexFormLength;
         this.posId = posId;
-        this.surface = 0;
+        this.headword = 0;
         this.normalizedForm = 0;
         this.dictionaryForm = 0;
         this.reading = 0;
@@ -87,8 +87,8 @@ public class WordInfo {
      * @return raw string pointer to the text
      * @see StringPtr
      */
-    public int getSurface() {
-        return surface;
+    public int getHeadword() {
+        return headword;
     }
 
     /**
@@ -97,12 +97,12 @@ public class WordInfo {
      * <p>
      * This length is used to place a node in the
      * {@link com.worksap.nlp.sudachi.Lattice}, does not equals
-     * {@code getSurface().length()}.
+     * {@code getHeadword().length()}.
      *
      * @return the length of the text
      */
     public short getLength() {
-        return headwordLength;
+        return indexFormLength;
     }
 
     /**
@@ -226,13 +226,13 @@ public class WordInfo {
     }
 
     /**
-     * Read StringPtr to the surface form directly.
+     * Read StringPtr to the headword form directly.
      * 
      * @param buffer
      * @param pos
      * @return
      */
-    public static int surfaceForm(ByteBuffer buffer, int pos) {
+    public static int headwordForm(ByteBuffer buffer, int pos) {
         return buffer.getInt(pos + 8);
     }
 
@@ -253,13 +253,13 @@ public class WordInfo {
         // do not modify buffer metadata for better performance
         posId = buffer.getShort(pos + 6);
 
-        surface = surfaceForm(buffer, pos); // +8
+        headword = headwordForm(buffer, pos); // +8
         reading = readingForm(buffer, pos); // +12
         normalizedForm = buffer.getInt(pos + 16);
         dictionaryForm = buffer.getInt(pos + 20);
 
         long rest = buffer.getLong(pos + 24);
-        headwordLength = (short) (rest & 0xffff);
+        indexFormLength = (short) (rest & 0xffff);
         rest >>>= 16;
         if (rest == 0) {
             cUnitSplit = Ints.EMPTY_ARRAY;

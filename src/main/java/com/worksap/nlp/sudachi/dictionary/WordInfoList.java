@@ -40,8 +40,8 @@ public class WordInfoList {
         return WordInfo.read(bytes, wordId2offset(wordId));
     }
 
-    public int surfacePtr(int wordId) {
-        return WordInfo.surfaceForm(bytes, wordId2offset(wordId));
+    public int headwordPtr(int wordId) {
+        return WordInfo.headwordForm(bytes, wordId2offset(wordId));
     }
 
     public int readingPtr(int wordId) {

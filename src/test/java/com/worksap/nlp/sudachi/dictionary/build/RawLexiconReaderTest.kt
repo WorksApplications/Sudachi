@@ -45,7 +45,7 @@ class RawLexiconReaderTest {
   fun legacyCsvWithMinimumFields() {
     val reader = RawLexiconReader(csvfile("legacy-minimum.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.indexForm)
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
@@ -61,7 +61,7 @@ class RawLexiconReaderTest {
   fun legacyCsvWithAllFields() {
     val reader = RawLexiconReader(csvfile("legacy-full.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.indexForm)
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
@@ -78,8 +78,8 @@ class RawLexiconReaderTest {
   fun headerCsvMinimumFields() {
     val reader = RawLexiconReader(csvfile("headers-minimum.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.surface)
-      assertEquals("東京都", e.headword()) // surface is used for missing writing
+      assertEquals("東京都", e.indexForm)
+      assertEquals("東京都", e.headword()) // indexForm is used for missing headword
       assertEquals("トウキョウト", e.reading)
       assertEquals(
           listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 1, "ト")),
@@ -99,7 +99,7 @@ class RawLexiconReaderTest {
   fun headerCsvAllFields() {
     val reader = RawLexiconReader(csvfile("headers-all.csv"), POSTable())
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("東京都", e.surface)
+      assertEquals("東京都", e.indexForm)
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
@@ -122,16 +122,16 @@ class RawLexiconReaderTest {
   }
 
   @Test
-  fun parseWriting() {
+  fun parseHeadword() {
     val text =
-        """Surface,LeftId,RightId,Cost,writing,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,headword,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
 
     val reader = RawLexiconReader(csvtext(text), posTable)
     assertNotNull(reader.nextEntry()).let { e ->
-      assertEquals("abc", e.surface)
+      assertEquals("abc", e.indexForm)
       assertEquals("AbC", e.headword())
     }
     assertNull(reader.nextEntry())
@@ -141,7 +141,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   fun failMissingRequiredEntry() {
     // pos1-6 are not required (because of posId), but must be used as a set
     val columns =
-        "Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure".split(
+        "IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure".split(
             ",")
     val values = "東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,".split(",")
 
@@ -159,7 +159,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun posIdOnly() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,0,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -172,7 +172,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun failNonExistingPosId() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,1,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -185,7 +185,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun posIdAndParts() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,0,トウキョウト,,,,,"""
     val posTable = POSTable()
 
@@ -197,7 +197,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun posIdAndEmptyParts() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,,,,,,,0,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -210,7 +210,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun posPartsAndEmptyPosId() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos_id,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos_id,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,0,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,"""
     val posTable = POSTable()
 
@@ -222,7 +222,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun failPosIdAndPartsNotMatch() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,0,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -236,7 +236,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun failPosColumnMissing() {
     val text =
-        """Surface,LeftId,RightId,Cost,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -250,7 +250,7 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   @Test
   fun failPosColumnEmpty() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 東京都,6,8,5320,,,,,,,,トウキョウト,,,,,"""
     val posTable = POSTable()
     posTable.getId(POS("a", "a", "a", "a", "a", "0"))
@@ -266,28 +266,28 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
     val oversizeWord = "a".repeat(StringPtr.MAX_LENGTH + 1)
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,writing,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,headword,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,${oversizeWord},名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,${oversizeWord},,,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,${oversizeWord},,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
@@ -295,9 +295,9 @@ ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウ�
   }
 
   @Test
-  fun failEmptySurface() {
+  fun failEmptyIndexForm() {
     val text =
-        """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+        """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
 ,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,"""
     val reader = RawLexiconReader(csvtext(text), POSTable())
     assertFails { reader.nextEntry() }
@@ -308,28 +308,28 @@ ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウ�
   fun failSingleSplit() {
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,1,,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,1,,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,1,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,,1"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
@@ -343,28 +343,28 @@ ${oversizeWord},6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウ�
 
     run {
       var text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,${oversizeSplit},,,"""
       var reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,${oversizeSplit},,"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,${oversizeSplit},"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }
     }
     run {
       val text =
-          """Surface,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
+          """IndexForm,LeftId,RightId,Cost,pos1,pos2,pos3,pos4,pos5,pos6,reading_form,normalized_form,DictionaryForm,splita,splitb,splitC,wordstructure
 東京都,6,8,5320,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,,,,${oversizeSplit}"""
       val reader = RawLexiconReader(csvtext(text), POSTable())
       assertFails { reader.nextEntry() }

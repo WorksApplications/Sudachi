@@ -60,8 +60,8 @@ public class DictionaryPrinter {
     /**
      * WordRef print mode
      * 
-     * TRIPLE_PARTS: print as (surface, pos1, .., pos6, reading) tuple. TRIPLE_ID:
-     * print as (surface, pos-id, reading) tuple.
+     * TRIPLE_PARTS: print as (headword, pos1, .., pos6, reading) tuple. TRIPLE_ID:
+     * print as (headword, pos-id, reading) tuple.
      */
     public enum WordRefMode {
         TRIPLE_PARTS, TRIPLE_ID;
@@ -89,7 +89,7 @@ public class DictionaryPrinter {
 
         // in order to output dictionary entries in in-dictionary order we need to sort
         // them. iterator over them will get them not in the sorted order, but grouped
-        // by surface (and sorted in groups).
+        // by index-form (and sorted in groups).
         DoubleArrayLexicon targetLex = dic.getLexicon();
         Ints allIds = new Ints(targetLex.size());
         Iterator<Ints> ids = targetLex.wordIds(0);
@@ -138,7 +138,8 @@ public class DictionaryPrinter {
         }
 
         List<Column> headerColumns = Stream
-                .of(Arrays.asList(Column.SURFACE, Column.LEFT_ID, Column.RIGHT_ID, Column.COST), posColumns,
+                .of(Arrays.asList(Column.INDEX_FORM, Column.LEFT_ID, Column.RIGHT_ID, Column.COST, Column.HEADWORD),
+                        posColumns,
                         Arrays.asList(Column.READING_FORM, Column.NORMALIZED_FORM, Column.DICTIONARY_FORM,
                                 Column.SPLIT_A, Column.SPLIT_B, Column.SPLIT_C, Column.WORD_STRUCTURE,
                                 Column.SYNONYM_GROUPS, Column.USER_DATA))
@@ -173,16 +174,20 @@ public class DictionaryPrinter {
     void printEntry(int wordId) {
         int dic = WordId.dic(wordId);
         WordInfo info = lex.getWordInfo(wordId);
+
+        String headword = lex.string(dic, info.getHeadword());
+        String indexForm = headword; // TODO: need normalization
+        field(indexForm);
+
+        long params = lex.parameters(wordId);
+        field(WordParameters.leftId(params));
+        field(WordParameters.rightId(params));
+        field(WordParameters.cost(params));
+
+        field(headword.equals(indexForm) ? "" : headword);
+
         short posId = info.getPOSId();
         POS pos = grammar.getPartOfSpeechString(posId);
-        long params = lex.parameters(wordId);
-        short leftId = WordParameters.leftId(params);
-        short rightId = WordParameters.rightId(params);
-        short cost = WordParameters.cost(params);
-        field(lex.string(dic, info.getSurface()));
-        field(leftId);
-        field(rightId);
-        field(cost);
         if (posMode == POSMode.ID || posMode == POSMode.BOTH) {
             field(posId);
         }
@@ -194,13 +199,16 @@ public class DictionaryPrinter {
             field(pos.get(4));
             field(pos.get(5));
         }
+
         field(lex.string(dic, info.getReadingForm()));
         field(wordRefHeadword(info.getNormalizedForm(), wordId));
         field(wordRef(info.getDictionaryForm(), wordId));
+
         field(wordRefList(info.getAunitSplit()));
         field(wordRefList(info.getBunitSplit()));
         field(wordRefList(info.getCunitSplit()));
         field(wordRefList(info.getWordStructure()));
+
         field(intList(info.getSynonymGroupIds()));
         lastField(info.getUserData());
         output.print("\n");
@@ -235,17 +243,17 @@ public class DictionaryPrinter {
     String wordRef(int wordId) {
         WordInfo info = lex.getWordInfo(wordId);
         int dic = WordId.dic(wordId);
-        String surface = lex.string(dic, info.getSurface());
+        String headword = lex.string(dic, info.getHeadword());
         short posId = info.getPOSId();
         String reading = lex.string(dic, info.getReadingForm());
 
         List<String> parts;
         if (wordRefMode == WordRefMode.TRIPLE_ID) {
-            parts = Arrays.asList(surface, String.valueOf(posId), reading);
+            parts = Arrays.asList(headword, String.valueOf(posId), reading);
         } else {
             POS pos = grammar.getPartOfSpeechString(posId);
             parts = new ArrayList<>(1 + POS.DEPTH + 1);
-            parts.add(surface);
+            parts.add(headword);
             parts.addAll(pos);
             parts.add(reading);
         }
@@ -261,7 +269,7 @@ public class DictionaryPrinter {
         }
         int dic = WordId.dic(wordId);
         WordInfo info = lex.getWordInfo(wordId);
-        return lex.string(dic, info.getSurface());
+        return lex.string(dic, info.getHeadword());
     }
 
     String wordRefList(int[] wordIds) {

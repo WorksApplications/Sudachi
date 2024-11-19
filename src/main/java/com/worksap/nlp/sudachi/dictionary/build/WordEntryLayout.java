@@ -66,7 +66,7 @@ public class WordEntryLayout {
         buf.putShort(entry.posId);
         // 2*4 = 8 bytes
 
-        buf.putInt(index.resolve(entry.writing).encode()); // surface StringPtr
+        buf.putInt(index.resolve(entry.headword).encode()); // headword StringPtr
         buf.putInt(index.resolve(entry.reading).encode()); // reading StringPtr
         int selfPtr = isUser ? WordId.make(1, entry.pointer) : entry.pointer;
         int normFormPtr = entry.normalizedFormRef == null ? selfPtr : entry.normalizedFormRef.resolve(lookup);
@@ -76,7 +76,7 @@ public class WordEntryLayout {
         // 8 + 4*4 = 24 bytes
 
         // length can't be more than ~4k utf-16 code units so the cast is safe
-        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.surface);
+        short utf8Len = (short) StringUtil.countUtf8Bytes(entry.indexForm);
         byte cSplitLen = resolveWordRefList(entry.cUnitSplit, null, cSplits);
         byte bSplitLen = resolveWordRefList(entry.bUnitSplit, entry.cUnitSplit, bSplits);
         byte aSplitLen = resolveWordRefList(entry.aUnitSplit, entry.bUnitSplit, aSplits);

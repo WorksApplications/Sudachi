@@ -94,11 +94,11 @@ class DoubleArrayLexiconTest {
   fun wordInfo() {
     // た
     var wi = lexicon.getWordInfo(getWordId(0))
-    assertEquals("た", lexicon.string(0, wi.getSurface()))
+    assertEquals("た", lexicon.string(0, wi.getHeadword()))
     assertEquals(3, wi.getLength())
     assertEquals(0, wi.getPOSId())
-    assertEquals("た", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getSurface()))
-    assertEquals("た", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getSurface()))
+    assertEquals("た", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
+    assertEquals("た", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword()))
     assertEquals("タ", lexicon.string(0, wi.getReadingForm()))
     assertEquals(listOf(), wi.getAunitSplit().toList())
     assertEquals(listOf(), wi.getBunitSplit().toList())
@@ -106,13 +106,13 @@ class DoubleArrayLexiconTest {
 
     // 行っ
     wi = lexicon.getWordInfo(getWordId(8))
-    assertEquals("行っ", lexicon.string(0, wi.getSurface()))
-    assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getSurface()))
-    assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getSurface()))
+    assertEquals("行っ", lexicon.string(0, wi.getHeadword()))
+    assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
+    assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword()))
 
     // 東京都
     wi = lexicon.getWordInfo(getWordId(6))
-    assertEquals("東京都", lexicon.string(0, wi.getSurface()))
+    assertEquals("東京都", lexicon.string(0, wi.getHeadword()))
     assertEquals(listOf(getWordId(5), getWordId(9)), wi.getAunitSplit().toList())
     assertEquals(listOf(), wi.getBunitSplit().toList())
     assertEquals(listOf(getWordId(5), getWordId(9)), wi.getWordStructure().toList())
@@ -127,7 +127,7 @@ class DoubleArrayLexiconTest {
 
     // すだち
     val wi = userlex.getWordInfo(18)
-    assertEquals("すだち", userlex.string(0, wi.getSurface()))
+    assertEquals("すだち", userlex.string(0, wi.getHeadword()))
     assertEquals(8, wi.getPOSId())
     assertEquals("徳島県産", wi.getUserData())
   }
@@ -136,12 +136,14 @@ class DoubleArrayLexiconTest {
   fun wordInfoLong() {
     // 0123456789 * 30
     val wi = lexicon.getWordInfo(getWordId(36))
-    val surface = lexicon.string(0, wi.getSurface())
+    val surface = lexicon.string(0, wi.getHeadword())
     assertEquals(300, surface.length)
     assertEquals(300, wi.getLength())
-    val normalizedform = lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getSurface())
+    val normalizedform =
+        lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword())
     assertEquals(300, normalizedform.length)
-    val dictionaryform = lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getSurface())
+    val dictionaryform =
+        lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword())
     assertEquals(300, dictionaryform.length)
     val readingform = lexicon.string(0, wi.getReadingForm())
     assertEquals(570, readingform.length)

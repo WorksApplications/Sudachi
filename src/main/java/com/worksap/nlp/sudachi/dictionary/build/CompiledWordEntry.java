@@ -59,6 +59,6 @@ public class CompiledWordEntry implements EntryLookup.Entry {
     @Override
     public String headword() {
         WordInfo wi = wordInfo();
-        return lexicon.string(0, wi.getSurface());
+        return lexicon.string(0, wi.getHeadword());
     }
 }

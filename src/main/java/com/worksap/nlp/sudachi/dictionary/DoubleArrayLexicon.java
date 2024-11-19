@@ -174,9 +174,9 @@ public class DoubleArrayLexicon implements Lexicon {
                 if (isNormalCost(WordParameters.cost(parameters(wordId)))) {
                     continue;
                 }
-                int surfPtr = wordInfos.surfacePtr(wordId);
-                String surface = strings.string(surfPtr);
-                MorphemeList ms = tokenizer.tokenize(surface);
+                int headwordPtr = wordInfos.headwordPtr(wordId);
+                String headword = strings.string(headwordPtr);
+                MorphemeList ms = tokenizer.tokenize(headword);
                 int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
                 if (cost > Short.MAX_VALUE) {
                     cost = Short.MAX_VALUE;

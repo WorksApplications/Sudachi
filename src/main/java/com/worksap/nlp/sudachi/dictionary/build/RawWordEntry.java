@@ -30,8 +30,8 @@ import java.util.ArrayList;
 @SuppressWarnings("jol")
 public class RawWordEntry implements EntryLookup.Entry {
     int pointer; // wordid, compressed offset of this entry in the lexicon.WordEntries
-    String surface;
-    String writing;
+    String indexForm;
+    String headword;
     short leftId;
     short rightId;
     short cost;
@@ -92,8 +92,7 @@ public class RawWordEntry implements EntryLookup.Entry {
 
     @Override
     public String headword() {
-        // use writing for entry lookup
-        return writing;
+        return headword;
     }
 
     private void checkString(String value, String name) {
@@ -106,8 +105,8 @@ public class RawWordEntry implements EntryLookup.Entry {
 
     /** check if sudachi dictionary can handle this entry */
     public void validate() {
-        checkString(surface, "surface");
-        checkString(writing, "writing");
+        checkString(indexForm, "index form");
+        checkString(headword, "headword");
         checkString(reading, "reading");
         if (normalizedFormRef instanceof WordRef.RefByHeadword) {
             checkString(((WordRef.RefByHeadword) normalizedFormRef).getHeadword(), "normalized form");
@@ -121,9 +120,10 @@ public class RawWordEntry implements EntryLookup.Entry {
      *            storage to publish strings.
      */
     public void publishStrings(StringStorage strings) {
-        // surface is used only for indexing and is not necessary to store
-        strings.add(writing);
+        strings.add(headword);
         strings.add(reading);
+        // allow referring a non-existing word in the normalized form, which needs to be
+        // published
         if (normalizedFormRef instanceof WordRef.RefByHeadword) {
             strings.add(((WordRef.RefByHeadword) normalizedFormRef).getHeadword());
         }
@@ -134,8 +134,8 @@ public class RawWordEntry implements EntryLookup.Entry {
      */
     public static RawWordEntry makeEmpty() {
         RawWordEntry entry = new RawWordEntry();
-        entry.surface = "";
-        entry.writing = "";
+        entry.indexForm = "";
+        entry.headword = "";
         entry.leftId = -1;
         entry.rightId = -1;
         entry.cost = Short.MAX_VALUE;
@@ -158,11 +158,11 @@ public class RawWordEntry implements EntryLookup.Entry {
      * Create phantom entry, that is referred for the normalized form of the base
      * entry.
      */
-    public static RawWordEntry makePhantom(RawWordEntry base, String surface) {
+    public static RawWordEntry makePhantom(RawWordEntry base, String headword) {
         RawWordEntry entry = new RawWordEntry();
-        // keep surface empty, phantom entry will only be accessed via normalized form
-        entry.surface = "";
-        entry.writing = surface;
+        // keep index form empty, phantom entry will only be accessed via word reference
+        entry.indexForm = "";
+        entry.headword = headword;
 
         // phantom entry should not be used in the analysis
         entry.leftId = -1;

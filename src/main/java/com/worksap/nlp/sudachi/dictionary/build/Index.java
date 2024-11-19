@@ -28,9 +28,10 @@ import java.util.*;
 /**
  * Dictionary Parts: Trie index and corresponding word id table.
  * 
- * TRIE maps headwords to offset for WordIdTable. WordIdTable contains the list
- * of word-ids of words which have the target headword. WordId here means offset
- * in WordEntryTable (with last n bits dropped).
+ * TRIE maps index-forms to offset for WordIdTable. WordIdTable contains the
+ * list of word-ids of words which have the target index-form. WordId here means
+ * offset in WordEntryTable (with last n bits dropped as defined in
+ * {@link com.worksap.nlp.sudachi.dictionary.WordInfoList}).
  * 
  * WordIdTable also contins word-ids that are not indexed in TRIE, so that we
  * can iterate over all word entries.
@@ -48,7 +49,7 @@ public class Index {
     });
 
     /**
-     * Add a (headword, wordid) pair to the index
+     * Add a (index-form, wordid) pair to the index
      * 
      * @param key
      * @param wordId
@@ -124,7 +125,7 @@ public class Index {
      * Subclass for trie construction.
      */
     private static class TrieData {
-        // headwords added to this index
+        // index-forms added to this index
         private final byte[][] keys;
         // offsets to WordIdTable
         private final int[] values;

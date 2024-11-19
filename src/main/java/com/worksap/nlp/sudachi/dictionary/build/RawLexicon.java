@@ -120,7 +120,7 @@ public class RawLexicon {
             offset += entry.computeExpectedSize();
             checkOffset(offset);
             if (entry.shouldBeIndexed()) {
-                index.add(entry.surface, entry.pointer);
+                index.add(entry.indexForm, entry.pointer);
             } else {
                 notIndexed.add(entry);
             }
@@ -195,7 +195,7 @@ public class RawLexicon {
     }
 
     /**
-     * Add surface-only entry to access via normalized_form reference if necessary.
+     * Add headword-only entry to access via normalized_form reference if necessary.
      * 
      * @param list
      * @param lookup
