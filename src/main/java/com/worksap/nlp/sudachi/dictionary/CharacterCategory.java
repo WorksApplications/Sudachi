@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi.dictionary;
 
 import com.worksap.nlp.sudachi.Config;
+import com.worksap.nlp.sudachi.PathAnchor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -156,5 +157,10 @@ public class CharacterCategory {
             }
             return result;
         });
+    }
+
+    public static CharacterCategory loadDefault() throws IOException {
+        Config.Resource<CharacterCategory> defaultResource = PathAnchor.classpath().resource("char.def");
+        return load(defaultResource);
     }
 }

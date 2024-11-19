@@ -22,6 +22,7 @@ import com.worksap.nlp.sudachi.dictionary.build.Progress;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader;
 import com.worksap.nlp.sudachi.dictionary.build.WordRef;
 import com.worksap.nlp.sudachi.dictionary.build.RawLexiconReader.Column;
+import com.worksap.nlp.sudachi.TextNormalizer;
 
 import java.io.Console;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class DictionaryPrinter {
 
     private final GrammarImpl grammar;
     private final LexiconSet lex;
+    private final TextNormalizer textNormalizer;
     // sorted raw word ids taken from the target dict.
     private final Ints wordIds;
 
@@ -69,7 +71,7 @@ public class DictionaryPrinter {
         public static final WordRefMode DEFAULT = TRIPLE_PARTS;
     }
 
-    DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) {
+    DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base) throws IOException {
         if (dic.getDictionaryHeader().isUserDictionary() && base == null) {
             throw new IllegalArgumentException("System dictionary is required to print user dictionary");
         }
@@ -87,6 +89,10 @@ public class DictionaryPrinter {
             grammar.addPosList(dic.getGrammar());
         }
 
+        // set default char category for text normalizer
+        grammar.setCharacterCategory(CharacterCategory.loadDefault());
+        textNormalizer = new TextNormalizer(grammar);
+
         // in order to output dictionary entries in in-dictionary order we need to sort
         // them. iterator over them will get them not in the sorted order, but grouped
         // by index-form (and sorted in groups).
@@ -101,7 +107,7 @@ public class DictionaryPrinter {
     }
 
     DictionaryPrinter(PrintStream output, BinaryDictionary dic, BinaryDictionary base, POSMode posMode,
-            WordRefMode wordRefMode) {
+            WordRefMode wordRefMode) throws IOException {
         this(output, dic, base);
         this.posMode = posMode;
         this.wordRefMode = wordRefMode;
@@ -176,7 +182,7 @@ public class DictionaryPrinter {
         WordInfo info = lex.getWordInfo(wordId);
 
         String headword = lex.string(dic, info.getHeadword());
-        String indexForm = headword; // TODO: need normalization
+        String indexForm = textNormalizer.normalize(headword);
         field(indexForm);
 
         long params = lex.parameters(wordId);
