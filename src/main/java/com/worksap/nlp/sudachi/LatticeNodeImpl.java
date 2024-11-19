@@ -28,12 +28,13 @@ public class LatticeNodeImpl implements LatticeNode {
     int begin;
     int end;
 
+    int wordId;
+
+    // word param/info that corresponds to wordId or that manually set
+    // (special/OOV).
     short leftId;
     short rightId;
     short cost;
-
-    int wordId;
-    // word info that corresponds to wordId or that manually set (OOV).
     WordInfo wordInfo;
 
     // for lattice construction
@@ -58,16 +59,25 @@ public class LatticeNodeImpl implements LatticeNode {
     LatticeNodeImpl() {
     }
 
-    /** Create special node with given wordid. */
+    /**
+     * Create special node with given wordid.
+     * 
+     * WordParameters should be set by the caller if needed.
+     */
     static LatticeNodeImpl makeSpecial(int specialWordId) {
         assert WordId.isSpecial(specialWordId);
         LatticeNodeImpl node = new LatticeNodeImpl();
         node.wordId = specialWordId;
+        node.setWordInfo(UNDEFINED_WORDINFO);
         return node;
     }
 
-    /** Create OOV node. */
-    public static LatticeNodeImpl makeOov(int begin, int end, short posId, String surface, String normalizedForm,
+    /**
+     * Create OOV node.
+     * 
+     * WordParameters should be set by the caller if needed.
+     */
+    static LatticeNodeImpl makeOov(int begin, int end, short posId, String surface, String normalizedForm,
             String dictionaryForm, String readingForm) {
         LatticeNodeImpl node = new LatticeNodeImpl();
         node.wordId = WordId.makeOov(posId);
@@ -85,6 +95,14 @@ public class LatticeNodeImpl implements LatticeNode {
         this.cost = cost;
     }
 
+    /**
+     * Set the parameters of connection.
+     *
+     * @param params
+     *            packed parameters
+     * 
+     * @see com.worksap.nlp.sudachi.dictionary.WordParameters
+     */
     public void setParameter(long params) {
         this.leftId = WordParameters.leftId(params);
         this.rightId = WordParameters.rightId(params);
@@ -139,9 +157,6 @@ public class LatticeNodeImpl implements LatticeNode {
 
     @Override
     public WordInfo getWordInfo() {
-        if (isSpecial()) {
-            return UNDEFINED_WORDINFO;
-        }
         if (wordInfo != null) {
             return wordInfo;
         }
@@ -259,6 +274,10 @@ public class LatticeNodeImpl implements LatticeNode {
         }
     }
 
+    /**
+     * Cache to reduce the access to the lexicon. Also used to mock the lexicon for
+     * OOV nodes.
+     */
     private static final class StringsCache {
         private final Lexicon lexicon;
         private String surface;
@@ -331,10 +350,15 @@ public class LatticeNodeImpl implements LatticeNode {
         }
     }
 
+    /** Alias for {@link OOVFactory} constructor. */
     public static OOVFactory oovFactory(short leftId, short rightId, short cost, short posId) {
         return new OOVFactory(leftId, rightId, cost, posId);
     }
 
+    /**
+     * Factory class for creating OOV LatticeNodeImpl with fixed word paramters and
+     * pos.
+     */
     public static final class OOVFactory {
         private final short leftId;
         private final short rightId;
@@ -348,11 +372,21 @@ public class LatticeNodeImpl implements LatticeNode {
             this.posId = posId;
         }
 
+        /**
+         * Create OOV LatticeNode at the given position of the input.
+         * 
+         * The begin/end must be an index in InputText.bytes.
+         */
         public LatticeNodeImpl make(int begin, int end, InputText input) {
             String s = input.getSubstring(begin, end);
             return make(begin, end, s);
         }
 
+        /**
+         * Create OOV LatticeNode at the given position and surface.
+         * 
+         * The begin/end must be an index in InputText.bytes.
+         */
         public LatticeNodeImpl make(int begin, int end, String text) {
             LatticeNodeImpl i = makeOov(begin, end, posId, text, text, text, text);
             i.setParameter(leftId, rightId, cost);

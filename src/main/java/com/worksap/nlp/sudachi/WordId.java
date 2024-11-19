@@ -42,6 +42,7 @@ public class WordId {
     // ids for special tokens.
     public static final int ID_BOS = 0xffff_fff0;
     public static final int ID_EOS = 0xffff_fff1;
+    // id for oov without pos information
     public static final int ID_OOV_NOPOS = 0xf000_ffff;
 
     /**
