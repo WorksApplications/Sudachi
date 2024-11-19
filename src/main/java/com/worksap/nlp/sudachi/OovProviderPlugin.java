@@ -79,18 +79,6 @@ public abstract class OovProviderPlugin extends Plugin {
      */
     public abstract int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result);
 
-    /** Runs provideOOV and set proper begin/end for each nodes. */
-    int getOOV(UTF8InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result) {
-        int oldSize = result.size();
-        int numCreated = provideOOV(inputText, offset, otherWords, result);
-        for (int i = 0; i < numCreated; i++) {
-            LatticeNodeImpl n = result.get(oldSize + i);
-            n.begin = offset;
-            n.end = offset + n.getWordInfo().getLength();
-        }
-        return numCreated;
-    }
-
     /**
      * @return throws an exception
      * @deprecated Use

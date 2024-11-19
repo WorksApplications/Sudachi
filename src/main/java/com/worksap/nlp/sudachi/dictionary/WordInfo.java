@@ -92,14 +92,14 @@ public class WordInfo {
     }
 
     /**
-     * Returns the length of the text in internal use unit.
+     * Returns the length of the word in internal use unit (InputText.getByteText).
      *
      * <p>
-     * This length is used to place a node in the
+     * This length is used to calculate indexes of split nodes in the
      * {@link com.worksap.nlp.sudachi.Lattice}, does not equals
      * {@code getHeadword().length()}.
      *
-     * @return the length of the text
+     * @return the byte length of the word
      */
     public short getLength() {
         return indexFormLength;

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class LatticeNodeImpl implements LatticeNode {
+    // index of this node in the InuptText.bytes.
     int begin;
     int end;
 

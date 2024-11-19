@@ -256,7 +256,7 @@ class JapaneseTokenizer implements Tokenizer {
     private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
             int boundary, long wordMask) {
         int initialSize = unkNodes.size();
-        int created = plugin.getOOV(input, boundary, wordMask, unkNodes);
+        int created = plugin.provideOOV(input, boundary, wordMask, unkNodes);
         if (created == 0) {
             return wordMask;
         }
