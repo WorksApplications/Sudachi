@@ -41,6 +41,16 @@ public interface Dictionary extends AutoCloseable {
      *
      * @return a tokenizer
      */
+    public Tokenizer tokenizer();
+
+    /**
+     * Creates a tokenizer instance.
+     *
+     * @return a tokenizer
+     * 
+     * @deprecated renamed to {@link tokenizer()}
+     */
+    @Deprecated
     public Tokenizer create();
 
     @Override
