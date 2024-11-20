@@ -22,11 +22,12 @@ import kotlin.test.*
 class PosMatcherTest {
 
   private val dic = DictionaryFactory().create(TestDictionary.user2Cfg()) as JapaneseDictionary
+  private val tok = dic.tokenizer()
 
   @Test
   fun basic() {
     val nouns = dic.posMatcher(PartialPOS("名詞"))
-    val morphs = dic.create().tokenize("京都に行った")
+    val morphs = tok.tokenize("京都に行った")
     assertEquals(4, morphs.size)
     assertTrue(nouns.test(morphs[0]))
     assertFalse(nouns.test(morphs[1]))
@@ -37,7 +38,7 @@ class PosMatcherTest {
   @Test
   fun userDic() {
     val filter = dic.posMatcher { it[3] == "ミカン科" }
-    val morphs = dic.create().tokenize("すだちにかぼす")
+    val morphs = tok.tokenize("すだちにかぼす")
     assertEquals(3, morphs.size)
     assertTrue(filter.test(morphs[0]))
     assertFalse(filter.test(morphs[1]))
@@ -49,7 +50,7 @@ class PosMatcherTest {
     val f1 = dic.posMatcher { it[5] == "スダチ" }
     val f2 = dic.posMatcher { it[5] == "カボス" }
     val filter = f1.union(f2)
-    val morphs = dic.create().tokenize("すだちにかぼす")
+    val morphs = tok.tokenize("すだちにかぼす")
     assertEquals(3, morphs.size)
     assertTrue(filter.test(morphs[0]))
     assertFalse(filter.test(morphs[1]))
@@ -61,7 +62,7 @@ class PosMatcherTest {
     val f1 = dic.posMatcher { it[5] == "終止形-一般" }
     val f2 = dic.posMatcher { it[0] == "動詞" }
     val filter = f1.intersection(f2)
-    val morphs = dic.create().tokenize("いった東京行く")
+    val morphs = tok.tokenize("いった東京行く")
     assertEquals(4, morphs.size)
     assertFalse(filter.test(morphs[0]))
     assertFalse(filter.test(morphs[1]))
@@ -72,7 +73,7 @@ class PosMatcherTest {
   @Test
   fun invert() {
     val filter = dic.posMatcher { it[3] == "ミカン科" }.invert()
-    val morphs = dic.create().tokenize("すだちにかぼす")
+    val morphs = tok.tokenize("すだちにかぼす")
     assertEquals(3, morphs.size)
     assertFalse(filter.test(morphs[0]))
     assertTrue(filter.test(morphs[1]))

@@ -48,7 +48,7 @@ public class JapaneseTokenizerTest {
     @Before
     public void setUp() {
         dict = TestDictionary.INSTANCE.user1();
-        tokenizer = (JapaneseTokenizer) dict.create();
+        tokenizer = (JapaneseTokenizer) dict.tokenizer();
     }
 
     private static Matcher<Morpheme> morpheme(String surface, int begin, int end) {
@@ -353,7 +353,7 @@ public class JapaneseTokenizerTest {
     public void disableEmptyMorpheme() throws IOException {
         Config config = TestDictionary.INSTANCE.user1Cfg();
         dict = new DictionaryFactory().create(Config.empty().withFallback(config).allowEmptyMorpheme(false));
-        tokenizer = (JapaneseTokenizer) dict.create();
+        tokenizer = (JapaneseTokenizer) dict.tokenizer();
 
         List<Morpheme> s = tokenizer.tokenize("…");
         assertThat(s.size(), is(3));

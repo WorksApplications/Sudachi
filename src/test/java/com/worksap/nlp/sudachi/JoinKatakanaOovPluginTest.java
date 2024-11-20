@@ -32,7 +32,7 @@ public class JoinKatakanaOovPluginTest {
     @Before
     public void setUp() throws IOException {
         Dictionary dict = TestDictionary.INSTANCE.user1();
-        tokenizer = (JapaneseTokenizer) dict.create();
+        tokenizer = (JapaneseTokenizer) dict.tokenizer();
         plugin = new JoinKatakanaOovPlugin();
         plugin.setOovFactory((short) -1);
     }

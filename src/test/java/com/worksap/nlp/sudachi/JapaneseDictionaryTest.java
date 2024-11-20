@@ -43,7 +43,7 @@ public class JapaneseDictionaryTest {
 
     @Test
     public void create() {
-        assertThat(dict.create(), isA(Tokenizer.class));
+        assertThat(dict.tokenizer(), isA(Tokenizer.class));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class JapaneseDictionaryTest {
         cfg.systemDictionary(TestDictionary.INSTANCE.getSystemDict());
         try (JapaneseDictionary jd = (JapaneseDictionary) new DictionaryFactory().create(cfg)) {
             assertThat(jd, notNullValue());
-            assertThat(jd.create(), notNullValue());
+            assertThat(jd.tokenizer(), notNullValue());
         }
     }
 
@@ -79,14 +79,14 @@ public class JapaneseDictionaryTest {
     @Test(expected = IllegalStateException.class)
     public void throwExceptionOnDictionaryUsageAfterClose() throws IOException {
         JapaneseDictionary dic = makeDictionaryIncorrectly();
-        Tokenizer ignored = dic.create();
+        Tokenizer ignored = dic.tokenizer();
     }
 
     private Tokenizer makeTokenizerIncorrectly() throws IOException {
         Config cfg = Config.fromClasspath("sudachi_minimum.json");
         cfg.systemDictionary(TestDictionary.INSTANCE.getSystemDict());
         try (JapaneseDictionary jd = (JapaneseDictionary) new DictionaryFactory().create(cfg)) {
-            return jd.create();
+            return jd.tokenizer();
         }
     }
 

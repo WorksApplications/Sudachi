@@ -38,7 +38,7 @@ public class UserDictionaryTest {
         config.addUserDictionary(instance.getUserDict2());
 
         try (Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
             assertThat(morphs.size(), is(1));
             Morpheme m = morphs.get(0);
@@ -62,7 +62,7 @@ public class UserDictionaryTest {
         TestDictionary td = TestDictionary.INSTANCE;
         Config config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
         try (Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("東京府");
             assertThat(morphs.size(), is(1));
             Morpheme m = morphs.get(0);
@@ -77,7 +77,7 @@ public class UserDictionaryTest {
     public void userDefinedPos() throws IOException {
         Config config = TestDictionary.INSTANCE.user2Cfg();
         try (Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));
             Morpheme m = morphs.get(0);
@@ -89,7 +89,7 @@ public class UserDictionaryTest {
         TestDictionary td = TestDictionary.INSTANCE;
         config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
         try (Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));
             Morpheme m = morphs.get(0);

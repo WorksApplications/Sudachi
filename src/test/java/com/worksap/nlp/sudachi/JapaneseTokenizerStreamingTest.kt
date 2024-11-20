@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class JapaneseTokenizerStreamingTest {
-  private val tokenizer = TestDictionary.user0().create()
+  private val tokenizer = TestDictionary.user0().tokenizer()
 
   class BadReader(private val data: String, private val window: Int = 512) : Reader() {
 

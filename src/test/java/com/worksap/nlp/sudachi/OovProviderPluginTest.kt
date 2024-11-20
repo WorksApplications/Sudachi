@@ -108,7 +108,7 @@ class OovProviderPluginTest {
     val dict = DictionaryFactory().create(cfg) as JapaneseDictionary
     val plugin = assertIs<FakeOovProvider>(dict.oovProviderPlugins.last())
     assertEquals(8, plugin.posId)
-    val tokinzer = dict.create()
+    val tokinzer = dict.tokenizer()
     val tokens = tokinzer.tokenize("すだちかぼす")
     assertEquals("スダチ", tokens[0].partOfSpeech()[5])
     assertEquals("カボス", tokens[1].partOfSpeech()[5])
