@@ -29,7 +29,7 @@ class TextNormalizerTest {
 
   @Test
   fun instantiation() {
-    TextNormalizer.fromDictionary(dic)
+    dic.textNormalizer()
     TextNormalizer(dic.getGrammar())
     TextNormalizer(dic.getGrammar(), dic.inputTextPlugins)
     TextNormalizer.defaultTextNormalizer()
@@ -53,7 +53,7 @@ class TextNormalizerTest {
   fun normalizeTextWithDefaultConfig() {
     // will use default config, which has InputTextPlugins of
     // [Default, ProlongedSoundMark, IgnoreYomigana]
-    val tn = TextNormalizer.fromDictionary(dic)
+    val tn = dic.textNormalizer()
     print(dic.inputTextPlugins)
 
     assertEquals("âbγд(株)ガヴ⼼ⅲ", tn.normalize("ÂＢΓД㈱ｶﾞウ゛⼼Ⅲ")) // default

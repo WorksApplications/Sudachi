@@ -69,7 +69,10 @@ public class TextNormalizer {
 
     /**
      * Create TextNormalizer based on the {@link JapaneseDictionary}.
+     * 
+     * @deprecated use Dictionary.textNormalizer() instead
      */
+    @Deprecated
     public static TextNormalizer fromDictionary(JapaneseDictionary dictionary) {
         return new TextNormalizer(dictionary.getGrammar(), dictionary.inputTextPlugins);
     }

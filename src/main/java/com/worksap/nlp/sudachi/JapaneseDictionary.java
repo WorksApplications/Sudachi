@@ -181,4 +181,9 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
                 .toArray();
         return new PosMatcher(ids, this);
     }
+
+    @Override
+    public TextNormalizer textNormalizer() {
+        return new TextNormalizer(grammar, inputTextPlugins);
+    }
 }
