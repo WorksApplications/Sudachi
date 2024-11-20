@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,10 +38,30 @@ public class DictionaryBuilder {
 
     static void printUsage() {
         Console console = System.console();
-        console.printf("usage: DictionaryBuilder -o file -m file [-d description] files...\n");
+        console.printf("usage: DictionaryBuilder -o file -m file [-d description] [-s signature] files...\n");
         console.printf("\t-o file\toutput to file\n");
         console.printf("\t-m file\tmatrix file\n");
         console.printf("\t-d description\tcomment\n");
+        console.printf("\t-p file\tpos file (optional)\n");
+        console.printf("\t-s signature\tsignature\n");
+    }
+
+    private static void build(Path matrixPath, String description, String posPath, String signature,
+            List<String> lexiconPaths, Path outputPath) throws IOException {
+        DicBuilder.System builder = DicBuilder.system().progress(Progress.syserr(20)).matrix(matrixPath)
+                .comment(description);
+        if (posPath != null) {
+            builder = builder.posTable(Paths.get(posPath));
+        }
+        for (String lexiconPath : lexiconPaths) {
+            builder = builder.lexicon(Paths.get(lexiconPath));
+        }
+        builder = builder.signature(signature);
+
+        try (SeekableByteChannel ch = Files.newByteChannel(outputPath, StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            builder.build(ch);
+        }
     }
 
     /**
@@ -66,6 +86,8 @@ public class DictionaryBuilder {
         String description = "";
         String outputPath = null;
         String matrixPath = null;
+        String posPath = null;
+        String signature = null;
 
         int i;
         for (i = 0; i < args.length; i++) {
@@ -73,8 +95,12 @@ public class DictionaryBuilder {
                 outputPath = args[++i];
             } else if (args[i].equals("-m") && i + 1 < args.length) {
                 matrixPath = args[++i];
+            } else if (args[i].equals("-p") && i + 1 < args.length) {
+                posPath = args[++i];
             } else if (args[i].equals("-d") && i + 1 < args.length) {
                 description = args[++i];
+            } else if (args[i].equals("-s")) {
+                signature = args[++i];
             } else if (args[i].equals("-h")) {
                 printUsage();
                 return;
@@ -90,51 +116,7 @@ public class DictionaryBuilder {
 
         List<String> lexiconPaths = Arrays.asList(args).subList(i, args.length);
 
-        DicBuilder.System builder = DicBuilder.system().matrix(Paths.get(matrixPath)).description(description)
-                .progress(new Progress(20, new StderrProgress()));
-
-        for (String lexiconPath : lexiconPaths) {
-            builder = builder.lexicon(Paths.get(lexiconPath));
-        }
-
-        try (SeekableByteChannel ch = Files.newByteChannel(Paths.get(outputPath), StandardOpenOption.WRITE,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            builder.build(ch);
-        }
+        build(Paths.get(matrixPath), description, posPath, signature, lexiconPaths, Paths.get(outputPath));
     }
 
-    public static class StderrProgress implements Progress.Callback {
-        float last = 0;
-        String unit = "bytes";
-
-        @Override
-        public void start(String name, Progress.Kind kind) {
-            System.err.printf("%s\t", name);
-            last = 0;
-            switch (kind) {
-            case OUTPUT:
-                unit = "bytes";
-                break;
-            case INPUT:
-                unit = "entries";
-                break;
-            }
-        }
-
-        @Override
-        public void progress(float progress) {
-            while (last < progress) {
-                last += 0.05f;
-                System.err.print(".");
-            }
-        }
-
-        static final double NANOS_PER_SECOND = 1000_000_000;
-
-        @Override
-        public void end(long size, Duration time) {
-            double seconds = time.getSeconds() + time.getNano() / NANOS_PER_SECOND;
-            System.err.printf("\tDone! (%d %s, %.3f sec)%n", size, unit, seconds);
-        }
-    }
 }

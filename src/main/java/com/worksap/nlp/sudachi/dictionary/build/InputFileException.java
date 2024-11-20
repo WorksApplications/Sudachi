@@ -17,7 +17,18 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 public class InputFileException extends IllegalArgumentException {
-    public InputFileException(int line, String s, Exception cause) {
-        super(String.format("line:%d %s", line, s), cause);
+    /** Exception with line number */
+    public InputFileException(int line, Exception cause) {
+        super(String.format("[line:%d]", line), cause);
+    }
+
+    /** Exception with file name and line number */
+    public InputFileException(String file, int line, Exception cause) {
+        super(String.format("[%s line:%d]", file, line), cause);
+    }
+
+    /** Exception with file name, line number and csv column name */
+    public InputFileException(String file, int line, String column, Exception cause) {
+        super(String.format("[%s line:%d, column: %s]", file, line, column), cause);
     }
 }

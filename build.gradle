@@ -11,7 +11,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.9.1'
     id 'distribution'
     id 'signing'
-    id 'me.champeau.jmh' version "0.6.6"
+    id 'me.champeau.jmh' version "0.6.7"
     id 'io.github.gradle-nexus.publish-plugin' version "1.1.0"
 }
 
@@ -27,7 +27,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.openjdk.jmh:jmh-core:1.35'
-    testImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.35'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.35'
     testImplementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.7.10'
 }

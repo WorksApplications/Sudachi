@@ -17,18 +17,27 @@
 package com.worksap.nlp.sudachi.dictionary.build;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
+import com.worksap.nlp.sudachi.dictionary.Block;
+import com.worksap.nlp.sudachi.dictionary.Ints;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Dictionary Parts: Trie index and entry offsets
+ * Dictionary Parts: Trie index and corresponding word id table.
+ * 
+ * TRIE maps index-forms to offset for WordIdTable. WordIdTable contains the
+ * list of word-ids of words which have the target index-form. WordId here means
+ * offset in WordEntryTable (with last n bits dropped as defined in
+ * {@link com.worksap.nlp.sudachi.dictionary.WordInfoList}).
+ * 
+ * WordIdTable also contins word-ids that are not indexed in TRIE, so that we
+ * can iterate over all word entries.
  */
-public class Index implements WriteDictionary {
-    private final SortedMap<byte[], List<Integer>> elements = new TreeMap<>((byte[] l, byte[] r) -> {
+public class Index {
+    private final SortedMap<byte[], Ints> elements = new TreeMap<>((byte[] l, byte[] r) -> {
         int llen = l.length;
         int rlen = r.length;
         for (int i = 0; i < Math.min(llen, rlen); i++) {
@@ -39,58 +48,108 @@ public class Index implements WriteDictionary {
         return l.length - r.length;
     });
 
-    private int count = 0;
-
+    /**
+     * Add a (index-form, wordid) pair to the index
+     * 
+     * @param key
+     * @param wordId
+     * @return
+     */
     public int add(String key, int wordId) {
         byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
-        List<Integer> entries = elements.computeIfAbsent(bytes, k -> new ArrayList<>());
-        if (entries.size() >= 255) {
-            throw new IllegalArgumentException(String.format("key %s has >= 255 entries in the dictionary", key));
-        }
-        entries.add(wordId);
-        count += 1;
+        Ints entries = elements.computeIfAbsent(bytes, k -> new Ints(4));
+        entries.append(wordId);
         return bytes.length;
     }
 
-    public void writeTo(ModelOutput output) throws IOException {
-        DoubleArray trie = new DoubleArray();
+    /**
+     * Write word id table and trie to the provided block layout.
+     * 
+     * @param layout
+     * @param notIndexed
+     * @throws IOException
+     */
+    public void compile(BlockLayout layout, List<RawWordEntry> notIndexed) throws IOException {
+        TrieData data = layout.block(Block.WORD_POINTERS, o -> writeWordTable(o, notIndexed));
+        layout.block(Block.TRIE_INDEX, data::writeTrie);
+    }
 
+    private TrieData writeWordTable(BlockOutput out, List<? extends EntryLookup.Entry> notIndexed) throws IOException {
         int size = this.elements.size();
-
         byte[][] keys = new byte[size][];
         int[] values = new int[size];
-        ByteBuffer wordIdTable = ByteBuffer.allocate(count * (4 + 2));
-        wordIdTable.order(ByteOrder.LITTLE_ENDIAN);
+        BufferedChannel buffer = new BufferedChannel(out.getChannel(),
+                Math.max((notIndexed.size() + 16) * 5, 64 * 1024));
 
-        output.withSizedPart("WordId table", () -> {
+        int nis = notIndexed.size();
+        int fullsize = size + nis;
+
+        out.measured("Word Id table", p -> {
             int i = 0;
-            int numEntries = this.elements.entrySet().size();
-            for (Map.Entry<byte[], List<Integer>> entry : this.elements.entrySet()) {
+            for (Map.Entry<byte[], Ints> entry : this.elements.entrySet()) {
                 keys[i] = entry.getKey();
-                values[i] = wordIdTable.position();
+                values[i] = buffer.offset();
                 i++;
-                List<Integer> wordIds = entry.getValue();
-                wordIdTable.put((byte) wordIds.size());
-                for (int wid : wordIds) {
-                    wordIdTable.putInt(wid);
+                Ints wordIds = entry.getValue();
+                int length = wordIds.length();
+                BufWriter buf = buffer.writer((length + 1) * 5);
+
+                buf.putVarint32(length);
+                int prevWid = 0;
+                for (int word = 0; word < length; ++word) {
+                    int wid = wordIds.get(word);
+                    buf.putVarint32(wid - prevWid);
+                    prevWid = wid;
                 }
-                output.progress(i, numEntries);
+                p.progress(i, fullsize);
             }
-            return wordIdTable.position() + 4;
+
+            // write non-indexed entries
+            BufWriter buf = buffer.writer((nis + 1) * 5);
+            buf.putVarint32(nis);
+            int prevId = 0;
+            for (EntryLookup.Entry e : notIndexed) {
+                int wid = e.pointer();
+                buf.putVarint32(wid - prevId);
+                prevId = wid;
+                p.progress(++i, fullsize);
+            }
+            buffer.flush();
+            return null;
         });
 
-        DicBuffer buffer = new DicBuffer(4);
-        output.withPart("double array Trie", () -> {
-            trie.build(keys, values, output::progress);
-            buffer.putInt(trie.size());
-            buffer.consume(output::write);
-            output.write(trie.byteArray());
-        });
+        return new TrieData(keys, values);
+    }
 
-        buffer.putInt(wordIdTable.position());
-        buffer.consume(output::write);
+    /**
+     * Subclass for trie construction.
+     */
+    private static class TrieData {
+        // index-forms added to this index
+        private final byte[][] keys;
+        // offsets to WordIdTable
+        private final int[] values;
 
-        wordIdTable.flip();
-        output.write(wordIdTable);
+        public TrieData(byte[][] keys, int[] values) {
+            this.keys = keys;
+            this.values = values;
+        }
+
+        /**
+         * Write trie to the provided block output.
+         * 
+         * @param block
+         * @return
+         * @throws IOException
+         */
+        public Void writeTrie(BlockOutput block) throws IOException {
+            return block.measured("Trie Index", p -> {
+                DoubleArray trie = new DoubleArray();
+                trie.build(keys, values, p::progress);
+                ByteBuffer buf = trie.byteArray().duplicate();
+                block.getChannel().write(buf);
+                return null;
+            });
+        }
     }
 }

@@ -18,14 +18,38 @@ package com.worksap.nlp.sudachi
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class MorphemeImplTest {
   @Test
   fun useToString() {
     val dic = TestDictionary.user0()
+    // should be split into す/だ/ち, all of them are OOV
     val sudachi = dic.create().tokenize("すだち")
+    // wid of OOV is (0xf, posId)
     assertEquals(
-        "MorphemeImpl{begin=0, end=1, surface=す, pos=4/名詞,普通名詞,一般,*,*,*, wid=(0,0)}",
+        "MorphemeImpl{begin=0, end=1, surface=す, pos=4/名詞,普通名詞,一般,*,*,*, wid=(15,4)}",
         sudachi[0].toString())
+  }
+
+  @Test
+  fun userdata() {
+    // system
+    val sdic = TestDictionary.user0()
+    val tokyo = sdic.create().tokenize("東京")
+    assertTrue(tokyo[0].getUserData().isEmpty())
+
+    // oov
+    val oovs = sdic.create().tokenize("すだち")
+    assertTrue(oovs[0].getUserData().isEmpty())
+
+    // user with data
+    val udic = TestDictionary.user1()
+    val sudachi = udic.create().tokenize("すだち")
+    assertEquals("徳島県産", sudachi[0].getUserData())
+
+    // user without data
+    val piraru = udic.create().tokenize("ぴらる")
+    assertTrue(piraru[0].getUserData().isEmpty())
   }
 }

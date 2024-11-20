@@ -1,2 +1,3 @@
-ぴさる,8,8,-32768,ぴさる,名詞,普通名詞,一般,*,*,*,ピサル,ぴさる,*,A,*,*,*,*
-かぼす,6,6,2816,かぼす,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,カボス,カボス,かぼす,*,A,*,*,*,*
+IndexForm,LeftId,RightId,Cost,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Split_A,Split_B,WordStructure,SynonymGroups
+ぴさる,8,8,-32768,名詞,普通名詞,一般,*,*,*,ピサル,ぴさる,,,,,
+かぼす,6,6,2816,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,カボス,カボス,かぼす,,,,,

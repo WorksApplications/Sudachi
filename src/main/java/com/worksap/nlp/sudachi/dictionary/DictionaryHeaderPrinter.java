@@ -22,8 +22,6 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.time.Instant;
-import java.time.ZoneId;
 
 /**
  * A dictionary header printing tool.
@@ -33,28 +31,37 @@ public class DictionaryHeaderPrinter {
     private DictionaryHeaderPrinter() {
     }
 
-    static void printHeader(String filename, PrintStream output) throws IOException {
+    /** print information in the dictionary Description part */
+    static void printDescription(String filename, PrintStream output) throws IOException {
+        output.printf("File: %s%n", filename);
+
         ByteBuffer bytes;
         try (FileInputStream input = new FileInputStream(filename); FileChannel inputFile = input.getChannel()) {
             bytes = inputFile.map(FileChannel.MapMode.READ_ONLY, 0, inputFile.size());
             bytes.order(ByteOrder.LITTLE_ENDIAN);
         }
-        DictionaryHeader header = new DictionaryHeader(bytes, 0);
+        Description desc = Description.load(bytes);
 
-        output.println("filename: " + filename);
-
-        if (header.isSystemDictionary()) {
+        if (desc.isSystemDictionary()) {
             output.println("type: system dictionary");
-        } else if (header.isUserDictionary()) {
+        } else if (desc.isUserDictionary()) {
             output.println("type: user dictionary");
         } else {
+            // should not happen
             output.println("invalid file");
             return;
         }
-
-        output.println("createTime: "
-                + Instant.ofEpochSecond(header.getCreateTime()).atZone(ZoneId.systemDefault()).toString());
-        output.println("description: " + header.getDescription());
+        output.printf("Creation time: %s%n", desc.getCreationTime());
+        output.printf("Comment: %s%n", desc.getComment());
+        output.printf("Signature: %s%n", desc.getSignature());
+        output.printf("Reference: %s%n", desc.getReference());
+        output.printf("Entries total: %d%n", desc.getNumTotalEntries());
+        output.printf("Entries indexed: %d%n", desc.getNumIndexedEntries());
+        for (Description.BlockInfo b : desc.getBlocks()) {
+            long start = b.getStart();
+            output.printf("Block %s: %d - %d%n", b.getName(), start, start + b.getSize());
+        }
+        output.printf("Flag isRuntimeCosts: %s%n", desc.isRuntimeCosts());
     }
 
     /**
@@ -69,7 +76,7 @@ public class DictionaryHeaderPrinter {
      */
     public static void main(String[] args) throws IOException {
         for (String filename : args) {
-            printHeader(filename, System.out);
+            printDescription(filename, System.out);
         }
     }
 }

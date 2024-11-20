@@ -57,7 +57,7 @@ class RegexOovProviderTest {
     assertEquals(3, tokens.size)
     assertEquals("XＡＧ-2F", tokens[2].surface())
     assertEquals("xag-2f", tokens[2].normalizedForm())
-    assertEquals("", tokens[2].readingForm())
+    assertEquals("xag-2f", tokens[2].readingForm())
   }
 
   @Test

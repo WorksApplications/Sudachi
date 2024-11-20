@@ -18,12 +18,10 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
 import com.worksap.nlp.sudachi.dictionary.Grammar;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 /**
  * A plugin that rewrite the best path of the lattice.
@@ -71,7 +69,7 @@ public abstract class PathRewritePlugin extends Plugin {
      * @param lattice
      *            the lattice
      */
-    public abstract void rewrite(InputText text, List<LatticeNode> path, Lattice lattice);
+    public abstract void rewrite(InputText text, List<LatticeNodeImpl> path, Lattice lattice);
 
     /**
      * Concatenate the sequence of nodes in the path. The sequence begins at the
@@ -97,7 +95,8 @@ public abstract class PathRewritePlugin extends Plugin {
      *             length of the sequence, or {@code begin} equals or is greater
      *             than {@code end}
      */
-    public LatticeNode concatenate(List<LatticeNode> path, int begin, int end, Lattice lattice, String normalizedForm) {
+    public LatticeNode concatenate(List<LatticeNodeImpl> path, int begin, int end, Lattice lattice,
+            String normalizedForm) {
         if (begin >= end) {
             throw new IndexOutOfBoundsException("begin >= end");
         }
@@ -105,27 +104,22 @@ public abstract class PathRewritePlugin extends Plugin {
         int e = path.get(end - 1).getEnd();
         short posId = path.get(begin).getWordInfo().getPOSId();
         StringBuilder surface = new StringBuilder();
-        int length = 0;
         StringBuilder normalizedFormBuilder = new StringBuilder();
         StringBuilder dictionaryForm = new StringBuilder();
         StringBuilder readingForm = new StringBuilder();
         for (int i = begin; i < end; i++) {
-            WordInfo info = path.get(i).getWordInfo();
-            surface.append(info.getSurface());
-            length += info.getLength();
+            LatticeNodeImpl node = path.get(i);
+            surface.append(node.getSurface());
             if (normalizedForm == null) {
-                normalizedFormBuilder.append(info.getNormalizedForm());
+                normalizedFormBuilder.append(node.getNormalizedForm());
             }
-            dictionaryForm.append(info.getDictionaryForm());
-            readingForm.append(info.getReadingForm());
+            dictionaryForm.append(node.getDictionaryForm());
+            readingForm.append(node.getReading());
         }
-        WordInfo wi = new WordInfo(surface.toString(), (short) length, posId,
+
+        LatticeNodeImpl node = LatticeNodeImpl.makeOov(b, e, posId, surface.toString(),
                 (normalizedForm == null) ? normalizedFormBuilder.toString() : normalizedForm, dictionaryForm.toString(),
                 readingForm.toString());
-
-        LatticeNode node = lattice.createNode();
-        node.setRange(b, e);
-        node.setWordInfo(wi);
         replaceNode(path, begin, end, node);
         return node;
     }
@@ -143,8 +137,8 @@ public abstract class PathRewritePlugin extends Plugin {
      *            the beginning index
      * @param end
      *            the ending index
-     * @param posId
-     *            the POS ID of the concatenated node
+     * @param factory
+     *            factory for creating an OOV lattice node
      * @param lattice
      *            the lattice
      * @return the concatenated OOV node
@@ -153,34 +147,28 @@ public abstract class PathRewritePlugin extends Plugin {
      *             length of the sequence, or {@code begin} equals or is greater
      *             than {@code end}
      */
-    public LatticeNode concatenateOov(List<LatticeNode> path, int begin, int end, short posId, Lattice lattice) {
+    public LatticeNode concatenateOov(List<LatticeNodeImpl> path, int begin, int end,
+            LatticeNodeImpl.OOVFactory factory, Lattice lattice) {
         if (begin >= end) {
             throw new IndexOutOfBoundsException("begin >= end");
         }
         int b = path.get(begin).getBegin();
         int e = path.get(end - 1).getEnd();
 
-        Optional<? extends LatticeNode> n = lattice.getMinimumNode(b, e);
-        if (n.isPresent()) {
-            LatticeNode node = n.get();
+        LatticeNodeImpl node = lattice.getMinimumNode(b, e);
+        if (node != null) {
             replaceNode(path, begin, end, node);
             return node;
         }
 
         StringBuilder surface = new StringBuilder();
-        int length = 0;
         for (int i = begin; i < end; i++) {
-            WordInfo info = path.get(i).getWordInfo();
-            surface.append(info.getSurface());
-            length += info.getLength();
+            String s = path.get(i).getSurface();
+            surface.append(s);
         }
-        String s = surface.toString();
-        WordInfo wi = new WordInfo(s, (short) length, posId, s, s, "");
 
-        LatticeNode node = lattice.createNode();
-        node.setRange(b, e);
-        node.setWordInfo(wi);
-        node.setOOV();
+        String s = surface.toString();
+        node = factory.make(b, e, s);
         replaceNode(path, begin, end, node);
         return node;
     }
@@ -198,7 +186,7 @@ public abstract class PathRewritePlugin extends Plugin {
         return text.getCharCategoryTypes(node.getBegin(), node.getEnd());
     }
 
-    private void replaceNode(List<LatticeNode> path, int begin, int end, LatticeNode node) {
+    private void replaceNode(List<LatticeNodeImpl> path, int begin, int end, LatticeNodeImpl node) {
         path.subList(begin, end).clear();
         path.add(begin, node);
     }

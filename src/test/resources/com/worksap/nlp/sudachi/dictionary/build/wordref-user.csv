@@ -1,0 +1,3 @@
+IndexForm,LeftId,RightId,Cost,pos_id,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,Split_C,WordStructure,SynonymGroups
+府,2,2,2914,1,名詞,普通名詞,一般,*,*,*,フ,,,A,,,,,
+東京府,2,2,2816,0,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,1,フ",,,,

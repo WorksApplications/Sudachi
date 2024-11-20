@@ -16,7 +16,6 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
@@ -26,30 +25,42 @@ import com.worksap.nlp.sudachi.MorphemeList;
 import com.worksap.nlp.sudachi.Tokenizer;
 
 public class DoubleArrayLexicon implements Lexicon {
-
     static final int USER_DICT_COST_PAR_MORPH = -20;
-
-    private final WordIdTable wordIdTable;
-    private final WordParameterList wordParams;
     private final WordInfoList wordInfos;
     private final DoubleArray trie;
+    private final WordParameters parameters;
+    private final Description description;
+    private final WordIdTable wordIdTable;
+    private final CompactedStrings strings;
 
-    public DoubleArrayLexicon(ByteBuffer bytes, int offset, boolean hasSynonymGid) {
-        trie = new DoubleArray();
-        int size = bytes.getInt(offset);
-        offset += 4;
-        ((Buffer) bytes).position(offset); // a kludge for Java 9
-        IntBuffer array = bytes.asIntBuffer();
-        trie.setArray(array, size);
-        offset += trie.totalSize();
+    public DoubleArrayLexicon(Description description, WordIdTable wordIdTable, WordParameters wordParams,
+            WordInfoList wordInfos, DoubleArray trie, CompactedStrings strings) {
+        this.description = description;
+        this.wordIdTable = wordIdTable;
+        this.parameters = wordParams;
+        this.wordInfos = wordInfos;
+        this.trie = trie;
+        this.strings = strings;
+    }
 
-        wordIdTable = new WordIdTable(bytes, offset);
-        offset += wordIdTable.storageSize();
+    public static DoubleArrayLexicon load(ByteBuffer bytes, Description header) {
+        ByteBuffer trieBuf = header.slice(bytes, Block.TRIE_INDEX);
+        DoubleArray da = new DoubleArray();
+        IntBuffer array = trieBuf.asIntBuffer();
+        da.setArray(array, array.limit());
 
-        wordParams = new WordParameterList(bytes, offset);
-        offset += wordParams.storageSize();
+        WordParameters parms;
+        if (header.isRuntimeCosts()) {
+            parms = WordParameters.readWrite(header.slice(bytes, Block.ENTRIES));
+        } else {
+            parms = WordParameters.readOnly(header.slice(bytes, Block.ENTRIES));
+        }
 
-        wordInfos = new WordInfoList(bytes, offset, wordParams.size(), hasSynonymGid);
+        WordIdTable idTable = new WordIdTable(header.slice(bytes, Block.WORD_POINTERS));
+        WordInfoList infos = new WordInfoList(header.slice(bytes, Block.ENTRIES));
+        CompactedStrings strings = new CompactedStrings(header.slice(bytes, Block.STRINGS).asCharBuffer());
+
+        return new DoubleArrayLexicon(header, idTable, parms, infos, da, strings);
     }
 
     /**
@@ -85,6 +96,11 @@ public class DoubleArrayLexicon implements Lexicon {
         return wordIdTable;
     }
 
+    @Override
+    public long parameters(int wordId) {
+        return parameters.loadParams(wordId);
+    }
+
     private class Itr implements Iterator<int[]> {
         private final Iterator<int[]> iterator;
         private Integer[] wordIds;
@@ -118,30 +134,8 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     @Override
-    public int getWordId(String headword, short posId, String readingForm) {
-        for (int wid = 0; wid < wordInfos.size(); wid++) {
-            WordInfo info = wordInfos.getWordInfo(wid);
-            if (info.getSurface().equals(headword) && info.getPOSId() == posId
-                    && info.getReadingForm().equals(readingForm)) {
-                return wid;
-            }
-        }
-        return -1;
-    }
-
-    @Override
-    public short getLeftId(int wordId) {
-        return wordParams.getLeftId(wordId);
-    }
-
-    @Override
-    public short getRightId(int wordId) {
-        return wordParams.getRightId(wordId);
-    }
-
-    @Override
-    public short getCost(int wordId) {
-        return wordParams.getCost(wordId);
+    public String string(int dic, int stringPtr) {
+        return strings.string(stringPtr);
     }
 
     @Override
@@ -151,23 +145,46 @@ public class DoubleArrayLexicon implements Lexicon {
 
     @Override
     public int size() {
-        return wordParams.size();
+        return description.getNumTotalEntries();
     }
 
-    public void calculateCost(Tokenizer tokenizer) {
-        for (int wordId = 0; wordId < wordParams.size(); wordId++) {
-            if (getCost(wordId) != Short.MIN_VALUE) {
-                continue;
+    public Iterator<Ints> wordIds(int dic) {
+        return wordIdTable.wordIds();
+    }
+
+    /**
+     * Returns true if the cost value is a normal value which can be used as is.
+     * Otherwise, it is a placeholder which needs to be recalculated based on the
+     * content of the dictionary.
+     * 
+     * @param cost
+     *            raw cost value
+     * @return true a normal cost value
+     */
+    public static boolean isNormalCost(short cost) {
+        return cost != Short.MIN_VALUE;
+    }
+
+    public void calculateDynamicCosts(Tokenizer tokenizer) {
+        Iterator<Ints> outer = wordIdTable.wordIds();
+        while (outer.hasNext()) {
+            Ints values = outer.next();
+            for (int i = 0; i < values.length(); ++i) {
+                int wordId = values.get(i);
+                if (isNormalCost(WordParameters.cost(parameters(wordId)))) {
+                    continue;
+                }
+                int headwordPtr = wordInfos.headwordPtr(wordId);
+                String headword = strings.string(headwordPtr);
+                MorphemeList ms = tokenizer.tokenize(headword);
+                int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
+                if (cost > Short.MAX_VALUE) {
+                    cost = Short.MAX_VALUE;
+                } else if (cost < Short.MIN_VALUE) {
+                    cost = Short.MIN_VALUE;
+                }
+                parameters.setCost(wordId, (short) cost);
             }
-            String surface = getWordInfo(wordId).getSurface();
-            MorphemeList ms = tokenizer.tokenize(surface);
-            int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
-            if (cost > Short.MAX_VALUE) {
-                cost = Short.MAX_VALUE;
-            } else if (cost < Short.MIN_VALUE) {
-                cost = Short.MIN_VALUE;
-            }
-            wordParams.setCost(wordId, (short) cost);
         }
     }
 
@@ -175,4 +192,8 @@ public class DoubleArrayLexicon implements Lexicon {
         wordIdTable.setDictionaryId(id);
     }
 
+    @Override
+    public WordInfoList wordInfos(int dic) {
+        return wordInfos;
+    }
 }

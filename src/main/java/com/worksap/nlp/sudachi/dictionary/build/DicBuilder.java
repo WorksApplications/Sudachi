@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2022 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,191 +16,412 @@
 
 package com.worksap.nlp.sudachi.dictionary.build;
 
-import com.worksap.nlp.sudachi.dictionary.*;
+import com.worksap.nlp.sudachi.dictionary.BinaryDictionary;
+import com.worksap.nlp.sudachi.dictionary.Block;
+import com.worksap.nlp.sudachi.dictionary.Description;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.util.Objects;
 
+import static java.lang.System.nanoTime;
+
+/**
+ * Fluid API for building a binary dictionary from a CSV file. See documentation
+ * for the format of the CSV dictionary.
+ */
 public class DicBuilder {
+    @FunctionalInterface
+    public interface IOSupplier<T> {
+        T get() throws IOException;
+    }
+
     private DicBuilder() {
-        /* instantiations are forbidden */
+        // no instances
     }
 
-    public static SystemNoMatrix system() {
-        return new SystemNoMatrix(new System());
-    }
-
-    public static User user(DictionaryAccess system) {
-        return new User(system);
-    }
-
-    public static abstract class Base<T extends Base<T>> {
-        protected final POSTable pos = new POSTable();
+    private static class Base<T extends Base<T>> {
+        protected Progress progress = Progress.NOOP;
+        protected final Description description = new Description();
         protected final ConnectionMatrix connection = new ConnectionMatrix();
-        protected final Index index = new Index();
-        protected String description = "";
-        protected long version;
-        protected long creationTime = java.lang.System.currentTimeMillis();
-        private final List<ModelOutput.Part> inputs = new ArrayList<>();
-        private Progress progress;
-
-        protected WordIdResolver resolver() {
-            return new WordLookup.Csv(lexicon);
-        }
+        protected final POSTable pos = new POSTable();
+        protected final RawLexicon lexicon = new RawLexicon();
 
         @SuppressWarnings("unchecked")
         private T self() {
             return (T) this;
         }
 
-        protected final CsvLexicon lexicon = new CsvLexicon(pos);
-
-        public BuildStats build(SeekableByteChannel result) throws IOException {
-            lexicon.setResolver(resolver());
-            ModelOutput output = new ModelOutput(result);
-            if (progress != null) {
-                output.progressor(progress);
-            }
-            DictionaryHeader header = new DictionaryHeader(version, creationTime, description);
-
-            ByteBuffer headerBuffer = ByteBuffer.wrap(header.toByte());
-
-            output.write(headerBuffer);
-            pos.writeTo(output);
-            connection.writeTo(output);
-            index.writeTo(output);
-            lexicon.writeTo(output);
-            return new BuildStats(inputs, output.getParts());
-        }
-
-        public T lexicon(URL data) throws IOException {
-            URLConnection conn = data.openConnection();
-            try (InputStream is = conn.getInputStream()) {
-                long length = data.openConnection().getContentLengthLong();
-                return lexiconImpl(data.getPath(), is, length);
-            }
-        }
-
-        public T lexicon(Path path) throws IOException {
-            try (InputStream is = Files.newInputStream(path)) {
-                return lexiconImpl(path.getFileName().toString(), is, Files.size(path));
-            }
-        }
-
-        public T lexicon(InputStream data) throws IOException {
-            return lexiconImpl("<input stream>", data, data.available());
-        }
-
-        public T lexiconImpl(String name, InputStream data, long size) throws IOException {
-            long startTime = java.lang.System.nanoTime();
-            if (progress != null) {
-                progress.startBlock(name, startTime, Progress.Kind.INPUT);
-            }
-
-            TrackingInputStream tracker = new TrackingInputStream(data);
-            CSVParser parser = new CSVParser(new InputStreamReader(tracker, StandardCharsets.UTF_8));
-            int line = 1;
-            while (true) {
-                List<String> fields = parser.getNextRecord();
-                if (fields == null)
-                    break;
-                try {
-                    CsvLexicon.WordEntry e = lexicon.parseLine(fields);
-                    int wordId = lexicon.addEntry(e);
-                    if (e.headword != null) {
-                        index.add(e.headword, wordId);
-                    }
-                    line += 1;
-                } catch (Exception e) {
-                    throw new InputFileException(line, fields.get(0), e);
-                }
-                if (progress != null) {
-                    progress.progress(tracker.getPosition(), size);
-                }
-            }
-
-            long time = java.lang.System.nanoTime() - startTime;
-            if (progress != null) {
-                progress.endBlock(line, time);
-            }
-
-            inputs.add(new ModelOutput.Part(name, time, line));
-
-            return self();
-        }
-
-        public T description(String description) {
-            this.description = description;
-            return self();
-        }
-
+        /**
+         * Set the progress handler to the provided one.
+         * 
+         * @param progress
+         *            progress handler
+         * @return current object
+         */
         public T progress(Progress progress) {
-            this.progress = progress;
+            this.progress = Objects.requireNonNull(progress);
             return self();
         }
+
+        /**
+         * Import words from the csv lexicon into the binary dictionary compiler.
+         *
+         * @param name
+         *            name of input file
+         * @param input
+         *            factory for the InputStream with the lexicon content. May be
+         *            called several times.
+         * @param size
+         *            total size of the file in bytes. Used for reporting progress and
+         *            can be not very precise.
+         * @return current object
+         * @throws IOException
+         *             when IO fails
+         */
+        public T lexicon(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            int numEntryBefore = lexicon.getTotalEntries();
+            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
+            short numLeft = connection.nonEmpty() ? connection.getNumLeft() : Short.MAX_VALUE;
+            short numRight = connection.nonEmpty() ? connection.getNumRight() : Short.MAX_VALUE;
+            try (InputStream is = input.get()) {
+                InputStream stream = new ProgressInputStream(is, size, progress);
+                lexicon.read(name, stream, pos, numLeft, numRight);
+            }
+            progress.endBlock((long) lexicon.getTotalEntries() - numEntryBefore, nanoTime());
+            return self();
+        }
+
+        /**
+         * Import words from the csv lexicon into the binary dictionary compiler. This
+         * method is for loading resources from classpath mostly, remote access is
+         * untested.
+         *
+         * @param url
+         *            pointing to the
+         * @return current object
+         * @throws IOException
+         *             when IO fails
+         * @see Class#getResource(String)
+         * @see ClassLoader#getResource(String)
+         */
+        public T lexicon(URL url) throws IOException {
+            String name = url.getPath();
+            URLConnection conn = url.openConnection();
+            long size = conn.getContentLengthLong();
+            return lexicon(name, conn::getInputStream, size);
+        }
+
+        /**
+         * Import words from the csv lexicon into the binary dictionary compiler.
+         *
+         * @param path
+         *            csv file
+         * @return current object
+         * @throws IOException
+         *             when IO fails
+         */
+        public T lexicon(Path path) throws IOException {
+            String name = path.getFileName().toString();
+            long size = Files.size(path);
+            return lexicon(name, () -> Files.newInputStream(path), size);
+        }
+
+        /**
+         * Set the comment string in the binary dictionary
+         * 
+         * @param comment
+         *            provided string
+         * @return current object
+         */
+        public T comment(String comment) {
+            description.setComment(Objects.requireNonNull(comment));
+            return self();
+        }
+
+        /**
+         * Set the dictionary compilation time
+         * 
+         * @param instant
+         *            time to set
+         * @return current object
+         */
+        public T creationTime(Instant instant) {
+            description.setCreationTime(Objects.requireNonNull(instant));
+            return self();
+        }
+
+        /**
+         * Compile the binary dictionary and write it to the proviced channel
+         * 
+         * @param channel
+         *            contents will be written here
+         * @throws IOException
+         *             if io fails
+         */
+        public void build(SeekableByteChannel channel) throws IOException {
+            BlockLayout layout = new BlockLayout(channel, progress);
+            layout.keepBlocks(1); // keep space for the Description.
+            if (connection.nonEmpty()) {
+                layout.block(Block.CONNECTION_MATRIX, connection::compile);
+            }
+            layout.block(Block.POS_TABLE, pos::compile);
+            lexicon.compile(layout);
+            description.setBlocks(layout.blocks());
+            description.setNumberOfEntries(lexicon.getIndexedEntries(), lexicon.getTotalEntries());
+            description.setRuntimeCosts(lexicon.hasRuntimeCosts());
+            description.save(channel);
+        }
     }
 
+    /**
+     * System dictionary with connection matrix added.
+     * 
+     * Instanciate via SystemNoMatrix.
+     */
     public static final class System extends Base<System> {
-        public System() {
-            version = DictionaryVersion.SYSTEM_DICT_VERSION_2;
+        /**
+         * Read connection matrix from MeCab matrix.def format text file.
+         */
+        private System readMatrix(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            progress.startBlock(name, nanoTime(), Progress.Kind.BYTE);
+            try (InputStream is = input.get()) {
+                InputStream stream = new ProgressInputStream(is, size, progress);
+                connection.readEntries(stream);
+            }
+            progress.endBlock(size, nanoTime());
+            return this;
         }
 
-        private void readMatrix(InputStream matrix) throws IOException {
-            connection.readEntries(matrix);
-            lexicon.setLimits(connection.getNumLeft(), connection.getNumRight());
+        /**
+         * Set the system dictionary signature to the provided string.
+         * 
+         * If null is provided, set the default value that consists of current timestamp
+         * and a 8 hexadecimal hashcode calculated from the comment.
+         * 
+         * @param signature
+         *            provided dictionary signature. Can not be empty.
+         * @return current object
+         */
+        public System signature(String signature) {
+            if (signature == null) {
+                description.setDefaultSignature();
+                return this;
+            }
+
+            if (signature.isEmpty()) {
+                throw new IllegalArgumentException("signature can not be empty");
+            }
+            description.setSignature(signature);
+            return this;
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(String name, IOSupplier<InputStream> input, long size) throws IOException {
+            if (!pos.isNewPosAllowed()) {
+                throw new IllegalArgumentException("POS list already loaded (only single POS file is allowed).");
+            }
+
+            progress.startBlock(name, nanoTime(), Progress.Kind.ENTRY);
+            int nRead;
+            try (InputStream is = input.get()) {
+                InputStream stream = new ProgressInputStream(is, size, progress);
+                nRead = pos.readEntries(stream);
+                pos.setAllowNewPos(false);
+            }
+            progress.endBlock(nRead, nanoTime());
+            return this;
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(URL url) throws IOException {
+            String name = url.getPath();
+            URLConnection conn = url.openConnection();
+            long size = conn.getContentLengthLong();
+            return posTable(name, conn::getInputStream, size);
+        }
+
+        /** Read POS list from the csv file. */
+        public System posTable(Path path) throws IOException {
+            String name = path.getFileName().toString();
+            long size = Files.size(path);
+            return posTable(name, () -> Files.newInputStream(path), size);
         }
     }
 
-    public static final class User extends Base<User> {
-        final DictionaryAccess dictionary;
-
-        private User(DictionaryAccess dictionary) {
-            this.dictionary = dictionary;
-            this.version = DictionaryVersion.USER_DICT_VERSION_3;
-            Connection conn = dictionary.getGrammar().getConnection();
-            lexicon.setLimits(conn.getLeftSize(), conn.getRightSize());
-            connection.makeEmpty();
-            pos.preloadFrom(dictionary.getGrammar());
-        }
-
-        @Override
-        protected WordIdResolver resolver() {
-            return new WordLookup.Chain(new WordLookup.Prebuilt(dictionary.getLexicon()), new WordLookup.Csv(lexicon));
-        }
-    }
-
+    /**
+     * Typestate pattern for system dictionary that does not have connection matrix
+     * added yet.
+     */
     public static final class SystemNoMatrix {
         private final System inner;
 
-        private SystemNoMatrix(System inner) {
+        private SystemNoMatrix(DicBuilder.System inner) {
             this.inner = inner;
         }
 
-        public System matrix(InputStream data) throws IOException {
-            inner.readMatrix(data);
-            return inner;
+        /**
+         * Read connection matrix from MeCab matrix.def format text file.
+         * 
+         * @param name
+         *            name of the file
+         * @param data
+         *            factory for the InputStream which contains the file. This can be
+         *            called more than once.
+         * @param size
+         *            total number of bytes for the file. This information will be only
+         *            used for calculating progress.
+         * @return system dictionary builder
+         * @throws IOException
+         *             if IO fails
+         */
+        public DicBuilder.System matrix(String name, IOSupplier<InputStream> data, long size) throws IOException {
+            return inner.readMatrix(name, data, size);
         }
 
-        public System matrix(URL data) throws IOException {
-            try (InputStream is = data.openStream()) {
-                return matrix(is);
-            }
+        /**
+         * Read connection matrix from MeCab matrix.def format text file. Classpath
+         * version.
+         * 
+         * @param data
+         *            name of the file
+         * @return system dictionary builder
+         * @throws IOException
+         *             if IO fails
+         */
+        public DicBuilder.System matrix(URL data) throws IOException {
+            String name = data.getPath();
+            URLConnection conn = data.openConnection();
+            long size = conn.getContentLengthLong();
+            return matrix(name, conn::getInputStream, size);
         }
 
-        public System matrix(Path path) throws IOException {
-            try (InputStream is = Files.newInputStream(path)) {
-                return matrix(is);
-            }
+        /**
+         * Read connection matrix from MeCab matrix.def format text file. Filesystem
+         * version.
+         * 
+         * @param path
+         *            path to matrix.def format file
+         * @return system dictionary builder
+         * @throws IOException
+         *             if IO fails
+         */
+        public DicBuilder.System matrix(Path path) throws IOException {
+            String name = path.getFileName().toString();
+            long size = Files.size(path);
+            return matrix(name, () -> Files.newInputStream(path), size);
+        }
+
+        /**
+         * Set the progress handler to the provided one
+         * 
+         * @param progress
+         *            progress handler
+         * @return current object
+         */
+        public SystemNoMatrix progress(Progress progress) {
+            inner.progress(progress);
+            return this;
+        }
+    }
+
+    /**
+     * Create a new system dictionary compiler
+     * 
+     * @return new system dictionary compiler object
+     */
+    public static SystemNoMatrix system() {
+        return new SystemNoMatrix(new System());
+    }
+
+    /**
+     * User dictionary with reference system dictionary added.
+     * 
+     * Instanciate via UserNoSystem.
+     */
+    public static final class User extends Base<User> {
+        /**
+         * Preload data from given system dictionary.
+         * 
+         */
+        public User system(BinaryDictionary system) {
+            progress.startBlock("system dict entries", nanoTime(), Progress.Kind.ENTRY);
+            int nread = lexicon.preloadFrom(system.getLexicon(), progress);
+            progress.endBlock(nread, nanoTime());
+
+            progress.startBlock("system dict pos list", nanoTime(), Progress.Kind.ENTRY);
+            pos.preloadFrom(system.getGrammar());
+            progress.endBlock(pos.getList().size(), nanoTime());
+
+            description.setSignature("");
+            description.setReference(system.getDictionaryHeader().getSignature());
+            return this;
+        }
+    }
+
+    /**
+     * Typestate pattern for user dictionary that does not have system dictionary
+     * added yet.
+     */
+    public static final class UserNoSystem {
+        private final User inner;
+
+        private UserNoSystem(DicBuilder.User inner) {
+            this.inner = inner;
+        }
+
+        /**
+         * Preload data from given system dictionary.
+         * 
+         * @param system
+         *            referenced dictionary
+         * @return
+         */
+        public DicBuilder.User system(BinaryDictionary system) {
+            return inner.system(system);
+        }
+
+        /**
+         * Set the progress handler to the provided one
+         * 
+         * @param progress
+         *            progress handler
+         * @return current object
+         */
+        public UserNoSystem progress(Progress progress) {
+            inner.progress(progress);
+            return this;
+        }
+    }
+
+    /**
+     * Create a new user dictionary compiler which will reference the provided user
+     * dictionary.
+     * 
+     * @return new dictionary compiler object
+     */
+    public static UserNoSystem user() {
+        return new UserNoSystem(new User());
+    }
+
+    /** entry point to test Base build with single lexicon (first arg). */
+    public static void main(String[] args) throws IOException {
+        Base<?> b = new Base<>();
+        Path input = Paths.get(args[0]);
+        b.lexicon(input);
+        Path output = Paths.get(args[1]);
+        Files.createDirectories(output.getParent());
+        try (SeekableByteChannel chan = Files.newByteChannel(output, StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE)) {
+            b.build(chan);
         }
     }
 }

@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import com.worksap.nlp.sudachi.dictionary.build.MemChannel
-import com.worksap.nlp.sudachi.dictionary.build.res
 
 /** Utility for lazily creating binary dictionaries for test */
 object TestDictionary {
@@ -28,14 +27,20 @@ object TestDictionary {
     DicBuilder.system()
         .matrix(res("/dict/matrix.def"))
         .lexicon(res("/dict/lex.csv"))
-        .description("the system dictionary for the unit tests")
+        .comment("the system dictionary for the unit tests")
         .build(result)
     result
   }
 
   val userDict1Data: MemChannel by lazy {
     val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user.csv")).build(chan)
+    DicBuilder.user().system(systemDict).lexicon(res("/dict/user.csv")).build(chan)
+    chan
+  }
+
+  val userDict2Data: MemChannel by lazy {
+    val chan = MemChannel()
+    DicBuilder.user().system(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
     chan
   }
 
@@ -45,11 +50,8 @@ object TestDictionary {
   val userDict1: BinaryDictionary
     get() = BinaryDictionary.loadUser(userDict1Data.buffer())
 
-  val userDict2: BinaryDictionary by lazy {
-    val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
-    BinaryDictionary.loadUser(chan.buffer())
-  }
+  val userDict2: BinaryDictionary
+    get() = BinaryDictionary.loadUser(userDict2Data.buffer())
 
   fun user0Cfg(): Config {
     return Config.defaultConfig().clearUserDictionaries().systemDictionary(systemDict)

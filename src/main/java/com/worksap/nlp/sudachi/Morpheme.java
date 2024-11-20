@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+import com.worksap.nlp.sudachi.dictionary.POS;
+
 import java.util.List;
 
 /**
@@ -55,7 +57,7 @@ public interface Morpheme {
      *
      * @return the part of speech of the morpheme
      */
-    public List<String> partOfSpeech();
+    public POS partOfSpeech();
 
     /**
      * Returns the ID of part of speech of the morpheme.
@@ -145,4 +147,14 @@ public interface Morpheme {
      * @return the array of synonym group IDs
      */
     public int[] getSynonymGroupIds();
+
+    /**
+     * Returns the user custamized data of the morpheme.
+     * 
+     * If the morpheme is in the system dictionary, is an oov, or user data is not
+     * set, returns a empty string.
+     * 
+     * @return the user data String
+     */
+    public String getUserData();
 }

@@ -17,7 +17,6 @@
 package com.worksap.nlp.sudachi;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * A graph structure used in the morphological analysis.
@@ -72,7 +71,7 @@ public interface Lattice {
      *            the index to after the last position in the input text
      * @return the node which start at {@code begin} and end at {@code end}
      */
-    public Optional<? extends LatticeNode> getMinimumNode(int begin, int end);
+    public LatticeNodeImpl getMinimumNode(int begin, int end);
 
     /**
      * Insert the node at the specified index.
@@ -113,6 +112,10 @@ public interface Lattice {
      * Allocate a new node.
      *
      * @return a new node has no information
+     * 
+     * @deprecated use {@code LatticeNodeImpl.makeOOV} or
+     *             {@code LatticeNodeImpl.OOVFactory} instead.
      */
+    @Deprecated
     public LatticeNode createNode();
 }

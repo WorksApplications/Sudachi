@@ -372,6 +372,14 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
+    public void splitC() {
+        MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東東京都");
+        assertThat(morphemesC.get(0).surface(), is("東"));
+        assertThat(morphemesC.get(1).surface(), is("東"));
+        assertThat(morphemesC.get(2).surface(), is("京都"));
+    }
+
+    @Test
     public void splitAfterTokenizeCtoA() {
         MorphemeList morphemesC = tokenizer.tokenize(Tokenizer.SplitMode.C, "東京都");
         assertThat(morphemesC.size(), is(1));
@@ -453,7 +461,7 @@ public class JapaneseTokenizerTest {
         assertThat(lattice.getJsonObject(i).isNull("begin"), is(true));
         assertThat(lattice.getJsonObject(i).getInt("end"), is(0));
         assertThat(lattice.getJsonObject(i).getString("headword"), is("(null)"));
-        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(WordId.ID_BOS));
         assertThat(lattice.getJsonObject(i).getString("pos"), is("BOS/EOS"));
         assertThat(lattice.getJsonObject(i).getInt("rightId"), is(0));
         assertThat(lattice.getJsonObject(i).getInt("leftId"), is(0));
@@ -466,7 +474,6 @@ public class JapaneseTokenizerTest {
         assertThat(lattice.getJsonObject(i).getInt("end"), is(3));
         assertThat(lattice.getJsonObject(i).getString("headword"), is("東"));
         assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,普通名詞,一般,*,*,*"));
-        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(4));
         assertThat(lattice.getJsonObject(i).getInt("rightId"), is(7));
         assertThat(lattice.getJsonObject(i).getInt("leftId"), is(7));
         assertThat(lattice.getJsonObject(i).getInt("cost"), is(4675));
@@ -505,7 +512,7 @@ public class JapaneseTokenizerTest {
         assertThat(lattice.getJsonObject(i).getInt("begin"), is(9));
         assertThat(lattice.getJsonObject(i).isNull("end"), is(true));
         assertThat(lattice.getJsonObject(i).getString("headword"), is("(null)"));
-        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(0));
+        assertThat(lattice.getJsonObject(i).getInt("wordId"), is(WordId.ID_EOS));
         assertThat(lattice.getJsonObject(i).getString("pos"), is("BOS/EOS"));
         assertThat(lattice.getJsonObject(i).getInt("rightId"), is(0));
         assertThat(lattice.getJsonObject(i).getInt("leftId"), is(0));
