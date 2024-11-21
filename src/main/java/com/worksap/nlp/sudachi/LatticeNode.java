@@ -99,24 +99,40 @@ public interface LatticeNode {
     public WordInfo getWordInfo();
 
     /**
+     * Returns the string information of the node.
+     * 
+     * @return the string information of the node.
+     * @see StringsCache
+     */
+    public StringsCache getStrings();
+
+    /**
      * @return the text of node.
      */
-    public String getSurface();
+    default public String getSurface() {
+        return getStrings().getSurface();
+    }
 
     /**
      * @return the reading form of node.
      */
-    public String getReading();
+    default public String getReading() {
+        return getStrings().getReading();
+    }
 
     /**
      * @return the normalized form of node.
      */
-    public String getNormalizedForm();
+    default public String getNormalizedForm() {
+        return getStrings().getNormalizedForm();
+    }
 
     /**
      * @return the dictionary form of node.
      */
-    public String getDictionaryForm();
+    default public String getDictionaryForm() {
+        return getStrings().getDictionaryForm();
+    }
 
     /**
      * Sets the morpheme information to the node.

@@ -42,13 +42,13 @@ public class LatticeNodeImpl implements LatticeNode {
     LatticeNodeImpl bestPreviousNode;
 
     // either Lexicon or StringsCache object
-    Object lexicon;
+    Object lexiconOrStrings;
 
     // Empty wordInfo for special words.
     static final WordInfo UNDEFINED_WORDINFO = new WordInfo((short) 0, (short) -1);
 
     LatticeNodeImpl(Lexicon lexicon, long params, int wordId) {
-        this.lexicon = lexicon;
+        this.lexiconOrStrings = lexicon;
         this.leftId = WordParameters.leftId(params);
         this.rightId = WordParameters.rightId(params);
         this.cost = WordParameters.cost(params);
@@ -82,7 +82,7 @@ public class LatticeNodeImpl implements LatticeNode {
         LatticeNodeImpl node = new LatticeNodeImpl();
         node.wordId = WordId.makeOov(posId);
         node.wordInfo = new WordInfo((short) (end - begin), posId);
-        node.lexicon = new StringsCache(surface, readingForm, normalizedForm, dictionaryForm);
+        node.lexiconOrStrings = new StringsCache(surface, readingForm, normalizedForm, dictionaryForm);
         node.begin = begin;
         node.end = end;
         return node;
@@ -110,10 +110,10 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     private Lexicon lexicon() {
-        if (lexicon instanceof Lexicon) {
-            return (Lexicon) lexicon;
-        } else if (lexicon instanceof StringsCache) {
-            return ((StringsCache) lexicon).lexicon;
+        if (lexiconOrStrings instanceof Lexicon) {
+            return (Lexicon) lexiconOrStrings;
+        } else if (lexiconOrStrings instanceof StringsCache) {
+            return ((StringsCache) lexiconOrStrings).getLexicon();
         } else {
             throw new IllegalStateException("lexicon was null probably");
         }
@@ -192,26 +192,6 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     @Override
-    public String getSurface() {
-        return strings().getSurface(this);
-    }
-
-    @Override
-    public String getReading() {
-        return strings().getReading(this);
-    }
-
-    @Override
-    public String getNormalizedForm() {
-        return strings().getNormalizedForm(this);
-    }
-
-    @Override
-    public String getDictionaryForm() {
-        return strings().getDictionaryForm(this);
-    }
-
-    @Override
     public String toString() {
         String surface = getSurface();
         short pos = getWordInfo().getPOSId();
@@ -220,11 +200,12 @@ public class LatticeNodeImpl implements LatticeNode {
                 cost);
     }
 
-    private StringsCache strings() {
-        Object l = lexicon;
+    @Override
+    public StringsCache getStrings() {
+        Object l = lexiconOrStrings;
         if (l instanceof Lexicon) {
-            StringsCache c = new StringsCache((Lexicon) l);
-            lexicon = c;
+            StringsCache c = new StringsCache((Lexicon) l, wordId);
+            lexiconOrStrings = c;
             return c;
         } else if (l instanceof StringsCache) {
             return (StringsCache) l;
@@ -271,82 +252,6 @@ public class LatticeNodeImpl implements LatticeNode {
             offset += n.getWordInfo().getLength();
             n.end = offset;
             result.add(n);
-        }
-    }
-
-    /**
-     * Cache to reduce the access to the lexicon. Also used to mock the lexicon for
-     * OOV nodes.
-     */
-    private static final class StringsCache {
-        private final Lexicon lexicon;
-        private String surface;
-        private String reading;
-        private String normalizedForm;
-        private String dictionaryForm;
-
-        public StringsCache(Lexicon lexicon) {
-            this.lexicon = lexicon;
-        }
-
-        public StringsCache(String surface, String readingForm, String normalizedForm, String dictionaryForm) {
-            this.lexicon = null;
-            this.surface = surface;
-            this.reading = readingForm;
-            this.normalizedForm = normalizedForm;
-            this.dictionaryForm = dictionaryForm;
-        }
-
-        public String getSurface(LatticeNodeImpl node) {
-            // benign data race pattern
-            // https://shipilev.net/blog/2016/close-encounters-of-jmm-kind/#wishful-benign-is-resilient
-            String s = surface;
-            if (s == null) {
-                WordInfo wi = node.getWordInfo();
-                int headwordPtr = wi.getHeadword();
-                int dic = WordId.dic(node.getWordId());
-                s = lexicon.string(dic, headwordPtr);
-                surface = s;
-            }
-            return s;
-        }
-
-        public String getReading(LatticeNodeImpl node) {
-            String s = reading;
-            if (s == null) {
-                WordInfo wi = node.getWordInfo();
-                int readingPtr = wi.getReadingForm();
-                int dic = WordId.dic(node.getWordId());
-                s = lexicon.string(dic, readingPtr);
-                reading = s;
-            }
-            return s;
-        }
-
-        public String getNormalizedForm(LatticeNodeImpl node) {
-            String s = normalizedForm;
-            if (s == null) {
-                WordInfo wi = node.getWordInfo();
-                int wordref = wi.getNormalizedForm();
-                int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
-                int headwordPtr = lexicon.wordInfos(dic).headwordPtr(WordId.word(wordref));
-                s = lexicon.string(dic, headwordPtr);
-                normalizedForm = s;
-            }
-            return s;
-        }
-
-        public String getDictionaryForm(LatticeNodeImpl node) {
-            String s = dictionaryForm;
-            if (s == null) {
-                WordInfo wi = node.getWordInfo();
-                int wordref = wi.getDictionaryForm();
-                int dic = WordId.refDic(wordref, WordId.dic(node.wordId));
-                int headwordPtr = lexicon.wordInfos(dic).headwordPtr(WordId.word(wordref));
-                s = lexicon.string(dic, headwordPtr);
-                dictionaryForm = s;
-            }
-            return s;
         }
     }
 

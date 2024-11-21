@@ -24,7 +24,9 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 class MorphemeImpl implements Morpheme {
     private final MorphemeList list;
     private final int index;
-    private LatticeNodeImpl node; // cache
+
+    // cache
+    private LatticeNodeImpl node;
 
     /* internal */ MorphemeImpl(MorphemeList list, int index) {
         this.list = list;
@@ -60,17 +62,17 @@ class MorphemeImpl implements Morpheme {
 
     @Override
     public String dictionaryForm() {
-        return node().getDictionaryForm();
+        return strings().getDictionaryForm();
     }
 
     @Override
     public String normalizedForm() {
-        return node().getNormalizedForm();
+        return strings().getNormalizedForm();
     }
 
     @Override
     public String readingForm() {
-        return node().getReading();
+        return strings().getReading();
     }
 
     @Override
@@ -116,6 +118,10 @@ class MorphemeImpl implements Morpheme {
 
     WordInfo getWordInfo() {
         return node().getWordInfo();
+    }
+
+    private StringsCache strings() {
+        return node().getStrings();
     }
 
     @Override
