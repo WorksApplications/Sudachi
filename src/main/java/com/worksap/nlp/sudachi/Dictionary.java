@@ -57,6 +57,20 @@ public interface Dictionary extends AutoCloseable {
     public void close() throws IOException;
 
     /**
+     * Lookup entries in the dictionary without performing an analysis.
+     * 
+     * Specified surface will be normalized. This will work like performing analysis
+     * on the given headword and find paths with a single morpheme, but returns all
+     * paths instead of the lowest cost one.
+     * 
+     * @param surface
+     *            to lookup. Will be normalized beforehand.
+     * @return a list of morphemes that match the surface. Their begin/end will be
+     *         0/length of their headword.
+     */
+    public List<Morpheme> lookup(CharSequence surface);
+
+    /**
      * Returns the number of types of part-of-speech.
      *
      * The IDs of part-of-speech are within the range of 0 to

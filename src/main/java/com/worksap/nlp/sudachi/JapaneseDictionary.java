@@ -128,6 +128,34 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     @Override
+    public List<Morpheme> lookup(CharSequence surface) {
+        UTF8InputTextBuilder builder = new UTF8InputTextBuilder(surface, grammar);
+        for (InputTextPlugin plugin : inputTextPlugins) {
+            plugin.rewrite(builder);
+        }
+        UTF8InputText input = builder.build();
+        byte[] bytes = input.getByteText();
+
+        List<Morpheme> morphemes = new ArrayList<>();
+        WordLookup wordLookup = lexicon.makeLookup();
+        wordLookup.reset(bytes, 0, bytes.length);
+        while (wordLookup.next()) {
+            int end = wordLookup.getEndOffset();
+            if (end != bytes.length) {
+                continue;
+            }
+            int numWords = wordLookup.getNumWords();
+            int[] wordIds = wordLookup.getWordsIds();
+            for (int word = 0; word < numWords; ++word) {
+                int wordId = wordIds[word];
+                Morpheme morpheme = new SingleMorphemeImpl(this, wordId);
+                morphemes.add(morpheme);
+            }
+        }
+        return morphemes;
+    }
+
+    @Override
     public Tokenizer tokenizer() {
         if (grammar == null || lexicon == null) {
             throw new IllegalStateException("trying to use closed dictionary");

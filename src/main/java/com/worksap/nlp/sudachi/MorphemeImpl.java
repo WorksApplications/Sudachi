@@ -21,6 +21,13 @@ import java.util.List;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
+/**
+ * A morpheme as a part of the analysis result.
+ * 
+ * @see Morpheme
+ * @see MorphemeList
+ * @see SingleMorphemeImpl
+ */
 class MorphemeImpl implements Morpheme {
     private final MorphemeList list;
     private final int index;
@@ -116,7 +123,7 @@ class MorphemeImpl implements Morpheme {
         return n;
     }
 
-    WordInfo getWordInfo() {
+    /* internal for test */ WordInfo getWordInfo() {
         return node().getWordInfo();
     }
 
@@ -126,7 +133,8 @@ class MorphemeImpl implements Morpheme {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("MorphemeImpl{");
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+        sb.append("{");
         sb.append("begin=").append(begin());
         sb.append(", end=").append(end());
         sb.append(", surface=").append(surface());
