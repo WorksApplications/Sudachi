@@ -51,7 +51,14 @@ fun DictionaryAccess.morpheme(id: Int): Morpheme {
 }
 
 val Morpheme.wordInfo: WordInfo
-  get() = (this as MorphemeImpl).wordInfo
+  get() =
+      if (this is MorphemeImpl) {
+        this.wordInfo
+      } else if (this is SingleMorphemeImpl) {
+        this.wordInfo
+      } else {
+        throw IllegalStateException("Unknown subclass of Morpheme: ${this}")
+      }
 
 val String.pos: POS
   get() = POS(this.split(","))
