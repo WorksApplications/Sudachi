@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * @see Morpheme
  * @see MorphemeImpl
  */
-class SingleMorphemeImpl implements Morpheme {
+class SingleMorphemeImpl extends MorphemeImplBase {
     private final int wordId;
 
     // dictionary data, maybe null for OOV/user morpheme.
@@ -56,11 +56,6 @@ class SingleMorphemeImpl implements Morpheme {
         end = surface().length();
     }
 
-    /** Create a morpheme based on the dictionary data and the word id */
-    /* internal */ SingleMorphemeImpl(JapaneseDictionary dictionary, int wordId) {
-        this(dictionary.getGrammar(), dictionary.getLexicon(), wordId);
-    }
-
     /** Create an oov morpheme with given data. */
     /* internal */ SingleMorphemeImpl(Grammar grammar, short posId, String surface, String reading,
             String normalizedForm, String dictionaryForm) {
@@ -75,6 +70,28 @@ class SingleMorphemeImpl implements Morpheme {
         end = surface.length();
     }
 
+    protected Grammar getGrammar() {
+        return grammar;
+    }
+
+    protected WordInfo getWordInfo() {
+        WordInfo wi = wordInfo;
+        if (wi == null) {
+            wi = lexicon.getWordInfo(wordId);
+            wordInfo = wi;
+        }
+        return wi;
+    }
+
+    protected StringsCache strings() {
+        StringsCache sc = strings;
+        if (sc == null) {
+            sc = new StringsCache(lexicon, wordId, getWordInfo());
+            strings = sc;
+        }
+        return sc;
+    }
+
     @Override
     public int begin() {
         return this.begin;
@@ -86,35 +103,8 @@ class SingleMorphemeImpl implements Morpheme {
     }
 
     @Override
-    public POS partOfSpeech() {
-        WordInfo wi = getWordInfo();
-        return grammar.getPartOfSpeechString(wi.getPOSId());
-    }
-
-    @Override
-    public short partOfSpeechId() {
-        WordInfo wi = getWordInfo();
-        return wi.getPOSId();
-    }
-
-    @Override
     public String surface() {
         return strings().getSurface();
-    }
-
-    @Override
-    public String dictionaryForm() {
-        return strings().getDictionaryForm();
-    }
-
-    @Override
-    public String normalizedForm() {
-        return strings().getNormalizedForm();
-    }
-
-    @Override
-    public String readingForm() {
-        return strings().getReading();
     }
 
     @Override
@@ -124,6 +114,11 @@ class SingleMorphemeImpl implements Morpheme {
         return splits;
     }
 
+    /**
+     * append sub-split Morphemes to the result list.
+     * 
+     * @see LatticeNodeImpl.appendSplitsTo
+     */
     private void appendSplitsTo(List<Morpheme> result, Tokenizer.SplitMode mode) {
         if (mode == Tokenizer.SplitMode.A) {
             appendSplitsTo(result, getWordInfo().getAunitSplit());
@@ -165,68 +160,7 @@ class SingleMorphemeImpl implements Morpheme {
     }
 
     @Override
-    public boolean isOOV() {
-        return WordId.isOov(wordId);
-    }
-
-    @Override
     public int getWordId() {
         return wordId;
-    }
-
-    @Override
-    public int getDictionaryId() {
-        if (isOOV()) {
-            return -1;
-        }
-        return WordId.dic(wordId);
-    }
-
-    @Override
-    public int[] getSynonymGroupIds() {
-        WordInfo wi = getWordInfo();
-        return wi.getSynonymGroupIds();
-    }
-
-    @Override
-    public String getUserData() {
-        WordInfo wi = getWordInfo();
-        return wi.getUserData();
-    }
-
-    private WordInfo getWordInfo() {
-        WordInfo wi = wordInfo;
-        if (wi == null) {
-            wi = lexicon.getWordInfo(wordId);
-            wordInfo = wi;
-        }
-        return wi;
-    }
-
-    private StringsCache strings() {
-        StringsCache sc = strings;
-        if (sc == null) {
-            sc = new StringsCache(lexicon, wordId, getWordInfo());
-            strings = sc;
-        }
-        return sc;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(getClass().getSimpleName());
-        sb.append("{");
-        sb.append("begin=").append(begin());
-        sb.append(", end=").append(end());
-        sb.append(", surface=").append(surface());
-        sb.append(", pos=").append(partOfSpeechId()).append('/').append(partOfSpeech());
-        int wordId = getWordId();
-        sb.append(", wid=(").append(WordId.dic(wordId)).append(',').append(WordId.word(wordId));
-        sb.append(")}");
-        return sb.toString();
-    }
-
-    /* internal */ boolean isCompatible(JapaneseDictionary dictionary) {
-        return dictionary.grammar == this.grammar;
     }
 }

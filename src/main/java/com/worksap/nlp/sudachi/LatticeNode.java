@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,28 +109,28 @@ public interface LatticeNode {
     /**
      * @return the text of node.
      */
-    default public String getSurface() {
+    public default String getSurface() {
         return getStrings().getSurface();
     }
 
     /**
      * @return the reading form of node.
      */
-    default public String getReading() {
+    public default String getReading() {
         return getStrings().getReading();
     }
 
     /**
      * @return the normalized form of node.
      */
-    default public String getNormalizedForm() {
+    public default String getNormalizedForm() {
         return getStrings().getNormalizedForm();
     }
 
     /**
      * @return the dictionary form of node.
      */
-    default public String getDictionaryForm() {
+    public default String getDictionaryForm() {
         return getStrings().getDictionaryForm();
     }
 

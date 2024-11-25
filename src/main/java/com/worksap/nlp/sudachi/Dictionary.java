@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public interface Dictionary extends AutoCloseable {
      *            surface of the morpheme
      * @return an oov morpheme with given information
      */
-    default public Morpheme oovMorpheme(short posId, String surface) {
+    public default Morpheme oovMorpheme(short posId, String surface) {
         return oovMorpheme(posId, surface, surface, surface, surface);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,10 +121,15 @@ public class PosMatcher implements Predicate<Morpheme>, Iterable<POS> {
      */
     @Override
     public boolean test(Morpheme morpheme) {
-        assert (morpheme instanceof MorphemeImpl ? ((MorphemeImpl) morpheme).isCompatible(dictionary)
-                : morpheme instanceof SingleMorphemeImpl ? ((SingleMorphemeImpl) morpheme).isCompatible(dictionary)
-                        : false);
+        assert isCompatible(morpheme);
         return matching.get(morpheme.partOfSpeechId());
+    }
+
+    private boolean isCompatible(Morpheme morpheme) {
+        if (morpheme instanceof MorphemeImplBase) {
+            return ((MorphemeImplBase) morpheme).isCompatible(dictionary);
+        }
+        return false;
     }
 
     /**

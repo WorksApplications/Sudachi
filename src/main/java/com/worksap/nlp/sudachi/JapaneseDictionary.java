@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
             int[] wordIds = wordLookup.getWordsIds();
             for (int word = 0; word < numWords; ++word) {
                 int wordId = wordIds[word];
-                Morpheme morpheme = new SingleMorphemeImpl(this, wordId);
+                Morpheme morpheme = new SingleMorphemeImpl(getGrammar(), getLexicon(), wordId);
                 morphemes.add(morpheme);
             }
         }

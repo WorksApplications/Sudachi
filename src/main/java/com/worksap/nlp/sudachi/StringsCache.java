@@ -16,8 +16,6 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.lang.IllegalArgumentException;
-
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
