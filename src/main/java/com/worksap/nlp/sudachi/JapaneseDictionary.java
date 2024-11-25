@@ -156,6 +156,12 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     @Override
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm) {
+        return new SingleMorphemeImpl(getGrammar(), posId, surface, reading, normalizedForm, dictionaryForm);
+    }
+
+    @Override
     public Tokenizer tokenizer() {
         if (grammar == null || lexicon == null) {
             throw new IllegalStateException("trying to use closed dictionary");

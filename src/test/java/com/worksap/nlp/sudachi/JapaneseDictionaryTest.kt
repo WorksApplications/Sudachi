@@ -173,4 +173,30 @@ abc,1,1,4675,AbC,名詞,普通名詞,一般,*,*,*,エービーシー,,,,,""")
     assertEquals("ABC", found.get(2).surface())
     assertEquals("abc", found.get(3).surface())
   }
+
+  @Test
+  fun oovMorpheme() {
+    val m1 = dict.oovMorpheme(1, "OOV")
+    assertEquals(0, m1.begin())
+    assertEquals(3, m1.end())
+    assertEquals(1, m1.partOfSpeechId())
+    assertEquals("OOV", m1.surface())
+    assertEquals("OOV", m1.readingForm())
+    assertEquals("OOV", m1.normalizedForm())
+    assertEquals("OOV", m1.dictionaryForm())
+    assertTrue(m1.isOOV())
+    assertEquals(WordId.makeOov(1), m1.getWordId())
+    assertEquals(-1, m1.getDictionaryId())
+    assertEquals(0, m1.getSynonymGroupIds().size)
+    assertEquals("", m1.getUserData())
+
+    val m2 = dict.oovMorpheme(2, "OOVs", "OOVr", "OOVn", "OOVd")
+    assertEquals(0, m2.begin())
+    assertEquals(4, m2.end())
+    assertEquals(2, m2.partOfSpeechId())
+    assertEquals("OOVs", m2.surface())
+    assertEquals("OOVr", m2.readingForm())
+    assertEquals("OOVn", m2.normalizedForm())
+    assertEquals("OOVd", m2.dictionaryForm())
+  }
 }

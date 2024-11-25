@@ -71,6 +71,42 @@ public interface Dictionary extends AutoCloseable {
     public List<Morpheme> lookup(CharSequence surface);
 
     /**
+     * Create an out-of-vocabulary morpheme from the pos id and string forms.
+     * 
+     * Begin/end will be set based on the surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @param reading
+     *            reading form of the morpheme
+     * @param normalizedForm
+     *            normalized form of the morpheme
+     * @param dictionaryForm
+     *            dictionary form of the morpheme
+     * @return an oov morpheme with given information
+     */
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm);
+
+    /**
+     * Create an out-of-vocabulary morpheme from the pos id and the surface.
+     * 
+     * Use the surface to for other string forms. Begin/end will be set based on the
+     * surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @return an oov morpheme with given information
+     */
+    default public Morpheme oovMorpheme(short posId, String surface) {
+        return oovMorpheme(posId, surface, surface, surface, surface);
+    }
+
+    /**
      * Returns the number of types of part-of-speech.
      *
      * The IDs of part-of-speech are within the range of 0 to

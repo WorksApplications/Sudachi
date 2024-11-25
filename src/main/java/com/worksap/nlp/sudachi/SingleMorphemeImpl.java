@@ -57,6 +57,20 @@ class SingleMorphemeImpl implements Morpheme {
         this(dictionary.getGrammar(), dictionary.getLexicon(), wordId);
     }
 
+    /** Create an oov morpheme with given data. */
+    /* internal */ SingleMorphemeImpl(Grammar grammar, short posId, String surface, String reading,
+            String normalizedForm, String dictionaryForm) {
+        this.wordId = WordId.makeOov(posId);
+        this.grammar = grammar;
+        this.lexicon = null;
+
+        this.wordInfo = new WordInfo((short) surface.length(), posId);
+        this.strings = new StringsCache(surface, reading, normalizedForm, dictionaryForm);
+
+        begin = 0;
+        end = surface.length();
+    }
+
     @Override
     public int begin() {
         return this.begin;
