@@ -121,7 +121,9 @@ public class PosMatcher implements Predicate<Morpheme>, Iterable<POS> {
      */
     @Override
     public boolean test(Morpheme morpheme) {
-        assert ((MorphemeImpl) morpheme).isCompatible(dictionary);
+        assert (morpheme instanceof MorphemeImpl ? ((MorphemeImpl) morpheme).isCompatible(dictionary)
+                : morpheme instanceof SingleMorphemeImpl ? ((SingleMorphemeImpl) morpheme).isCompatible(dictionary)
+                        : false);
         return matching.get(morpheme.partOfSpeechId());
     }
 

@@ -25,7 +25,7 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 /**
- * A morpheme independent from the analysis.
+ * A morpheme which is independent from the analysis.
  * 
  * @see Morpheme
  * @see MorphemeImpl
@@ -41,18 +41,22 @@ class SingleMorphemeImpl implements Morpheme {
     private WordInfo wordInfo;
     private StringsCache strings;
 
+    // begin/end is always 0/surface().length() except splits, since this morpheme
+    // class does not have the corresponding input text.
     private int begin;
     private int end;
 
-    SingleMorphemeImpl(Grammar grammar, Lexicon lexicon, int wordId) {
+    /** Create a morpheme based on the dictionary data and the word id */
+    /* internal */ SingleMorphemeImpl(Grammar grammar, Lexicon lexicon, int wordId) {
+        this.wordId = wordId;
         this.grammar = grammar;
         this.lexicon = lexicon;
-        this.wordId = wordId;
 
         begin = 0;
         end = surface().length();
     }
 
+    /** Create a morpheme based on the dictionary data and the word id */
     /* internal */ SingleMorphemeImpl(JapaneseDictionary dictionary, int wordId) {
         this(dictionary.getGrammar(), dictionary.getLexicon(), wordId);
     }
@@ -191,11 +195,12 @@ class SingleMorphemeImpl implements Morpheme {
     }
 
     private WordInfo getWordInfo() {
-        if (wordInfo != null) {
-            return wordInfo;
+        WordInfo wi = wordInfo;
+        if (wi == null) {
+            wi = lexicon.getWordInfo(wordId);
+            wordInfo = wi;
         }
-        wordInfo = lexicon.getWordInfo(wordId);
-        return wordInfo;
+        return wi;
     }
 
     private StringsCache strings() {

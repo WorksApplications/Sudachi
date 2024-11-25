@@ -16,6 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
+import java.lang.IllegalArgumentException;
+
 import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
@@ -54,14 +56,31 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
     /**
      * Create StringsCache for a word not in the dictionary with provided string
      * forms.
+     * 
+     * Each string forms must be non null.
      */
     public StringsCache(String surface, String readingForm, String normalizedForm, String dictionaryForm) {
-        this.lexicon = null;
-        this.wordId = WordId.ID_OOV_NOPOS;
+        if (surface == null) {
+            throw new IllegalArgumentException("arg surface must be non null.");
+        }
+        if (readingForm == null) {
+            throw new IllegalArgumentException("arg readingForm must be non null.");
+        }
+        if (normalizedForm == null) {
+            throw new IllegalArgumentException("arg normalizedForm must be non null.");
+        }
+        if (dictionaryForm == null) {
+            throw new IllegalArgumentException("arg dictionaryForm must be non null.");
+        }
+
         this.surface = surface;
         this.reading = readingForm;
         this.normalizedForm = normalizedForm;
         this.dictionaryForm = dictionaryForm;
+
+        // won't be used. fill with temporary values
+        this.lexicon = null;
+        this.wordId = WordId.ID_OOV_NOPOS;
     }
 
     /**
