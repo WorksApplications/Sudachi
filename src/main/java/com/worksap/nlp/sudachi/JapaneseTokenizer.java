@@ -205,12 +205,13 @@ class JapaneseTokenizer implements Tokenizer {
     LatticeImpl buildLattice(UTF8InputText input) {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
-        ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>(64);
+        ArrayList<LatticeNodeImpl> crrNodes = new ArrayList<>(64);
         WordLookup wordLookup = lexicon.makeLookup();
         for (int byteBoundary = 0; byteBoundary < bytes.length; byteBoundary++) {
             if (!input.canBow(byteBoundary) || !lattice.hasPreviousNode(byteBoundary)) {
                 continue;
             }
+            crrNodes.clear();
             wordLookup.reset(bytes, byteBoundary, bytes.length);
             long wordMask = 0L;
             while (wordLookup.next()) {
@@ -224,7 +225,7 @@ class JapaneseTokenizer implements Tokenizer {
                     int wordId = wordIds[word];
                     LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.parameters(wordId), wordId);
                     lattice.insert(byteBoundary, end, n);
-                    unkNodes.add(n);
+                    crrNodes.add(n);
                     wordMask = WordMask.addNth(wordMask, end - byteBoundary);
                 }
             }
@@ -233,11 +234,11 @@ class JapaneseTokenizer implements Tokenizer {
             // OOV
             if (!input.getCharCategoryTypes(byteBoundary).contains(CategoryType.NOOOVBOW)) {
                 for (OovProviderPlugin plugin : oovProviderPlugins) {
-                    wordMaskWithOov = provideOovs(plugin, input, unkNodes, byteBoundary, wordMaskWithOov);
+                    wordMaskWithOov = provideOovs(plugin, input, byteBoundary, wordMaskWithOov, crrNodes);
                 }
             }
             if (wordMaskWithOov == 0 && defaultOovProvider != null) {
-                wordMaskWithOov = provideOovs(defaultOovProvider, input, unkNodes, byteBoundary, wordMaskWithOov);
+                wordMaskWithOov = provideOovs(defaultOovProvider, input, byteBoundary, wordMaskWithOov, crrNodes);
             }
             if (wordMaskWithOov == 0) {
                 throw new IllegalStateException("failed to found any morpheme candidate at boundary " + byteBoundary);
@@ -249,19 +250,31 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     /**
-     * Create OOV nodes using plugin and add them to the lattice and unkNodes.
+     * Create OOV nodes using plugin at the given position and update crrNodes and
+     * wordMask.
      * 
+     * @param plugin
+     *            OOVProviderPlugin to use
+     * @param input
+     *            Full inputText
+     * @param boundary
+     *            Byte index of inputText where OOV nodes should start from
+     * @param crrNodes
+     *            Nodes already provided by dict or other plugins. Provided nodes
+     *            should be appended to this
+     * @param wordMask
+     *            Word mask based on crrNodes
      * @return wordMask updated based on created OOV nodes.
      */
-    private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
-            int boundary, long wordMask) {
-        int initialSize = unkNodes.size();
-        int created = plugin.provideOOV(input, boundary, wordMask, unkNodes);
+    private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, int boundary, long wordMask,
+            ArrayList<LatticeNodeImpl> crrNodes) {
+        int initialSize = crrNodes.size();
+        int created = plugin.provideOOV(input, boundary, wordMask, crrNodes);
         if (created == 0) {
             return wordMask;
         }
         for (int i = initialSize; i < initialSize + created; ++i) {
-            LatticeNodeImpl node = unkNodes.get(i);
+            LatticeNodeImpl node = crrNodes.get(i);
             lattice.insert(node.getBegin(), node.getEnd(), node);
             wordMask = WordMask.addNth(wordMask, node.getEnd() - node.getBegin());
         }
