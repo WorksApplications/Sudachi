@@ -16,8 +16,6 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.util.List;
-
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
@@ -35,21 +33,6 @@ abstract class MorphemeImplBase implements Morpheme {
     protected abstract WordInfo getWordInfo();
 
     protected abstract StringsCache strings();
-
-    @Override
-    public abstract int begin();
-
-    @Override
-    public abstract int end();
-
-    @Override
-    public abstract String surface();
-
-    @Override
-    public abstract List<Morpheme> split(Tokenizer.SplitMode mode);
-
-    @Override
-    public abstract int getWordId();
 
     @Override
     public POS partOfSpeech() {
