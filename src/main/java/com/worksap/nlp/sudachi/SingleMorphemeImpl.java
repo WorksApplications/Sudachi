@@ -27,7 +27,7 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * A morpheme which is independent from the analysis.
  * 
  * @see Morpheme
- * @see MorphemeImpl
+ * @see MorphemeListItem
  */
 class SingleMorphemeImpl extends MorphemeImplBase {
     private final int wordId;

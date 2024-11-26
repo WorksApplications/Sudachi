@@ -23,7 +23,8 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 /**
  * base class for the morpheme classes.
  * 
- * @see MorphemeImpl
+ * @see MorphemeList
+ * @see MorphemeListItem
  * @see SingleMorphemeImpl
  */
 abstract class MorphemeImplBase implements Morpheme {

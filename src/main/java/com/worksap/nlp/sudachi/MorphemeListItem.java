@@ -29,14 +29,14 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * @see MorphemeList
  * @see SingleMorphemeImpl
  */
-class MorphemeImpl extends MorphemeImplBase {
+class MorphemeListItem extends MorphemeImplBase {
     private final MorphemeList list;
     private final int index;
 
     // cache
     private LatticeNodeImpl node;
 
-    /* internal */ MorphemeImpl(MorphemeList list, int index) {
+    /* internal */ MorphemeListItem(MorphemeList list, int index) {
         this.list = list;
         this.index = index;
     }
