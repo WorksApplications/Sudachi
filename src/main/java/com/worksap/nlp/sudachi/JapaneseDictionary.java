@@ -128,7 +128,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     @Override
-    public Tokenizer create() {
+    public Tokenizer tokenizer() {
         if (grammar == null || lexicon == null) {
             throw new IllegalStateException("trying to use closed dictionary");
         }
@@ -138,6 +138,11 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
             tokenizer.disableEmptyMorpheme();
         }
         return tokenizer;
+    }
+
+    @Override
+    public Tokenizer create() {
+        return tokenizer();
     }
 
     @Override

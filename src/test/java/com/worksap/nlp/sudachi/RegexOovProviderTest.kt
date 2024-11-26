@@ -34,7 +34,7 @@ class RegexOovProviderTest {
             .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
     @Suppress("UNCHECKED_CAST") block(cfg, pluginCfg as Config.PluginConf<RegexOovProvider>)
     // prepend our OOV configuration to the main configuration
-    return DictionaryFactory().create(cfg.withFallback(TestDictionary.user0Cfg())).create()
+    return DictionaryFactory().create(cfg.withFallback(TestDictionary.user0Cfg())).tokenizer()
   }
 
   @Test

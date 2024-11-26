@@ -33,7 +33,7 @@ public class JoinNumericPluginTest {
         Config config = TestDictionary.INSTANCE.user0Cfg()
                 .characterDefinition(getClass().getClassLoader().getResource("joinnumeric/char.def"));
         Dictionary dict = new DictionaryFactory().create(config);
-        tokenizer = (JapaneseTokenizer) dict.create();
+        tokenizer = (JapaneseTokenizer) dict.tokenizer();
 
         plugin = new JoinNumericPlugin();
         plugin.setSettings(Settings.parse("{}", PathAnchor.none()));

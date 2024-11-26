@@ -291,7 +291,7 @@ public class SudachiCommandLine {
         try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
                 : new FileOrStdoutPrintStream(outputFileName);
                 Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output);
             }

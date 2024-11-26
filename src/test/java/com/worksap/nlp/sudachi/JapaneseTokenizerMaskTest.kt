@@ -41,7 +41,7 @@ class JapaneseTokenizerMaskTest {
     cfg0.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
     val cfg = cfg0.withFallback(TestDictionary.user0Cfg())
     val dic = DictionaryFactory().create(cfg) as JapaneseDictionary
-    val tokenizer = dic.create()
+    val tokenizer = dic.tokenizer()
 
     assertEquals(2, dic.oovProviderPlugins.size)
     assertIs<CaptureOtherWords>(dic.oovProviderPlugins[0])
@@ -62,7 +62,7 @@ class JapaneseTokenizerMaskTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(CaptureOtherWords::class.java)
     val dic = DictionaryFactory().create(cfg) as JapaneseDictionary
-    val tokenizer = dic.create()
+    val tokenizer = dic.tokenizer()
 
     assertIs<SimpleOovProviderPlugin>(dic.oovProviderPlugins[0])
     assertIs<CaptureOtherWords>(dic.oovProviderPlugins[1])
