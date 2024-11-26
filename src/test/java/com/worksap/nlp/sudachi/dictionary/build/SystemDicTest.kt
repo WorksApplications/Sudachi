@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.morpheme
 import com.worksap.nlp.sudachi.res
 import com.worksap.nlp.sudachi.setCharacterCategory
-import com.worksap.nlp.sudachi.wordInfo
 import kotlin.test.*
 
 fun DicBuilder.System.lexicon(s: String): DicBuilder.System {
@@ -57,7 +56,7 @@ class SystemDicTest {
     assertEquals(11, dic.lexicon.size()) // 10 + 南
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
     val m = dic.morpheme(44) // 11th word (i.e. 南)
-    val wi = m.wordInfo
+    val wi = dic.lexicon.getWordInfo(m.getWordId())
     assertEquals("南", m.surface())
     assertEquals(3, wi.length)
     assertEquals(0, wi.posId)

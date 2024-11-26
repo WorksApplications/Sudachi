@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi
 import com.worksap.nlp.sudachi.dictionary.CharacterCategory
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
-import com.worksap.nlp.sudachi.dictionary.WordInfo
 import java.net.URL
 
 fun DictionaryAccess.setCharacterCategory(
@@ -49,9 +48,6 @@ fun DictionaryAccess.morpheme(id: Int): Morpheme {
           Tokenizer.SplitMode.A)
   return l[0]
 }
-
-val Morpheme.wordInfo: WordInfo
-  get() = (this as MorphemeImpl).wordInfo
 
 val String.pos: POS
   get() = POS(this.split(","))

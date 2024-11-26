@@ -49,7 +49,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
 
     @Override
     public Morpheme get(int index) {
-        return new MorphemeImpl(this, index);
+        return new MorphemeListItem(this, index);
     }
 
     @Override

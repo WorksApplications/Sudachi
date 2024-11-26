@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,56 @@ public interface Dictionary extends AutoCloseable {
 
     @Override
     public void close() throws IOException;
+
+    /**
+     * Lookup entries in the dictionary without performing an analysis.
+     * 
+     * Specified surface will be normalized. This will work like performing analysis
+     * on the given headword and find paths with a single morpheme, but returns all
+     * paths instead of the lowest cost one.
+     * 
+     * @param surface
+     *            to lookup. Will be normalized beforehand.
+     * @return a list of morphemes that match the surface. Their begin/end will be
+     *         0/length of their headword.
+     */
+    public List<Morpheme> lookup(CharSequence surface);
+
+    /**
+     * Create an out-of-vocabulary morpheme from the pos id and string forms.
+     * 
+     * Begin/end will be set based on the surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @param reading
+     *            reading form of the morpheme
+     * @param normalizedForm
+     *            normalized form of the morpheme
+     * @param dictionaryForm
+     *            dictionary form of the morpheme
+     * @return an oov morpheme with given information
+     */
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm);
+
+    /**
+     * Create an out-of-vocabulary morpheme from the pos id and the surface.
+     * 
+     * Use the surface to for other string forms. Begin/end will be set based on the
+     * surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @return an oov morpheme with given information
+     */
+    public default Morpheme oovMorpheme(short posId, String surface) {
+        return oovMorpheme(posId, surface, surface, surface, surface);
+    }
 
     /**
      * Returns the number of types of part-of-speech.

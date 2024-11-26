@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,40 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         for (BinaryDictionary dictionary : dictionaries) {
             dictionary.close();
         }
+    }
+
+    @Override
+    public List<Morpheme> lookup(CharSequence surface) {
+        UTF8InputTextBuilder builder = new UTF8InputTextBuilder(surface, grammar);
+        for (InputTextPlugin plugin : inputTextPlugins) {
+            plugin.rewrite(builder);
+        }
+        UTF8InputText input = builder.build();
+        byte[] bytes = input.getByteText();
+
+        List<Morpheme> morphemes = new ArrayList<>();
+        WordLookup wordLookup = lexicon.makeLookup();
+        wordLookup.reset(bytes, 0, bytes.length);
+        while (wordLookup.next()) {
+            int end = wordLookup.getEndOffset();
+            if (end != bytes.length) {
+                continue;
+            }
+            int numWords = wordLookup.getNumWords();
+            int[] wordIds = wordLookup.getWordsIds();
+            for (int word = 0; word < numWords; ++word) {
+                int wordId = wordIds[word];
+                Morpheme morpheme = new SingleMorphemeImpl(getGrammar(), getLexicon(), wordId);
+                morphemes.add(morpheme);
+            }
+        }
+        return morphemes;
+    }
+
+    @Override
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm) {
+        return new SingleMorphemeImpl(getGrammar(), posId, surface, reading, normalizedForm, dictionaryForm);
     }
 
     @Override

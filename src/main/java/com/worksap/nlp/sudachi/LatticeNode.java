@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,24 +99,40 @@ public interface LatticeNode {
     public WordInfo getWordInfo();
 
     /**
+     * Returns the string information of the node.
+     * 
+     * @return the string information of the node.
+     * @see StringsCache
+     */
+    public StringsCache getStrings();
+
+    /**
      * @return the text of node.
      */
-    public String getSurface();
+    public default String getSurface() {
+        return getStrings().getSurface();
+    }
 
     /**
      * @return the reading form of node.
      */
-    public String getReading();
+    public default String getReading() {
+        return getStrings().getReading();
+    }
 
     /**
      * @return the normalized form of node.
      */
-    public String getNormalizedForm();
+    public default String getNormalizedForm() {
+        return getStrings().getNormalizedForm();
+    }
 
     /**
      * @return the dictionary form of node.
      */
-    public String getDictionaryForm();
+    public default String getDictionaryForm() {
+        return getStrings().getDictionaryForm();
+    }
 
     /**
      * Sets the morpheme information to the node.
