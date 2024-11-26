@@ -33,7 +33,7 @@ class DoubleArrayLexiconTest {
     lexicon = DoubleArrayLexicon.load(bytes, desc)
 
     val wids = Ints(lexicon.size())
-    for (ints: Ints in lexicon.wordIds(0)) {
+    for (ints: Ints in lexicon.getWordIdTable().wordIds()) {
       wids.appendAll(ints)
     }
     wids.sort()

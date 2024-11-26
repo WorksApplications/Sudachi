@@ -19,10 +19,12 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.MorphemeList;
 import com.worksap.nlp.sudachi.Tokenizer;
+import com.worksap.nlp.sudachi.WordId;
 
 public class DoubleArrayLexicon implements Lexicon {
     static final int USER_DICT_COST_PAR_MORPH = -20;
@@ -148,8 +150,42 @@ public class DoubleArrayLexicon implements Lexicon {
         return description.getNumTotalEntries();
     }
 
-    public Iterator<Ints> wordIds(int dic) {
-        return wordIdTable.wordIds();
+    public Iterator<Integer> wordIds(int dic) {
+        return new WordIdItr(dic);
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        int dictId;
+        Iterator<Ints> iterator;
+        Ints ints;
+        int index;
+
+        WordIdItr(int dic) {
+            dictId = dic;
+            this.iterator = getWordIdTable().wordIds();
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (ints == null || index >= ints.length()) {
+                if (!iterator.hasNext()) {
+                    return false;
+                }
+                ints = iterator.next();
+                index = 0;
+            }
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            int rawWordId = ints.get(index++);
+            return WordId.make(dictId, rawWordId);
+        }
     }
 
     /**

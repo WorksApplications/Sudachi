@@ -209,8 +209,8 @@ class DictionaryPrinterTest {
 
     val lexO = original.getLexicon()
     val lexR = rebuilt.getLexicon()
-    val wiIterO = lexO.wordIds(0)
-    val wiIterR = lexR.wordIds(0)
+    val wiIterO = lexO.getWordIdTable().wordIds()
+    val wiIterR = lexR.getWordIdTable().wordIds()
 
     while (wiIterO.hasNext()) {
       assertTrue(wiIterR.hasNext())
@@ -258,8 +258,8 @@ class DictionaryPrinterTest {
 
     val lexO = original.getLexicon()
     val lexR = rebuilt.getLexicon()
-    val wiIterO = lexO.wordIds(0)
-    val wiIterR = lexR.wordIds(0)
+    val wiIterO = lexO.getWordIdTable().wordIds()
+    val wiIterR = lexR.getWordIdTable().wordIds()
 
     while (wiIterO.hasNext()) {
       assertTrue(wiIterR.hasNext())

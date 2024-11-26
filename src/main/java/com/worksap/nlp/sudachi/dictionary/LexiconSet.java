@@ -171,7 +171,7 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
-    public Iterator<Ints> wordIds(int dic) {
+    public Iterator<Integer> wordIds(int dic) {
         return lexicons.get(dic).wordIds(dic);
     }
 }

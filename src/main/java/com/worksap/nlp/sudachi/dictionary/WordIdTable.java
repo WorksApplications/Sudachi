@@ -23,7 +23,7 @@ import java.nio.BufferUnderflowException;
 import java.util.NoSuchElementException;
 import java.util.Iterator;
 
-class WordIdTable {
+public class WordIdTable {
     private final ByteBuffer bytes;
     private int dicIdMask = 0;
 

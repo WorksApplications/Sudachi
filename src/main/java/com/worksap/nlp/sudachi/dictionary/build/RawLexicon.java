@@ -19,7 +19,6 @@ package com.worksap.nlp.sudachi.dictionary.build;
 import com.worksap.nlp.sudachi.dictionary.Block;
 import com.worksap.nlp.sudachi.dictionary.DoubleArrayLexicon;
 import com.worksap.nlp.sudachi.dictionary.Ints;
-import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfoList;
 
 import java.io.IOException;
@@ -63,17 +62,19 @@ public class RawLexicon {
      * used to resolve wordref.
      * 
      * @param lexicon
+     *            lexicon of a system dictionary.
      * @return number of entries read.
      */
-    public int preloadFrom(Lexicon lexicon, Progress progress) {
+    public int preloadFrom(DoubleArrayLexicon lexicon, Progress progress) {
         this.isUser = true;
 
         Ints allIds = new Ints(lexicon.size());
-        Iterator<Ints> ids = lexicon.wordIds(0);
+        Iterator<Ints> ids = lexicon.getWordIdTable().wordIds();
         while (ids.hasNext()) {
             allIds.appendAll(ids.next());
         }
         allIds.sort();
+
         for (int i = 0; i < allIds.length(); i++) {
             preloadedEntries.add(new CompiledWordEntry(lexicon, allIds.get(i)));
             progress.progress(i, allIds.length());

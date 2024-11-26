@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,15 @@ import java.util.Iterator;
  */
 public interface Lexicon {
 
+    /**
+     * Lookup entries that match the text starting from the offset.
+     * 
+     * @param text
+     *            input byte text. should be normalized
+     * @param offset
+     *            input offset to start lookup from
+     * @return iterator of (wordid, length) pair
+     */
     Iterator<int[]> lookup(byte[] text, int offset);
 
     /**
@@ -73,8 +82,10 @@ public interface Lexicon {
     WordInfoList wordInfos(int dic);
 
     /**
-     * Iterates over all word ids in the specified dictionary. Returned word ids are
-     * not sorted.
+     * Iterates over all word ids in the specified dictionary.
+     * 
+     * Returned word ids are not sorted. Dictionary part of returned ids are filled
+     * by the given dicId.
      */
-    Iterator<Ints> wordIds(int dic);
+    Iterator<Integer> wordIds(int dic);
 }
