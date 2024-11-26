@@ -42,7 +42,13 @@ public class JapaneseDictionaryTest {
     }
 
     @Test
+    @Deprecated
     public void create() {
+        assertThat(dict.create(), isA(Tokenizer.class));
+    }
+
+    @Test
+    public void createTokenizer() {
         assertThat(dict.tokenizer(), isA(Tokenizer.class));
     }
 
