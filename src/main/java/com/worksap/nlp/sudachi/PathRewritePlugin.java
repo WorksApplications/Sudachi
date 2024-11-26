@@ -109,13 +109,12 @@ public abstract class PathRewritePlugin extends Plugin {
         StringBuilder readingForm = new StringBuilder();
         for (int i = begin; i < end; i++) {
             LatticeNodeImpl node = path.get(i);
-            StringsCache sc = node.getStrings();
-            surface.append(sc.getSurface());
+            surface.append(node.getSurface());
             if (normalizedForm == null) {
-                normalizedFormBuilder.append(sc.getNormalizedForm());
+                normalizedFormBuilder.append(node.getNormalizedForm());
             }
-            dictionaryForm.append(sc.getDictionaryForm());
-            readingForm.append(sc.getReading());
+            dictionaryForm.append(node.getDictionaryForm());
+            readingForm.append(node.getReading());
         }
 
         LatticeNodeImpl node = LatticeNodeImpl.makeOov(b, e, posId, surface.toString(),
