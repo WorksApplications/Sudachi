@@ -24,7 +24,6 @@ import java.util.NoSuchElementException;
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.MorphemeList;
 import com.worksap.nlp.sudachi.Tokenizer;
-import com.worksap.nlp.sudachi.WordId;
 
 public class DoubleArrayLexicon implements Lexicon {
     static final int USER_DICT_COST_PAR_MORPH = -20;
