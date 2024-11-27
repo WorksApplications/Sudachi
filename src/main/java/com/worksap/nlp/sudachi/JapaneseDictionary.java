@@ -25,9 +25,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
@@ -127,6 +133,41 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
     }
 
+    /**
+     * Iterator of morphemes in the dictionary.
+     */
+    private class EntryItr implements Iterator<Morpheme> {
+        private Iterator<Integer> wordIdItr;
+
+        EntryItr() {
+            this.wordIdItr = getLexicon().wordIds();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return wordIdItr.hasNext();
+        }
+
+        @Override
+        public Morpheme next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return new SingleMorphemeImpl(getGrammar(), getLexicon(), wordIdItr.next());
+        }
+    }
+
+    @Override
+    public Stream<Morpheme> entries() {
+        Iterator<Morpheme> iterator = new EntryItr();
+        int size = getLexicon().size();
+        int characteristics = Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.SIZED;
+        boolean parallel = true;
+
+        Spliterator<Morpheme> spliterator = Spliterators.spliterator(iterator, size, characteristics);
+        return StreamSupport.stream(spliterator, parallel);
+    }
+
     @Override
     public List<Morpheme> lookup(CharSequence surface) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(surface, grammar);
@@ -204,10 +245,12 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
     }
 
+    @Override
     public GrammarImpl getGrammar() {
         return grammar;
     }
 
+    @Override
     public LexiconSet getLexicon() {
         return lexicon;
     }

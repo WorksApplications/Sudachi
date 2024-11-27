@@ -174,4 +174,45 @@ public class LexiconSet implements Lexicon {
     public Iterator<Integer> wordIds(int dic) {
         return lexicons.get(dic).wordIds(dic);
     }
+
+    /**
+     * Iterates over all word ids in all lexicons.
+     * 
+     * Returned word ids are not sorted. Dictionary part of returned ids are filled
+     * by the proper dict-ids.
+     */
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        private int dictId;
+        private Iterator<Integer> iterator;
+
+        WordIdItr() {
+            this.dictId = 0;
+            this.iterator = wordIds(this.dictId);
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (!iterator.hasNext()) {
+                int nextDictId = dictId + 1;
+                if (nextDictId >= lexicons.size()) {
+                    return false;
+                }
+                dictId = nextDictId;
+                iterator = wordIds(nextDictId);
+            }
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return iterator.next();
+        }
+    }
 }
