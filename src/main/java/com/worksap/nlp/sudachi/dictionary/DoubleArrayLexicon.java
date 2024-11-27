@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class DoubleArrayLexicon implements Lexicon {
 
     private class Itr implements Iterator<int[]> {
         private final Iterator<int[]> iterator;
-        private Integer[] wordIds;
+        private int[] wordIds;
         private int length;
         private int index;
 
@@ -155,9 +155,9 @@ public class DoubleArrayLexicon implements Lexicon {
     }
 
     private class WordIdItr implements Iterator<Integer> {
-        Iterator<Ints> iterator;
-        Ints ints;
-        int index;
+        private final Iterator<Ints> iterator;
+        private Ints ints;
+        private int index;
 
         WordIdItr() {
             this.iterator = getWordIdTable().wordIds();
@@ -166,7 +166,7 @@ public class DoubleArrayLexicon implements Lexicon {
 
         @Override
         public boolean hasNext() {
-            if (ints == null || index >= ints.length()) {
+            while (ints == null || index >= ints.length()) {
                 if (!iterator.hasNext()) {
                     return false;
                 }

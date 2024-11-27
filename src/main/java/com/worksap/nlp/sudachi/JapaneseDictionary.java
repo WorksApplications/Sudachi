@@ -137,10 +137,14 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
      * Iterator of morphemes in the dictionary.
      */
     private class EntryItr implements Iterator<Morpheme> {
+        private final GrammarImpl grammar;
+        private final LexiconSet lexicon;
         private Iterator<Integer> wordIdItr;
 
         EntryItr() {
-            this.wordIdItr = getLexicon().wordIds();
+            this.grammar = getGrammar();
+            this.lexicon = getLexicon();
+            this.wordIdItr = this.lexicon.wordIds();
         }
 
         @Override
@@ -153,7 +157,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return new SingleMorphemeImpl(getGrammar(), getLexicon(), wordIdItr.next());
+            return new SingleMorphemeImpl(this.grammar, this.lexicon, wordIdItr.next());
         }
     }
 

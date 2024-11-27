@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,9 +123,10 @@ public interface Morpheme {
      * The IDs change when the dictionaries are updated or the combination of
      * dictionaries changes.
      *
-     * If the morpheme is OOV, it returns an undefined value.
+     * If the morpheme is OOV, it returns an id consist of OOV flag and pos id.
      *
      * @return the word ID
+     * @see WordId
      */
     public int getWordId();
 

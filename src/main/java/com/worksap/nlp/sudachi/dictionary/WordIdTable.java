@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,12 @@ import java.nio.BufferUnderflowException;
 import java.util.NoSuchElementException;
 import java.util.Iterator;
 
+/**
+ * Table which contains the list of (internal) word ids that has same index
+ * form.
+ * 
+ * Automatically fills dict parts of word id using the dicId set.
+ */
 public class WordIdTable {
     private final ByteBuffer bytes;
     private int dicIdMask = 0;
@@ -31,19 +37,13 @@ public class WordIdTable {
         this.bytes = bytes;
     }
 
-    Integer[] get(int index) {
+    int[] get(int index) {
         ByteBuffer dup = bytes.duplicate();
         dup.position(index);
         BufReader reader = new BufReader(dup);
         int length = reader.readVarint32();
-        Integer[] result = new Integer[length];
-        int mask = dicIdMask;
-        int sum = 0;
-        for (int i = 0; i < length; i++) {
-            int v = reader.readVarint32();
-            result[i] = WordId.applyMask(v + sum, mask);
-            sum += v;
-        }
+        int[] result = new int[length];
+        readDeltaCompressed(result, length, this.dicIdMask, reader);
         return result;
     }
 
@@ -75,8 +75,8 @@ public class WordIdTable {
         }
     }
 
-    void setDictionaryId(int id) {
-        dicIdMask = WordId.dicIdMask(id);
+    void setDictionaryId(int dictId) {
+        dicIdMask = WordId.dicIdMask(dictId);
     }
 
     /**

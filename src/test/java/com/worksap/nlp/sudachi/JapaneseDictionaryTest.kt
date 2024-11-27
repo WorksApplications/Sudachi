@@ -104,6 +104,25 @@ class JapaneseDictionaryTest {
   }
 
   @Test
+  fun entries() {
+    // contains all morphemes, where all of them have different wordId
+    assertEquals(41, dict.entries().map { m -> m.getWordId() }.distinct().count())
+    // use grammar
+    assertEquals(6, dict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
+    // use lexicon
+    assertEquals(4, dict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
+  }
+
+  @Test
+  fun entriesWithUser() {
+    val udict = TestDictionary.user1()
+    assertEquals(41 + 4, udict.entries().map { m -> m.getWordId() }.distinct().count())
+    assertEquals(6 + 1, udict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
+    assertEquals(4 + 1, udict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
+    udict.close()
+  }
+
+  @Test
   fun lookupEntries() {
     // nothing
     val nothing = dict.lookup("存在しない語")
