@@ -82,10 +82,9 @@ public interface Lexicon {
     WordInfoList wordInfos(int dic);
 
     /**
-     * Iterates over all word ids in the specified dictionary.
+     * Iterates over all word ids in the dictionary.
      * 
-     * Returned word ids are not sorted. Dictionary part of returned ids are filled
-     * by the given dicId.
+     * Returned word ids are not sorted.
      */
-    Iterator<Integer> wordIds(int dic);
+    Iterator<Integer> wordIds();
 }

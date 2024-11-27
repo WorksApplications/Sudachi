@@ -150,18 +150,16 @@ public class DoubleArrayLexicon implements Lexicon {
         return description.getNumTotalEntries();
     }
 
-    public Iterator<Integer> wordIds(int dic) {
-        return new WordIdItr(dic);
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
     }
 
     private class WordIdItr implements Iterator<Integer> {
-        int dictId;
         Iterator<Ints> iterator;
         Ints ints;
         int index;
 
-        WordIdItr(int dic) {
-            dictId = dic;
+        WordIdItr() {
             this.iterator = getWordIdTable().wordIds();
             index = 0;
         }
@@ -183,8 +181,7 @@ public class DoubleArrayLexicon implements Lexicon {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            int rawWordId = ints.get(index++);
-            return WordId.make(dictId, rawWordId);
+            return ints.get(index++);
         }
     }
 

@@ -171,16 +171,6 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
-    public Iterator<Integer> wordIds(int dic) {
-        return lexicons.get(dic).wordIds(dic);
-    }
-
-    /**
-     * Iterates over all word ids in all lexicons.
-     * 
-     * Returned word ids are not sorted. Dictionary part of returned ids are filled
-     * by the proper dict-ids.
-     */
     public Iterator<Integer> wordIds() {
         return new WordIdItr();
     }
@@ -191,7 +181,7 @@ public class LexiconSet implements Lexicon {
 
         WordIdItr() {
             this.dictId = 0;
-            this.iterator = wordIds(this.dictId);
+            this.iterator = lexicons.get(dictId).wordIds();
         }
 
         @Override
@@ -202,7 +192,7 @@ public class LexiconSet implements Lexicon {
                     return false;
                 }
                 dictId = nextDictId;
-                iterator = wordIds(nextDictId);
+                iterator = lexicons.get(nextDictId).wordIds();
             }
             return true;
         }
@@ -212,7 +202,8 @@ public class LexiconSet implements Lexicon {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return iterator.next();
+            int innerWordId = iterator.next();
+            return WordId.make(dictId, innerWordId);
         }
     }
 }
