@@ -77,7 +77,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void partOfSpeech() {
-        List<Morpheme> ms = tokenizer.tokenize("京都");
+        MorphemeList ms = tokenizer.tokenize("京都");
         assertThat(ms.size(), is(1));
         Morpheme m = ms.get(0);
         short pid = m.partOfSpeechId();
@@ -88,7 +88,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void getWordId() {
-        List<Morpheme> ms = tokenizer.tokenize("京都");
+        MorphemeList ms = tokenizer.tokenize("京都");
         assertThat(ms.size(), is(1));
         int wid = ms.get(0).getWordId();
 
@@ -103,7 +103,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void getDictionaryId() {
-        List<Morpheme> ms = tokenizer.tokenize("京都");
+        MorphemeList ms = tokenizer.tokenize("京都");
         assertThat(ms.size(), is(1));
         assertThat(ms.get(0).getDictionaryId(), is(0));
 
@@ -118,7 +118,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void getSynonymGroupIds() {
-        List<Morpheme> ms = tokenizer.tokenize("京都");
+        MorphemeList ms = tokenizer.tokenize("京都");
         assertThat(ms.size(), is(1));
         assertThat(ms.get(0).getSynonymGroupIds(), is(new int[] { 1, 5 }));
 
@@ -188,7 +188,7 @@ public class JapaneseTokenizerTest {
     @Test
     public void tokenizerWithReader() throws IOException {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
@@ -208,7 +208,7 @@ public class JapaneseTokenizerTest {
         }
         sb.append("京都");
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader);
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             assertThat(it.hasNext(), is(true));
             assertThat(it.next().size(), is(2));
@@ -226,12 +226,12 @@ public class JapaneseTokenizerTest {
             sb.append("京都。");
         }
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(5));
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
             assertThat(it.hasNext(), is(true));
-            List<Morpheme> ms = it.next();
+            MorphemeList ms = it.next();
             assertThat(ms.size(), is(2));
             assertThat(ms.get(0).surface(), is("京都"));
             assertThat(ms.get(1).surface(), is("。"));
@@ -247,7 +247,7 @@ public class JapaneseTokenizerTest {
         }
         sb.append("😀");
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader);
 
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(SentenceDetector.DEFAULT_LIMIT - 1));
@@ -264,7 +264,7 @@ public class JapaneseTokenizerTest {
     @Test
     public void lazyTokenizeSentences() {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
-        Iterator<List<Morpheme>> it = tokenizer.lazyTokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.lazyTokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
@@ -295,7 +295,7 @@ public class JapaneseTokenizerTest {
         }
         sb.append("京都");
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.lazyTokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.lazyTokenizeSentences(reader);
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             assertThat(it.hasNext(), is(true));
             assertThat(it.next().size(), is(2));
@@ -318,12 +318,12 @@ public class JapaneseTokenizerTest {
             sb.append("京都。");
         }
         StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.lazyTokenizeSentences(reader);
+        Iterator<MorphemeList> it = tokenizer.lazyTokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(5));
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
             assertThat(it.hasNext(), is(true));
-            List<Morpheme> ms = it.next();
+            MorphemeList ms = it.next();
             assertThat(ms.size(), is(2));
             assertThat(ms.get(0).surface(), is("京都"));
             assertThat(ms.get(1).surface(), is("。"));
@@ -333,7 +333,7 @@ public class JapaneseTokenizerTest {
 
     @Test
     public void zeroLengthMorpheme() {
-        List<Morpheme> s = tokenizer.tokenize("…");
+        MorphemeList s = tokenizer.tokenize("…");
         assertThat(s.size(), is(3));
         assertThat(s.get(0).surface(), is("…"));
         assertThat(s.get(0).normalizedForm(), is("."));
@@ -355,7 +355,7 @@ public class JapaneseTokenizerTest {
         dict = new DictionaryFactory().create(Config.empty().withFallback(config).allowEmptyMorpheme(false));
         tokenizer = (JapaneseTokenizer) dict.tokenizer();
 
-        List<Morpheme> s = tokenizer.tokenize("…");
+        MorphemeList s = tokenizer.tokenize("…");
         assertThat(s.size(), is(3));
         assertThat(s.get(0).surface(), is("…"));
         assertThat(s.get(0).normalizedForm(), is("."));

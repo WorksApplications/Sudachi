@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     @Override
-    public Morpheme get(int index) {
+    public MorphemeListItem get(int index) {
         return new MorphemeListItem(this, index);
     }
 
@@ -91,7 +91,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.get(index).getWordInfo();
     }
 
-    List<Morpheme> split(Tokenizer.SplitMode mode, int index) {
+    MorphemeList split(Tokenizer.SplitMode mode, int index) {
         List<LatticeNodeImpl> nodes = new ArrayList<>();
         LatticeNodeImpl node = path.get(index);
         node.appendSplitsTo(nodes, mode);

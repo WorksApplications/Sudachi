@@ -98,12 +98,12 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input) {
+    public Iterator<MorphemeList> tokenizeSentences(SplitMode mode, Readable input) {
         return new SentenceSplittingLazyAnalysis(mode, this, input);
     }
 
     @Override
-    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input) {
+    public Iterator<MorphemeList> lazyTokenizeSentences(SplitMode mode, Readable input) {
         return tokenizeSentences(mode, input);
     }
 

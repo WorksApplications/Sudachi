@@ -87,7 +87,7 @@ public interface Tokenizer {
      *            a readable input text
      * @return an iterator of tokenized sentences
      */
-    Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input);
+    Iterator<MorphemeList> tokenizeSentences(SplitMode mode, Readable input);
 
     /**
      * Read an input text from {@code input}, divide it into sentences and tokenize
@@ -98,7 +98,7 @@ public interface Tokenizer {
      * @return an iterator of tokenized sentences
      * @see #tokenizeSentences(SplitMode,Readable)
      */
-    default Iterator<List<Morpheme>> tokenizeSentences(Readable input) {
+    default Iterator<MorphemeList> tokenizeSentences(Readable input) {
         return tokenizeSentences(SplitMode.C, input);
     }
 
@@ -115,7 +115,7 @@ public interface Tokenizer {
      * 
      */
     @Deprecated
-    Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input);
+    Iterator<MorphemeList> lazyTokenizeSentences(SplitMode mode, Readable input);
 
     /**
      * Read an input text from {@code input}, divide it into sentences and tokenize
@@ -128,7 +128,7 @@ public interface Tokenizer {
      * @deprecated renamed to {@link #tokenizeSentences(Readable)}
      */
     @Deprecated
-    default Iterator<List<Morpheme>> lazyTokenizeSentences(Readable input) {
+    default Iterator<MorphemeList> lazyTokenizeSentences(Readable input) {
         return lazyTokenizeSentences(SplitMode.C, input);
     }
 

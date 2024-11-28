@@ -29,8 +29,7 @@ import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 /**
  * Provides lazy sentence split and analysis.
  */
-/* internal */ class SentenceSplittingLazyAnalysis
-        implements SentenceDetector.NonBreakCheker, Iterator<List<Morpheme>> {
+/* internal */ class SentenceSplittingLazyAnalysis implements SentenceDetector.NonBreakCheker, Iterator<MorphemeList> {
     private final SentenceDetector detector = new SentenceDetector();
 
     private final Tokenizer.SplitMode mode;
