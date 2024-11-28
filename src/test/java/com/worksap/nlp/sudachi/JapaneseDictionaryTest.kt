@@ -142,7 +142,7 @@ class JapaneseDictionaryTest {
     assertEquals(1, sudachi.size)
     assertEquals("徳島県産", sudachi[0].getUserData())
 
-    // cannot find hidden entry
+    // cannot find entry with -1 conjunction cost
     val hidden = dict.lookup("隠し")
     assertTrue(hidden.isEmpty())
 
