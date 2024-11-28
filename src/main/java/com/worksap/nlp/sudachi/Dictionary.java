@@ -185,4 +185,12 @@ public interface Dictionary extends AutoCloseable {
     default PosMatcher posMatcher(PartialPOS... posList) {
         return posMatcher(Arrays.asList(posList));
     }
+
+    /**
+     * Create a TextNormalizer that works based on the grammar and InputTextPlugins
+     * of this dictionary
+     * 
+     * @return TextNormalizer based on this dictionary.
+     */
+    TextNormalizer textNormalizer();
 }
