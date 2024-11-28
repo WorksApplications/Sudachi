@@ -104,6 +104,29 @@ class JapaneseDictionaryTest {
   }
 
   @Test
+  fun entries() {
+    // contains all morphemes, where all of them have different wordId
+    assertEquals(41, dict.entries().map { m -> m.getWordId() }.distinct().count())
+    // includes entry with -1 conjunction cost
+    assertEquals(1, dict.entries().filter { m -> m.dictionaryForm() == "隠し" }.count())
+    // excludes phantom entry
+    assertEquals(0, dict.entries().filter { m -> m.surface() == "なな" }.count())
+    // use grammar
+    assertEquals(6, dict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
+    // use lexicon
+    assertEquals(4, dict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
+  }
+
+  @Test
+  fun entriesWithUser() {
+    val udict = TestDictionary.user1()
+    assertEquals(41 + 4, udict.entries().map { m -> m.getWordId() }.distinct().count())
+    assertEquals(6 + 1, udict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
+    assertEquals(4 + 1, udict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
+    udict.close()
+  }
+
+  @Test
   fun lookupEntries() {
     // nothing
     val nothing = dict.lookup("存在しない語")
@@ -118,6 +141,10 @@ class JapaneseDictionaryTest {
     val sudachi = TestDictionary.user1().lookup("すだち")
     assertEquals(1, sudachi.size)
     assertEquals("徳島県産", sudachi[0].getUserData())
+
+    // cannot find entry with -1 conjunction cost
+    val hidden = dict.lookup("隠し")
+    assertTrue(hidden.isEmpty())
 
     // will be normalized
     val norm = dict.lookup("特A")

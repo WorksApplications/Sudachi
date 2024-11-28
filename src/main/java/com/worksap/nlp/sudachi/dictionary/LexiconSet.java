@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,38 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
-    public Iterator<Ints> wordIds(int dic) {
-        return lexicons.get(dic).wordIds(dic);
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        private int dictId;
+        private Iterator<Integer> iterator;
+
+        WordIdItr() {
+            this.dictId = 0;
+            this.iterator = lexicons.get(dictId).wordIds();
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (!iterator.hasNext()) {
+                int nextDictId = dictId + 1;
+                if (nextDictId >= lexicons.size()) {
+                    return false;
+                }
+                dictId = nextDictId;
+                iterator = lexicons.get(nextDictId).wordIds();
+            }
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return iterator.next();
+        }
     }
 }

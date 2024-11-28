@@ -93,12 +93,13 @@ public class DictionaryPrinter {
         grammar.setCharacterCategory(CharacterCategory.loadDefault());
         textNormalizer = new TextNormalizer(grammar);
 
-        // in order to output dictionary entries in in-dictionary order we need to sort
-        // them. iterator over them will get them not in the sorted order, but grouped
-        // by index-form (and sorted in groups).
+        // In order to output dictionary entries in in-dictionary order we need to sort
+        // them. Iterator over them will get them not in the sorted order, but grouped
+        // by index-form. Here we assume DoubleArrayLexicon and use WordIdTable.wordIds
+        // for the performance.
         DoubleArrayLexicon targetLex = dic.getLexicon();
         Ints allIds = new Ints(targetLex.size());
-        Iterator<Ints> ids = targetLex.wordIds(0);
+        Iterator<Ints> ids = targetLex.getWordIdTable().wordIds();
         while (ids.hasNext()) {
             allIds.appendAll(ids.next());
         }

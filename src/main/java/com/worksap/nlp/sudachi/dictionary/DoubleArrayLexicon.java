@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.MorphemeList;
@@ -103,7 +104,7 @@ public class DoubleArrayLexicon implements Lexicon {
 
     private class Itr implements Iterator<int[]> {
         private final Iterator<int[]> iterator;
-        private Integer[] wordIds;
+        private int[] wordIds;
         private int length;
         private int index;
 
@@ -148,8 +149,39 @@ public class DoubleArrayLexicon implements Lexicon {
         return description.getNumTotalEntries();
     }
 
-    public Iterator<Ints> wordIds(int dic) {
-        return wordIdTable.wordIds();
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        private final Iterator<Ints> iterator;
+        private Ints ints;
+        private int index;
+
+        WordIdItr() {
+            this.iterator = getWordIdTable().wordIds();
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (ints == null || index >= ints.length()) {
+                if (!iterator.hasNext()) {
+                    return false;
+                }
+                ints = iterator.next();
+                index = 0;
+            }
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return ints.get(index++);
+        }
     }
 
     /**

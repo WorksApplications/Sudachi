@@ -16,12 +16,13 @@
 
 package com.worksap.nlp.sudachi;
 
-import com.worksap.nlp.sudachi.dictionary.POS;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import com.worksap.nlp.sudachi.dictionary.POS;
 
 /**
  * A lexicon and a grammar for morphological analysis.
@@ -55,6 +56,18 @@ public interface Dictionary extends AutoCloseable {
 
     @Override
     public void close() throws IOException;
+
+    /**
+     * Create a parallel stream of all words in the dictionary as morphemes.
+     *
+     * Corresponds to the lines in the lexicon csv, i.e. it includes entries that
+     * appear only when refered from other words (e.g. as constitution) during an
+     * analysis and excludes entries that automatically added to store a
+     * normalization form of another word. Entries in the stream are not sorted.
+     *
+     * @return a parallel stream of morphemes.
+     */
+    public Stream<Morpheme> entries();
 
     /**
      * Lookup entries in the dictionary without performing an analysis.

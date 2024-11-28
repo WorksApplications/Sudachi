@@ -33,7 +33,7 @@ class DoubleArrayLexiconTest {
     lexicon = DoubleArrayLexicon.load(bytes, desc)
 
     val wids = Ints(lexicon.size())
-    for (ints: Ints in lexicon.wordIds(0)) {
+    for (ints: Ints in lexicon.getWordIdTable().wordIds()) {
       wids.appendAll(ints)
     }
     wids.sort()
@@ -109,6 +109,12 @@ class DoubleArrayLexiconTest {
     assertEquals("行っ", lexicon.string(0, wi.getHeadword()))
     assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
     assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword()))
+
+    // な。な  (phantom normalized form)
+    wi = lexicon.getWordInfo(getWordId(39))
+    assertEquals("な。な", lexicon.string(0, wi.getHeadword()))
+    assertEquals("ナナ", lexicon.string(0, wi.getReadingForm()))
+    assertEquals("なな", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
 
     // 東京都
     wi = lexicon.getWordInfo(getWordId(6))
