@@ -176,7 +176,7 @@ public class DoubleArrayLexicon implements Lexicon {
                 }
                 int headwordPtr = wordInfos.headwordPtr(wordId);
                 String headword = strings.string(headwordPtr);
-                MorphemeList ms = tokenizer.tokenize(headword);
+                MorphemeList ms = (MorphemeList) tokenizer.tokenize(headword);
                 int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
                 if (cost > Short.MAX_VALUE) {
                     cost = Short.MAX_VALUE;

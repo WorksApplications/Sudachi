@@ -29,7 +29,8 @@ import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 /**
  * Provides lazy sentence split and analysis.
  */
-/* internal */ class SentenceSplittingLazyAnalysis implements SentenceDetector.NonBreakCheker, Iterator<MorphemeList> {
+/* internal */ class SentenceSplittingLazyAnalysis
+        implements SentenceDetector.NonBreakCheker, Iterator<List<Morpheme>> {
     private final SentenceDetector detector = new SentenceDetector();
 
     private final Tokenizer.SplitMode mode;
@@ -99,7 +100,7 @@ import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
     }
 
     @Override
-    public MorphemeList next() {
+    public List<Morpheme> next() {
         int length = detector.getEos(normalized, this);
         if (length > 0) { // sentence found
             int eos = bos + length;

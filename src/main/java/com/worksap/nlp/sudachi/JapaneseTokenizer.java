@@ -66,8 +66,9 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public MorphemeList tokenize(Tokenizer.SplitMode mode, String text) {
+    public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
         if (text.isEmpty()) {
+            // return MorphemeList instance for the case internalCost is required.
             return MorphemeList.EMPTY;
         }
         UTF8InputText input = buildInputText(text);
@@ -75,25 +76,25 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text) {
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
 
         StringReader input = new StringReader(text);
         SentenceSplittingLazyAnalysis analysis = new SentenceSplittingLazyAnalysis(mode, this, input);
-        List<MorphemeList> result = new ArrayList<>();
+        List<List<Morpheme>> result = new ArrayList<>();
         analysis.forEachRemaining(result::add);
         return result;
     }
 
     @Override
-    public Iterator<MorphemeList> tokenizeSentences(SplitMode mode, Readable input) {
+    public Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input) {
         return new SentenceSplittingLazyAnalysis(mode, this, input);
     }
 
     @Override
-    public Iterator<MorphemeList> lazyTokenizeSentences(SplitMode mode, Readable input) {
+    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input) {
         return tokenizeSentences(mode, input);
     }
 
@@ -151,7 +152,7 @@ class JapaneseTokenizer implements Tokenizer {
         return input;
     }
 
-    MorphemeList tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
+    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         checkIfAlive();
         buildLattice(input);
 
