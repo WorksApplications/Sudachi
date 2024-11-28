@@ -215,15 +215,7 @@ public class LatticeNodeImpl implements LatticeNode {
     }
 
     /* internal */ void appendSplitsTo(List<LatticeNodeImpl> result, Tokenizer.SplitMode mode) {
-        if (mode == Tokenizer.SplitMode.A) {
-            appendSplitsTo(result, getWordInfo().getAunitSplit());
-        } else if (mode == Tokenizer.SplitMode.B) {
-            appendSplitsTo(result, getWordInfo().getBunitSplit());
-        } else if (mode == Tokenizer.SplitMode.C) {
-            appendSplitsTo(result, getWordInfo().getCunitSplit());
-        } else {
-            result.add(this);
-        }
+        appendSplitsTo(result, getWordInfo().getUnitSplit(mode));
     }
 
     private void appendSplitsTo(List<LatticeNodeImpl> result, int[] splitsId) {

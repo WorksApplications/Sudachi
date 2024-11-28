@@ -133,6 +133,18 @@ public interface Tokenizer {
     }
 
     /**
+     * Produce a copy of this list in a finer split mode. May return the given list
+     * if the mode is coarser than the current one. The given list is not modified.
+     * 
+     * @param morphemes
+     *            list of morphemes to split.
+     * @param mode
+     *            requested split mode
+     * @return current list, or a new list in the requested split mode.
+     */
+    List<Morpheme> split(List<Morpheme> morphemes, SplitMode mode);
+
+    /**
      * Prints lattice structure of the analysis into the passed {@link PrintStream}.
      *
      * @param output

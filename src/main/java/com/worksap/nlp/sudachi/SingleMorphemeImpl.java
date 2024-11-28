@@ -118,16 +118,8 @@ class SingleMorphemeImpl extends MorphemeImplBase {
      * 
      * @see LatticeNodeImpl.appendSplitsTo
      */
-    private void appendSplitsTo(List<Morpheme> result, Tokenizer.SplitMode mode) {
-        if (mode == Tokenizer.SplitMode.A) {
-            appendSplitsTo(result, getWordInfo().getAunitSplit());
-        } else if (mode == Tokenizer.SplitMode.B) {
-            appendSplitsTo(result, getWordInfo().getBunitSplit());
-        } else if (mode == Tokenizer.SplitMode.C) {
-            appendSplitsTo(result, getWordInfo().getCunitSplit());
-        } else {
-            result.add(this);
-        }
+    /* internal */ void appendSplitsTo(List<Morpheme> result, Tokenizer.SplitMode mode) {
+        appendSplitsTo(result, getWordInfo().getUnitSplit(mode));
     }
 
     private void appendSplitsTo(List<Morpheme> result, int[] splitIds) {

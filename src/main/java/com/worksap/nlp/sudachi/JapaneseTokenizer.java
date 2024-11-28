@@ -98,6 +98,25 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
+    public List<Morpheme> split(List<Morpheme> morphemes, SplitMode mode) {
+        if (morphemes instanceof MorphemeList) {
+            return ((MorphemeList) morphemes).split(mode);
+        }
+
+        List<Morpheme> result = new ArrayList<>();
+        for (Morpheme m : morphemes) {
+            if (m instanceof SingleMorphemeImpl) {
+                ((SingleMorphemeImpl) m).appendSplitsTo(result, mode);
+            } else {
+                for (Morpheme subsplit : m.split(mode)) {
+                    result.add(subsplit);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void setDumpOutput(PrintStream output) {
         dumpOutput = output;
     }
