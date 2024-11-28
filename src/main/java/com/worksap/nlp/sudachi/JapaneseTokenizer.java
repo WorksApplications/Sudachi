@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
@@ -79,21 +80,10 @@ class JapaneseTokenizer implements Tokenizer {
             return Collections.emptyList();
         }
 
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-        int length = analysis.tokenizeBuffer(text);
-        ArrayList<MorphemeList> result = analysis.result;
-        int bos = analysis.bos;
-        if (length < 0) {
-            // treat remaining thing as a single sentence
-            int eos = analysis.input.getText().length();
-            if (bos != eos) {
-                UTF8InputText slice = analysis.input;
-                if (bos != 0) {
-                    slice = slice.slice(bos, eos);
-                }
-                result.add(tokenizeSentence(mode, slice));
-            }
-        }
+        StringReader input = new StringReader(text);
+        SentenceSplittingLazyAnalysis analysis = new SentenceSplittingLazyAnalysis(mode, this, input);
+        List<MorphemeList> result = new ArrayList<>();
+        analysis.forEachRemaining(result::add);
         return result;
     }
 
