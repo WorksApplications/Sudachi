@@ -98,32 +98,13 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
-        IOTools.SurrogateAwareReadable wrappedReader = new IOTools.SurrogateAwareReadable(reader);
-        CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-
-        while (wrappedReader.read(buffer) > 0) {
-            buffer.flip();
-            int length = analysis.tokenizeBuffer(buffer);
-            if (length < 0) {
-                buffer.position(analysis.bosPosition());
-                buffer.compact();
-            }
-        }
-        buffer.flip();
-        ArrayList<MorphemeList> sentences = analysis.result;
-
-        if (buffer.hasRemaining()) {
-            sentences.add(tokenizeSentence(mode, buildInputText(buffer)));
-        }
-
-        return sentences;
+    public Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input) {
+        return new SentenceSplittingLazyAnalysis(mode, this, input);
     }
 
     @Override
-    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable readable) {
-        return new SentenceSplittingLazyAnalysis(mode, this, readable);
+    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input) {
+        return tokenizeSentences(mode, input);
     }
 
     @Override

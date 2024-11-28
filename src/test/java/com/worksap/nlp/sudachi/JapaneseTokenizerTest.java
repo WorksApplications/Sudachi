@@ -185,15 +185,10 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
-    /**
-     * @deprecated testing deprecated method
-     *             {@link #Tokenizer.tokenizeSentences(Reader)}.
-     */
-    @Deprecated
     @Test
     public void tokenizerWithReader() throws IOException {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
-        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(2));
         assertThat(it.hasNext(), is(true));
@@ -205,11 +200,6 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
-    /**
-     * @deprecated testing deprecated method
-     *             {@link #Tokenizer.tokenizeSentences(Reader)}.
-     */
-    @Deprecated
     @Test
     public void tokenizerWithLongReader() throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -218,7 +208,7 @@ public class JapaneseTokenizerTest {
         }
         sb.append("京都");
         StringReader reader = new StringReader(sb.toString());
-        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT * 2 / 3; i++) {
             assertThat(it.hasNext(), is(true));
             assertThat(it.next().size(), is(2));
@@ -228,11 +218,6 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
-    /**
-     * @deprecated testing deprecated method
-     *             {@link #Tokenizer.tokenizeSentences(Reader)}.
-     */
-    @Deprecated
     @Test
     public void tokenizerWithReaderAndNormalization() throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -241,7 +226,7 @@ public class JapaneseTokenizerTest {
             sb.append("京都。");
         }
         StringReader reader = new StringReader(sb.toString());
-        Iterator<MorphemeList> it = tokenizer.tokenizeSentences(reader).iterator();
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().size(), is(5));
         for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT / 3; i++) {
@@ -254,6 +239,28 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
+    @Test
+    public void tokenizeSentencesWithSurrogatePairAtBufferLimit() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT - 1; i++) {
+            sb.append("。");
+        }
+        sb.append("😀");
+        StringReader reader = new StringReader(sb.toString());
+        Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences(reader);
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(SentenceDetector.DEFAULT_LIMIT - 1));
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next().size(), is(1));
+        assertThat(it.hasNext(), is(false));
+    }
+
+    /**
+     * @deprecated testing deprecated method
+     *             {@link #Tokenizer.lazyTokenizeSentences(Readable)}.
+     */
+    @Deprecated
     @Test
     public void lazyTokenizeSentences() {
         StringReader reader = new StringReader("京都。東京.東京都。京都");
@@ -275,6 +282,11 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
+    /**
+     * @deprecated testing deprecated method
+     *             {@link #Tokenizer.lazyTokenizeSentences(Readable)}.
+     */
+    @Deprecated
     @Test
     public void lazyTokenizeSentencesWithLongText() {
         StringBuilder sb = new StringBuilder();
@@ -293,6 +305,11 @@ public class JapaneseTokenizerTest {
         assertThat(it.hasNext(), is(false));
     }
 
+    /**
+     * @deprecated testing deprecated method
+     *             {@link #Tokenizer.lazyTokenizeSentences(Readable)}.
+     */
+    @Deprecated
     @Test
     public void lazyTokenizeSentencesWithNormalization() {
         StringBuilder sb = new StringBuilder();
@@ -311,23 +328,6 @@ public class JapaneseTokenizerTest {
             assertThat(ms.get(0).surface(), is("京都"));
             assertThat(ms.get(1).surface(), is("。"));
         }
-        assertThat(it.hasNext(), is(false));
-    }
-
-    @Test
-    public void lazyTokenizeSentencesWithSurrogatePair() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < SentenceDetector.DEFAULT_LIMIT - 1; i++) {
-            sb.append("。");
-        }
-        sb.append("😀");
-        StringReader reader = new StringReader(sb.toString());
-        Iterator<List<Morpheme>> it = tokenizer.lazyTokenizeSentences(reader);
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next().size(), is(SentenceDetector.DEFAULT_LIMIT - 1));
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next().size(), is(1));
         assertThat(it.hasNext(), is(false));
     }
 

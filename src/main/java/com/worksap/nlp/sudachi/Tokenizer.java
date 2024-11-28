@@ -79,36 +79,26 @@ public interface Tokenizer {
 
     /**
      * Read an input text from {@code input}, divide it into sentences and tokenize
-     * them. It reads all text in the input and uses a lot of memory when the text
-     * is long.
+     * them. It reads the input lazily.
      *
      * @param mode
      *            a mode of splitting
      * @param input
-     *            a reader of input text
-     * @return a result of tokenizing
-     * @throws IOException
-     *             if reading a stream is failed
-     * @deprecated use {@link #lazyTokenizeSentences(SplitMode, Readable)} instead.
+     *            a readable input text
+     * @return an iterator of tokenized sentences
      */
-    @Deprecated
-    Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
+    Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input);
 
     /**
-     * Reads an input text from {@code input}, divide it into sentences and
-     * tokenizes them with {@link SplitMode}.C. It reads all text in the input and
-     * uses a lot of memory when the text is long.
+     * Read an input text from {@code input}, divide it into sentences and tokenize
+     * them with {@link SplitMode}.C. It reads the input lazily.
      *
      * @param input
-     *            a reader of input text
-     * @return a result of tokenizing
-     * @throws IOException
-     *             if reading a stream is failed
-     * @see #tokenizeSentences(SplitMode,Reader)
-     * @deprecated use {@link #lazyTokenizeSentences(Readable)} instead.
+     *            a readable input text
+     * @return an iterator of tokenized sentences
+     * @see #tokenizeSentences(SplitMode,Readable)
      */
-    @Deprecated
-    default Iterable<MorphemeList> tokenizeSentences(Reader input) throws IOException {
+    default Iterator<List<Morpheme>> tokenizeSentences(Readable input) {
         return tokenizeSentences(SplitMode.C, input);
     }
 
@@ -121,7 +111,10 @@ public interface Tokenizer {
      * @param input
      *            a readable input text
      * @return a result of tokenizing
+     * @deprecated renamed to {@link #tokenizeSentences(SplitMode, Readable)}
+     * 
      */
+    @Deprecated
     Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input);
 
     /**
@@ -132,7 +125,9 @@ public interface Tokenizer {
      *            a readable input text
      * @return a result of tokenizing
      * @see #lazyTokenizeSentences(SplitMode,Readable)
+     * @deprecated renamed to {@link #tokenizeSentences(Readable)}
      */
+    @Deprecated
     default Iterator<List<Morpheme>> lazyTokenizeSentences(Readable input) {
         return lazyTokenizeSentences(SplitMode.C, input);
     }
