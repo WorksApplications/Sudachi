@@ -107,6 +107,10 @@ class JapaneseDictionaryTest {
   fun entries() {
     // contains all morphemes, where all of them have different wordId
     assertEquals(41, dict.entries().map { m -> m.getWordId() }.distinct().count())
+    // includes entry with -1 conjunction cost
+    assertEquals(1, dict.entries().filter { m -> m.dictionaryForm() == "隠し" }.count())
+    // excludes phantom entry
+    assertEquals(0, dict.entries().filter { m -> m.surface() == "なな" }.count())
     // use grammar
     assertEquals(6, dict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
     // use lexicon
@@ -137,6 +141,10 @@ class JapaneseDictionaryTest {
     val sudachi = TestDictionary.user1().lookup("すだち")
     assertEquals(1, sudachi.size)
     assertEquals("徳島県産", sudachi[0].getUserData())
+
+    // cannot find hidden entry
+    val hidden = dict.lookup("隠し")
+    assertTrue(hidden.isEmpty())
 
     // will be normalized
     val norm = dict.lookup("特A")

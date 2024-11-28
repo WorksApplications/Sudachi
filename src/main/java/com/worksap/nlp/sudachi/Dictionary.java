@@ -60,7 +60,9 @@ public interface Dictionary extends AutoCloseable {
     /**
      * Create a parallel stream of all words in the dictionary as morphemes.
      *
-     * Entries in the stream are not sorted.
+     * Corresponds to the lines in the lexicon csv, i.e. includes hidden entries and
+     * excludes entries for normalization form. Entries in the stream are not
+     * sorted.
      *
      * @return a stream of morphemes.
      */

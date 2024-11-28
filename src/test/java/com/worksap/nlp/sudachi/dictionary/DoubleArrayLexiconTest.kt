@@ -110,6 +110,12 @@ class DoubleArrayLexiconTest {
     assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
     assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword()))
 
+    // な。な  (phantom normalized form)
+    wi = lexicon.getWordInfo(getWordId(39))
+    assertEquals("な。な", lexicon.string(0, wi.getHeadword()))
+    assertEquals("ナナ", lexicon.string(0, wi.getReadingForm()))
+    assertEquals("なな", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
+
     // 東京都
     wi = lexicon.getWordInfo(getWordId(6))
     assertEquals("東京都", lexicon.string(0, wi.getHeadword()))
