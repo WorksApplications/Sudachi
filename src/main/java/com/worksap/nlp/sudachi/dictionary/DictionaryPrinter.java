@@ -42,7 +42,7 @@ public class DictionaryPrinter {
     private final LexiconSet lex;
     private final TextNormalizer textNormalizer;
     // sorted raw word ids taken from the target dict.
-    private final Ints wordIds;
+    private final int[] wordIds;
 
     private POSMode posMode = POSMode.DEFAULT;
     private WordRefMode wordRefMode = WordRefMode.DEFAULT;
@@ -98,18 +98,15 @@ public class DictionaryPrinter {
 
         // In order to output dictionary entries in in-dictionary order we need to sort
         // them. Iterator over them will get them not in the sorted order, but grouped
-        // by index-form. Here we assume DoubleArrayLexicon and use WordIdTable.wordIds
-        // for the performance.
-        DoubleArrayLexicon targetLex = dic.getLexicon();
-        Ints allIds = new Ints(targetLex.size());
-        Iterator<Ints> ids = targetLex.getWordIdTable().wordIds();
+        // by index-form.
+        Lexicon targetLexicon = dic.getLexicon();
+        int[] allIds = new int[targetLexicon.size()];
+        int idx = 0;
+        Iterator<Integer> ids = targetLexicon.wordIds();
         while (ids.hasNext()) {
-            allIds.appendAll(ids.next());
+            allIds[idx++] = WordId.applyMask(ids.next(), dicIdMask);
         }
-        allIds.sort();
-        for (int i = 0; i < allIds.length(); i++) {
-            allIds.set(i, WordId.applyMask(allIds.get(i), dicIdMask));
-        }
+        Arrays.sort(allIds);
         wordIds = allIds;
     }
 
@@ -176,9 +173,9 @@ public class DictionaryPrinter {
 
     private void printEntries() {
         progress.startBlock("Entries", System.nanoTime(), Progress.Kind.ENTRY);
-        long size = wordIds.length();
+        long size = wordIds.length;
         for (int i = 0; i < size; ++i) {
-            printEntry(wordIds.get(i));
+            printEntry(wordIds[i]);
             progress.progress(i, size);
         }
         progress.endBlock(size, System.nanoTime());
