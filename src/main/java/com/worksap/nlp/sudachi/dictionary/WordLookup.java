@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public final class WordLookup {
     private int numWords;
     private final List<DoubleArrayLexicon> lexicons;
     private int currentLexicon = -1;
+    private int dictMask;
 
     public WordLookup(List<DoubleArrayLexicon> lexicons) {
         this.lexicons = lexicons;
@@ -58,6 +59,7 @@ public final class WordLookup {
      */
     public void reset(byte[] key, int offset, int limit) {
         currentLexicon = lexicons.size() - 1;
+        dictMask = WordId.dicIdMask(currentLexicon);
         rebind(lexicons.get(currentLexicon));
         lookup.reset(key, offset, limit);
     }
@@ -90,9 +92,14 @@ public final class WordLookup {
             }
             rebind(lexicons.get(nextLexicon));
             currentLexicon = nextLexicon;
+            dictMask = WordId.dicIdMask(nextLexicon);
         }
         int wordGroupId = lookup.getValue();
         numWords = words.readWordIds(wordGroupId, this);
+        for (int i = 0; i < numWords; ++i) {
+            int internalId = wordIds[i];
+            wordIds[i] = WordId.applyMask(internalId, dictMask);
+        }
         return true;
     }
 

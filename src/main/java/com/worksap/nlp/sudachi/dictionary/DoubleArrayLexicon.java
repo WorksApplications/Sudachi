@@ -25,22 +25,34 @@ import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.MorphemeList;
 import com.worksap.nlp.sudachi.Tokenizer;
 
+/**
+ * The main lexicon implementation.
+ * 
+ * In V1 format, it consists of followings. {@link DoubleArray} (TRIE): Mapping
+ * from index form to WordIdTable offset. {@link WordIdTable}: Table of list of
+ * word ids that have same index form.
+ * {@link WordParameters}/{@link WordInfoList}: List of word information, for
+ * analysis/non-analysis respectively. Word id represents offset in them.
+ * {@link CompactedStrings}: Storage of strings such as headword, reading form,
+ * etc.
+ */
 public class DoubleArrayLexicon implements Lexicon {
     static final int USER_DICT_COST_PAR_MORPH = -20;
-    private final WordInfoList wordInfos;
-    private final DoubleArray trie;
-    private final WordParameters parameters;
+
     private final Description description;
+    private final DoubleArray trie;
+    private final WordInfoList wordInfos;
+    private final WordParameters parameters;
     private final WordIdTable wordIdTable;
     private final CompactedStrings strings;
 
     public DoubleArrayLexicon(Description description, WordIdTable wordIdTable, WordParameters wordParams,
             WordInfoList wordInfos, DoubleArray trie, CompactedStrings strings) {
         this.description = description;
+        this.trie = trie;
         this.wordIdTable = wordIdTable;
         this.parameters = wordParams;
         this.wordInfos = wordInfos;
-        this.trie = trie;
         this.strings = strings;
     }
 
@@ -86,29 +98,16 @@ public class DoubleArrayLexicon implements Lexicon {
         if (!iterator.hasNext()) {
             return iterator;
         }
-        return new Itr(iterator);
+        return new LookupItr(iterator);
     }
 
-    public IntBuffer getTrieArray() {
-        return trie.array();
-    }
-
-    public WordIdTable getWordIdTable() {
-        return wordIdTable;
-    }
-
-    @Override
-    public long parameters(int wordId) {
-        return parameters.loadParams(wordId);
-    }
-
-    private class Itr implements Iterator<int[]> {
+    private class LookupItr implements Iterator<int[]> {
         private final Iterator<int[]> iterator;
         private int[] wordIds;
         private int length;
         private int index;
 
-        Itr(Iterator<int[]> iterator) {
+        LookupItr(Iterator<int[]> iterator) {
             this.iterator = iterator;
             index = -1;
         }
@@ -132,6 +131,19 @@ public class DoubleArrayLexicon implements Lexicon {
             }
             return new int[] { wordIds[index++], length };
         }
+    }
+
+    public IntBuffer getTrieArray() {
+        return trie.array();
+    }
+
+    public WordIdTable getWordIdTable() {
+        return wordIdTable;
+    }
+
+    @Override
+    public long parameters(int wordId) {
+        return parameters.loadParams(wordId);
     }
 
     @Override
@@ -218,10 +230,6 @@ public class DoubleArrayLexicon implements Lexicon {
                 parameters.setCost(wordId, (short) cost);
             }
         }
-    }
-
-    public void setDictionaryId(int id) {
-        wordIdTable.setDictionaryId(id);
     }
 
     @Override

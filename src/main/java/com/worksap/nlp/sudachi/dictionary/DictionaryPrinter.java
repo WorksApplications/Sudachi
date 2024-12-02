@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,15 +78,18 @@ public class DictionaryPrinter {
 
         this.output = output;
 
-        if (base == null) {
+        int dicIdMask;
+        if (base == null) { // system
             grammar = dic.getGrammar();
             lex = new LexiconSet(dic.getLexicon(), grammar.getSystemPartOfSpeechSize());
-        } else {
+            dicIdMask = WordId.dicIdMask(0);
+        } else { // user
             grammar = base.getGrammar();
             lex = new LexiconSet(base.getLexicon(), grammar.getSystemPartOfSpeechSize());
 
             lex.add(dic.getLexicon(), (short) grammar.getPartOfSpeechSize());
             grammar.addPosList(dic.getGrammar());
+            dicIdMask = WordId.dicIdMask(1);
         }
 
         // set default char category for text normalizer
@@ -104,6 +107,9 @@ public class DictionaryPrinter {
             allIds.appendAll(ids.next());
         }
         allIds.sort();
+        for (int i = 0; i < allIds.length(); i++) {
+            allIds.set(i, WordId.applyMask(allIds.get(i), dicIdMask));
+        }
         wordIds = allIds;
     }
 

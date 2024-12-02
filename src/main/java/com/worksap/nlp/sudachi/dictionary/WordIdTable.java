@@ -24,14 +24,17 @@ import java.util.NoSuchElementException;
 import java.util.Iterator;
 
 /**
- * Table which contains the list of (internal) word ids that has same index
- * form.
+ * Lexicon parts that contains the list of (internal) word ids that have the
+ * same index form.
  * 
- * Automatically fills dict parts of word id using the dicId set.
+ * DoubleArray has mapping from indexForm to offset in this table, and
+ * {@link WordInfoList} has actual data for each words.
+ * 
+ * In V1 format, each word ids in a list in this table are sorted (and
+ * compressed using varint-32), but they are not sorted between lists.
  */
 public class WordIdTable {
     private final ByteBuffer bytes;
-    private int dicIdMask = 0;
 
     WordIdTable(ByteBuffer bytes) {
         this.bytes = bytes;
@@ -43,7 +46,7 @@ public class WordIdTable {
         BufReader reader = new BufReader(dup);
         int length = reader.readVarint32();
         int[] result = new int[length];
-        readDeltaCompressed(result, length, this.dicIdMask, reader);
+        readDeltaCompressed(result, length, reader);
         return result;
     }
 
@@ -62,21 +65,17 @@ public class WordIdTable {
         BufReader reader = new BufReader(dup);
         int length = reader.readVarint32();
         int[] result = lookup.outputBuffer(length);
-        readDeltaCompressed(result, length, this.dicIdMask, reader);
+        readDeltaCompressed(result, length, reader);
         return length;
     }
 
-    private static void readDeltaCompressed(int[] result, int count, int mask, BufReader reader) {
+    private static void readDeltaCompressed(int[] result, int count, BufReader reader) {
         int sum = 0;
         for (int i = 0; i < count; ++i) {
             int v = reader.readVarint32();
-            result[i] = WordId.applyMask(v + sum, mask);
+            result[i] = v + sum;
             sum += v;
         }
-    }
-
-    void setDictionaryId(int dictId) {
-        dicIdMask = WordId.dicIdMask(dictId);
     }
 
     /**
@@ -109,7 +108,7 @@ public class WordIdTable {
                 }
                 ints.clear();
                 int[] data = ints.prepare(size);
-                readDeltaCompressed(data, size, dicIdMask, r);
+                readDeltaCompressed(data, size, r);
                 return ints;
             }
         };
