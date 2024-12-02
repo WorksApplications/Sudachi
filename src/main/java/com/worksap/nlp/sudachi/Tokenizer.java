@@ -37,7 +37,7 @@ public interface Tokenizer {
      *            input text
      * @return a result of tokenizing
      */
-    MorphemeList tokenize(SplitMode mode, String text);
+    List<Morpheme> tokenize(SplitMode mode, String text);
 
     /**
      *
@@ -48,7 +48,7 @@ public interface Tokenizer {
      * @return a result of tokenizing
      * @see #tokenize(SplitMode,String)
      */
-    default MorphemeList tokenize(final String text) {
+    default List<Morpheme> tokenize(final String text) {
         return tokenize(SplitMode.C, text);
     }
 
@@ -62,7 +62,7 @@ public interface Tokenizer {
      *            input text
      * @return a result of tokenizing
      */
-    Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text);
+    Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text);
 
     /**
      * Tokenize sentences. Divide an input text into sentences and tokenize them
@@ -73,42 +73,32 @@ public interface Tokenizer {
      * @return a result of tokenizing
      * @see #tokenizeSentences(SplitMode,String)
      */
-    default Iterable<MorphemeList> tokenizeSentences(String text) {
+    default Iterable<List<Morpheme>> tokenizeSentences(String text) {
         return tokenizeSentences(SplitMode.C, text);
     }
 
     /**
      * Read an input text from {@code input}, divide it into sentences and tokenize
-     * them. It reads all text in the input and uses a lot of memory when the text
-     * is long.
+     * them. It reads the input lazily.
      *
      * @param mode
      *            a mode of splitting
      * @param input
-     *            a reader of input text
-     * @return a result of tokenizing
-     * @throws IOException
-     *             if reading a stream is failed
-     * @deprecated use {@link #lazyTokenizeSentences(SplitMode, Readable)} instead.
+     *            a readable input text
+     * @return an iterator of tokenized sentences
      */
-    @Deprecated
-    Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader input) throws IOException;
+    Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input);
 
     /**
-     * Reads an input text from {@code input}, divide it into sentences and
-     * tokenizes them with {@link SplitMode}.C. It reads all text in the input and
-     * uses a lot of memory when the text is long.
+     * Read an input text from {@code input}, divide it into sentences and tokenize
+     * them with {@link SplitMode}.C. It reads the input lazily.
      *
      * @param input
-     *            a reader of input text
-     * @return a result of tokenizing
-     * @throws IOException
-     *             if reading a stream is failed
-     * @see #tokenizeSentences(SplitMode,Reader)
-     * @deprecated use {@link #lazyTokenizeSentences(Readable)} instead.
+     *            a readable input text
+     * @return an iterator of tokenized sentences
+     * @see #tokenizeSentences(SplitMode,Readable)
      */
-    @Deprecated
-    default Iterable<MorphemeList> tokenizeSentences(Reader input) throws IOException {
+    default Iterator<List<Morpheme>> tokenizeSentences(Readable input) {
         return tokenizeSentences(SplitMode.C, input);
     }
 
@@ -121,7 +111,10 @@ public interface Tokenizer {
      * @param input
      *            a readable input text
      * @return a result of tokenizing
+     * @deprecated renamed to {@link #tokenizeSentences(SplitMode, Readable)}
+     * 
      */
+    @Deprecated
     Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input);
 
     /**
@@ -132,10 +125,24 @@ public interface Tokenizer {
      *            a readable input text
      * @return a result of tokenizing
      * @see #lazyTokenizeSentences(SplitMode,Readable)
+     * @deprecated renamed to {@link #tokenizeSentences(Readable)}
      */
+    @Deprecated
     default Iterator<List<Morpheme>> lazyTokenizeSentences(Readable input) {
         return lazyTokenizeSentences(SplitMode.C, input);
     }
+
+    /**
+     * Produce a copy of this list in a finer split mode. May return the given list
+     * if the mode is coarser than the current one. The given list is not modified.
+     * 
+     * @param morphemes
+     *            list of morphemes to split.
+     * @param mode
+     *            requested split mode
+     * @return current list, or a new list in the requested split mode.
+     */
+    List<Morpheme> split(List<Morpheme> morphemes, SplitMode mode);
 
     /**
      * Prints lattice structure of the analysis into the passed {@link PrintStream}.

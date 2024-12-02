@@ -77,7 +77,7 @@ class MorphemeListItem extends MorphemeImplBase {
     }
 
     @Override
-    public List<Morpheme> split(Tokenizer.SplitMode mode) {
+    public MorphemeList split(Tokenizer.SplitMode mode) {
         return list.split(mode, index);
     }
 

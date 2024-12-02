@@ -16,9 +16,10 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import com.worksap.nlp.sudachi.StringUtil;
-
 import java.nio.ByteBuffer;
+
+import com.worksap.nlp.sudachi.StringUtil;
+import com.worksap.nlp.sudachi.Tokenizer;
 
 /**
  * Internal morpheme information. This class does not contain any strings.
@@ -184,6 +185,23 @@ public class WordInfo {
      */
     public int[] getCunitSplit() {
         return cUnitSplit;
+    }
+
+    /**
+     * Returns the array of word IDs which the morpheme is compounded of in given
+     * mode.
+     * 
+     * @return the word IDs of the given units
+     */
+    public int[] getUnitSplit(Tokenizer.SplitMode mode) {
+        if (mode == Tokenizer.SplitMode.A) {
+            return getAunitSplit();
+        }
+        if (mode == Tokenizer.SplitMode.B) {
+            return getBunitSplit();
+        }
+        assert (mode == Tokenizer.SplitMode.C);
+        return getCunitSplit();
     }
 
     /**

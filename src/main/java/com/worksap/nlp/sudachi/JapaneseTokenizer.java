@@ -19,6 +19,7 @@ package com.worksap.nlp.sudachi;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
@@ -65,8 +66,9 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public MorphemeList tokenize(Tokenizer.SplitMode mode, String text) {
+    public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
         if (text.isEmpty()) {
+            // return MorphemeList instance for the case internalCost is required.
             return MorphemeList.EMPTY;
         }
         UTF8InputText input = buildInputText(text);
@@ -74,56 +76,45 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text) {
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
 
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-        int length = analysis.tokenizeBuffer(text);
-        ArrayList<MorphemeList> result = analysis.result;
-        int bos = analysis.bos;
-        if (length < 0) {
-            // treat remaining thing as a single sentence
-            int eos = analysis.input.getText().length();
-            if (bos != eos) {
-                UTF8InputText slice = analysis.input;
-                if (bos != 0) {
-                    slice = slice.slice(bos, eos);
-                }
-                result.add(tokenizeSentence(mode, slice));
-            }
-        }
+        StringReader input = new StringReader(text);
+        SentenceSplittingLazyAnalysis analysis = new SentenceSplittingLazyAnalysis(mode, this, input);
+        List<List<Morpheme>> result = new ArrayList<>();
+        analysis.forEachRemaining(result::add);
         return result;
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
-        IOTools.SurrogateAwareReadable wrappedReader = new IOTools.SurrogateAwareReadable(reader);
-        CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-
-        while (wrappedReader.read(buffer) > 0) {
-            buffer.flip();
-            int length = analysis.tokenizeBuffer(buffer);
-            if (length < 0) {
-                buffer.position(analysis.bosPosition());
-                buffer.compact();
-            }
-        }
-        buffer.flip();
-        ArrayList<MorphemeList> sentences = analysis.result;
-
-        if (buffer.hasRemaining()) {
-            sentences.add(tokenizeSentence(mode, buildInputText(buffer)));
-        }
-
-        return sentences;
+    public Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input) {
+        return new SentenceSplittingLazyAnalysis(mode, this, input);
     }
 
     @Override
-    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable readable) {
-        return new SentenceSplittingLazyAnalysis(mode, this, readable);
+    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input) {
+        return tokenizeSentences(mode, input);
+    }
+
+    @Override
+    public List<Morpheme> split(List<Morpheme> morphemes, SplitMode mode) {
+        if (morphemes instanceof MorphemeList) {
+            return ((MorphemeList) morphemes).split(mode);
+        }
+
+        List<Morpheme> result = new ArrayList<>();
+        for (Morpheme m : morphemes) {
+            if (m instanceof SingleMorphemeImpl) {
+                ((SingleMorphemeImpl) m).appendSplitsTo(result, mode);
+            } else {
+                for (Morpheme subsplit : m.split(mode)) {
+                    result.add(subsplit);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -161,7 +152,7 @@ class JapaneseTokenizer implements Tokenizer {
         return input;
     }
 
-    MorphemeList tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
+    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         checkIfAlive();
         buildLattice(input);
 

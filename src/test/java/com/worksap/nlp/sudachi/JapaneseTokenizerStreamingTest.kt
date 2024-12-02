@@ -26,6 +26,35 @@ import kotlin.test.assertFailsWith
 class JapaneseTokenizerStreamingTest {
   private val tokenizer = TestDictionary.user0().tokenizer()
 
+  @Test
+  fun streamingReadable() {
+    val reader = StringReader("あ".repeat(5000))
+    val result = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
+    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
+    assertEquals(5000, totalLength)
+  }
+
+  @Test
+  fun callingNextWithoutTextFails() {
+    val reader = StringReader("東京")
+    val it = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader)
+
+    val morphemes = it.next()
+    assertEquals("東京", morphemes.get(0).surface())
+
+    assertFailsWith<java.util.NoSuchElementException>(
+        block = { it.next() },
+    )
+  }
+
+  @Test
+  fun streamingLongTextShouldNotCauseOOM() {
+    val reader = StringReader("あ".repeat(10 * 1024 * 1024))
+    val result = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
+    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
+    assertEquals(10 * 1024 * 1024, totalLength)
+  }
+
   class BadReader(private val data: String, private val window: Int = 512) : Reader() {
 
     private var position: Int = 0
@@ -51,58 +80,11 @@ class JapaneseTokenizerStreamingTest {
   }
 
   @Test
-  fun streamingTest() {
-    // Testing deprecated method `tokenizeSentences(Reader)`
-    val reader = StringReader("あ".repeat(5000))
-    val result = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader)
-    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
-    assertEquals(5000, totalLength)
-  }
-
-  @Test
-  fun streamingTestWithBadReader() {
-    // Testing deprecated method `tokenizeSentences(Reader)`
-    val reader = BadReader("あ".repeat(5000))
-    val result = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader)
-    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
-    assertEquals(5000, totalLength)
-  }
-
-  @Test
-  fun streamingReadable() {
-    val reader = StringReader("あ".repeat(5000))
-    val result = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
-    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
-    assertEquals(5000, totalLength)
-  }
-
-  @Test
-  fun callingNextWithoutTextFails() {
-    val reader = StringReader("東京")
-    val it = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader)
-
-    val morphemes = it.next()
-    assertEquals("東京", morphemes.get(0).surface())
-
-    assertFailsWith<java.util.NoSuchElementException>(
-        block = { it.next() },
-    )
-  }
-
-  @Test
   fun streamingBlockingReadable() {
     val reader = BadReader("あ".repeat(5000))
-    val result = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
+    val result = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
     val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
     assertEquals(5000, totalLength)
-  }
-
-  @Test
-  fun streamingLongTextShouldNotCauseOOM() {
-    val reader = StringReader("あ".repeat(10 * 1024 * 1024))
-    val result = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader).asSequence()
-    val totalLength = result.sumOf { sent -> sent.sumOf { mrph -> mrph.end() - mrph.begin() } }
-    assertEquals(10 * 1024 * 1024, totalLength)
   }
 
   class FailReader(private val data: String) : Reader() {
@@ -133,13 +115,13 @@ class JapaneseTokenizerStreamingTest {
   fun failsWhenReaderFails() {
     var reader = FailReader("あ".repeat(500))
     // should not fail on the instantiation
-    var it = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader)
+    var it = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader)
     assertFailsWith<java.io.UncheckedIOException>(
         block = { it.hasNext() },
     )
 
     reader = FailReader("あ".repeat(500))
-    it = tokenizer.lazyTokenizeSentences(Tokenizer.SplitMode.C, reader)
+    it = tokenizer.tokenizeSentences(Tokenizer.SplitMode.C, reader)
     assertFailsWith<java.io.UncheckedIOException>(
         block = { it.next() },
     )
