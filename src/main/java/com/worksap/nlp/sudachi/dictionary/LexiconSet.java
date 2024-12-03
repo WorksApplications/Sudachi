@@ -20,6 +20,14 @@ import com.worksap.nlp.sudachi.WordId;
 
 import java.util.*;
 
+/**
+ * A lexicon that contains multiple lexicons inside.
+ * 
+ * It only accepts {@link DoubleArrayLexicon} now. This lexicon cannot be
+ * nested.
+ * 
+ * Handles dictionary part of the word id.
+ */
 public class LexiconSet implements Lexicon {
     static final int MAX_DICTIONARIES = 15;
 
@@ -33,9 +41,7 @@ public class LexiconSet implements Lexicon {
     }
 
     public void add(Lexicon lexicon, short posOffset) {
-        DoubleArrayLexicon daLexicon = (DoubleArrayLexicon) lexicon;
-        daLexicon.setDictionaryId(lexicons.size());
-        lexicons.add(daLexicon);
+        lexicons.add((DoubleArrayLexicon) lexicon);
         posOffsets.add(posOffset);
     }
 
@@ -51,7 +57,7 @@ public class LexiconSet implements Lexicon {
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
         }
-        return new Itr(text, offset, lexicons.size() - 1);
+        return new LookupItr(text, offset, lexicons.size() - 1);
     }
 
     /**
@@ -63,16 +69,18 @@ public class LexiconSet implements Lexicon {
      *
      * Dictionaries have their word weights prioritized in the same manner
      */
-    private class Itr implements Iterator<int[]> {
+    private class LookupItr implements Iterator<int[]> {
         byte[] text;
         int offset;
         int dictId;
+        int dictMask;
         Iterator<int[]> iterator;
 
-        Itr(byte[] text, int offset, int start) {
+        LookupItr(byte[] text, int offset, int start) {
             this.text = text;
             this.offset = offset;
             dictId = start;
+            dictMask = WordId.dicIdMask(start);
             iterator = lexicons.get(dictId).lookup(text, offset);
         }
 
@@ -85,6 +93,7 @@ public class LexiconSet implements Lexicon {
                 }
                 iterator = lexicons.get(nextId).lookup(text, offset);
                 dictId = nextId;
+                dictMask = WordId.dicIdMask(nextId);
             }
             return true;
         }
@@ -93,7 +102,7 @@ public class LexiconSet implements Lexicon {
         public int[] next() {
             if (hasNext()) {
                 int[] r = iterator.next();
-                r[0] = buildWordId(dictId, r[0]);
+                r[0] = WordId.applyMask(r[0], dictMask);
                 return r;
             }
             throw new NoSuchElementException();
@@ -177,10 +186,12 @@ public class LexiconSet implements Lexicon {
 
     private class WordIdItr implements Iterator<Integer> {
         private int dictId;
+        private int dictMask;
         private Iterator<Integer> iterator;
 
         WordIdItr() {
             this.dictId = 0;
+            this.dictMask = WordId.dicIdMask(dictId);
             this.iterator = lexicons.get(dictId).wordIds();
         }
 
@@ -192,6 +203,7 @@ public class LexiconSet implements Lexicon {
                     return false;
                 }
                 dictId = nextDictId;
+                dictMask = WordId.dicIdMask(nextDictId);
                 iterator = lexicons.get(nextDictId).wordIds();
             }
             return true;
@@ -202,7 +214,7 @@ public class LexiconSet implements Lexicon {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return iterator.next();
+            return WordId.applyMask(iterator.next(), dictMask);
         }
     }
 }
