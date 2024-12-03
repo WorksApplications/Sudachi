@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -174,12 +176,8 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
     @Override
     public List<Morpheme> lookup(CharSequence surface) {
-        UTF8InputTextBuilder builder = new UTF8InputTextBuilder(surface, grammar);
-        for (InputTextPlugin plugin : inputTextPlugins) {
-            plugin.rewrite(builder);
-        }
-        UTF8InputText input = builder.build();
-        byte[] bytes = input.getByteText();
+        TextNormalizer textNormalizer = textNormalizer();
+        byte[] bytes = textNormalizer.normalizedInputText(surface).getByteText();
 
         List<Morpheme> morphemes = new ArrayList<>();
         WordLookup wordLookup = lexicon.makeLookup();
@@ -198,6 +196,16 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
             }
         }
         return morphemes;
+    }
+
+    @Override
+    public List<Morpheme> slowLookupAllEntries(CharSequence surface) {
+        TextNormalizer textNormalizer = textNormalizer();
+        byte[] bytes = textNormalizer.normalizedInputText(surface).getByteText();
+
+        return entries()
+                .filter(m -> Arrays.equals(bytes, textNormalizer.normalizedInputText(m.surface()).getByteText()))
+                .collect(Collectors.toList());
     }
 
     @Override

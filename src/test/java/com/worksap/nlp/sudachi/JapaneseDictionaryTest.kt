@@ -202,6 +202,38 @@ abc,1,1,4675,AbC,名詞,普通名詞,一般,*,*,*,エービーシー,,,,,""")
   }
 
   @Test
+  fun slowLookup() {
+    // nothing
+    val nothing = dict.slowLookupAllEntries("存在しない語")
+    assertTrue(nothing.isEmpty())
+
+    // system
+    val tokyo = dict.slowLookupAllEntries("東京都")
+    assertEquals(1, tokyo.size)
+    assertEquals("トウキョウト", tokyo[0].readingForm())
+
+    // user
+    val sudachi = TestDictionary.user1().slowLookupAllEntries("すだち")
+    assertEquals(1, sudachi.size)
+    assertEquals("徳島県産", sudachi[0].getUserData())
+
+    // CAN find entry with -1 conjunction cost
+    val hidden = dict.slowLookupAllEntries("隠し")
+    assertEquals(1, hidden.size)
+    assertEquals("隠し", hidden[0].surface())
+
+    // will be normalized
+    val norm = dict.slowLookupAllEntries("特A")
+    assertEquals(1, norm.size)
+    assertEquals("特A", norm[0].normalizedForm())
+
+    // inputTextPlugin
+    val yomi = dict.slowLookupAllEntries("京都（キョウト）")
+    assertEquals(1, yomi.size)
+    assertEquals("京都", yomi[0].normalizedForm())
+  }
+
+  @Test
   fun oovMorpheme() {
     val m1 = dict.oovMorpheme(1, "OOV")
     assertEquals(0, m1.begin())
