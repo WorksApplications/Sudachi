@@ -204,31 +204,31 @@ abc,1,1,4675,AbC,名詞,普通名詞,一般,*,*,*,エービーシー,,,,,""")
   @Test
   fun slowLookup() {
     // nothing
-    val nothing = dict.slowLookupAllEntries("存在しない語")
+    val nothing = dict.lookupAllEntries("存在しない語")
     assertTrue(nothing.isEmpty())
 
     // system
-    val tokyo = dict.slowLookupAllEntries("東京都")
+    val tokyo = dict.lookupAllEntries("東京都")
     assertEquals(1, tokyo.size)
     assertEquals("トウキョウト", tokyo[0].readingForm())
 
     // user
-    val sudachi = TestDictionary.user1().slowLookupAllEntries("すだち")
+    val sudachi = TestDictionary.user1().lookupAllEntries("すだち")
     assertEquals(1, sudachi.size)
     assertEquals("徳島県産", sudachi[0].getUserData())
 
     // CAN find entry with -1 conjunction cost
-    val hidden = dict.slowLookupAllEntries("隠し")
+    val hidden = dict.lookupAllEntries("隠し")
     assertEquals(1, hidden.size)
     assertEquals("隠し", hidden[0].surface())
 
     // will be normalized
-    val norm = dict.slowLookupAllEntries("特A")
+    val norm = dict.lookupAllEntries("特A")
     assertEquals(1, norm.size)
     assertEquals("特A", norm[0].normalizedForm())
 
     // inputTextPlugin
-    val yomi = dict.slowLookupAllEntries("京都（キョウト）")
+    val yomi = dict.lookupAllEntries("京都（キョウト）")
     assertEquals(1, yomi.size)
     assertEquals("京都", yomi[0].normalizedForm())
   }

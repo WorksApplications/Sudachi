@@ -97,7 +97,7 @@ public interface Dictionary extends AutoCloseable {
      *         0/length of their headword.
      * @see Dictionary#lookup(CharSequence)
      */
-    public List<Morpheme> slowLookupAllEntries(CharSequence surface);
+    public List<Morpheme> lookupAllEntries(CharSequence surface);
 
     /**
      * Create an out-of-vocabulary morpheme from the pos id and string forms.

@@ -199,7 +199,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     @Override
-    public List<Morpheme> slowLookupAllEntries(CharSequence surface) {
+    public List<Morpheme> lookupAllEntries(CharSequence surface) {
         TextNormalizer textNormalizer = textNormalizer();
         byte[] bytes = textNormalizer.normalizedInputText(surface).getByteText();
 
