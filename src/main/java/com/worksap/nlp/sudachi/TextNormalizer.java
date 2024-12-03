@@ -96,13 +96,24 @@ public class TextNormalizer {
         return plugins;
     }
 
-    /** Normalize given text */
-    public String normalize(CharSequence text) {
+    /**
+     * Build {@link InputText} for the text and apply InputTextPlugins.
+     * 
+     * @param text
+     *            text to normalize
+     * @return Normalized text as InputText
+     */
+    /* internal */ InputText normalizedInputText(CharSequence text) {
         UTF8InputTextBuilder builder = new UTF8InputTextBuilder(text, grammar);
         for (InputTextPlugin plugin : inputTextPlugins) {
             plugin.rewrite(builder);
         }
-        UTF8InputText input = builder.build();
+        return builder.build();
+    }
+
+    /** Normalize the text */
+    public String normalize(CharSequence text) {
+        InputText input = normalizedInputText(text);
         return input.getText();
     }
 }
