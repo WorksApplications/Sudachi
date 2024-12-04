@@ -21,7 +21,10 @@ import java.nio.file.Paths;
 
 /**
  * Build a {@link Dictionary} instance from a dictionary file.
+ * 
+ * @deprecated use {@link Dictionary#load} instead
  */
+@Deprecated
 public class DictionaryFactory {
 
     /**
@@ -47,7 +50,10 @@ public class DictionaryFactory {
      * @return {@link Dictionary}
      * @throws IOException
      *             if reading a file is failed
+     * 
+     * @deprecated use {@link Dictionary#load(Config)} instead
      */
+    @Deprecated
     public Dictionary create(Config config) throws IOException {
         return new JapaneseDictionary(config);
     }

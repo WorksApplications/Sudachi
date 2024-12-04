@@ -38,6 +38,19 @@ import com.worksap.nlp.sudachi.dictionary.POS;
 public interface Dictionary extends AutoCloseable {
 
     /**
+     * Creates {@code Dictionary} from configuration.
+     *
+     * @param config
+     *            configuration of the dictionary to create
+     * @return {@link Dictionary}
+     * @throws IOException
+     *             if reading a file is failed
+     */
+    public static Dictionary load(Config config) throws IOException {
+        return new JapaneseDictionary(config);
+    }
+
+    /**
      * Creates a tokenizer instance.
      *
      * @return a tokenizer
