@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,11 +67,11 @@ object TestDictionary {
 
   /** System only */
   fun user0(): JapaneseDictionary {
-    return DictionaryFactory().create(user0Cfg()) as JapaneseDictionary
+    return Dictionary.load(user0Cfg()) as JapaneseDictionary
   }
 
   /** System + One User dictionary */
   fun user1(): JapaneseDictionary {
-    return DictionaryFactory().create(user1Cfg()) as JapaneseDictionary
+    return Dictionary.load(user1Cfg()) as JapaneseDictionary
   }
 }

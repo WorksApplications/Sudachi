@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class UserDictionaryTest {
         }
         config.addUserDictionary(instance.getUserDict2());
 
-        try (Dictionary dict = new DictionaryFactory().create(config)) {
+        try (Dictionary dict = Dictionary.load(config)) {
             Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("ぴさる");
             assertThat(morphs.size(), is(1));
@@ -54,14 +54,14 @@ public class UserDictionaryTest {
         for (int i = 0; i < 15; i++) {
             config.addUserDictionary(instance.getUserDict1());
         }
-        new DictionaryFactory().create(config);
+        Dictionary.load(config);
     }
 
     @Test
     public void splitForUserDict() throws IOException {
         TestDictionary td = TestDictionary.INSTANCE;
         Config config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
-        try (Dictionary dict = new DictionaryFactory().create(config)) {
+        try (Dictionary dict = Dictionary.load(config)) {
             Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("東京府");
             assertThat(morphs.size(), is(1));
@@ -76,7 +76,7 @@ public class UserDictionaryTest {
     @Test
     public void userDefinedPos() throws IOException {
         Config config = TestDictionary.INSTANCE.user2Cfg();
-        try (Dictionary dict = new DictionaryFactory().create(config)) {
+        try (Dictionary dict = Dictionary.load(config)) {
             Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));
@@ -88,7 +88,7 @@ public class UserDictionaryTest {
 
         TestDictionary td = TestDictionary.INSTANCE;
         config = td.user0Cfg().addUserDictionary(td.getUserDict2()).addUserDictionary(td.getUserDict1());
-        try (Dictionary dict = new DictionaryFactory().create(config)) {
+        try (Dictionary dict = Dictionary.load(config)) {
             Tokenizer tokenizer = dict.tokenizer();
             List<Morpheme> morphs = tokenizer.tokenize("すだちかぼす");
             assertThat(morphs.size(), is(2));

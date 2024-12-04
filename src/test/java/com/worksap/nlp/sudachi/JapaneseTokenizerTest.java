@@ -353,7 +353,7 @@ public class JapaneseTokenizerTest {
     @Test
     public void disableEmptyMorpheme() throws IOException {
         Config config = TestDictionary.INSTANCE.user1Cfg();
-        dict = new DictionaryFactory().create(Config.empty().withFallback(config).allowEmptyMorpheme(false));
+        dict = Dictionary.load(Config.empty().withFallback(config).allowEmptyMorpheme(false));
         tokenizer = (JapaneseTokenizer) dict.tokenizer();
 
         List<Morpheme> s = tokenizer.tokenize("…");

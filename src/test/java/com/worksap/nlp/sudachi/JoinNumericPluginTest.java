@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class JoinNumericPluginTest {
     public void setUp() throws IOException {
         Config config = TestDictionary.INSTANCE.user0Cfg()
                 .characterDefinition(getClass().getClassLoader().getResource("joinnumeric/char.def"));
-        Dictionary dict = new DictionaryFactory().create(config);
+        Dictionary dict = Dictionary.load(config);
         tokenizer = (JapaneseTokenizer) dict.tokenizer();
 
         plugin = new JoinNumericPlugin();
