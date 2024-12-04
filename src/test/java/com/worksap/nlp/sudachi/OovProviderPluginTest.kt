@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class OovProviderPluginTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
-    val inst = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val inst = Dictionary.load(cfg) as JapaneseDictionary
     val plugin = assertIs<FakeOovProvider>(inst.oovProviderPlugins.last())
     assertEquals(4, plugin.posId)
   }
@@ -60,7 +60,7 @@ class OovProviderPluginTest {
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
         .add(USER_POS, USER_POS_ALLOW)
-    val inst = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val inst = Dictionary.load(cfg) as JapaneseDictionary
     val plugin = assertIs<FakeOovProvider>(inst.oovProviderPlugins.last())
     assertEquals(8, plugin.posId)
   }
@@ -71,7 +71,7 @@ class OovProviderPluginTest {
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
         .add(USER_POS, "test")
-    assertFails { DictionaryFactory().create(cfg) }
+    assertFails { Dictionary.load(cfg) }
   }
 
   @Test
@@ -79,7 +79,7 @@ class OovProviderPluginTest {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "test")
-    assertFails { DictionaryFactory().create(cfg) }
+    assertFails { Dictionary.load(cfg) }
   }
 
   @Test
@@ -91,7 +91,7 @@ class OovProviderPluginTest {
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
         .add(USER_POS, USER_POS_ALLOW)
-    val inst = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val inst = Dictionary.load(cfg) as JapaneseDictionary
     val oovPlugins = inst.oovProviderPlugins
     val p1 = assertIs<FakeOovProvider>(oovPlugins[oovPlugins.size - 2])
     assertEquals(8, p1.posId)
@@ -105,7 +105,7 @@ class OovProviderPluginTest {
     cfg.addOovProviderPlugin(FakeOovProvider::class.java)
         .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "new")
         .add(USER_POS, USER_POS_ALLOW)
-    val dict = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val dict = Dictionary.load(cfg) as JapaneseDictionary
     val plugin = assertIs<FakeOovProvider>(dict.oovProviderPlugins.last())
     assertEquals(8, plugin.posId)
     val tokinzer = dict.tokenizer()

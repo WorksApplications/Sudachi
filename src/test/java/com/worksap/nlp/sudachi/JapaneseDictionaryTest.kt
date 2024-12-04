@@ -77,7 +77,7 @@ class JapaneseDictionaryTest {
   @Test
   fun instantiateConfigWithoutCharDef() {
     val config = setupMinimumConfig()
-    val jdict = DictionaryFactory().create(config)
+    val jdict = Dictionary.load(config)
 
     assertNotNull(jdict)
     assertNotNull(jdict.tokenizer())
@@ -87,7 +87,7 @@ class JapaneseDictionaryTest {
   @Test
   fun throwExceptionOnDictionaryUsageAfterClose() {
     val config = setupMinimumConfig()
-    val jdict = DictionaryFactory().create(config)
+    val jdict = Dictionary.load(config)
     jdict.close()
 
     assertFailsWith(IllegalStateException::class) { jdict.tokenizer() }
@@ -96,7 +96,7 @@ class JapaneseDictionaryTest {
   @Test
   fun throwExceptionOnTokenizerUsageAfterClose() {
     val config = setupMinimumConfig()
-    val jdict = DictionaryFactory().create(config)
+    val jdict = Dictionary.load(config)
     val tok = jdict.tokenizer()
     jdict.close()
 
@@ -189,7 +189,7 @@ abc,1,1,4675,AbC,名詞,普通名詞,一般,*,*,*,エービーシー,,,,,""")
             .clearUserDictionaries()
             .systemDictionary(sdict)
             .addUserDictionary(udict)
-    val mdict = DictionaryFactory().create(cfg)
+    val mdict = Dictionary.load(cfg)
 
     val found = mdict.lookup("ABC")
     assertEquals(4, found.size)

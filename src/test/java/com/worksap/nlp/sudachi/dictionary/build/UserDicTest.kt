@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class TestDic {
   fun load(): Dictionary {
     val config = Config.fromClasspath(config).systemDictionary(systemDic)
     userDics.forEach { config.addUserDictionary(it) }
-    return DictionaryFactory().create(config)
+    return Dictionary.load(config)
   }
 }
 

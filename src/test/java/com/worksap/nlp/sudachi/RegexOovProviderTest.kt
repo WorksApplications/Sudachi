@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class RegexOovProviderTest {
             .addList("pos", "名詞", "普通名詞", "一般", "*", "*", "*")
     @Suppress("UNCHECKED_CAST") block(cfg, pluginCfg as Config.PluginConf<RegexOovProvider>)
     // prepend our OOV configuration to the main configuration
-    return DictionaryFactory().create(cfg.withFallback(TestDictionary.user0Cfg())).tokenizer()
+    return Dictionary.load(cfg.withFallback(TestDictionary.user0Cfg())).tokenizer()
   }
 
   @Test

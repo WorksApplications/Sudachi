@@ -23,8 +23,8 @@ import kotlin.test.*
 class TextNormalizerTest {
 
   private val dic =
-      DictionaryFactory()
-          .create(TestDictionary.user2Cfg().characterDefinition(CharacterCategory.loadDefault()))
+      Dictionary.load(
+          TestDictionary.user2Cfg().characterDefinition(CharacterCategory.loadDefault()))
           as JapaneseDictionary
 
   @Test

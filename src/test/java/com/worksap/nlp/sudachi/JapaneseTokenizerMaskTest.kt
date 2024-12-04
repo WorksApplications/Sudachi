@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class JapaneseTokenizerMaskTest {
     cfg0.addOovProviderPlugin(CaptureOtherWords::class.java)
     cfg0.addOovProviderPlugin(SimpleOovProviderPlugin::class.java)
     val cfg = cfg0.withFallback(TestDictionary.user0Cfg())
-    val dic = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val dic = Dictionary.load(cfg) as JapaneseDictionary
     val tokenizer = dic.tokenizer()
 
     assertEquals(2, dic.oovProviderPlugins.size)
@@ -61,7 +61,7 @@ class JapaneseTokenizerMaskTest {
   fun correctMasksWithSecondProvider() {
     val cfg = TestDictionary.user0Cfg()
     cfg.addOovProviderPlugin(CaptureOtherWords::class.java)
-    val dic = DictionaryFactory().create(cfg) as JapaneseDictionary
+    val dic = Dictionary.load(cfg) as JapaneseDictionary
     val tokenizer = dic.tokenizer()
 
     assertIs<SimpleOovProviderPlugin>(dic.oovProviderPlugins[0])
