@@ -4,6 +4,45 @@
 
 -
 
+## [v0.8.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.0)
+
+### Breaking changes
+
+See [migration guide](./docs/migration_guide.md) for details.
+
+- Binary dictionary format changed
+- Signatures of many methods changed
+
+### Added
+
+- Add `Stream<Morpheme> Dictionary.entries()` (#248)
+  - Stream all morphemes in the dictionary.
+  - use `Stream.iterator()` or `Stream.spliterator()` if necessary.
+- Add `List<Morpheme> Dictionary.lookup(CharSequence)` (#245)
+  - List up morphemes that match the given text (after normalization).
+  - If you need to search entries with -1 conjugation cost, use `lookupAllEntries`.
+- Add `Morpheme Dictionary.oovMorpheme(posId, surface, ...)` (#245)
+  - Create an OOV morpheme with a POS in the dictionary.
+
+### Changed
+
+- `Tokenizer` methods now returns `List<Morpheme>` instead of `MorphemeList` (#254)
+  - use `Tokenizer.split(List<Morphemes>, SplitMode)` instead of `MorphemeList.split(SplitMode)`.
+    - providing null as a split mode now errors.
+- `Tokenizer Dictionary.create()` is deprecated (#246)
+  - use `Tokenizer Dictionary.tokenizer()` instead.
+- `Lexicon.wordIds()` behaviour is changed (#248)
+  - dictionary id argument is removed.
+  - iterates `Integer` instead of `Ints`.
+
+### Deprecated
+
+- `Iterable<MorphemeList> Tokenizer.tokenizeSentences(Reader)` is removed and `lazyTokenizeSentences` replaced it (#254)
+  - `Tokenizer.lazyTokenizeSentences` is deprecated.
+- `SentenceSplittingAnalysis` is removed (#254)
+- `DictionaryFactory` is deprecated and will be removed in v1.0 (#259)
+  - use `Dictionary.load(Config)` instead.
+
 ## [v0.7.5](https://github.com/WorksApplications/Sudachi/releases/tag/v0.7.5)
 
 ### Added
