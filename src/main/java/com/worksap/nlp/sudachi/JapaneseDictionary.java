@@ -90,9 +90,16 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     void setupUserDictionaries(Config config) throws IOException {
+        BinaryDictionary systemDict = dictionaries.get(0);
+        int i = 0;
         for (Config.Resource<BinaryDictionary> userDic : config.getUserDictionaries()) {
             BinaryDictionary instance = BinaryDictionary.loadUser(userDic);
+            if (!systemDict.isCompatibleWith(instance)) {
+                throw new IllegalArgumentException(
+                        String.format("%d-th user dictionary is not compatible with the system dictionary", i));
+            }
             addUserDictionary(instance);
+            i++;
         }
     }
 

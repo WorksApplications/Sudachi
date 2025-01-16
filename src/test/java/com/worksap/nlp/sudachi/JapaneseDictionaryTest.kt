@@ -58,6 +58,41 @@ class JapaneseDictionaryTest {
   }
 
   @Test
+  fun throwExceptionOnUsingIncompatibleDicts() {
+    // build another system dict (should have different signature)
+    val anotherSystemDictData: MemChannel = run {
+      val chan = MemChannel()
+      DicBuilder.system()
+          .matrix(res("/dict/matrix.def"))
+          .lexicon(res("/dict/lex.csv"))
+          .comment("another system dictionary for the unit tests")
+          .build(chan)
+      chan
+    }
+    val anotherSystemDict = BinaryDictionary.loadSystem(anotherSystemDictData.buffer())
+
+    // build user dict based on another system dict
+    val anotherUserDictData = run {
+      val chan = MemChannel()
+      DicBuilder.user().system(anotherSystemDict).lexicon(res("/dict/user.csv")).build(chan)
+      chan
+    }
+    val anotherUserDict = BinaryDictionary.loadUser(anotherUserDictData.buffer())
+
+    // TestDictionary.systemDict + another user dict
+    val confAnotherUser = TestDictionary.user0Cfg().addUserDictionary(anotherUserDict)
+    assertFailsWith(IllegalArgumentException::class) { Dictionary.load(confAnotherUser) }
+
+    // another system dict + TestDictionary.userDict
+    val confAnotherSystem =
+        Config.defaultConfig()
+            .clearUserDictionaries()
+            .systemDictionary(anotherSystemDict)
+            .addUserDictionary(TestDictionary.userDict1)
+    assertFailsWith(IllegalArgumentException::class) { Dictionary.load(confAnotherSystem) }
+  }
+
+  @Test
   fun createTokenizer() {
     assertIs<Tokenizer>(dict.tokenizer())
   }
