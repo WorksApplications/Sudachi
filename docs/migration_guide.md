@@ -7,7 +7,8 @@
 Sudachi 辞書のバイナリ形式が変更され、v0.7 までのバイナリ辞書は使用できなくなりました。
 システム辞書については [配布ページ](#TODO) より再取得してください。
 
-ユーザー辞書の移行については[ユーザー辞書移行ガイド](./migrate_legacy_dictionary_v1.md)を参照してください。
+ユーザー辞書についても再ビルドが必要です。
+詳細は[ユーザー辞書移行ガイド](./migrate_user_dictionary.md)を参照してください。
 
 ## Dictionary
 
@@ -39,17 +40,12 @@ v0.8 では同名の `Iterator<List<Morpheme>> Tokenizer.tokenizeSentences(Reada
 返り値型が `Iterable` から `Iterator` に変更されていることに注意してください。
 
 これの挙動は `Tokenizer.lazyTokenizeSentences` と同値であり、このため `lazyTokenizeSentences` は廃止されます。
+`lazyTokenizeSentences` を使用していた場合は `tokenizeSentences` に変更してください。
 
 ## TextNormalizer
 
 辞書に基づいた `TextNormalizer` を生成する `TextNormalizer.formDictionary(JapaneseDictionary)` は廃止されます。
 代わりに `Dictionary.textNormalizer()` を使用してください。
-
-## Lexicon
-
-`Lexicon.wordIds()` は引数を取らなくなりました。
-含まれている全ての辞書の word id をイテレートします。
-また返り値型が `Iterator<Ints>` から `Iterator<Integer>` に変更されました（内部で `Ints` の flatten 処理を行うようになりました）。
 
 ## 廃止されたクラス
 
