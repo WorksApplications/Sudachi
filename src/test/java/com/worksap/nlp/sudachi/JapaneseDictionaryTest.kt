@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2025 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,27 +60,18 @@ class JapaneseDictionaryTest {
   @Test
   fun throwExceptionOnUsingIncompatibleDicts() {
     // build another system dict (should have different signature)
-    val anotherSystemDictData: MemChannel = run {
-      val chan = MemChannel()
-      DicBuilder.system()
-          .matrix(res("/dict/matrix.def"))
-          .lexicon(res("/dict/lex.csv"))
-          .comment("another system dictionary for the unit tests")
-          .build(chan)
-      chan
-    }
-    val anotherSystemDict = BinaryDictionary.loadSystem(anotherSystemDictData.buffer())
+    val anotherSystemDict =
+        BinaryDictionary.loadSystem(
+            TestDictionary.buildSystemDictData("another system dictionary for the unit tests")
+                .buffer())
 
     // build user dict based on another system dict
-    val anotherUserDictData = run {
-      val chan = MemChannel()
-      DicBuilder.user().system(anotherSystemDict).lexicon(res("/dict/user.csv")).build(chan)
-      chan
-    }
-    val anotherUserDict = BinaryDictionary.loadUser(anotherUserDictData.buffer())
+    val anotherUserDict =
+        BinaryDictionary.loadUser(
+            TestDictionary.buildUserDictData(anotherSystemDict, res("/dict/user.csv")).buffer())
 
     // TestDictionary.systemDict + another user dict
-    val confAnotherUser = TestDictionary.user0Cfg().addUserDictionary(anotherUserDict)
+    val confAnotherUser = TestDictionary.user1Cfg().addUserDictionary(anotherUserDict)
     assertFailsWith(IllegalArgumentException::class) { Dictionary.load(confAnotherUser) }
 
     // another system dict + TestDictionary.userDict
