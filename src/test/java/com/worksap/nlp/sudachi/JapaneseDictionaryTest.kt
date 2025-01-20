@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2025 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,32 @@ class JapaneseDictionaryTest {
   @Deprecated("testing deprecated Dictionary.create")
   fun create() {
     assertIs<Tokenizer>(dict.create())
+  }
+
+  @Test
+  fun throwExceptionOnUsingIncompatibleDicts() {
+    // build another system dict (should have different signature)
+    val anotherSystemDict =
+        BinaryDictionary.loadSystem(
+            TestDictionary.buildSystemDictData("another system dictionary for the unit tests")
+                .buffer())
+
+    // build user dict based on another system dict
+    val anotherUserDict =
+        BinaryDictionary.loadUser(
+            TestDictionary.buildUserDictData(anotherSystemDict, res("/dict/user.csv")).buffer())
+
+    // TestDictionary.systemDict + another user dict
+    val confAnotherUser = TestDictionary.user1Cfg().addUserDictionary(anotherUserDict)
+    assertFailsWith(IllegalArgumentException::class) { Dictionary.load(confAnotherUser) }
+
+    // another system dict + TestDictionary.userDict
+    val confAnotherSystem =
+        Config.defaultConfig()
+            .clearUserDictionaries()
+            .systemDictionary(anotherSystemDict)
+            .addUserDictionary(TestDictionary.userDict1)
+    assertFailsWith(IllegalArgumentException::class) { Dictionary.load(confAnotherSystem) }
   }
 
   @Test

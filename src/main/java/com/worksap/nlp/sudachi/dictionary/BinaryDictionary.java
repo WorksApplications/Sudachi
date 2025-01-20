@@ -97,4 +97,38 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
     public DoubleArrayLexicon getLexicon() {
         return lexicon;
     }
+
+    /**
+     * Check if two dictionaries are built on a same system dictionary.
+     * 
+     * User dictionary stores the signature of the system dictionary which it is
+     * built on as Desctiption.reference
+     * ({@link com.worksap.nlp.sudachi.dictionary.build.DicBuilder.User#system}).
+     * 
+     * @param other
+     *            dictionary to check with
+     * @return true if and only if two dictionaries have matching signature or
+     *         reference.
+     */
+    public boolean isCompatibleWith(BinaryDictionary other) {
+        String thisSignature;
+        if (this.header.isSystemDictionary()) {
+            thisSignature = this.header.getSignature();
+        } else if (this.header.isUserDictionary()) {
+            thisSignature = this.header.getReference();
+        } else {
+            throw new IllegalStateException("Invalid dictionary");
+        }
+
+        String otherSignature;
+        if (other.header.isSystemDictionary()) {
+            otherSignature = other.header.getSignature();
+        } else if (other.header.isUserDictionary()) {
+            otherSignature = other.header.getReference();
+        } else {
+            throw new IllegalStateException("Invalid dictionary");
+        }
+
+        return thisSignature.equals(otherSignature);
+    }
 }
