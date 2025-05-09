@@ -90,8 +90,8 @@ public class BufReader {
         }
         v0 |= (v8 & 0x7f) << 56;
         long v9 = b.get() & 0xff;
-        if (v9 < 0x07) { // only 3 bits are valid here, rest must be 0
-            return (v8 << 61) | v0;
+        if (v9 < 0x02) { // only 1 bits are valid here, rest must be 0
+            return (v9 << 63) | v0;
         }
         throw new IllegalStateException("invalid long varint encoding");
     }
