@@ -20,6 +20,7 @@ import com.worksap.nlp.sudachi.dictionary.build.BufWriter
 import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 inline fun <reified T> check(
     crossinline fin: (BufWriter, T) -> Unit,
@@ -153,6 +154,40 @@ class BufReaderTest {
     checkInt(0x7fff_ffff)
     // full bit
     checkInt(0.inv())
+  }
+
+  @Test
+  fun invalid_varint64() {
+    val bb = ByteBuffer.allocate(32)
+    val w = BufWriter(bb)
+
+    // 64 bits are encoded as 7 bits * 9 + 1 bit.
+    for (i in 1..9) {
+      w.putByte(Byte.MIN_VALUE) // 0x80, 1 bit continue flag + 7 bits
+    }
+    // using other than the lowest 1 bit is invalid here
+    w.putByte(0x02)
+
+    bb.flip()
+    val r = BufReader(bb)
+    assertFails { r.readVarint64() }
+  }
+
+  @Test
+  fun invalid_varint32() {
+    // put/read func for varint64/32 shares implementation
+    val checkLong2Int =
+        check({ w, x -> w.putVarint64(x) }, { it.readVarint32().toLong() and 0xffff_ffff })
+
+    // less than or equal to 32 bit should be ok
+    checkLong2Int(0x0)
+    checkLong2Int(0x1)
+    checkLong2Int(0x8)
+    checkLong2Int(0x8000_0000)
+    checkLong2Int(0xffff_ffff)
+
+    // more than 32 bit should fail
+    assertFails { checkLong2Int(0x1_0000_0000) }
   }
 
   @Test
