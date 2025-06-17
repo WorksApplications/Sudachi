@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2025 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.worksap.nlp.sudachi.dictionary.build.BufWriter
 import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 inline fun <reified T> check(
     crossinline fin: (BufWriter, T) -> Unit,
@@ -38,71 +39,155 @@ class BufReaderTest {
   @Test
   fun varint64() {
     val checkLong = check({ w, x -> w.putVarint64(x) }, { it.readVarint64() })
-    checkLong(0L.inv())
+    // single bits
     checkLong(0x0)
     checkLong(0x1)
+    checkLong(0x2)
+    checkLong(0x4)
+    checkLong(0x8)
+    checkLong(0x10)
+    checkLong(0x20)
+    checkLong(0x40)
     checkLong(0x80)
-    checkLong(0xff)
-    checkLong(0x4ff)
-    checkLong(0xfff)
-    checkLong(0x4fff)
-    checkLong(0xffff)
-    checkLong(0x4_ffff)
-    checkLong(0xf_ffff)
-    checkLong(0x4f_ffff)
-    checkLong(0xff_ffff)
-    checkLong(0x4ff_ffff)
-    checkLong(0xfff_ffff)
-    checkLong(0x4fff_ffff)
-    checkLong(0xffff_ffff)
-    checkLong(0x4_ffff_ffff)
-    checkLong(0xf_ffff_ffff)
-    checkLong(0x4f_ffff_ffff)
-    checkLong(0xff_ffff_ffff)
-    checkLong(0x4ff_ffff_ffff)
-    checkLong(0xfff_ffff_ffff)
-    checkLong(0x4fff_ffff_ffff)
-    checkLong(0xffff_ffff_ffff)
-    checkLong(0x4_ffff_ffff_ffff)
-    checkLong(0xf_ffff_ffff_ffff)
-    checkLong(0x4f_ffff_ffff_ffff)
-    checkLong(0xff_ffff_ffff_ffff)
-    checkLong(0x4ff_ffff_ffff_ffff)
-    checkLong(0xfff_ffff_ffff_ffff)
+    checkLong(0x100)
+    checkLong(0x200)
+    checkLong(0x400)
+    checkLong(0x800)
+    checkLong(0x1000)
+    checkLong(0x2000)
+    checkLong(0x4000)
+    checkLong(0x8000)
+    checkLong(0x1_0000)
+    checkLong(0x2_0000)
+    checkLong(0x4_0000)
+    checkLong(0x8_0000)
+    checkLong(0x10_0000)
+    checkLong(0x20_0000)
+    checkLong(0x40_0000)
+    checkLong(0x80_0000)
+    checkLong(0x100_0000)
+    checkLong(0x200_0000)
+    checkLong(0x400_0000)
+    checkLong(0x800_0000)
+    checkLong(0x1000_0000)
+    checkLong(0x2000_0000)
+    checkLong(0x4000_0000)
+    checkLong(0x8000_0000)
+    checkLong(0x1_0000_0000)
+    checkLong(0x2_0000_0000)
+    checkLong(0x4_0000_0000)
+    checkLong(0x8_0000_0000)
+    checkLong(0x10_0000_0000)
+    checkLong(0x20_0000_0000)
+    checkLong(0x40_0000_0000)
+    checkLong(0x80_0000_0000)
+    checkLong(0x100_0000_0000)
+    checkLong(0x200_0000_0000)
+    checkLong(0x400_0000_0000)
+    checkLong(0x800_0000_0000)
+    checkLong(0x1000_0000_0000)
+    checkLong(0x2000_0000_0000)
+    checkLong(0x4000_0000_0000)
+    checkLong(0x8000_0000_0000)
+    checkLong(0x1_0000_0000_0000)
+    checkLong(0x2_0000_0000_0000)
+    checkLong(0x4_0000_0000_0000)
+    checkLong(0x8_0000_0000_0000)
+    checkLong(0x10_0000_0000_0000)
+    checkLong(0x20_0000_0000_0000)
+    checkLong(0x40_0000_0000_0000)
+    checkLong(0x80_0000_0000_0000)
+    checkLong(0x100_0000_0000_0000)
+    checkLong(0x200_0000_0000_0000)
+    checkLong(0x400_0000_0000_0000)
+    checkLong(0x800_0000_0000_0000)
     checkLong(0x1000_0000_0000_0000)
-    checkLong(0x4fff_ffff_ffff_ffff)
-    checkLong(0x5fff_ffff_ffff_ffff)
-    checkLong(0x6fff_ffff_ffff_ffff)
+    checkLong(0x2000_0000_0000_0000)
+    checkLong(0x4000_0000_0000_0000)
+    checkLong(0x7fff_ffff_ffff_ffff.inv())
+
+    // long-max
     checkLong(0x7fff_ffff_ffff_ffff)
-    checkLong(0x1111_1111_1111_1111)
-    checkLong(0x2222_2222_2222_2222)
-    checkLong(0x3333_3333_3333_3333)
-    checkLong(0x5555_5555_5555_5555)
+    // full bit
+    checkLong(0L.inv())
   }
 
   @Test
   fun varint32() {
     val checkInt = check({ w, x -> w.putVarint32(x) }, { it.readVarint32() })
-    checkInt(0.inv())
+    // single bits
     checkInt(0x0)
     checkInt(0x1)
+    checkInt(0x2)
+    checkInt(0x4)
+    checkInt(0x8)
+    checkInt(0x10)
+    checkInt(0x20)
+    checkInt(0x40)
     checkInt(0x80)
-    checkInt(0xff)
-    checkInt(0x4ff)
-    checkInt(0xfff)
+    checkInt(0x100)
+    checkInt(0x200)
+    checkInt(0x400)
+    checkInt(0x800)
     checkInt(0x1000)
-    checkInt(0x4fff)
-    checkInt(0xffff)
+    checkInt(0x2000)
+    checkInt(0x4000)
+    checkInt(0x8000)
     checkInt(0x1_0000)
-    checkInt(0x4_ffff)
-    checkInt(0xf_ffff)
+    checkInt(0x2_0000)
+    checkInt(0x4_0000)
+    checkInt(0x8_0000)
     checkInt(0x10_0000)
-    checkInt(0x4f_ffff)
-    checkInt(0xff_ffff)
+    checkInt(0x20_0000)
+    checkInt(0x40_0000)
+    checkInt(0x80_0000)
     checkInt(0x100_0000)
-    checkInt(0x4ff_ffff)
-    checkInt(0xfff_ffff)
-    checkInt(0x4fff_ffff)
+    checkInt(0x200_0000)
+    checkInt(0x400_0000)
+    checkInt(0x800_0000)
+    checkInt(0x1000_0000)
+    checkInt(0x2000_0000)
+    checkInt(0x4000_0000)
+    checkInt(0x7fff_ffff.inv())
+
+    // int-max
+    checkInt(0x7fff_ffff)
+    // full bit
+    checkInt(0.inv())
+  }
+
+  @Test
+  fun invalid_varint64() {
+    val bb = ByteBuffer.allocate(32)
+    val w = BufWriter(bb)
+
+    // 64 bits are encoded as 7 bits * 9 + 1 bit.
+    for (i in 1..9) {
+      w.putByte(Byte.MIN_VALUE) // 0x80, 1 bit continue flag + 7 bits
+    }
+    // using other than the lowest 1 bit is invalid here
+    w.putByte(0x02)
+
+    bb.flip()
+    val r = BufReader(bb)
+    assertFails { r.readVarint64() }
+  }
+
+  @Test
+  fun invalid_varint32() {
+    // put/read func for varint64/32 shares implementation
+    val checkLong2Int =
+        check({ w, x -> w.putVarint64(x) }, { it.readVarint32().toLong() and 0xffff_ffff })
+
+    // less than or equal to 32 bit should be ok
+    checkLong2Int(0x0)
+    checkLong2Int(0x1)
+    checkLong2Int(0x8)
+    checkLong2Int(0x8000_0000)
+    checkLong2Int(0xffff_ffff)
+
+    // more than 32 bit should fail
+    assertFails { checkLong2Int(0x1_0000_0000) }
   }
 
   @Test
