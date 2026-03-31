@@ -230,14 +230,21 @@ public class RawLexiconReader {
         return result;
     }
 
-    /** parse specified column as WordRef, also checks self-reference. */
-    private WordRef getWordRef(List<String> data, Column column, WordRef.Parser refParser, RawWordEntry entry) {
+    /**
+     * parse specified column as WordRef, also checks self-reference if requested.
+     */
+    private WordRef getWordRef(List<String> data, Column column, WordRef.Parser refParser, RawWordEntry entry,
+            boolean resolveSelfReferenceToNull) {
         String value = get(data, column, false);
         WordRef ref;
         try {
             ref = refParser.parse(value);
         } catch (IllegalArgumentException e) {
             throw new InputFileException(parser.getName(), parser.getRowCount(), column.name(), e);
+        }
+
+        if (!resolveSelfReferenceToNull) {
+            return ref;
         }
 
         // if parsed ref seems to refering current entry, return self-reference (null),
@@ -306,8 +313,8 @@ public class RawLexiconReader {
         entry.posId = getPos(data);
 
         // headword, pos, reading must be parsed before these to resolve wordref.
-        entry.normalizedFormRef = getWordRef(data, Column.NORMALIZED_FORM, normRefParser, entry);
-        entry.dictionaryFormRef = getWordRef(data, Column.DICTIONARY_FORM, dictRefParser, entry);
+        entry.normalizedFormRef = getWordRef(data, Column.NORMALIZED_FORM, normRefParser, entry, true);
+        entry.dictionaryFormRef = getWordRef(data, Column.DICTIONARY_FORM, dictRefParser, entry, false);
 
         entry.mode = get(data, Column.MODE, false);
         entry.aUnitSplit = getWordRefs(data, Column.SPLIT_A, splitParser);

@@ -138,6 +138,23 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
   }
 
   @Test
+  fun dictionaryFormKeepsExplicitReferenceToEarlierMatchingEntry() {
+    val text =
+        """IndexForm,LeftId,RightId,Cost,headword,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure
+base,0,0,1000,同形,0,ドウケイ,,,,,
+derived,0,0,1000,同形,0,ドウケイ,,"同形,0,ドウケイ",,,"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable)
+    assertNotNull(reader.nextEntry())
+    assertNotNull(reader.nextEntry()).let { e ->
+      assertEquals(WordRef.RefByTriple("同形", 0, "ドウケイ"), e.dictionaryFormRef)
+    }
+    assertNull(reader.nextEntry())
+  }
+
+  @Test
   fun failMissingRequiredEntry() {
     // pos1-6 are not required (because of posId), but must be used as a set
     val columns =
