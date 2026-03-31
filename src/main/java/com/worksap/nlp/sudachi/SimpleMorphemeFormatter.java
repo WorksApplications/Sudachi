@@ -57,8 +57,10 @@ public class SimpleMorphemeFormatter extends MorphemeFormatterPlugin {
         if (showDetails) {
             output += columnDelimiter + morpheme.dictionaryForm() + columnDelimiter + morpheme.readingForm()
                     + columnDelimiter + morpheme.getDictionaryId() + columnDelimiter
-                    + Arrays.toString(morpheme.getSynonymGroupIds()) + columnDelimiter
-                    + ((morpheme.isOOV()) ? "(OOV)" : "");
+                    + Arrays.toString(morpheme.getSynonymGroupIds());
+            if (morpheme.isOOV()) {
+                output += columnDelimiter + "(OOV)";
+            }
         }
         return output;
     }

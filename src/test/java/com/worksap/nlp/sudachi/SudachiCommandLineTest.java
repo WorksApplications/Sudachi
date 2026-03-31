@@ -125,6 +125,9 @@ public class SudachiCommandLineTest {
             assertTrue(first.isPresent());
             assertThat(first.get().split("\\t").length, is(7));
         }
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            assertThat(lines.filter(l -> !l.equals("EOS")).allMatch(l -> !l.endsWith("\t")), is(true));
+        }
     }
 
     @Test
