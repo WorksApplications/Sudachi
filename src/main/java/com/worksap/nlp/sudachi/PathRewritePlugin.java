@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.worksap.nlp.sudachi.dictionary.CategoryType;
@@ -155,8 +156,9 @@ public abstract class PathRewritePlugin extends Plugin {
         int b = path.get(begin).getBegin();
         int e = path.get(end - 1).getEnd();
 
-        LatticeNodeImpl node = lattice.getMinimumNode(b, e);
-        if (node != null) {
+        Optional<LatticeNodeImpl> n = lattice.getMinimumNode(b, e);
+        if (n.isPresent()) {
+            LatticeNodeImpl node = n.get();
             replaceNode(path, begin, end, node);
             return node;
         }
@@ -168,7 +170,7 @@ public abstract class PathRewritePlugin extends Plugin {
         }
 
         String s = surface.toString();
-        node = factory.make(b, e, s);
+        LatticeNodeImpl node = factory.make(b, e, s);
         replaceNode(path, begin, end, node);
         return node;
     }
