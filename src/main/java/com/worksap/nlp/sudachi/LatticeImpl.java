@@ -94,15 +94,9 @@ class LatticeImpl implements Lattice {
     }
 
     @Override
-    public LatticeNodeImpl getMinimumNode(int begin, int end) {
-        ArrayList<LatticeNodeImpl> ends = endLists.get(end);
-        LatticeNodeImpl result = null;
-        for (LatticeNodeImpl node : ends) {
-            if (node.begin == begin && (result == null || result.totalCost >= node.cost)) {
-                result = node;
-            }
-        }
-        return result;
+    public Optional<LatticeNodeImpl> getMinimumNode(int begin, int end) {
+        return endLists.get(end).stream().filter(n -> (n.getBegin() == begin))
+                .min(Comparator.comparingInt(n -> n.cost));
     }
 
     @Override
