@@ -314,7 +314,7 @@ An implementation of Sudachi in Python and Rust
 We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
 
 - https://sudachi-dev.slack.com/
-- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
+- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/zt-39n46itp3-oypQk1THbvb_wYW~MNI6yA))
 
 
 ## Citing Sudachi
@@ -622,7 +622,7 @@ Python 版および Rust 版も公開しています。
 開発者やユーザーの方々が質問したり議論するためのSlackワークスペースを用意しています。
 
 - https://sudachi-dev.slack.com/
-- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU)から招待を受けてください)
+- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/zt-39n46itp3-oypQk1THbvb_wYW~MNI6yA)から招待を受けてください)
 
 
 ## Sudachiの引用
