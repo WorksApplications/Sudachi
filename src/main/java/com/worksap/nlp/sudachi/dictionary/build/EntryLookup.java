@@ -34,6 +34,9 @@ public class EntryLookup {
 
         /** @return headword of the entry. */
         String headword();
+
+        /** @return reference-id of the entry, or null if unset. */
+        String referenceId();
     }
 
     /** Wrapper class to distinguish if the entry is system or user. */
@@ -60,13 +63,18 @@ public class EntryLookup {
         public String headword() {
             return entry.headword();
         }
+
+        @Override
+        public String referenceId() {
+            return entry.referenceId();
+        }
     }
 
     // entries
     private final List<? extends Entry> systemEntries;
     private final List<? extends Entry> userEntries;
-    // mapping to entries that have same headwords
     private final Map<String, List<EntryWithFlag>> byHeadword;
+    private final Map<String, EntryWithFlag> byReferenceId;
 
     public EntryLookup(List<? extends Entry> systemEntries, List<? extends Entry> userEntries) {
         this.systemEntries = systemEntries;
@@ -74,15 +82,35 @@ public class EntryLookup {
 
         HashMap<String, List<EntryWithFlag>> result = new HashMap<>(
                 (systemEntries.size() + userEntries.size()) * 4 / 3);
-        for (Entry e : systemEntries) {
-            List<EntryWithFlag> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
-            sublist.add(new EntryWithFlag(e, false));
-        }
+        HashMap<String, EntryWithFlag> refs = new HashMap<>((systemEntries.size() + userEntries.size()) / 10);
+        // put user entries first to prioritize them over system entries.
         for (Entry e : userEntries) {
-            List<EntryWithFlag> sublist = result.computeIfAbsent(e.headword(), x -> new ArrayList<>());
-            sublist.add(new EntryWithFlag(e, true));
+            register(result, refs, e, true);
+        }
+        for (Entry e : systemEntries) {
+            register(result, refs, e, false);
         }
         byHeadword = result;
+        byReferenceId = refs;
+    }
+
+    private void register(Map<String, List<EntryWithFlag>> headwords, Map<String, EntryWithFlag> refs, Entry e,
+            boolean isUser) {
+        EntryWithFlag wrapped = new EntryWithFlag(e, isUser);
+        headwords.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(wrapped);
+
+        String referenceId = e.referenceId();
+        if (referenceId == null) {
+            return;
+        }
+
+        EntryWithFlag existing = refs.putIfAbsent(referenceId, wrapped);
+        // User/system overlap is allowed here because user resolution intentionally
+        // checks the user side first and falls back to the system side only if the
+        // user dictionary does not define the same reference-id.
+        if (existing != null && existing.isUser == isUser) {
+            throw new IllegalArgumentException("duplicated reference_id: " + referenceId);
+        }
     }
 
     /**
@@ -113,12 +141,16 @@ public class EntryLookup {
         return byHeadword.get(headword);
     }
 
+    public EntryWithFlag byReferenceId(String referenceId) {
+        return byReferenceId.get(referenceId);
+    }
+
     /**
      * Add an entry for headword search.
      * 
      * @param e
      */
     public void add(Entry e, boolean isUser) {
-        byHeadword.computeIfAbsent(e.headword(), x -> new ArrayList<>()).add(new EntryWithFlag(e, isUser));
+        register(byHeadword, byReferenceId, e, isUser);
     }
 }

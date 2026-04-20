@@ -28,7 +28,9 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dictionary part: Lexicon loaded from csv files.
@@ -51,6 +53,7 @@ public class RawLexicon {
     private final Index index = new Index();
     private final List<RawWordEntry> notIndexed = new ArrayList<>();
     private final StringStorage strings = new StringStorage();
+    private final Map<String, Integer> referenceIdValidation = new LinkedHashMap<>();
     private boolean isUser = false;
 
     // offset for next entry
@@ -65,7 +68,7 @@ public class RawLexicon {
      *            lexicon of a system dictionary.
      * @return number of entries read.
      */
-    public int preloadFrom(DoubleArrayLexicon lexicon, Progress progress) {
+    public int preloadFrom(DoubleArrayLexicon lexicon, Map<Integer, String> systemReferenceIds, Progress progress) {
         this.isUser = true;
 
         Ints allIds = new Ints(lexicon.size());
@@ -76,7 +79,8 @@ public class RawLexicon {
         allIds.sort();
 
         for (int i = 0; i < allIds.length(); i++) {
-            preloadedEntries.add(new CompiledWordEntry(lexicon, allIds.get(i)));
+            int wordId = allIds.get(i);
+            preloadedEntries.add(new CompiledWordEntry(lexicon, wordId, systemReferenceIds.get(wordId)));
             progress.progress(i, allIds.length());
         }
         return preloadedEntries.size();
@@ -118,6 +122,7 @@ public class RawLexicon {
             entry.publishStrings(strings);
             entries.add(entry);
             entry.pointer = pointer(offset);
+            registerReferenceId(entry);
             offset += entry.computeExpectedSize();
             checkOffset(offset);
             if (entry.shouldBeIndexed()) {
@@ -160,6 +165,9 @@ public class RawLexicon {
         // entry layout requires stringstorage to be compiled beforehand.
         layout.block(Block.STRINGS, this::writeStrings);
         layout.block(Block.ENTRIES, this::writeEntries);
+        if (!referenceIdValidation.isEmpty()) {
+            layout.block(Block.REFERENCE_ID_TABLE, this::writeReferenceIds);
+        }
     }
 
     private Void writeStrings(BlockOutput blockOutput) throws IOException {
@@ -189,6 +197,24 @@ public class RawLexicon {
                 size += addPhantomEntries(e, list, lookup);
                 ptr = layout.put(e);
                 p.progress(i, size);
+            }
+            buf.flush();
+            return null;
+        });
+    }
+
+    private Void writeReferenceIds(BlockOutput blockOutput) throws IOException {
+        return blockOutput.measured("Reference IDs", p -> {
+            BufferedChannel buf = new BufferedChannel(blockOutput.getChannel(), 8192);
+            BufWriter writer = buf.writer(16);
+            writer.putVarint32(referenceIdValidation.size());
+            int i = 0;
+            for (Map.Entry<String, Integer> e : referenceIdValidation.entrySet()) {
+                int byteLength = e.getKey().getBytes(StandardCharsets.UTF_8).length;
+                writer = buf.writer(byteLength + 16);
+                writer.putVarint32(e.getValue());
+                writer.putUtf8String(e.getKey());
+                p.progress(i++, referenceIdValidation.size());
             }
             buf.flush();
             return null;
@@ -234,5 +260,16 @@ public class RawLexicon {
     /** @return if lexicon has entries that need runtime cost caluculation */
     public boolean hasRuntimeCosts() {
         return this.runtimeCosts;
+    }
+
+    private void registerReferenceId(RawWordEntry entry) {
+        String referenceId = entry.referenceId();
+        if (referenceId == null) {
+            return;
+        }
+        Integer existing = referenceIdValidation.putIfAbsent(referenceId, entry.pointer);
+        if (existing != null) {
+            throw new IllegalArgumentException("duplicated reference_id: " + referenceId);
+        }
     }
 }

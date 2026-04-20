@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,9 +38,10 @@ public class RawLexiconReader {
      */
     public enum Column {
         INDEX_FORM(true), LEFT_ID(true), RIGHT_ID(true), COST(true), HEADWORD(false), POS1(false), POS2(false), POS3(
-                false), POS4(false), POS5(false), POS6(false), READING_FORM(true), NORMALIZED_FORM(
-                        true), DICTIONARY_FORM(true), MODE(false), SPLIT_A(true), SPLIT_B(true), WORD_STRUCTURE(
-                                true), SYNONYM_GROUPS(false), SPLIT_C(false), USER_DATA(false), POS_ID(false);
+                false), POS4(false), POS5(
+                        false), POS6(false), READING_FORM(true), NORMALIZED_FORM(true), DICTIONARY_FORM(true), MODE(
+                                false), SPLIT_A(true), SPLIT_B(true), WORD_STRUCTURE(true), SYNONYM_GROUPS(
+                                        false), SPLIT_C(false), USER_DATA(false), POS_ID(false), REFERENCE_ID(false);
 
         private static final List<Column> POS_PARTS = Arrays.asList(POS1, POS2, POS3, POS4, POS5, POS6);
         private final boolean required;
@@ -241,18 +243,9 @@ public class RawLexiconReader {
         }
 
         // if parsed ref seems to refering current entry, return self-reference (null),
-        // because headword/triple ref may resolved to other entry.
-        if (ref instanceof WordRef.RefByHeadword) {
-            WordRef.RefByHeadword refbyHeadword = (WordRef.RefByHeadword) ref;
-            if (refbyHeadword.getHeadword().equals(entry.headword())) {
-                return null;
-            }
-        } else if (ref instanceof WordRef.RefByTriple) {
-            WordRef.RefByTriple refbyTriple = (WordRef.RefByTriple) ref;
-            if (refbyTriple.getHeadword().equals(entry.headword()) && refbyTriple.getPosId() == entry.posId
-                    && refbyTriple.getReading().equals(entry.reading)) {
-                return null;
-            }
+        // because headword/entry-key ref may resolved to other entry.
+        if (ref != null && ref.matches(entry.headword(), entry.posId, entry.reading, entry.referenceId)) {
+            return null;
         }
         return ref;
     }
@@ -303,6 +296,8 @@ public class RawLexiconReader {
         entry.cost = getShort(data, Column.COST);
 
         entry.reading = get(data, Column.READING_FORM, true);
+        String referenceId = get(data, Column.REFERENCE_ID, true);
+        entry.referenceId = referenceId.isEmpty() ? null : referenceId;
         entry.posId = getPos(data);
 
         // headword, pos, reading must be parsed before these to resolve wordref.

@@ -24,6 +24,7 @@ public class Block {
     public static final String TRIE_INDEX = "TrieIndex";
     public static final String STRINGS = "Strings";
     public static final String ENTRIES = "Entries";
+    public static final String REFERENCE_ID_TABLE = "ReferenceIdTable";
     public static final String CONNECTION_MATRIX = "ConnMatrix";
     public static final String POS_TABLE = "POS";
 }

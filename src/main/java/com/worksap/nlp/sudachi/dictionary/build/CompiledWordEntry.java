@@ -30,11 +30,17 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 public class CompiledWordEntry implements EntryLookup.Entry {
     private final Lexicon lexicon;
     private final int wordId;
+    private final String referenceId;
     private WordInfo wordInfo = null;
 
     public CompiledWordEntry(Lexicon lexicon, int wordId) {
+        this(lexicon, wordId, null);
+    }
+
+    public CompiledWordEntry(Lexicon lexicon, int wordId, String referenceId) {
         this.lexicon = lexicon;
         this.wordId = wordId;
+        this.referenceId = referenceId;
     }
 
     private WordInfo wordInfo() {
@@ -60,5 +66,10 @@ public class CompiledWordEntry implements EntryLookup.Entry {
     public String headword() {
         WordInfo wi = wordInfo();
         return lexicon.string(0, wi.getHeadword());
+    }
+
+    @Override
+    public String referenceId() {
+        return referenceId;
     }
 }

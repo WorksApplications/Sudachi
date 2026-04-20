@@ -16,7 +16,9 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.WordId
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
+import com.worksap.nlp.sudachi.dictionary.Block
 import com.worksap.nlp.sudachi.dictionary.DictionaryAccess
 import com.worksap.nlp.sudachi.dictionary.POS
 import com.worksap.nlp.sudachi.morpheme
@@ -171,9 +173,45 @@ class SystemDicTest {
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     bldr.lexicon(javaClass.getResource("wordref.csv")).build(dictData)
 
-    val wordIds = intArrayOf(4, 8, 12, 16, 20, 24, 28, 33)
+    val wordIds = intArrayOf(4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45)
     val dic = BinaryDictionary(dictData.buffer())
     assertEquals(wordIds.size, dic.lexicon.size())
+  }
+
+  @Test
+  fun referenceIdResolvesAmbiguousEntries() {
+    val bldr = DicBuilder.system().matrix(res("test.matrix"))
+    val data = MemChannel()
+    bldr
+        .lexicon(
+            """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京A,,,,,,tokyo-a
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京B,,,,,,tokyo-b
+区,2,2,2914,区,名詞,普通名詞,一般,*,*,*,ク,,,,,,,
+東京区,2,2,5320,東京区,名詞,固有名詞,地名,一般,*,*,トウキョウク,,,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,tokyo-b/区,名詞,普通名詞,一般,*,*,*,ク",,,
+                """.trimIndent())
+        .build(data)
+
+    val dic = BinaryDictionary(data.buffer())
+    val wi = dic.lexicon.getWordInfo(WordId.make(0, 16))
+    assertContentEquals(intArrayOf(8, 12), wi.aunitSplit)
+    assertEquals(2, dic.getReferenceIdMap().size)
+    assertEquals("tokyo-b", dic.getReferenceIdMap()[8])
+    assertNotNull(dic.dictionaryHeader.sliceOrNull(data.buffer(), Block.REFERENCE_ID_TABLE))
+  }
+
+  @Test
+  fun duplicateReferenceIdFails() {
+    val bldr = DicBuilder.system().matrix(res("test.matrix"))
+    assertFails {
+      bldr.lexicon(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京A,,,,,,dup
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京B,,,,,,dup
+          """.trimIndent())
+    }
   }
 
   @Test

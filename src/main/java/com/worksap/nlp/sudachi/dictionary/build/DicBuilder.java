@@ -354,7 +354,7 @@ public class DicBuilder {
          */
         public User system(BinaryDictionary system) {
             progress.startBlock("system dict entries", nanoTime(), Progress.Kind.ENTRY);
-            int nread = lexicon.preloadFrom(system.getLexicon(), progress);
+            int nread = lexicon.preloadFrom(system.getLexicon(), system.getReferenceIdMap(), progress);
             progress.endBlock(nread, nanoTime());
 
             progress.startBlock("system dict pos list", nanoTime(), Progress.Kind.ENTRY);

@@ -164,7 +164,7 @@ class UserDicTest {
             .load()
 
     val da = dic as DictionaryAccess
-    val m = da.morpheme(WordId.make(1, 8))
+    val m = da.morpheme(WordId.make(1, 12))
     assertEquals("東京府", m.surface())
   }
 
@@ -203,6 +203,89 @@ class UserDicTest {
 
     assertFails {
       bldr.user("""東京都,2,2,5320,東京都,a,b,c,d,e,f,トウキョウト,東京都,*,B,0/U1,*,*,*""".trimIndent())
+    }
+  }
+
+  @Test
+  fun referenceIdPrefersUserThenSystem() {
+    val dic =
+        TestDic()
+            .system(
+                """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京system,,,,,,tokyo
+駅,2,2,2914,駅,名詞,普通名詞,一般,*,*,*,エキ,,,,,,,
+                """.trimIndent())
+            .user(
+                """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京user,,,,,,tokyo
+東京駅,2,2,5320,東京駅,名詞,固有名詞,地名,一般,*,*,トウキョウエキ,,,B,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,tokyo/駅,名詞,普通名詞,一般,*,*,*,エキ",,,
+                """.trimIndent())
+            .load()
+
+    val da = dic as DictionaryAccess
+    val wi = da.lexicon.getWordInfo(WordId.make(1, 8))
+    assertContentEquals(intArrayOf(WordId.make(1, 4), WordId.make(0, 8)), wi.aunitSplit)
+  }
+
+  @Test
+  fun duplicateReferenceIdFails() {
+    val bldr =
+        TestDic()
+            .system(
+                """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京s,,,,,,tokyo
+                """.trimIndent())
+
+    assertFails {
+      bldr.user(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京A,,,,,,dup
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,東京B,,,,,,dup
+          """.trimIndent())
+    }
+  }
+
+  @Test
+  fun entryKeyMismatchFails() {
+    val bldr =
+        TestDic()
+            .system(
+                """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京,1,1,2816,東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,,,,,,,tokyo
+                """.trimIndent())
+
+    assertFails {
+      bldr.user(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京駅,2,2,5320,東京駅,名詞,固有名詞,地名,一般,*,*,トウキョウエキ,"京都,名詞,固有名詞,地名,一般,*,*,トウキョウ,tokyo",,B,,,,
+          """.trimIndent())
+    }
+    assertFails {
+      bldr.user(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京駅,2,2,5320,東京駅,名詞,固有名詞,地名,一般,*,*,トウキョウエキ,"東京,名詞,固有名詞,地名,一般,未使用,*,トウキョウ,tokyo",,B,,,,
+          """.trimIndent())
+    }
+    assertFails {
+      bldr.user(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京駅,2,2,5320,東京駅,名詞,固有名詞,地名,一般,*,*,トウキョウエキ,"東京,名詞,固有名詞,地名,一般,*,*,キョウト,tokyo",,B,,,,
+          """.trimIndent())
+    }
+    assertFails {
+      bldr.user(
+          """
+IndexForm,LeftId,RightId,Cost,Headword,POS1,POS2,POS3,POS4,POS5,POS6,Reading_Form,Normalized_Form,Dictionary_Form,Mode,Split_A,Split_B,WordStructure,reference_id
+東京駅,2,2,5320,東京駅,名詞,固有名詞,地名,一般,*,*,トウキョウエキ,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ,kyoto",,B,,,,
+          """.trimIndent())
     }
   }
 }

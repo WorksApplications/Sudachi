@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.MMap;
@@ -30,6 +33,7 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
     private final Description header;
     private final GrammarImpl grammar;
     private final DoubleArrayLexicon lexicon;
+    private Map<Integer, String> referenceIdMap;
 
     public BinaryDictionary(String fileName) throws IOException {
         this(Paths.get(fileName));
@@ -96,6 +100,31 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
 
     public DoubleArrayLexicon getLexicon() {
         return lexicon;
+    }
+
+    /**
+     * Build-time helper data for dictionary compilation. Runtime tokenization does
+     * not use this map.
+     */
+    public Map<Integer, String> getReferenceIdMap() {
+        if (referenceIdMap != null) {
+            return referenceIdMap;
+        }
+
+        ByteBuffer slice = header.sliceOrNull(bytes, Block.REFERENCE_ID_TABLE);
+        if (slice == null) {
+            referenceIdMap = Collections.emptyMap();
+            return referenceIdMap;
+        }
+
+        BufReader reader = new BufReader(slice);
+        int length = reader.readVarint32();
+        HashMap<Integer, String> map = new HashMap<>(Math.max(1, length / 10 + 1));
+        for (int i = 0; i < length; ++i) {
+            map.put(reader.readVarint32(), reader.readUtf8String());
+        }
+        referenceIdMap = Collections.unmodifiableMap(map);
+        return referenceIdMap;
     }
 
     /**
