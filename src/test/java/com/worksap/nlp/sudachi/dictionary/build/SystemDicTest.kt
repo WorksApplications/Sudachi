@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ class SystemDicTest {
     repeat(10) { bldr.lexicon(javaClass.getResource("one.csv")) }
     bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,ミナミ,西,5,C,0/1,2/3,4/5,6/7").build(data)
     val dic = BinaryDictionary(data.buffer())
-    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
+    (dic as DictionaryAccess).setCharacterCategory(
+        javaClass.getClassLoader().getResource("char.def"))
     assertEquals(11, dic.lexicon.size()) // 10 + 南
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
     val m = dic.morpheme(44) // 11th word (i.e. 南)
@@ -75,7 +76,8 @@ class SystemDicTest {
     val data = MemChannel()
     bldr.lexicon("南,1,1,4675,南,名詞,普通名詞,一般,*,*,*,南,南,*,C,*,*,*,*").build(data)
     val dic = BinaryDictionary(data.buffer())
-    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
+    (dic as DictionaryAccess).setCharacterCategory(
+        javaClass.getClassLoader().getResource("char.def"))
     val wordIds = intArrayOf(4)
     assertEquals(1, dic.lexicon.size())
     assertEquals(POS("名詞", "普通名詞", "一般", "*", "*", "*"), dic.grammar.getPartOfSpeechString(0))
@@ -213,7 +215,8 @@ class SystemDicTest {
     val ch = MemChannel()
     bldr.build(ch)
     val dic = BinaryDictionary(ch.buffer())
-    (dic as DictionaryAccess).setCharacterCategory(javaClass.getResource("char.def"))
+    (dic as DictionaryAccess).setCharacterCategory(
+        javaClass.getClassLoader().getResource("char.def"))
     assertEquals(dic.lexicon.size(), 101)
 
     (0..100).forEach { i ->
