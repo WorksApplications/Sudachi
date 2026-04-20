@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,11 @@ class MockInputText implements InputText {
 
     @Override
     public boolean canBow(int index) {
+        return true;
+    }
+
+    @Override
+    public boolean canOovBow(int index) {
         return true;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,14 @@ import com.worksap.nlp.sudachi.dictionary.Grammar;
 class UTF8InputText implements InputText {
 
     private final String originalText;
+    // input text modified by normalizer and plugins
     private final String modifiedText;
+    // utf-8 representation of the modifiedText
     private final byte[] bytes;
     private final int[] byteToOriginal;
     private final int[] byteToModified;
     private final List<Integer> modifiedToOriginal;
+    // pre-calculated data for each modifiedText chars
     private final List<EnumSet<CategoryType>> charCategories;
     private final List<Integer> charCategoryContinuities;
     private final List<Boolean> canBowList;
@@ -189,6 +192,13 @@ class UTF8InputText implements InputText {
     }
 
     @Override
+    public boolean canOovBow(int index) {
+        int offset = modifiedOffset(index);
+        return isCharAlignment(index) && !charCategories.get(offset).contains(CategoryType.NOOOVBOW)
+                && (offset == 0 || !charCategories.get(offset - 1).contains(CategoryType.NOOOVEOW));
+    }
+
+    @Override
     public int getWordCandidateLength(int index) {
         for (int i = index + 1; i < bytes.length; i++) {
             if (canBow(i)) {
@@ -198,6 +208,7 @@ class UTF8InputText implements InputText {
         return bytes.length - index;
     }
 
+    /** check if the byte is the first byte of a utf-8 codepoint representation */
     private boolean isCharAlignment(int index) {
         return (bytes[index] & 0xC0) != 0x80;
     }

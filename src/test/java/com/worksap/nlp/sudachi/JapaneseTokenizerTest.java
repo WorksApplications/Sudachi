@@ -177,6 +177,14 @@ public class JapaneseTokenizerTest {
     }
 
     @Test
+    public void tokenizeNoooveow() {
+        String text = "Auf\u200Clage";
+        List<Morpheme> morphemes = tokenizer.tokenize(text);
+        assertThat(morphemes.size(), is(1));
+        assertThat(morphemes.get(0).surface(), is(text));
+    }
+
+    @Test
     public void tokenizeSentencesWithSurrogatePair() {
         Iterator<List<Morpheme>> it = tokenizer.tokenizeSentences("。😀").iterator();
         assertThat(it.hasNext(), is(true));
