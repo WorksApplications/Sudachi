@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -33,7 +30,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
 import com.worksap.nlp.sudachi.dictionary.*;
-import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 class JapaneseTokenizer implements Tokenizer {
 
@@ -223,7 +219,7 @@ class JapaneseTokenizer implements Tokenizer {
             long wordMaskWithOov = wordMask;
 
             // OOV
-            if (!input.getCharCategoryTypes(byteBoundary).contains(CategoryType.NOOOVBOW)) {
+            if (input.canOovBow(byteBoundary)) {
                 for (OovProviderPlugin plugin : oovProviderPlugins) {
                     wordMaskWithOov = provideOovs(plugin, input, byteBoundary, wordMaskWithOov, crrNodes);
                 }
