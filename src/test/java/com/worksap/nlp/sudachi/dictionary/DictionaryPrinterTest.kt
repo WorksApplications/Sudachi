@@ -74,16 +74,16 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic")
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(43, lines.size) // header + entries + trailing new line
+    assertEquals(46, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
-    assertEquals("た,1,1,8729,,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,,", lines[2])
     assertEquals(
-        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト\",,",
+        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト,to-2\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト,to-2\",,,",
         lines[7])
-    assertEquals("特a,8,8,2914,特A,名詞,普通名詞,一般,*,*,*,トクエー,,,,,,,,", lines[38])
+    assertEquals("特a,8,8,2914,特A,名詞,普通名詞,一般,*,*,*,トクエー,,,,,,,,,", lines[41])
   }
 
   @Test
@@ -92,12 +92,12 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.ID)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(43, lines.size) // header + entries + trailing new line
+    assertEquals(46, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
-    assertEquals("た,1,1,8729,,0,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,,1,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,0,タ,,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,1,ニ,,,,,,,,,", lines[2])
   }
 
   @Test
@@ -106,12 +106,12 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", posMode = DictionaryPrinter.POSMode.BOTH)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(43, lines.size) // header + entries + trailing new line
+    assertEquals(46, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS_ID,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
-    assertEquals("た,1,1,8729,,0,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,", lines[1])
-    assertEquals("に,2,2,11406,,1,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,", lines[2])
+    assertEquals("た,1,1,8729,,0,助動詞,*,*,*,助動詞-タ,終止形-一般,タ,,,,,,,,,", lines[1])
+    assertEquals("に,2,2,11406,,1,助詞,接続助詞,*,*,*,*,ニ,,,,,,,,,", lines[2])
   }
 
   @Test
@@ -120,12 +120,12 @@ class DictionaryPrinterTest {
     printDictionary(output, "system.dic", wordRefMode = DictionaryPrinter.WordRefMode.TRIPLE_ID)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(43, lines.size) // header + entries + trailing new line
+    assertEquals(46, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
     assertEquals(
-        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト\",,,\"東京,3,トウキョウ/都,4,ト\",,",
+        "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト,to-2\",,,\"東京,3,トウキョウ/都,4,ト,to-2\",,,",
         lines[7])
   }
 
@@ -135,14 +135,14 @@ class DictionaryPrinterTest {
     printDictionary(output, "user.dic", TestDictionary.systemDict)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(6, lines.size) // header + entries + trailing new line
+    assertEquals(9, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
     assertEquals(
-        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ\",1/3,",
-        lines[3])
-    assertEquals("すだち,6,6,2816,,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ,スダチ,,,,,,,,徳島県産", lines[4])
+        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ,fu-2\",,,\"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/府,名詞,普通名詞,一般,*,*,*,フ,fu-2\",1/3,,",
+        lines[5])
+    assertEquals("すだち,6,6,2816,,被子植物門,双子葉植物綱,ムクロジ目,ミカン科,ミカン属,スダチ,スダチ,,,,,,,,徳島県産,", lines[7])
   }
 
   @Test
@@ -155,13 +155,13 @@ class DictionaryPrinterTest {
         wordRefMode = DictionaryPrinter.WordRefMode.TRIPLE_ID)
     val lines = output.toString().split(System.lineSeparator())
 
-    assertEquals(6, lines.size) // header + entries + trailing new line
+    assertEquals(9, lines.size) // header + entries + trailing new line
     assertEquals(
-        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA",
+        "INDEX_FORM,LEFT_ID,RIGHT_ID,COST,HEADWORD,POS1,POS2,POS3,POS4,POS5,POS6,READING_FORM,NORMALIZED_FORM,DICTIONARY_FORM,SPLIT_A,SPLIT_B,SPLIT_C,WORD_STRUCTURE,SYNONYM_GROUPS,USER_DATA,REFERENCE_ID",
         lines[0])
     assertEquals(
-        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,3,トウキョウ/府,4,フ\",,,\"東京,3,トウキョウ/府,4,フ\",1/3,",
-        lines[3])
+        "東京府,6,6,2816,,名詞,固有名詞,地名,一般,*,*,トウキョウフ,,,\"東京,3,トウキョウ/府,4,フ,fu-2\",,,\"東京,3,トウキョウ/府,4,フ,fu-2\",1/3,,",
+        lines[5])
   }
 
   @Test

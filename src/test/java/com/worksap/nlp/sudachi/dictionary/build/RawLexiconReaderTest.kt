@@ -70,6 +70,7 @@ class RawLexiconReaderTest {
       assertEquals(
           listOf(WordRef.RefByLineNo(8, false), WordRef.RefByLineNo(9, false)), e.cUnitSplit)
       assertEquals("10", e.userData)
+      assertEquals("ref", e.referenceId)
     }
     assertNull(reader.nextEntry())
   }
@@ -82,13 +83,13 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword()) // indexForm is used for missing headword
       assertEquals("トウキョウト", e.reading)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 1, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 1, "ト")),
           e.aUnitSplit)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 2, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 2, "ト")),
           e.bUnitSplit)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 3, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 3, "ト")),
           e.wordStructure)
     }
     assertNotNull(reader.nextEntry())
@@ -103,19 +104,20 @@ class RawLexiconReaderTest {
       assertEquals("東京都", e.headword())
       assertEquals("トウキョウト", e.reading)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 1, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 1, "ト")),
           e.aUnitSplit)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 2, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 2, "ト")),
           e.bUnitSplit)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 3, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 3, "ト")),
           e.cUnitSplit)
       assertEquals(
-          listOf(WordRef.RefByTriple("東京", 0, "トウキョウ"), WordRef.RefByTriple("都", 4, "ト")),
+          listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ"), WordRef.RefByEntryKey("都", 4, "ト")),
           e.wordStructure)
       assertEquals(Ints.wrap(intArrayOf(8, 9)), e.synonymGroups)
       assertEquals("10", e.userData)
+      assertEquals("ref", e.referenceId)
     }
     assertNotNull(reader.nextEntry())
     assertNull(reader.nextEntry())
@@ -259,6 +261,34 @@ abc,0,0,1000,AbC,0,トウキョウト,,,,,"""
       val reader = RawLexiconReader(csvtext(text), posTable)
       reader.nextEntry()
     }
+  }
+
+  @Test
+  fun parseReferenceIdColumnAndWordRef() {
+    val text =
+        """IndexForm,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure,reference_id
+東京都,6,8,5320,0,トウキョウト,,,"東京,0,トウキョウ,tokyo-main",,,metro"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable)
+    assertNotNull(reader.nextEntry()).let { e ->
+      assertEquals("metro", e.referenceId)
+      assertEquals(listOf(WordRef.RefByEntryKey("東京", 0, "トウキョウ", "tokyo-main")), e.aUnitSplit)
+    }
+    assertNull(reader.nextEntry())
+  }
+
+  @Test
+  fun selfReferenceWithReferenceIdBecomesNull() {
+    val text =
+        """IndexForm,LeftId,RightId,Cost,pos_id,reading_form,normalized_form,DictionaryForm,splita,splitb,wordstructure,reference_id
+東京都,6,8,5320,0,トウキョウト,"東京都,0,トウキョウト,metro",,,,,metro"""
+    val posTable = POSTable()
+    posTable.getId(POS("a", "a", "a", "a", "a", "0"))
+
+    val reader = RawLexiconReader(csvtext(text), posTable)
+    assertNotNull(reader.nextEntry()).let { e -> assertNull(e.normalizedFormRef) }
   }
 
   @Test

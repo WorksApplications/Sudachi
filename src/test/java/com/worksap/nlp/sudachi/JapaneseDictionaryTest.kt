@@ -132,7 +132,7 @@ class JapaneseDictionaryTest {
   @Test
   fun entries() {
     // contains all morphemes, where all of them have different wordId
-    assertEquals(41, dict.entries().map { m -> m.getWordId() }.distinct().count())
+    assertEquals(44, dict.entries().map { m -> m.getWordId() }.distinct().count())
     // includes entry with -1 conjunction cost
     assertEquals(1, dict.entries().filter { m -> m.dictionaryForm() == "隠し" }.count())
     // excludes phantom entry
@@ -146,9 +146,9 @@ class JapaneseDictionaryTest {
   @Test
   fun entriesWithUser() {
     val udict = TestDictionary.user1()
-    assertEquals(41 + 4, udict.entries().map { m -> m.getWordId() }.distinct().count())
-    assertEquals(6 + 1, udict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
-    assertEquals(4 + 1, udict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
+    assertEquals(44 + 7, udict.entries().map { m -> m.getWordId() }.distinct().count())
+    assertEquals(6 + 3, udict.entries().filter { m -> m.partOfSpeech().get(1) == "固有名詞" }.count())
+    assertEquals(4 + 3, udict.entries().filter { m -> m.readingForm().contains("キョウ") }.count())
     udict.close()
   }
 

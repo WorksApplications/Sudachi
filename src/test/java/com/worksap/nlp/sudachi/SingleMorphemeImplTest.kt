@@ -91,7 +91,7 @@ class SingleMorphemeImplTest {
     assertEquals("都", spl[1].surface())
     assertEquals(2, spl[1].begin())
     assertEquals(3, spl[1].end())
-    assertEquals(42, spl[1].getWordId())
+    assertEquals(46, spl[1].getWordId())
   }
 
   @Test

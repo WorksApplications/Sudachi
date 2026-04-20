@@ -46,7 +46,7 @@ class DoubleArrayLexiconTest {
 
   @Test
   fun iterWordIds() {
-    assertEquals(41, systemWordIds.length())
+    assertEquals(44, systemWordIds.length())
     for (i in 0..(systemWordIds.length() - 1)) {
       lexicon.getWordInfo(systemWordIds.get(i))
     }
@@ -111,7 +111,7 @@ class DoubleArrayLexiconTest {
     assertEquals("行く", lexicon.string(0, lexicon.getWordInfo(wi.getDictionaryForm()).getHeadword()))
 
     // な。な  (phantom normalized form)
-    wi = lexicon.getWordInfo(getWordId(39))
+    wi = lexicon.getWordInfo(getWordId(42))
     assertEquals("な。な", lexicon.string(0, wi.getHeadword()))
     assertEquals("ナナ", lexicon.string(0, wi.getReadingForm()))
     assertEquals("なな", lexicon.string(0, lexicon.getWordInfo(wi.getNormalizedForm()).getHeadword()))
@@ -119,9 +119,9 @@ class DoubleArrayLexiconTest {
     // 東京都
     wi = lexicon.getWordInfo(getWordId(6))
     assertEquals("東京都", lexicon.string(0, wi.getHeadword()))
-    assertEquals(listOf(getWordId(5), getWordId(9)), wi.getAunitSplit().toList())
+    assertEquals(listOf(getWordId(5), getWordId(10)), wi.getAunitSplit().toList())
     assertEquals(listOf(), wi.getBunitSplit().toList())
-    assertEquals(listOf(getWordId(5), getWordId(9)), wi.getWordStructure().toList())
+    assertEquals(listOf(getWordId(5), getWordId(10)), wi.getWordStructure().toList())
     assertEquals(listOf(), wi.getSynonymGroupIds().toList())
   }
 
@@ -132,7 +132,7 @@ class DoubleArrayLexiconTest {
     val userlex = DoubleArrayLexicon.load(bytes, desc)
 
     // すだち
-    val wi = userlex.getWordInfo(18)
+    val wi = userlex.getWordInfo(34)
     assertEquals("すだち", userlex.string(0, wi.getHeadword()))
     assertEquals(8, wi.getPOSId())
     assertEquals("徳島県産", wi.getUserData())
@@ -141,7 +141,7 @@ class DoubleArrayLexiconTest {
   @Test
   fun wordInfoLong() {
     // 0123456789 * 30
-    val wi = lexicon.getWordInfo(getWordId(36))
+    val wi = lexicon.getWordInfo(getWordId(39))
     val surface = lexicon.string(0, wi.getHeadword())
     assertEquals(300, surface.length)
     assertEquals(300, wi.getLength())
@@ -157,7 +157,7 @@ class DoubleArrayLexiconTest {
 
   @Test
   fun size() {
-    assertEquals(41, lexicon.size())
+    assertEquals(44, lexicon.size())
   }
 
   @Test fun string() {}

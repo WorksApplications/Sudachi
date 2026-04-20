@@ -456,7 +456,7 @@ public class JapaneseTokenizerTest {
         assertThat(splits.size(), is(3));
         assertThat(splits.get(0).normalizedForm(), is("京都"));
         assertThat(splits.get(1).normalizedForm(), is("東京"));
-        assertThat(splits.get(2).normalizedForm(), is("都"));
+        assertThat(splits.get(2).normalizedForm(), is("都2"));
     }
 
     @Test
@@ -470,7 +470,7 @@ public class JapaneseTokenizerTest {
         List<Morpheme> splits = tokenizer.split(morphemes, Tokenizer.SplitMode.A);
         assertThat(splits.size(), is(3));
         assertThat(splits.get(0).normalizedForm(), is("アイウ"));
-        assertThat(splits.get(2).normalizedForm(), is("都"));
+        assertThat(splits.get(2).normalizedForm(), is("都2"));
     }
 
     @Test
@@ -483,7 +483,7 @@ public class JapaneseTokenizerTest {
         assertThat(root.getJsonObject("inputText").getString("modifiedText"), is("東京都"));
 
         JsonArray lattice = root.getJsonArray("lattice");
-        assertThat(lattice.size(), is(7));
+        assertThat(lattice.size(), is(8));
 
         int i = 0;
         assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
@@ -538,6 +538,13 @@ public class JapaneseTokenizerTest {
 
         i = 6;
         assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
+        assertThat(lattice.getJsonObject(i).getInt("begin"), is(6));
+        assertThat(lattice.getJsonObject(i).getInt("end"), is(9));
+        assertThat(lattice.getJsonObject(i).getString("headword"), is("都"));
+        assertThat(lattice.getJsonObject(i).getString("pos"), is("名詞,普通名詞,一般,*,*,*"));
+
+        i = 7;
+        assertThat(lattice.getJsonObject(i).getInt("nodeId"), is(i));
         assertThat(lattice.getJsonObject(i).getInt("begin"), is(9));
         assertThat(lattice.getJsonObject(i).isNull("end"), is(true));
         assertThat(lattice.getJsonObject(i).getString("headword"), is("(null)"));
@@ -546,7 +553,7 @@ public class JapaneseTokenizerTest {
         assertThat(lattice.getJsonObject(i).getInt("rightId"), is(0));
         assertThat(lattice.getJsonObject(i).getInt("leftId"), is(0));
         assertThat(lattice.getJsonObject(i).getInt("cost"), is(0));
-        assertThat(lattice.getJsonObject(i).getJsonArray("connectCosts").size(), is(3));
+        assertThat(lattice.getJsonObject(i).getJsonArray("connectCosts").size(), is(4));
 
         assertThat(root.getJsonArray("bestPath").size(), is(1));
         assertThat(root.getJsonArray("bestPath").getJsonObject(0).getString("headword"), is("東京都"));
