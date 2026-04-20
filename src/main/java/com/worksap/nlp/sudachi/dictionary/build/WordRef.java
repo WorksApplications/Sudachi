@@ -33,6 +33,13 @@ public abstract class WordRef {
     public abstract int resolve(EntryLookup resolver);
 
     /**
+     * @return true if this ref refers to the provided entry identity.
+     */
+    public boolean matches(String headword, short posId, String reading, String referenceId) {
+        return false;
+    }
+
+    /**
      * Encode the target entry as wordref.
      * 
      * wordref (32 bits) has similar structure as combined word id, but its dict
@@ -105,6 +112,11 @@ public abstract class WordRef {
         }
 
         @Override
+        public boolean matches(String headword, short posId, String reading, String referenceId) {
+            return this.headword.equals(headword);
+        }
+
+        @Override
         public int resolve(EntryLookup resolver) {
             List<EntryLookup.EntryWithFlag> entries = resolver.byHeadword(headword);
             // Use the first entry. This is ok since RefByHeadword is only allowed for the
@@ -134,17 +146,23 @@ public abstract class WordRef {
     }
 
     /**
-     * Reference written by headword-pos-reading tuple.
+     * Reference written by headword-pos-reading and optional reference-id key.
      */
-    public static final class RefByTriple extends WordRef {
+    public static final class RefByEntryKey extends WordRef {
         private final String headword;
         private final short posId;
         private final String reading;
+        private final String referenceId;
 
-        public RefByTriple(String headword, short posId, String reading) {
+        public RefByEntryKey(String headword, short posId, String reading) {
+            this(headword, posId, reading, null);
+        }
+
+        public RefByEntryKey(String headword, short posId, String reading, String referenceId) {
             this.headword = headword;
             this.posId = posId;
             this.reading = reading;
+            this.referenceId = normalizeReferenceId(referenceId);
         }
 
         public String getHeadword() {
@@ -159,8 +177,29 @@ public abstract class WordRef {
             return reading;
         }
 
+        public String getReferenceId() {
+            return referenceId;
+        }
+
+        @Override
+        public boolean matches(String headword, short posId, String reading, String referenceId) {
+            return this.headword.equals(headword) && this.posId == posId && this.reading.equals(reading)
+                    && Objects.equals(this.referenceId, normalizeReferenceId(referenceId));
+        }
+
         @Override
         public int resolve(EntryLookup resolver) {
+            if (referenceId != null) {
+                EntryLookup.EntryWithFlag entry = resolver.byReferenceId(referenceId);
+                if (entry == null) {
+                    throw new IllegalArgumentException("matching entry not found for the " + this.toString());
+                }
+                if (entry.matches(posId, reading) && headword.equals(entry.headword())) {
+                    return intoWordRef(entry);
+                }
+                throw new IllegalArgumentException("matching entry not found for the " + this.toString());
+            }
+
             List<EntryLookup.EntryWithFlag> entries = resolver.byHeadword(headword);
             if (entries == null) {
                 throw new IllegalArgumentException("matching entry not found for the " + this.toString());
@@ -175,7 +214,7 @@ public abstract class WordRef {
 
         @Override
         public String toString() {
-            return String.format("WordRef/Triple: %s/%d/%s", headword, posId, reading);
+            return String.format("WordRef/EntryKey: %s/%d/%s/%s", headword, posId, reading, referenceId);
         }
 
         @Override
@@ -184,13 +223,21 @@ public abstract class WordRef {
                 return true;
             if (other == null || getClass() != other.getClass())
                 return false;
-            RefByTriple o = (RefByTriple) other;
-            return (headword.equals(o.headword)) && (posId == o.posId) && (reading.equals(o.reading));
+            RefByEntryKey o = (RefByEntryKey) other;
+            return (headword.equals(o.headword)) && (posId == o.posId) && (reading.equals(o.reading))
+                    && Objects.equals(referenceId, o.referenceId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(headword, posId, reading);
+            return Objects.hash(headword, posId, reading, referenceId);
+        }
+
+        private static String normalizeReferenceId(String value) {
+            if (value == null || value.isEmpty()) {
+                return null;
+            }
+            return value;
         }
     }
 
@@ -230,7 +277,7 @@ public abstract class WordRef {
                 return new RefByLineNo(lineNum, isUser);
             }
 
-            // triple, pos is written as 6-parts
+            // entry key, pos is written as 6-parts
             if (StringUtil.count(text, WORDREF_DELIMITER) == 7) {
                 String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 8);
                 String headword = Unescape.unescape(cols[0]);
@@ -241,16 +288,41 @@ public abstract class WordRef {
                 POS pos = new POS(posElems);
                 short posId = posTable.getId(pos);
                 String reading = Unescape.unescape(cols[7]);
-                return new RefByTriple(headword, posId, reading);
+                return new RefByEntryKey(headword, posId, reading);
             }
 
-            // triple, pos is written as pos-id
+            // entry key, pos is written as 6-parts with reference-id
+            if (StringUtil.count(text, WORDREF_DELIMITER) == 8) {
+                String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 9);
+                String headword = Unescape.unescape(cols[0]);
+                String[] posElems = Arrays.copyOfRange(cols, 1, 7);
+                for (int i = 0; i < POS.DEPTH; ++i) {
+                    posElems[i] = Unescape.unescape(posElems[i]);
+                }
+                POS pos = new POS(posElems);
+                short posId = posTable.getId(pos);
+                String reading = Unescape.unescape(cols[7]);
+                String referenceId = Unescape.unescape(cols[8]);
+                return new RefByEntryKey(headword, posId, reading, referenceId);
+            }
+
+            // entry key, pos is written as pos-id
             if (StringUtil.count(text, WORDREF_DELIMITER) == 2) {
                 String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 3);
                 String headword = Unescape.unescape(cols[0]);
                 short posId = Short.parseShort(cols[1]);
                 String reading = Unescape.unescape(cols[2]);
-                return new RefByTriple(headword, posId, reading);
+                return new RefByEntryKey(headword, posId, reading);
+            }
+
+            // entry key, pos is written as pos-id with reference-id
+            if (StringUtil.count(text, WORDREF_DELIMITER) == 3) {
+                String[] cols = text.split(String.valueOf(WORDREF_DELIMITER), 4);
+                String headword = Unescape.unescape(cols[0]);
+                short posId = Short.parseShort(cols[1]);
+                String reading = Unescape.unescape(cols[2]);
+                String referenceId = Unescape.unescape(cols[3]);
+                return new RefByEntryKey(headword, posId, reading, referenceId);
             }
 
             if (allowHeadword) {

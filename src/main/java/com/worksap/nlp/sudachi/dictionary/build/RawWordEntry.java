@@ -37,6 +37,7 @@ public class RawWordEntry implements EntryLookup.Entry {
     short cost;
     short posId;
     String reading;
+    String referenceId;
     WordRef normalizedFormRef;
     WordRef dictionaryFormRef;
     String mode;
@@ -95,6 +96,11 @@ public class RawWordEntry implements EntryLookup.Entry {
         return headword;
     }
 
+    @Override
+    public String referenceId() {
+        return referenceId;
+    }
+
     private void checkString(String value, String name) {
         if (value.length() > StringPtr.MAX_LENGTH) {
             throw new IllegalArgumentException(
@@ -141,6 +147,7 @@ public class RawWordEntry implements EntryLookup.Entry {
         entry.cost = Short.MAX_VALUE;
         entry.posId = 0;
         entry.reading = "";
+        entry.referenceId = null;
         //// null wordRef refers to self
         // entry.normalizedForm
         // entry.dictionaryForm
@@ -172,6 +179,7 @@ public class RawWordEntry implements EntryLookup.Entry {
         // other data should be equivalent to the base entry
         entry.posId = base.posId;
         entry.reading = base.reading;
+        entry.referenceId = null;
         entry.dictionaryFormRef = base.dictionaryFormRef;
         entry.normalizedFormRef = null; // refer to itself
         entry.mode = base.mode;

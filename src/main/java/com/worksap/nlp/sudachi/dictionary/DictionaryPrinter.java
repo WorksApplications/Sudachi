@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +45,7 @@ public class DictionaryPrinter {
     private final TextNormalizer textNormalizer;
     // sorted raw word ids taken from the target dict.
     private final int[] wordIds;
+    private final Map<Integer, String> referenceIdsByWordId;
 
     private POSMode posMode = POSMode.DEFAULT;
     private WordRefMode wordRefMode = WordRefMode.DEFAULT;
@@ -78,18 +81,18 @@ public class DictionaryPrinter {
 
         this.output = output;
 
-        int dicIdMask;
         if (base == null) { // system
             grammar = dic.getGrammar();
             lex = new LexiconSet(dic.getLexicon(), grammar.getSystemPartOfSpeechSize());
-            dicIdMask = WordId.dicIdMask(0);
+            referenceIdsByWordId = mapReferenceIds(dic.getReferenceIdMap(), WordId.dicIdMask(0));
         } else { // user
             grammar = base.getGrammar();
             lex = new LexiconSet(base.getLexicon(), grammar.getSystemPartOfSpeechSize());
 
             lex.add(dic.getLexicon(), (short) grammar.getPartOfSpeechSize());
             grammar.addPosList(dic.getGrammar());
-            dicIdMask = WordId.dicIdMask(1);
+            referenceIdsByWordId = mapReferenceIds(base.getReferenceIdMap(), WordId.dicIdMask(0));
+            referenceIdsByWordId.putAll(mapReferenceIds(dic.getReferenceIdMap(), WordId.dicIdMask(1)));
         }
 
         // set default char category for text normalizer
@@ -103,6 +106,7 @@ public class DictionaryPrinter {
         int[] allIds = new int[targetLexicon.size()];
         int idx = 0;
         Iterator<Integer> ids = targetLexicon.wordIds();
+        int dicIdMask = base == null ? WordId.dicIdMask(0) : WordId.dicIdMask(1);
         while (ids.hasNext()) {
             allIds[idx++] = WordId.applyMask(ids.next(), dicIdMask);
         }
@@ -152,7 +156,7 @@ public class DictionaryPrinter {
                         posColumns,
                         Arrays.asList(Column.READING_FORM, Column.NORMALIZED_FORM, Column.DICTIONARY_FORM,
                                 Column.SPLIT_A, Column.SPLIT_B, Column.SPLIT_C, Column.WORD_STRUCTURE,
-                                Column.SYNONYM_GROUPS, Column.USER_DATA))
+                                Column.SYNONYM_GROUPS, Column.USER_DATA, Column.REFERENCE_ID))
                 .flatMap(l -> l.stream()).collect(Collectors.toList());
 
         printColumnHeaders(headerColumns);
@@ -220,7 +224,8 @@ public class DictionaryPrinter {
         field(wordRefList(info.getWordStructure()));
 
         field(intList(info.getSynonymGroupIds()));
-        lastField(info.getUserData());
+        field(info.getUserData());
+        lastField(referenceIdsByWordId.getOrDefault(wordId, ""));
         output.print("\n");
     }
 
@@ -239,8 +244,8 @@ public class DictionaryPrinter {
     }
 
     /**
-     * encode word entry pointed by the wordId as WordRef.RefByTriple. If it points
-     * to self, return empty string.
+     * encode word entry pointed by the wordId as WordRef.RefByEntryKey. If it
+     * points to self, return empty string.
      */
     String wordRef(int wordId, int reference) {
         if (wordId == reference) {
@@ -249,7 +254,7 @@ public class DictionaryPrinter {
         return wordRef(wordId);
     }
 
-    /** encode word entry pointed by the wordId as WordRef.RefByTriple. */
+    /** encode word entry pointed by the wordId as WordRef.RefByEntryKey. */
     String wordRef(int wordId) {
         WordInfo info = lex.getWordInfo(wordId);
         int dic = WordId.dic(wordId);
@@ -266,6 +271,11 @@ public class DictionaryPrinter {
             parts.add(headword);
             parts.addAll(pos);
             parts.add(reading);
+        }
+        String referenceId = referenceIdsByWordId.get(wordId);
+        if (referenceId != null) {
+            parts = new ArrayList<>(parts);
+            parts.add(referenceId);
         }
 
         return parts.stream().map(this::maybeEscapeRefPart)
@@ -308,7 +318,7 @@ public class DictionaryPrinter {
         return "\"" + value + "\"";
     }
 
-    /** escape WordRef.RefByTriple part. */
+    /** escape WordRef.RefByEntryKey part. */
     private String maybeEscapeRefPart(String value) {
         boolean hasDelimiter = hasCh(value, RawLexiconReader.LIST_DELIMITER);
         boolean hasJoiner = hasCh(value, WordRef.Parser.WORDREF_DELIMITER);
@@ -341,6 +351,14 @@ public class DictionaryPrinter {
         } else {
             return 'C';
         }
+    }
+
+    private static Map<Integer, String> mapReferenceIds(Map<Integer, String> rawReferenceIds, int dicIdMask) {
+        HashMap<Integer, String> result = new HashMap<>(rawReferenceIds.size());
+        for (Map.Entry<Integer, String> e : rawReferenceIds.entrySet()) {
+            result.put(WordId.applyMask(e.getKey(), dicIdMask), e.getValue());
+        }
+        return result;
     }
 
     /**
