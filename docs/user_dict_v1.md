@@ -314,10 +314,12 @@ Surface,LeftId,RightId,Cost,POS1,POS2,POS3,POS4,POS5,POS6,ReadingForm,Normalized
 
 ### 引数
 
-- output.dic: 出力するバイナリ辞書ファイル名
-- system_core.dic: Sudachi のシステム辞書
-- description: バイナリ辞書のヘッダーに埋め込むコメント
+- output.dic: （必須）出力するバイナリ辞書ファイル名
+- system_core.dic: （必須）Sudachi のシステム辞書
+- description: （オプショナル）バイナリ辞書のヘッダーに埋め込むコメント
 - input.csv: ユーザ辞書ソースファイル名
+
+品詞ファイルの指定はありません。既存の品詞データは引数のシステム辞書から読み込まれ、そのほかのユーザー品詞はソースファイルに出現順に採番されます。
 
 ## ユーザー辞書の利用法
 
