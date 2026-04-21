@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class MorphemeListItemTest {
@@ -51,5 +52,28 @@ class MorphemeListItemTest {
     // user without data
     val piraru = udic.tokenizer().tokenize("ぴらる")
     assertTrue(piraru[0].getUserData().isEmpty())
+  }
+
+  @Test
+  fun referencedMorphemes() {
+    val dic = TestDictionary.user0()
+    val morphemes = dic.tokenizer().tokenize("いっ")
+    val m = morphemes[0]
+
+    val normalized = m.normalizedFormMorpheme()
+    val dictionary = m.dictionaryFormMorpheme()
+
+    assertEquals("行く", normalized.surface())
+    assertEquals("いく", dictionary.surface())
+    assertEquals(m.normalizedForm(), normalized.surface())
+    assertEquals(m.dictionaryForm(), dictionary.surface())
+    assertEquals(0, normalized.begin())
+    assertEquals(2, normalized.end())
+    assertEquals(0, dictionary.begin())
+    assertEquals(2, dictionary.end())
+
+    val kyoto = dic.tokenizer().tokenize("京都")[0]
+    assertSame(kyoto, kyoto.normalizedFormMorpheme())
+    assertSame(kyoto, kyoto.dictionaryFormMorpheme())
   }
 }

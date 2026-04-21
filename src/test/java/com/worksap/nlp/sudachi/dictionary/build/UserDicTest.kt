@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,9 +163,10 @@ class UserDicTest {
             .userUrl(javaClass.getResource("wordref-user.csv"))
             .load()
 
-    val da = dic as DictionaryAccess
-    val m = da.morpheme(WordId.make(1, 12))
-    assertEquals("東京府", m.surface())
+    val morphemes = dic.lookup("東京府")
+    assertEquals("府", morphemes[0].split(Tokenizer.SplitMode.A)[1].normalizedForm())
+    assertEquals("府2u", morphemes[1].split(Tokenizer.SplitMode.A)[1].normalizedForm())
+    assertEquals("府3", morphemes[2].split(Tokenizer.SplitMode.A)[1].normalizedForm())
   }
 
   @Test

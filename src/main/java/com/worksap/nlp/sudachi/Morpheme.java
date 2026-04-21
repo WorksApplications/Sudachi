@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,24 @@ public interface Morpheme {
     public String dictionaryForm();
 
     /**
+     * Returns the morpheme of the dictionary entry referenced by the dictionary
+     * form.
+     *
+     * Unlike {@link #dictionaryForm()}, the returned morpheme exposes the
+     * referenced entry itself, including its part-of-speech, reading form, user
+     * data, etc.
+     *
+     * If the morpheme is OOV, this method returns {@code this}.
+     *
+     * The returned referenced morpheme is independent from the original analysis,
+     * so its offsets are standalone values in the range
+     * {@code 0..surface().length()}.
+     *
+     * @return the dictionary form morpheme
+     */
+    public Morpheme dictionaryFormMorpheme();
+
+    /**
      * Returns the normalized form of morpheme.
      *
      * This method returns the form normalizing inconsistent spellings and inflected
@@ -84,6 +102,24 @@ public interface Morpheme {
      * @return the normalized form of morpheme
      */
     public String normalizedForm();
+
+    /**
+     * Returns the morpheme of the dictionary entry referenced by the normalized
+     * form.
+     *
+     * Unlike {@link #normalizedForm()}, the returned morpheme exposes the
+     * referenced entry itself, including its part-of-speech, reading form, user
+     * data, etc.
+     *
+     * If the morpheme is OOV, this method returns {@code this}.
+     *
+     * The returned referenced morpheme is independent from the original analysis,
+     * so its offsets are standalone values in the range
+     * {@code 0..surface().length()}.
+     *
+     * @return the normalized form morpheme
+     */
+    public Morpheme normalizedFormMorpheme();
 
     /**
      * Returns the reading form of morpheme.

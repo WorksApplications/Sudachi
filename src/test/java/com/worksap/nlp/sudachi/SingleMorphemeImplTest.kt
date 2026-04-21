@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class SingleMorphemeImplTest {
@@ -36,7 +37,8 @@ class SingleMorphemeImplTest {
     assertEquals("キョウト", m.readingForm())
     assertEquals("京都", m.normalizedForm())
     assertEquals("京都", m.dictionaryForm())
-    // assertEquals(, m.split(Tokenizer.SplitMode.A)) // in other test
+    assertSame(m, m.normalizedFormMorpheme())
+    assertSame(m, m.dictionaryFormMorpheme())
     assertFalse(m.isOOV())
     assertEquals(16, m.getWordId())
     assertEquals(0, m.getDictionaryId())
@@ -57,7 +59,8 @@ class SingleMorphemeImplTest {
     assertEquals("大阪", m.readingForm())
     assertEquals("大阪", m.normalizedForm())
     assertEquals("大阪", m.dictionaryForm())
-    // assertEquals(, m.split(Tokenizer.SplitMode.A)) // in other test
+    assertSame(m, m.normalizedFormMorpheme())
+    assertSame(m, m.dictionaryFormMorpheme())
     assertTrue(m.isOOV())
     assertEquals(WordId.makeOov(3), m.getWordId())
     assertEquals(-1, m.getDictionaryId())

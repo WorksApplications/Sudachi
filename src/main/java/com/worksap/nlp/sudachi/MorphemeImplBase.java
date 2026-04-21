@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.POS;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
@@ -30,6 +31,8 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
 abstract class MorphemeImplBase implements Morpheme {
 
     protected abstract Grammar getGrammar();
+
+    protected abstract Lexicon getLexicon();
 
     protected abstract WordInfo getWordInfo();
 
@@ -53,8 +56,18 @@ abstract class MorphemeImplBase implements Morpheme {
     }
 
     @Override
+    public Morpheme dictionaryFormMorpheme() {
+        return resolveReferencedMorpheme(getWordInfo().getDictionaryForm());
+    }
+
+    @Override
     public String normalizedForm() {
         return strings().getNormalizedForm();
+    }
+
+    @Override
+    public Morpheme normalizedFormMorpheme() {
+        return resolveReferencedMorpheme(getWordInfo().getNormalizedForm());
     }
 
     @Override
@@ -85,6 +98,19 @@ abstract class MorphemeImplBase implements Morpheme {
     public String getUserData() {
         WordInfo wi = getWordInfo();
         return wi.getUserData();
+    }
+
+    private Morpheme resolveReferencedMorpheme(int wordRef) {
+        int currentWordId = getWordId();
+        if (WordId.isOov(currentWordId)) {
+            return this;
+        }
+
+        int referencedWordId = WordId.make(WordId.refDic(wordRef, WordId.dic(currentWordId)), WordId.word(wordRef));
+        if (referencedWordId == currentWordId) {
+            return this;
+        }
+        return new SingleMorphemeImpl(getGrammar(), getLexicon(), referencedWordId);
     }
 
     @Override
