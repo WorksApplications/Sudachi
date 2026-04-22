@@ -2,14 +2,15 @@
 
 # Usage examples:
 #   Convert split system lexicon CSVs while keeping the split layout:
-#     python3 scripts/migrate_v0_lexicon_to_v1.py \
-#         system_small.csv system_core.csv system_full.csv \
-#         -o out_dir
+#     python3 scripts/migrate_lexicon_v0_to_v1.py \
+#         -o out_dir \
+#         -p src/main/resources/pos.csv \
+#         --drop-leading-zero-synonym-group \
+#         small_lex.csv core_lex.csv notcore_lex.csv
 #
-#   Convert split user lexicon CSVs with split system lexicon references:
+#   Convert user lexicon CSV with split system lexicon references:
 #     python3 scripts/migrate_v0_lexicon_to_v1.py \
-#         -s system_small.csv \
-#         -s system_core.csv \
+#         -s system_small.csv -s system_core.csv \
 #         user.csv \
 #         -o out_dir
 
@@ -28,6 +29,8 @@ except ImportError:
 POS = tuple[str, str, str, str, str, str]
 POS_PARTS = ["POS1", "POS2", "POS3", "POS4", "POS5", "POS6"]
 POS_ID_COLUMN = "POS_ID"
+REFERENCE_ID_COLUMN = "REFERENCE_ID"
+ROW_INDEX = "__ROW_INDEX"
 WORDREF_DELIMITER = ","
 LIST_DELIMITER = "/"
 UNICODE_ESCAPE_RE = re.compile(r"\\u\{([0-9a-fA-F]+)\}")
@@ -57,6 +60,7 @@ LEGACY_COLUMNS = [
     "SPLIT_C",
     "USER_DATA",
     "POS_ID",
+    "REFERENCE_ID",
 ]
 
 
@@ -81,6 +85,7 @@ V1_COLUMNS = [
     "WORD_STRUCTURE",
     "SYNONYM_GROUPS",
     "USER_DATA",
+    "REFERENCE_ID",
 ]
 
 V1_COLUMNS_WITH_POS_ID_ONLY = [
@@ -99,18 +104,19 @@ V1_COLUMNS_WITH_POS_ID_ONLY = [
     "WORD_STRUCTURE",
     "SYNONYM_GROUPS",
     "USER_DATA",
+    "REFERENCE_ID",
 ]
 
 
 def parse_args() -> ap.Namespace:
     parser = ap.ArgumentParser(
-        description="Convert Sudachi legacy (v0) lexicon CSV into v1 format."
+        description="Convert Sudachi v0 lexicon CSV into v1 format."
     )
     parser.add_argument(
         "lexicon",
         type=Path,
         nargs="+",
-        help="input legacy lexicon csv file path(s)",
+        help="input v0 lexicon csv file path(s)",
     )
     parser.add_argument(
         "-o",
@@ -138,7 +144,7 @@ def parse_args() -> ap.Namespace:
         type=Path,
         action="append",
         default=None,
-        help="reference system lexicon csv file path. Specify multiple times to concatenate files in order.",
+        help="reference system lexicon csv file path(s) in v0 or v1 format. Specify multiple times to concatenate files in order.",
     )
     return parser.parse_args()
 
@@ -162,13 +168,16 @@ def is_header_row(row: list[str], expected: list[str]) -> bool:
         return False
     normalized = {normalize_column_name(v) for v in row}
     expected_normalized = {normalize_column_name(v) for v in expected}
-    return bool(normalized & expected_normalized) and normalize_column_name(row[1]) != "LEFTID" and not row[1].lstrip("-").isdigit()
+    return bool(normalized & expected_normalized) and not row[1].lstrip("-").isdigit()
 
 
-def row_to_dict(row: list[str], columns: list[str]) -> dict[str, str]:
+def row_to_dict(row: list[str], columns: list[str], mapping: list[str]=None) -> dict[str, str]:
+    if mapping is None:
+        mapping = columns
+
     entry = {column: "" for column in columns}
-    for i, value in enumerate(row[: len(columns)]):
-        entry[columns[i]] = value
+    for i, value in enumerate(row[: len(mapping)]):
+        entry[mapping[i]] = value
     return entry
 
 
@@ -193,17 +202,12 @@ def load_csv_rows(path: Path, default_columns: list[str]) -> list[dict[str, str]
                 if canonical is None:
                     raise ValueError(f"Unknown column name in {path}: {name}")
                 mapping.append(canonical)
+        else:
+            mapping = default_columns
+            rows.append(row_to_dict(first_row, default_columns))
 
-            for row in reader:
-                entry = {column: "" for column in default_columns}
-                for i, value in enumerate(row[: len(mapping)]):
-                    entry[mapping[i]] = value
-                rows.append(entry)
-            return rows
-
-        rows.append(row_to_dict(first_row, default_columns))
         for row in reader:
-            rows.append(row_to_dict(row, default_columns))
+            rows.append(row_to_dict(row, default_columns, mapping))
         return rows
 
 
@@ -218,7 +222,7 @@ def load_csv_rows_from_paths(
         chunks.append(rows)
         all_rows.extend(rows)
     for i, row in enumerate(all_rows):
-        row["__ROW_INDEX"] = str(i)
+        row[ROW_INDEX] = str(i)
     return all_rows, chunks
 
 
@@ -271,26 +275,70 @@ def get_headword(entry: dict[str, str]) -> str:
     return headword if headword else entry["INDEX_FORM"]
 
 
-def build_wordref(entry: dict[str, str], posmap: dict[POS, int]) -> str:
+def get_reference_key(entry: dict[str, str]) -> tuple[str, POS, str]:
+    return (get_headword(entry), get_pos(entry), entry.get("READING_FORM"))
+
+
+def build_duplicate_entry_keys(
+    entries: list[dict[str, str]],
+) -> set[tuple[str, POS, str]]:
+    counts: dict[tuple[str, POS, str], int] = {}
+    for entry in entries:
+        key = get_reference_key(entry)
+        counts[key] = counts.get(key, 0) + 1
+    return {key for key, count in counts.items() if count > 1}
+
+
+def get_entry_reference_id(
+    entry: dict[str, str],
+    duplicate_entry_keys: set[tuple[str, POS, str]],
+    *,
+    auto_assign: bool,
+) -> str:
+    reference_id = entry.get(REFERENCE_ID_COLUMN, "")
+    if reference_id:
+        return reference_id
+    if auto_assign and get_reference_key(entry) in duplicate_entry_keys:
+        return f"ref-{entry[ROW_INDEX]}"
+    return ""
+
+
+def build_wordref(
+    entry: dict[str, str],
+    posmap: dict[POS, int],
+    duplicate_entry_keys: set[tuple[str, POS, str]],
+    *,
+    auto_assign_reference_id: bool,
+) -> str:
     headword = escape_wordref_part(get_headword(entry))
-    reading = escape_wordref_part(entry.get("READING_FORM", ""))
+    reading = escape_wordref_part(entry.get("READING_FORM"))
     pos = get_pos(entry)
+    reference_id = get_entry_reference_id(
+        entry,
+        duplicate_entry_keys,
+        auto_assign=auto_assign_reference_id,
+    )
+    escaped_reference_id = escape_wordref_part(reference_id) if reference_id else ""
 
     if pos in posmap:
+        if escaped_reference_id:
+            return f"{headword},{posmap[pos]},{reading},{escaped_reference_id}"
         return f"{headword},{posmap[pos]},{reading}"
 
     escaped_pos = [escape_wordref_part(v) for v in pos]
+    if escaped_reference_id:
+        return ",".join([headword, *escaped_pos, reading, escaped_reference_id])
     return ",".join([headword, *escaped_pos, reading])
 
 
 def parse_ref_token(
     token: str,
-    user_entries: list[dict[str, str]],
+    input_entries: list[dict[str, str]],
+    input_duplicate_entry_keys: set[tuple[str, POS, str]],
     system_entries: list[dict[str, str]] | None,
     posmap: dict[POS, int],
     *,
     allow_headword: bool,
-    default_to_user: bool,
     allow_numeric_ref: bool,
 ) -> str:
     token = token.strip()
@@ -298,48 +346,71 @@ def parse_ref_token(
         return ""
 
     if allow_numeric_ref and NUMERIC_REF_RE.fullmatch(token):
-        is_user = token.startswith("U")
-        index = int(token[1:] if is_user else token)
-        if is_user or default_to_user:
-            target_entries = user_entries
+        # input_entries is the lexicon currently being converted, while
+        # system_entries is an optional external system lexicon for references.
+        is_user_ref = token.startswith("U")
+        index = int(token[1:] if is_user_ref else token)
+        if is_user_ref:
+            if system_entries is None:
+                raise ValueError(
+                    f"explicit user reference '{token}' is used in a system lexicon")
+            target_entries = input_entries
             ref_kind = "user"
         elif system_entries is not None:
             target_entries = system_entries
             ref_kind = "system"
         else:
-            target_entries = user_entries
-            ref_kind = "current"
+            target_entries = input_entries
+            ref_kind = "input"
         if target_entries is None:
             raise ValueError(
                 f"{ref_kind} reference '{token}' requires a corresponding lexicon source")
         if index < 0 or index >= len(target_entries):
             raise IndexError(f"{ref_kind} reference '{token}' is out of range")
-        return build_wordref(target_entries[index], posmap)
+        return build_wordref(
+            target_entries[index],
+            posmap,
+            input_duplicate_entry_keys if target_entries is input_entries else set(),
+            auto_assign_reference_id=target_entries is input_entries,
+        )
 
-    if token.count(WORDREF_DELIMITER) in {2, 7}:
+    if token.count(WORDREF_DELIMITER) in {2, 3, 7, 8}:
         parts = [unescape(v) for v in token.split(WORDREF_DELIMITER)]
-        if len(parts) == 3:
-            return ",".join(
-                [escape_wordref_part(parts[0]), parts[1],
-                 escape_wordref_part(parts[2])]
-            )
+        if len(parts) in {3, 4}:
+            out = [
+                escape_wordref_part(parts[0]),
+                parts[1],
+                escape_wordref_part(parts[2]),
+            ]
+            if len(parts) == 4:
+                out.append(escape_wordref_part(parts[3]))
+            return ",".join(out)
         headword = escape_wordref_part(parts[0])
         reading = escape_wordref_part(parts[7])
         pos = tuple(parts[1:7])  # type: ignore[assignment]
+        escaped_reference_id = (
+            escape_wordref_part(parts[8]) if len(parts) == 9 else "")
         if pos in posmap:
-            return f"{headword},{posmap[pos]},{reading}"
+            out = [headword, str(posmap[pos]), reading]
+            if escaped_reference_id:
+                out.append(escaped_reference_id)
+            return ",".join(out)
         escaped_pos = [escape_wordref_part(v) for v in parts[1:7]]
-        return ",".join([headword, *escaped_pos, reading])
+        out = [headword, *escaped_pos, reading]
+        if escaped_reference_id:
+            out.append(escaped_reference_id)
+        return ",".join(out)
 
     if allow_headword:
         return token
 
-    raise ValueError(f"Invalid legacy reference: {token}")
+    raise ValueError(f"Invalid v0 reference: {token}")
 
 
 def convert_ref_list(
     value: str,
-    user_entries: list[dict[str, str]],
+    input_entries: list[dict[str, str]],
+    input_duplicate_entry_keys: set[tuple[str, POS, str]],
     system_entries: list[dict[str, str]] | None,
     posmap: dict[POS, int],
 ) -> str:
@@ -349,11 +420,11 @@ def convert_ref_list(
     refs = [
         parse_ref_token(
             token,
-            user_entries,
+            input_entries,
+            input_duplicate_entry_keys,
             system_entries,
             posmap,
             allow_headword=False,
-            default_to_user=False,
             allow_numeric_ref=True,
         )
         for token in value.split(LIST_DELIMITER)
@@ -363,7 +434,8 @@ def convert_ref_list(
 
 def convert_entry(
     entry: dict[str, str],
-    user_entries: list[dict[str, str]],
+    input_entries: list[dict[str, str]],
+    input_duplicate_entry_keys: set[tuple[str, POS, str]],
     system_entries: list[dict[str, str]] | None,
     posmap: dict[POS, int],
     pos_id_only: bool,
@@ -387,40 +459,47 @@ def convert_entry(
         for column in POS_PARTS:
             converted[column] = entry.get(column, "")
 
-    converted["READING_FORM"] = entry.get("READING_FORM", "")
+    converted["READING_FORM"] = entry.get("READING_FORM")
 
-    normalized = entry.get("NORMALIZED_FORM", "")
+    converted[REFERENCE_ID_COLUMN] = get_entry_reference_id(
+        entry,
+        input_duplicate_entry_keys,
+        auto_assign=True,
+    )
+
+    normalized = entry.get("NORMALIZED_FORM")
     if normalized in {""} or normalized == headword:
         converted["NORMALIZED_FORM"] = ""
     else:
         converted["NORMALIZED_FORM"] = parse_ref_token(
             normalized,
-            user_entries,
+            input_entries,
+            input_duplicate_entry_keys,
             system_entries,
             posmap,
             allow_headword=True,
-            default_to_user=False,
             allow_numeric_ref=False,
         )
 
-    dictionary_form = entry.get("DICTIONARY_FORM", "")
-    if dictionary_form.isdigit() and int(dictionary_form) == int(entry["__ROW_INDEX"]):
+    dictionary_form = entry.get("DICTIONARY_FORM")
+    if dictionary_form.isdigit() and int(dictionary_form) == int(entry[ROW_INDEX]):
         converted["DICTIONARY_FORM"] = ""
     else:
         converted["DICTIONARY_FORM"] = parse_ref_token(
             dictionary_form,
-            user_entries,
+            input_entries,
+            input_duplicate_entry_keys,
             system_entries,
             posmap,
             allow_headword=False,
-            default_to_user=True,
             allow_numeric_ref=True,
         )
 
     for column in ["SPLIT_A", "SPLIT_B", "SPLIT_C", "WORD_STRUCTURE"]:
         converted[column] = convert_ref_list(
             entry.get(column, ""),
-            user_entries,
+            input_entries,
+            input_duplicate_entry_keys,
             system_entries,
             posmap,
         )
@@ -438,16 +517,16 @@ def convert_entry(
     else:
         converted["SYNONYM_GROUPS"] = synonym_groups
 
-    user_data = entry.get("USER_DATA", "")
-    converted["USER_DATA"] = "" if user_data == "*" else user_data
+    converted["USER_DATA"] = entry.get("USER_DATA", "")
 
     return converted
 
 
 def write_dictionary_v1(
     output: Path,
-    entries: list[dict[str, str]],
-    all_entries: list[dict[str, str]],
+    chunk: list[dict[str, str]],
+    input_entries: list[dict[str, str]],
+    input_duplicate_entry_keys: set[tuple[str, POS, str]],
     system_entries: list[dict[str, str]] | None,
     posmap: dict[POS, int],
     drop_leading_zero_synonym_group: bool,
@@ -460,10 +539,18 @@ def write_dictionary_v1(
         writer = csv.DictWriter(
             fo, columns, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
-        for entry in tqdm(entries):
-            writer.writerow(convert_entry(entry, all_entries,
-                            system_entries, posmap, pos_id_only,
-                            drop_leading_zero_synonym_group))
+        for entry in tqdm(chunk):
+            writer.writerow(
+                convert_entry(
+                    entry,
+                    input_entries,
+                    input_duplicate_entry_keys,
+                    system_entries,
+                    posmap,
+                    pos_id_only,
+                    drop_leading_zero_synonym_group,
+                )
+            )
 
 
 def default_output_path(input_path: Path) -> Path:
@@ -495,8 +582,9 @@ def main() -> None:
     args = parse_args()
 
     posmap = load_pos(args.pos)
-    entries, entry_chunks = load_csv_rows_from_paths(
+    input_entries, entry_chunks = load_csv_rows_from_paths(
         args.lexicon, LEGACY_COLUMNS)
+    input_duplicate_entry_keys = build_duplicate_entry_keys(input_entries)
     system_entries = None
     if args.system:
         system_entries, _ = load_csv_rows_from_paths(
@@ -505,9 +593,15 @@ def main() -> None:
     output_paths = resolve_output_paths(args.lexicon, args.output)
 
     for output_path, chunk in zip(output_paths, entry_chunks):
-        write_dictionary_v1(output_path, chunk, entries,
-                            system_entries, posmap,
-                            args.drop_leading_zero_synonym_group)
+        write_dictionary_v1(
+            output_path,
+            chunk,
+            input_entries,
+            input_duplicate_entry_keys,
+            system_entries,
+            posmap,
+            args.drop_leading_zero_synonym_group,
+        )
 
 
 if __name__ == "__main__":
