@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.util.List;
-
 import com.worksap.nlp.sudachi.dictionary.Grammar;
+import com.worksap.nlp.sudachi.dictionary.Lexicon;
 import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 /**
@@ -42,6 +41,10 @@ class MorphemeListItem extends MorphemeImplBase {
 
     protected Grammar getGrammar() {
         return list.grammar;
+    }
+
+    protected Lexicon getLexicon() {
+        return list.lexicon;
     }
 
     protected WordInfo getWordInfo() {

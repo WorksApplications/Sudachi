@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class JapaneseDictionaryTest {
@@ -283,5 +284,33 @@ abc,1,1,4675,AbC,名詞,普通名詞,一般,*,*,*,エービーシー,,,,,""")
     assertEquals("OOVr", m2.readingForm())
     assertEquals("OOVn", m2.normalizedForm())
     assertEquals("OOVd", m2.dictionaryForm())
+    assertSame(m1, m1.normalizedFormMorpheme())
+    assertSame(m1, m1.dictionaryFormMorpheme())
+    assertSame(m2, m2.normalizedFormMorpheme())
+    assertSame(m2, m2.dictionaryFormMorpheme())
+  }
+
+  @Test
+  fun lookupReferencedMorphemes() {
+    val m = dict.lookupAllEntries("いっ")[0]
+    val normalized = m.normalizedFormMorpheme()
+    val dictionary = m.dictionaryFormMorpheme()
+    val iku = dict.lookupAllEntries("いく")[0]
+    val yuku = dict.lookupAllEntries("行く")[0]
+
+    assertEquals("行く", normalized.surface())
+    assertEquals("いく", dictionary.surface())
+    assertEquals(m.normalizedForm(), normalized.surface())
+    assertEquals(m.dictionaryForm(), dictionary.surface())
+    assertEquals(yuku.getWordId(), normalized.getWordId())
+    assertEquals(iku.getWordId(), dictionary.getWordId())
+    assertEquals(0, normalized.getDictionaryId())
+    assertEquals(0, dictionary.getDictionaryId())
+    assertEquals(yuku.partOfSpeechId(), normalized.partOfSpeechId())
+    assertEquals(iku.partOfSpeechId(), dictionary.partOfSpeechId())
+    assertEquals(0, normalized.begin())
+    assertEquals(normalized.surface().length, normalized.end())
+    assertEquals(0, dictionary.begin())
+    assertEquals(dictionary.surface().length, dictionary.end())
   }
 }

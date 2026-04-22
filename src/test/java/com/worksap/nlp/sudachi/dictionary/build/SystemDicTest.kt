@@ -16,6 +16,9 @@
 
 package com.worksap.nlp.sudachi.dictionary.build
 
+import com.worksap.nlp.sudachi.Config
+import com.worksap.nlp.sudachi.Dictionary
+import com.worksap.nlp.sudachi.Tokenizer
 import com.worksap.nlp.sudachi.WordId
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.Block
@@ -66,6 +69,16 @@ class SystemDicTest {
     assertEquals("東", m.dictionaryForm())
     assertEquals("西", m.normalizedForm())
     assertEquals("ミナミ", m.readingForm())
+    val dictionary = m.dictionaryFormMorpheme()
+    val normalized = m.normalizedFormMorpheme()
+    assertEquals("東", dictionary.surface())
+    assertEquals("西", normalized.surface())
+    assertEquals(m.dictionaryForm(), dictionary.surface())
+    assertEquals(m.normalizedForm(), normalized.surface())
+    assertEquals(0, dictionary.begin())
+    assertEquals(1, dictionary.end())
+    assertEquals(0, normalized.begin())
+    assertEquals(1, normalized.end())
     assertContentEquals(intArrayOf(4, 8), wi.aunitSplit)
     assertContentEquals(intArrayOf(12, 16), wi.bunitSplit)
     assertContentEquals(intArrayOf(20, 24), wi.wordStructure)
@@ -88,6 +101,8 @@ class SystemDicTest {
     assertEquals("南", m.dictionaryForm())
     assertEquals("南", m.normalizedForm())
     assertEquals("南", m.readingForm())
+    assertSame(m, m.dictionaryFormMorpheme()) // self reference
+    assertSame(m, m.normalizedFormMorpheme()) // self reference
   }
 
   @Test
@@ -174,10 +189,21 @@ class SystemDicTest {
     val dictData = MemChannel()
     val bldr = DicBuilder.system().matrix(res("test.matrix"))
     bldr.lexicon(javaClass.getResource("wordref.csv")).build(dictData)
+    val sDic = BinaryDictionary(dictData.buffer())
+    val config = Config.fromClasspath(res("sudachi_dic_build.json")).systemDictionary(sDic)
+    val dic = Dictionary.load(config)
 
     val wordIds = intArrayOf(4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45)
-    val dic = BinaryDictionary(dictData.buffer())
-    assertEquals(wordIds.size, dic.lexicon.size())
+    assertEquals(wordIds.size, sDic.lexicon.size())
+
+    val m1 = dic.lookup("トウキョウ")[0]
+    assertEquals("東京", m1.normalizedForm())
+    assertEquals("東京", m1.dictionaryForm())
+
+    val m2 = dic.lookup("東トウキョウ")[0]
+    val spl = m2.split(Tokenizer.SplitMode.C)
+    assertEquals("東", spl[0].surface())
+    assertEquals("東京B", spl[1].normalizedForm())
   }
 
   @Test
