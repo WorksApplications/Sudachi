@@ -10,9 +10,17 @@
 #
 #   Convert user lexicon CSV with split system lexicon references:
 #     python3 scripts/migrate_v0_lexicon_to_v1.py \
+#         -o out_dir \
+#         -p src/main/resources/pos.csv \
+#         --drop-leading-zero-synonym-group \
 #         -s system_small.csv -s system_core.csv \
-#         user.csv \
-#         -o out_dir
+#         user.csv
+#
+# Note:
+#   In v0, normalized form is a field associated with the entry itself, while
+#   in v1 it points to a specific entry. This script converts normalized form
+#   to the first entry whose headword matches, without considering any fields
+#   other than headword.
 
 import argparse as ap
 import csv
@@ -37,7 +45,7 @@ UNICODE_ESCAPE_RE = re.compile(r"\\u\{([0-9a-fA-F]+)\}")
 NUMERIC_REF_RE = re.compile(r"^U?\d+$")
 
 
-LEGACY_COLUMNS = [
+V0_COLUMNS = [
     "INDEX_FORM",
     "LEFT_ID",
     "RIGHT_ID",
@@ -63,8 +71,33 @@ LEGACY_COLUMNS = [
     "REFERENCE_ID",
 ]
 
-
 V1_COLUMNS = [
+    "INDEX_FORM",
+    "LEFT_ID",
+    "RIGHT_ID",
+    "COST",
+    "HEADWORD",
+    "POS1",
+    "POS2",
+    "POS3",
+    "POS4",
+    "POS5",
+    "POS6",
+    "READING_FORM",
+    "NORMALIZED_FORM",
+    "DICTIONARY_FORM",
+    "MODE",
+    "SPLIT_A",
+    "SPLIT_B",
+    "WORD_STRUCTURE",
+    "SYNONYM_GROUPS",
+    "SPLIT_C",
+    "USER_DATA",
+    "POS_ID",
+    "REFERENCE_ID",
+]
+
+OUTPUT_V1_COLUMNS_WITH_POS_PARTS = [
     "INDEX_FORM",
     "LEFT_ID",
     "RIGHT_ID",
@@ -88,7 +121,7 @@ V1_COLUMNS = [
     "REFERENCE_ID",
 ]
 
-V1_COLUMNS_WITH_POS_ID_ONLY = [
+OUTPUT_V1_COLUMNS_WITH_POS_ID = [
     "INDEX_FORM",
     "LEFT_ID",
     "RIGHT_ID",
@@ -144,7 +177,7 @@ def parse_args() -> ap.Namespace:
         type=Path,
         action="append",
         default=None,
-        help="reference system lexicon csv file path(s) in v0 or v1 format. Specify multiple times to concatenate files in order.",
+        help="reference system lexicon csv file path(s) in v1 format. Specify multiple times to concatenate files in order.",
     )
     return parser.parse_args()
 
@@ -168,7 +201,7 @@ def is_header_row(row: list[str], expected: list[str]) -> bool:
         return False
     normalized = {normalize_column_name(v) for v in row}
     expected_normalized = {normalize_column_name(v) for v in expected}
-    return bool(normalized & expected_normalized) and not row[1].lstrip("-").isdigit()
+    return normalized.issubset(expected_normalized)
 
 
 def row_to_dict(row: list[str], columns: list[str], mapping: list[str]=None) -> dict[str, str]:
@@ -265,9 +298,35 @@ def load_pos(path: Path | None) -> dict[POS, int]:
     return posmap
 
 
+def validate_system_entry(entry: dict[str, str], posmap: dict[POS, int]) -> None:
+    pos = get_full_pos_or_none(entry)
+    pos_id = get_pos_id(entry)
+    if pos is None and pos_id == "":
+        raise ValueError(
+            f"POS1-POS6 or POS_ID is required for system lexicon row {entry[ROW_INDEX]}")
+
+    if pos is not None and pos_id:
+        mapped_pos_id = posmap.get(pos)
+        if mapped_pos_id is None or str(mapped_pos_id) != pos_id:
+            raise ValueError(
+                f"POS_ID does not match POS1-POS6 at system lexicon row {entry[ROW_INDEX]}")
+
+
 def get_pos(entry: dict[str, str]) -> POS:
     # type: ignore[return-value]
     return tuple(entry.get(c, "") for c in POS_PARTS)
+
+
+def get_pos_id(entry: dict[str, str]) -> str:
+    return entry.get(POS_ID_COLUMN, "").strip()
+
+
+def get_full_pos_or_none(entry: dict[str, str]) -> POS | None:
+    pos = get_pos(entry)
+    filled = [part != "" for part in pos]
+    if any(filled) and not all(filled):
+        raise ValueError(f"Incomplete POS fields at row {entry[ROW_INDEX]}")
+    return pos if all(filled) else None
 
 
 def get_headword(entry: dict[str, str]) -> str:
@@ -312,13 +371,22 @@ def build_wordref(
 ) -> str:
     headword = escape_wordref_part(get_headword(entry))
     reading = escape_wordref_part(entry.get("READING_FORM"))
-    pos = get_pos(entry)
     reference_id = get_entry_reference_id(
         entry,
         duplicate_entry_keys,
         auto_assign=auto_assign_reference_id,
     )
     escaped_reference_id = escape_wordref_part(reference_id) if reference_id else ""
+    pos = get_full_pos_or_none(entry)
+    pos_id = get_pos_id(entry)
+
+    if pos_id:
+        if escaped_reference_id:
+            return f"{headword},{pos_id},{reading},{escaped_reference_id}"
+        return f"{headword},{pos_id},{reading}"
+
+    if pos is None:
+        raise ValueError(f"POS is required at row {entry[ROW_INDEX]}")
 
     if pos in posmap:
         if escaped_reference_id:
@@ -331,29 +399,26 @@ def build_wordref(
     return ",".join([headword, *escaped_pos, reading])
 
 
-def parse_ref_token(
-    token: str,
+def convert_ref(
+    ref_string: str,
     input_entries: list[dict[str, str]],
     input_duplicate_entry_keys: set[tuple[str, POS, str]],
     system_entries: list[dict[str, str]] | None,
     posmap: dict[POS, int],
-    *,
-    allow_headword: bool,
-    allow_numeric_ref: bool,
 ) -> str:
-    token = token.strip()
-    if token in {"", "*"}:
+    ref_string = ref_string.strip()
+    if ref_string == "":
         return ""
 
-    if allow_numeric_ref and NUMERIC_REF_RE.fullmatch(token):
+    if NUMERIC_REF_RE.fullmatch(ref_string):
         # input_entries is the lexicon currently being converted, while
         # system_entries is an optional external system lexicon for references.
-        is_user_ref = token.startswith("U")
-        index = int(token[1:] if is_user_ref else token)
+        is_user_ref = ref_string.startswith("U")
+        index = int(ref_string[1:] if is_user_ref else ref_string)
         if is_user_ref:
             if system_entries is None:
                 raise ValueError(
-                    f"explicit user reference '{token}' is used in a system lexicon")
+                    f"explicit user reference '{ref_string}' is used in a system lexicon")
             target_entries = input_entries
             ref_kind = "user"
         elif system_entries is not None:
@@ -364,9 +429,9 @@ def parse_ref_token(
             ref_kind = "input"
         if target_entries is None:
             raise ValueError(
-                f"{ref_kind} reference '{token}' requires a corresponding lexicon source")
+                f"{ref_kind} reference '{ref_string}' requires a corresponding lexicon source")
         if index < 0 or index >= len(target_entries):
-            raise IndexError(f"{ref_kind} reference '{token}' is out of range")
+            raise IndexError(f"{ref_kind} reference '{ref_string}' is out of range")
         return build_wordref(
             target_entries[index],
             posmap,
@@ -374,8 +439,8 @@ def parse_ref_token(
             auto_assign_reference_id=target_entries is input_entries,
         )
 
-    if token.count(WORDREF_DELIMITER) in {2, 3, 7, 8}:
-        parts = [unescape(v) for v in token.split(WORDREF_DELIMITER)]
+    if ref_string.count(WORDREF_DELIMITER) in {2, 3, 7, 8}:
+        parts = [unescape(v) for v in ref_string.split(WORDREF_DELIMITER)]
         if len(parts) in {3, 4}:
             out = [
                 escape_wordref_part(parts[0]),
@@ -401,10 +466,52 @@ def parse_ref_token(
             out.append(escaped_reference_id)
         return ",".join(out)
 
-    if allow_headword:
-        return token
+    raise ValueError(f"Invalid v0 reference: {ref_string}")
 
-    raise ValueError(f"Invalid v0 reference: {token}")
+
+def convert_normalized_form(
+    normalized: str,
+    input_entries: list[dict[str, str]],
+    input_duplicate_entry_keys: set[tuple[str, POS, str]],
+    system_entries: list[dict[str, str]] | None,
+    posmap: dict[POS, int],
+) -> str:
+    for entry in input_entries:
+        if get_headword(entry) == normalized:
+            return build_wordref(
+                entry,
+                posmap,
+                input_duplicate_entry_keys,
+                auto_assign_reference_id=True,
+            )
+
+    if system_entries is not None:
+        for entry in system_entries:
+            if get_headword(entry) == normalized:
+                return build_wordref(
+                    entry,
+                    posmap,
+                    set(),
+                    auto_assign_reference_id=False,
+                )
+
+    # print as headword-ref (this will be handled as a phantom entry)
+    return normalized
+
+
+def is_self_line_reference(
+    ref_string: str,
+    entry: dict[str, str],
+    *,
+    is_system: bool,
+) -> bool:
+    if not NUMERIC_REF_RE.fullmatch(ref_string):
+        return False
+
+    row_index = int(entry[ROW_INDEX])
+    if ref_string.startswith("U"):
+        return not is_system and int(ref_string[1:]) == row_index
+    return is_system and int(ref_string) == row_index
 
 
 def convert_ref_list(
@@ -418,14 +525,12 @@ def convert_ref_list(
         return ""
 
     refs = [
-        parse_ref_token(
+        convert_ref(
             token,
             input_entries,
             input_duplicate_entry_keys,
             system_entries,
             posmap,
-            allow_headword=False,
-            allow_numeric_ref=True,
         )
         for token in value.split(LIST_DELIMITER)
     ]
@@ -468,31 +573,31 @@ def convert_entry(
     )
 
     normalized = entry.get("NORMALIZED_FORM")
-    if normalized in {""} or normalized == headword:
+    if normalized == headword:
         converted["NORMALIZED_FORM"] = ""
     else:
-        converted["NORMALIZED_FORM"] = parse_ref_token(
+        converted["NORMALIZED_FORM"] = convert_normalized_form(
             normalized,
             input_entries,
             input_duplicate_entry_keys,
             system_entries,
             posmap,
-            allow_headword=True,
-            allow_numeric_ref=False,
         )
 
     dictionary_form = entry.get("DICTIONARY_FORM")
-    if dictionary_form.isdigit() and int(dictionary_form) == int(entry[ROW_INDEX]):
+    if dictionary_form == "*" or is_self_line_reference(
+        dictionary_form,
+        entry,
+        is_system=system_entries is None,
+    ):
         converted["DICTIONARY_FORM"] = ""
     else:
-        converted["DICTIONARY_FORM"] = parse_ref_token(
+        converted["DICTIONARY_FORM"] = convert_ref(
             dictionary_form,
             input_entries,
             input_duplicate_entry_keys,
             system_entries,
             posmap,
-            allow_headword=False,
-            allow_numeric_ref=True,
         )
 
     for column in ["SPLIT_A", "SPLIT_B", "SPLIT_C", "WORD_STRUCTURE"]:
@@ -532,7 +637,7 @@ def write_dictionary_v1(
     drop_leading_zero_synonym_group: bool,
 ) -> None:
     pos_id_only = bool(posmap)
-    columns = V1_COLUMNS_WITH_POS_ID_ONLY if pos_id_only else V1_COLUMNS
+    columns = OUTPUT_V1_COLUMNS_WITH_POS_ID if pos_id_only else OUTPUT_V1_COLUMNS_WITH_POS_PARTS
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as fo:
@@ -583,12 +688,14 @@ def main() -> None:
 
     posmap = load_pos(args.pos)
     input_entries, entry_chunks = load_csv_rows_from_paths(
-        args.lexicon, LEGACY_COLUMNS)
+        args.lexicon, V0_COLUMNS)
     input_duplicate_entry_keys = build_duplicate_entry_keys(input_entries)
     system_entries = None
     if args.system:
         system_entries, _ = load_csv_rows_from_paths(
-            args.system, LEGACY_COLUMNS)
+            args.system, V1_COLUMNS)
+        for entry in system_entries:
+            validate_system_entry(entry, posmap)
 
     output_paths = resolve_output_paths(args.lexicon, args.output)
 
