@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Works Applications Co., Ltd.
+ * Copyright (c) 2024-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,17 @@ class DictionaryPrinterTest {
     return "${wordId}, ${lex.string(0, wi.getHeadword())}, ${wi.getLength()}, ${wi.getPOSId()}, ${wi.getNormalizedForm()}, ${wi.getDictionaryForm()}, ${lex.string(0, wi.getReadingForm())}, ${Arrays.toString(wi.getAunitSplit())}, ${Arrays.toString(wi.getBunitSplit())}, ${Arrays.toString(wi.getCunitSplit())}, ${Arrays.toString(wi.getWordStructure())}, ${Arrays.toString(wi.getSynonymGroupIds())}, ${wi.getUserData()}"
   }
 
+  fun findWordId(lex: DoubleArrayLexicon, headword: String): Int {
+    val ids = mutableListOf<Int>()
+    for (wordIds in lex.getWordIdTable().wordIds()) {
+      for (i in 0 until wordIds.length()) {
+        ids.add(wordIds.get(i))
+      }
+    }
+    ids.sort()
+    return ids.first { wordId -> lex.string(0, lex.getWordInfo(wordId).getHeadword()) == headword }
+  }
+
   @Test
   fun printSystemDict() {
     val output = ByteArrayOutputStream()
@@ -127,6 +138,34 @@ class DictionaryPrinterTest {
     assertEquals(
         "東京都,6,8,5320,,名詞,固有名詞,地名,一般,*,*,トウキョウト,,,\"東京,3,トウキョウ/都,4,ト,to-2\",,,\"東京,3,トウキョウ/都,4,ト,to-2\",,,",
         lines[7])
+  }
+
+  @Test
+  fun normalizedFormUsesWordRefForNonPhantomEntry() {
+    val dict = BinaryDictionary(tempDir.resolve("system.dic").toString())
+    val printer = DictionaryPrinter(PrintStream(ByteArrayOutputStream()), dict, null)
+    val lex = dict.getLexicon()
+
+    val sourceWordId = findWordId(lex, "行っ")
+    val targetWordId = lex.getWordInfo(sourceWordId).getNormalizedForm()
+
+    assertEquals(
+        printer.wordRef(targetWordId), printer.normalizedFormWordRef(targetWordId, sourceWordId))
+    dict.close()
+  }
+
+  @Test
+  fun normalizedFormKeepsHeadwordForPhantomEntry() {
+    val dict = BinaryDictionary(tempDir.resolve("system.dic").toString())
+    val printer = DictionaryPrinter(PrintStream(ByteArrayOutputStream()), dict, null)
+    val lex = dict.getLexicon()
+
+    val sourceWordId = findWordId(lex, "な。な")
+    val targetWordId = lex.getWordInfo(sourceWordId).getNormalizedForm()
+
+    assertEquals("なな", printer.normalizedFormWordRef(targetWordId, sourceWordId))
+    assertTrue(printer.wordRef(targetWordId).contains(","))
+    dict.close()
   }
 
   @Test
