@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ public class DictionaryPrinter {
         }
 
         field(lex.string(dic, info.getReadingForm()));
-        field(wordRefHeadword(info.getNormalizedForm(), wordId));
+        field(normalizedFormWordRef(info.getNormalizedForm(), wordId));
         field(wordRef(info.getDictionaryForm(), wordId));
 
         field(wordRefList(info.getAunitSplit()));
@@ -282,14 +282,28 @@ public class DictionaryPrinter {
                 .collect(Collectors.joining(String.valueOf(WordRef.Parser.WORDREF_DELIMITER)));
     }
 
-    /** encode word entry pointed by the wordId as WordRef.RefByHeadword. */
-    String wordRefHeadword(int wordId, int reference) {
+    /**
+     * Encode normalized-form reference.
+     *
+     * Print as WordRef.RefByEntryKey except phantom entries which need to be
+     * written in headword-only format.
+     */
+    String normalizedFormWordRef(int wordId, int reference) {
         if (wordId == reference) {
             return "";
+        }
+        if (!isPhantomEntry(wordId)) {
+            return wordRef(wordId);
         }
         int dic = WordId.dic(wordId);
         WordInfo info = lex.getWordInfo(wordId);
         return lex.string(dic, info.getHeadword());
+    }
+
+    private boolean isPhantomEntry(int wordId) {
+        long params = lex.parameters(wordId);
+        return WordParameters.leftId(params) == -1 && WordParameters.rightId(params) == -1
+                && WordParameters.cost(params) == Short.MAX_VALUE;
     }
 
     String wordRefList(int[] wordIds) {
