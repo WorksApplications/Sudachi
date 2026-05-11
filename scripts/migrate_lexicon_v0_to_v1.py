@@ -10,7 +10,7 @@
 #
 #   Convert user lexicon CSV with split system lexicon references:
 #     python3 scripts/migrate_v0_lexicon_to_v1.py \
-#         -o out_dir \
+#         -o outfile.csv \
 #         -p src/main/resources/pos.csv \
 #         --drop-leading-zero-synonym-group \
 #         -s system_small.csv -s system_core.csv \

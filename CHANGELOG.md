@@ -23,6 +23,9 @@ See [migration guide](./docs/migration_guide.md) for details.
   - If you need to search entries with -1 conjugation cost, use `lookupAllEntries`.
 - Add `Morpheme Dictionary.oovMorpheme(posId, surface, ...)` (#245)
   - Create an OOV morpheme with a POS in the dictionary.
+- Add `Morphme.normalizedFormMorpheme` and `Morphme.dictionaryFormMorpheme` (#359)
+  - Get the normalized form and dictionary form of the morphme as a morpheme instead of a string.
+  - We can use this e.g. `Morpheme.normalizedFormMorpheme().readingForm()`.
 
 ### Changed
 

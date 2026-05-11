@@ -51,12 +51,58 @@ V0 形式では可能だった行番号による参照は使用できません�
 例（split_a）：
 `...,1/2,...` -> `...,"東京,名詞,固有名詞,地名,一般,*,*,トウキョウ/都,名詞,普通名詞,一般,*,*,*,ト",...`
 
+「見出し表記、品詞、読み」の組で参照先の語が一意に定まらない場合は、参照 ID を使用することができます。
+Reference_Id カラムを追加し、重複する語にそれぞれ固有の文字列を記載します。
+その上で語参照の組の第4項目にこの文字列を追加することで参照先を一意に定めることができます。
+
+lexicon csv および参照ID付き語参照の記述例：
+```
+Surface,LeftId,RightId,Cost,POS1,POS2,POS3,POS4,POS5,POS6,ReadingForm,NormalizedForm,DictionaryForm,Split_A,Split_B,WordStructure,Reference_Id
+あわ,5146,5146,8000,名詞,普通名詞,一般,*,*,*,アワ,泡,,,,,bubble
+あわ,5146,5146,8000,名詞,普通名詞,一般,*,*,*,アワ,粟,,,,,foxtail-millet
+```
+
+`"あわ,名詞,普通名詞,一般,*,*,*,アワ,foxtail-millet"`
+
+
 ### 移行用スクリプト
 
-移行用スクリプト [`migrate_user_lexicon_v0_to_v1.sh`](../scripts/migrate_user_lexicon_v0_to_v1.sh) が利用できます。
+#### [`migrate_lexicon_v0_to_v1.py`](../scripts/migrate_lexicon_v0_to_v1.py)
+
+移行用スクリプト [`migrate_lexicon_v0_to_v1.py`](../scripts/migrate_lexicon_v0_to_v1.py) が利用できます。
+これはソースファイルの内容を直接 V0 から V1 形式に変換するスクリプトです。
+実行には Python 実行環境が必要です。
+
+スクリプトの実行には、参照するシステム辞書のソースファイル（V1 形式）を指定する必要があります。
+別途[配布ページ](#TODO)から取得してください。
+辞書のタイプ（small / core / full）に応じて複数のソースファイルを指定する必要があることに注意してください。
+
+V1 形式では加えて品詞リストを指定することも可能です。
+公式配布のシステム辞書バイナリでは [pos.csv](./../src/main/resources/pos.csv) を使用しています。
+
+V0 形式のソースファイル内でシステム辞書内の語を参照している場合、以前と異なるシステム辞書を用いると、参照先がずれる可能性があります。
+このスクリプトの使用においては、対象 lexicon ファイルの作成時に参照したバージョンのシステム辞書を指定するか、変換後に内容を確認してください。
+一度 V1 形式へ変換した lexicon CSV ファイルは任意のバージョンのシステム辞書と共にビルド可能になります。
+
+例： `dict/system_small.csv` および `dict/system_core.csv` を参照し、`old_lexicon.csv` を変換したものを `new_lexicon.csv` に出力する
+
+```bash
+cd /path/to/sudachi
+python3 ./scripts/migrate_v0_lexicon_to_v1.py \
+    -o new_lexicon.csv \
+    -p ./src/main/resources/pos.csv \
+    --drop-leading-zero-synonym-group \
+    -s ./dict/system_small.csv -s ./dict/system_core.csv \
+    old_lexicon.csv
+```
+
+#### [`migrate_user_lexicon_v0_to_v1.sh`](../scripts/migrate_user_lexicon_v0_to_v1.sh)
+
+Sudachi v0.8 では移行用スクリプト [`migrate_user_lexicon_v0_to_v1.sh`](../scripts/migrate_user_lexicon_v0_to_v1.sh) が利用できます。
+これはバイナリ辞書へのビルドと再プリントを介して変換を行うスクリプトです。
 
 スクリプトの実行には、参照するシステムバイナリ辞書（V1 形式）を指定する必要があります。
-別途[配布ページ](#TODO)から取得するか、[lexicon CSV](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/) からビルドしてください。
+別途[配布ページ](#TODO)から取得するか、[手順](#システム辞書のビルド)に従ってビルドしてください。
 
 V0 形式のソースファイル内でシステム辞書内の語を参照している場合、以前と異なるシステム辞書を用いると、参照先がずれる可能性があります。
 このスクリプトの使用においては、対象 lexicon ファイルの作成時に参照したバージョンのシステム辞書を指定するか、変換後に内容を確認してください。
@@ -68,6 +114,7 @@ V0 形式のソースファイル内でシステム辞書内の語を参照し�
 cd /path/to/sudachi
 ./scripts/migrate_user_lexicon_v0_to_v1.sh old_lexicon.csv ./dict/system.dic > new_lexicon.csv
 ```
+
 
 ## バイナリ辞書
 
@@ -103,14 +150,14 @@ V1 形式のシステム辞書を手元でビルドすることも可能です�
 small 辞書のビルドには small_lex.csv、core 辞書のビルドには small_lex.csv, core_lex.csv、full 辞書のビルドには small_lex.csv, core_lex.csv, notcore_lex.csv が必要です。
 
 V1 形式では加えて品詞リストを指定することも可能です。
-その場合は [pos.csv](./../src/main/resources/pos.csv) の使用を推奨します。
+配布のシステム辞書バイナリでは [pos.csv](./../src/main/resources/pos.csv) を使用しています。
 
 例：`src/` 以下に配置した `matrix.def`, `pos.csv`, `small_lex.csv`, `core_lex.csv` から `dict/system_core.dic` をビルドする
 
 ```bash
 java -Xmx8g -Dfile.encoding=UTF-8 -cp ./sudachi/sudachi-1.0.0.jar \
     com.worksap.nlp.sudachi.dictionary.DictionaryBuilder \
-    -o ./dict/system_core.dic -m ./src/matrix.def -p src/pos.csv \
+    -o ./dict/system_core.dic -m ./src/matrix.def -p ./src/pos.csv \
     ./src/small_lex.csv ./src/core_lex.csv
 ```
 
