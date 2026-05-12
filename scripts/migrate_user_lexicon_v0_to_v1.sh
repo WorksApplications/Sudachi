@@ -1,5 +1,5 @@
 #!/bin/bash -
-# convert legacy user lexicon csv file into V1 format
+# convert V0 user lexicon csv file into V1 format
 set -eux
 
 # Constants
@@ -36,4 +36,4 @@ java -Dfile.encoding=UTF-8 \
     com.worksap.nlp.sudachi.dictionary.DictionaryPrinter \
     --posMode PARTS \
     --wordRefMode TRIPLE_PARTS \
-    -s "$SYSTEM_DICT" "$USER_DICT" \
+    -s "$SYSTEM_DICT" "$USER_DICT"
