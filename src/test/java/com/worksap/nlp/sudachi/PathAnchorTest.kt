@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,15 @@ class PathAnchorTest {
 
   @Test
   fun chainNone() {
+    val classpath = PathAnchor.classpath()
     assertEquals(PathAnchor.none(), PathAnchor.none().andThen(PathAnchor.none()))
-    assertEquals(PathAnchor.classpath(), PathAnchor.classpath().andThen(PathAnchor.classpath()))
+    assertEquals(classpath, classpath.andThen(classpath))
+    assertSame(classpath, PathAnchor.none().andThen(classpath))
   }
 
   @Test
   fun chain() {
-    val chain = PathAnchor.classpath().andThen(PathAnchor.none())
+    val chain = PathAnchor.classpath().andThen(PathAnchor.filesystem())
     assertIs<PathAnchor.Chain>(chain)
     assertEquals(chain.count(), 2)
     val chain2 = chain.andThen(chain)
@@ -54,8 +56,8 @@ class PathAnchorTest {
 
   @Test
   fun chainChains() {
-    val chain1 = PathAnchor.classpath().andThen(PathAnchor.none())
-    val chain2 = PathAnchor.classpath().andThen(PathAnchor.none())
+    val chain1 = PathAnchor.classpath().andThen(PathAnchor.filesystem())
+    val chain2 = PathAnchor.classpath().andThen(PathAnchor.filesystem())
     val chain3 = chain1.andThen(chain2)
     assertIs<PathAnchor.Chain>(chain3)
     assertEquals(chain3.count(), 2)
@@ -63,8 +65,8 @@ class PathAnchorTest {
 
   @Test
   fun chainChains2() {
-    val chain1 = PathAnchor.classpath().andThen(PathAnchor.filesystem(Paths.get("")))
-    val chain3 = PathAnchor.none().andThen(chain1)
+    val chain1 = PathAnchor.classpath().andThen(PathAnchor.filesystem())
+    val chain3 = PathAnchor.filesystem("another").andThen(chain1)
     assertIs<PathAnchor.Chain>(chain3)
     assertEquals(chain3.count(), 3)
   }
@@ -87,6 +89,20 @@ class PathAnchorTest {
             .andThen(PathAnchor.none())
     assertNotEquals(a.hashCode(), PathAnchor.none().hashCode())
     assertNotEquals(a, PathAnchor.none())
+  }
+
+  @Test
+  fun noneNeverResolves() {
+    val a = PathAnchor.none()
+    assertIs<Resource.NotFound<*>>(a.resource<Any>("char.def"))
+    assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get(".gitignore")))
+  }
+
+  @Test
+  fun filesystemEmptyUsesCurrentDirectory() {
+    val a = PathAnchor.filesystem()
+    assertTrue(a.exists(a.resolve(".gitignore")))
+    assertIsNot<Resource.NotFound<*>>(a.resource<Any>(".gitignore"))
   }
 
   @Test
