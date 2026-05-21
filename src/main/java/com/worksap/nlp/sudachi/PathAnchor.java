@@ -300,11 +300,12 @@ public abstract class PathAnchor {
 
         @Override
         public <T> Config.Resource<T> toResource(Path path) {
-            URL resource = loader.getResource(resourceName(path));
+            String name = resourceName(path);
+            URL resource = loader.getResource(name);
             if (resource == null) {
                 return new Config.Resource.NotFound<>(path, this);
             }
-            return new Config.Resource.Classpath<>(resource);
+            return new Config.Resource.Classpath<>(resource, loader, name);
         }
 
         @Override
