@@ -18,6 +18,7 @@ package com.worksap.nlp.sudachi
 
 import com.worksap.nlp.sudachi.Config.Resource
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.test.*
@@ -135,5 +136,25 @@ class PathAnchorTest {
     val x = assertIs<Resource.NotFound<*>>(a.toResource<Any>(Paths.get("char.def2")))
     assertFails { x.asByteBuffer() }
     assertFails { x.asInputStream() }
+  }
+
+  @Test
+  fun chainResourceUsesResolvingChildAnchor() {
+    val shadowDir = Paths.get("joinnumeric")
+    val shadowFile = shadowDir.resolve("char.def")
+    Files.createDirectories(shadowDir)
+    Files.write(shadowFile, byteArrayOf())
+    try {
+      val anchor =
+          PathAnchor.filesystem(Paths.get("missing-base"))
+              .andThen(PathAnchor.classpath("joinnumeric", javaClass.classLoader))
+
+      val resource = anchor.resource<Any>("char.def")
+
+      assertIs<Resource.Classpath<*>>(resource)
+    } finally {
+      Files.deleteIfExists(shadowFile)
+      Files.deleteIfExists(shadowDir)
+    }
   }
 }

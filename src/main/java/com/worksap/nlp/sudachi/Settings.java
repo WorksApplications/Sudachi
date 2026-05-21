@@ -461,8 +461,7 @@ public class Settings {
     }
 
     private <T> Config.Resource<T> extractResource(String path) {
-        Path obj = base.resolve(path);
-        return base.toResource(obj);
+        return base.resource(path);
     }
 
     /**

@@ -173,6 +173,12 @@ public abstract class PathAnchor {
 
     /**
      * Create a resource for the fully resolved path
+     *
+     * For chained anchors, this method may behave differently from
+     * {@code resource(part)} when passed a path returned by {@code resolve(part)}.
+     * Another child anchor may accept the already resolved path and reinterpret it
+     * through a different base. Use {@link #resource(String)} when resolution and
+     * resource lookup must stay on the same child anchor.
      * 
      * @param path
      *            fully resolved path
@@ -189,6 +195,9 @@ public abstract class PathAnchor {
 
     /**
      * Create a resource for passed string path
+     * 
+     * This is the preferred API for chained anchors because the same child anchor
+     * performs both resolution and resource lookup.
      * 
      * @param path
      *            path to the resource
@@ -373,6 +382,8 @@ public abstract class PathAnchor {
 
         @Override
         public <T> Config.Resource<T> toResource(Path path) {
+            // Note: Another child may also accept an already-resolved path and
+            // reinterpret it through a different base.
             for (PathAnchor child : children) {
                 if (child.exists(path)) {
                     return child.toResource(path);
@@ -380,6 +391,21 @@ public abstract class PathAnchor {
             }
 
             return new Config.Resource.NotFound<>(path, this);
+        }
+
+        @Override
+        public <T> Config.Resource<T> resource(String path) {
+            Path lastPath = null;
+            for (PathAnchor child : children) {
+                Path resolved = child.resolve(path);
+                lastPath = resolved;
+                if (child.exists(resolved)) {
+                    return child.toResource(resolved);
+                }
+                logger.fine(() -> String.format("%s: %s does not exist, skipping", child, path));
+            }
+
+            return new Config.Resource.NotFound<>(lastPath == null ? Paths.get(path) : lastPath, this);
         }
 
         @Override

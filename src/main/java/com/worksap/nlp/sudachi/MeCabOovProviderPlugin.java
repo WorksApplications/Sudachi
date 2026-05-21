@@ -133,7 +133,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     <T> void readCharacterProperty(Config.Resource<T> charDef) throws IOException {
         if (charDef == null) {
-            charDef = settings.base.toResource(settings.base.resolve("char.def"));
+            charDef = settings.base.resource("char.def");
         }
         try (InputStream input = charDef.asInputStream();
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
@@ -169,7 +169,7 @@ class MeCabOovProviderPlugin extends OovProviderPlugin {
 
     <T> void readOOV(Config.Resource<T> unkDef, Grammar grammar, String userPosMode) throws IOException {
         if (unkDef == null) {
-            unkDef = settings.base.toResource(settings.base.resolve("unk.def"));
+            unkDef = settings.base.resource("unk.def");
         }
         try (InputStream input = unkDef.asInputStream();
                 InputStreamReader isReader = new InputStreamReader(input, StandardCharsets.UTF_8);
