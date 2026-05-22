@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import java.util.logging.Logger;
  * <p>
  * There are three types of anchors:
  * <ul>
- * <li>{@link None} which will resolve paths as filesystem, relative to the
- * CWD</li>
+ * <li>{@link None} which will not search for resources</li>
  * <li>{@link Filesystem} which will resolve paths relative to a provided
  * directory</li>
  * <li>{@link Classpath} which will resolve classpath resources</li>
  * </ul>
- * Use static methods for their creation.
+ * Use static methods for their creation. To resolve paths relative to the
+ * current working directory, use {@link #filesystem()}.
  * <p>
  * One more utility of this class is to capture multiple classloaders in case of
  * complex environment with multiple classloaders (e.g. ElasticSearch plugins).
@@ -128,9 +128,18 @@ public abstract class PathAnchor {
     }
 
     /**
-     * Create a filesystem anchor relative to the current directory
+     * Create a filesystem anchor relative to the current working directory
      * 
      * @return filesystem anchor
+     */
+    public static PathAnchor filesystem() {
+        return filesystem("");
+    }
+
+    /**
+     * Create an anchor which does not search for resources
+     * 
+     * @return non-searching anchor
      */
     public static PathAnchor none() {
         return None.INSTANCE;
@@ -164,6 +173,12 @@ public abstract class PathAnchor {
 
     /**
      * Create a resource for the fully resolved path
+     *
+     * For chained anchors, this method may behave differently from
+     * {@code resource(part)} when passed a path returned by {@code resolve(part)}.
+     * Another child anchor may accept the already resolved path and reinterpret it
+     * through a different base. Use {@link #resource(String)} when resolution and
+     * resource lookup must stay on the same child anchor.
      * 
      * @param path
      *            fully resolved path
@@ -180,6 +195,9 @@ public abstract class PathAnchor {
 
     /**
      * Create a resource for passed string path
+     * 
+     * This is the preferred API for chained anchors because the same child anchor
+     * performs both resolution and resource lookup.
      * 
      * @param path
      *            path to the resource
@@ -203,6 +221,12 @@ public abstract class PathAnchor {
     public PathAnchor andThen(PathAnchor other) {
         if (this.equals(other)) {
             return this;
+        }
+        if (other instanceof None) {
+            return this;
+        }
+        if (this instanceof None) {
+            return other;
         }
         return new Chain(this, other);
     }
@@ -285,11 +309,12 @@ public abstract class PathAnchor {
 
         @Override
         public <T> Config.Resource<T> toResource(Path path) {
-            URL resource = loader.getResource(resourceName(path));
+            String name = resourceName(path);
+            URL resource = loader.getResource(name);
             if (resource == null) {
                 return new Config.Resource.NotFound<>(path, this);
             }
-            return new Config.Resource.Classpath<>(resource);
+            return new Config.Resource.Classpath<>(resource, loader, name);
         }
 
         @Override
@@ -357,6 +382,8 @@ public abstract class PathAnchor {
 
         @Override
         public <T> Config.Resource<T> toResource(Path path) {
+            // Note: Another child may also accept an already-resolved path and
+            // reinterpret it through a different base.
             for (PathAnchor child : children) {
                 if (child.exists(path)) {
                     return child.toResource(path);
@@ -364,6 +391,21 @@ public abstract class PathAnchor {
             }
 
             return new Config.Resource.NotFound<>(path, this);
+        }
+
+        @Override
+        public <T> Config.Resource<T> resource(String path) {
+            Path lastPath = null;
+            for (PathAnchor child : children) {
+                Path resolved = child.resolve(path);
+                lastPath = resolved;
+                if (child.exists(resolved)) {
+                    return child.toResource(resolved);
+                }
+                logger.fine(() -> String.format("%s: %s does not exist, skipping", child, path));
+            }
+
+            return new Config.Resource.NotFound<>(lastPath == null ? Paths.get(path) : lastPath, this);
         }
 
         @Override
@@ -412,6 +454,16 @@ public abstract class PathAnchor {
         }
 
         private static final None INSTANCE = new None();
+
+        @Override
+        public boolean exists(Path path) {
+            return false;
+        }
+
+        @Override
+        public <T> Config.Resource<T> toResource(Path path) {
+            return new Config.Resource.NotFound<>(path, this);
+        }
 
         @Override
         public String toString() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public class SudachiCommandLine {
         }
 
         Tokenizer.SplitMode mode = Tokenizer.SplitMode.C;
-        PathAnchor anchor = PathAnchor.classpath().andThen(PathAnchor.none());
+        PathAnchor anchor = PathAnchor.classpath().andThen(PathAnchor.filesystem());
         Settings current = Settings.resolvedBy(anchor)
                 .read(SudachiCommandLine.class.getClassLoader().getResource("sudachi.json"));
         Config additional = Config.empty();

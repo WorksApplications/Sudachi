@@ -145,7 +145,7 @@ class ConfigTest {
   fun anchoredWith() {
     val cfg = Config.empty()
     cfg.anchoredWith(PathAnchor.filesystem("test"))
-    assertIs<PathAnchor.Chain>(cfg.anchor)
+    assertIs<PathAnchor.Filesystem>(cfg.anchor)
   }
 
   @Test
