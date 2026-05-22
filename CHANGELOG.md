@@ -4,6 +4,21 @@
 
 -
 
+## [v0.8.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.0)
+
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+
+### Changed
+
+- `PathAnchor.None` does NOT resolve now (#361).
+- 0-th column of DictionaryPrinter output become normalized (#242).
+
+### Added
+
+- Add TextNormalizer (#242)
+
+
 ## [v0.7.5](https://github.com/WorksApplications/Sudachi/releases/tag/v0.7.5)
 
 ### Added

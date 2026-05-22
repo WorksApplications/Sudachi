@@ -17,6 +17,9 @@ mainly of the following tasks.
 - Part-of-speech tagging
 - Normalization
 
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+
 ## Tutorial
 
 For a tutorial on installation, please refer to the [tutorial page](/docs/tutorial.md).
