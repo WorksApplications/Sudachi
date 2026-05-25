@@ -13,35 +13,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - name: Set up JDK 11
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v5
       with:
         java-version: 11
         distribution: temurin
         cache: gradle
     - name: Extract tag version
       id: tag
-      run: echo "::set-output name=version::$(echo ${{ github.ref }} | sed -e 's/refs\/tags\/v//')"
+      run: echo "version=$(echo ${{ github.ref }} | sed -e 's/refs\/tags\/v//')" >> "$GITHUB_OUTPUT"
     - name: Build Distribution Archive
       run: ./gradlew --no-daemon --info --stacktrace assembleExecutableDist
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Rename asset
+      env:
+        RELEASE_TAG: ${{ steps.tag.outputs.version }}
+      run: |
+        mkdir dist/
+        mv build/distributions/sudachi-executable-$RELEASE_TAG.zip \
+          dist/sudachi-$RELEASE_TAG-executable.zip
+
+    - name: Create or reuse release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Sudachi version ${{ steps.tag.outputs.version }}
-        draft: true
-        prerelease: false
-    - name: Upload release asset
-      id: upload_release_asset
-      uses: actions/upload-release-asset@v1
+        RELEASE_TAG: ${{ steps.tag.outputs.version }}
+      run: |
+        if gh release view "v$RELEASE_TAG" >/dev/null 2>&1; then
+          echo "Release already exists for v$RELEASE_TAG"
+          exit 0
+        fi
+        gh release create "v$RELEASE_TAG" \
+          --draft \
+          --verify-tag \
+          --title "Sudachi version $RELEASE_TAG" \
+          --generate-notes
+    - name: Upload assets
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/distributions/sudachi-executable-${{ steps.tag.outputs.version }}.zip
-        asset_name: sudachi-${{ steps.tag.outputs.version }}-executable.zip
-        asset_content_type: application/zip
+        RELEASE_TAG: ${{ steps.tag.outputs.version }}
+      run: gh release upload "v$RELEASE_TAG" dist/* --clobber -R "${{ github.repository }}"
