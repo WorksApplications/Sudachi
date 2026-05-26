@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - develop
-#  pull_request: # uncommit for debug
-#      types: [ opened, synchronize, reopened ]
+  pull_request: # uncommit for debug
+      types: [ opened, synchronize, reopened ]
 
 jobs:
   publish:
