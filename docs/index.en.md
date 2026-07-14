@@ -20,7 +20,7 @@ Natural language processing software and language resources provided by [WAP Tok
 ## Software
 
 - [Sudachi](https://github.com/WorksApplications/Sudachi): Japanese Tokenizer (Morphological Analyzer)
-- [SudachiPy](https://github.com/WorksApplications/SudachiPy): Python version of Sudachi
+- [sudachi.rs / SudachiPy](https://github.com/WorksApplications/sudachi.rs): rust / Python version of Sudachi
 - [elasticsearch-sudachi](https://github.com/WorksApplications/elasticsearch-sudachi): Sudachi Plugin for Elasticsearch
 - [Kintoki](https://github.com/WorksApplications/kintoki): Dependency Parser
 - [jdartsclone](https://github.com/WorksApplications/jdartsclone): TRIE data structure library using Double-Array
@@ -52,7 +52,16 @@ SudachiDict and chiVe, chiTra data are generously hosted by AWS with their [Oepn
 
 Japanese dictionaries for morphological analysis. Please refer to [SudachiDict](https://github.com/WorksApplications/SudachiDict) for the detail.
 
-Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) for pre-built dictionaries.
+Sudachi dictionary has two formats:
+
+- V1
+  - Sudachi v0.8.2, sudachi.rs/SudachiPy v0.7 and latter requires this format.
+  - Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v1) for pre-built dictionaries.
+  - Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v1) for dictionary source files.
+- V0
+  - Sudachi v0.8.1, sudachi.rs/SudachiPy v0.6 and former requires this format.
+  - Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v0) for pre-built dictionaries.
+  - Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v0) for dictionary source files.
 
 
 ### chiVe

@@ -3,7 +3,10 @@
 ## 辞書ソース
 
 以下の配布ページにてビルド前のシステム辞書ソースファイルを配布しています：
-http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/
+http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v1
+
+Sudachi v0.8.1 以前（辞書形式 V0）を使用する場合の配布ページは以下です：
+http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v0
 
 各レキシコンはそれぞれ追加分の語のみを含みます。すなわち、
 
@@ -13,9 +16,13 @@ http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/
 
 がそれぞれ必要です。
 
-またビルドに追加で必要となる `matrix.def` ファイルもここから取得できます。
+またビルドに追加で必要となる `matrix.def` ファイルおよび `pos.csv` ファイルもここから取得できます。
 
-品詞リストファイル `pos.csv` については、[本リポジトリに配置](../src/main/resources/pos.csv)しています。
+品詞リストファイル `pos.csv` については、[本リポジトリにも配置](../src/main/resources/pos.csv)しています。
+
+### 辞書ソースのフォーマット
+
+このシステム辞書ソースファイルは、[ユーザ辞書（V1）](./user_dict_v1.md) の記載と同様のフォーマットを持ちます。
 
 ## バイナリ辞書の作成
 
@@ -26,11 +33,11 @@ http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/
 例：
 
 ```bash
-java -Dfile.encoding=UTF-8 -cp ./build/distributions/sudachi-0.7.6-SNAPSHOT.jar \
+java -Dfile.encoding=UTF-8 -cp ./build/distributions/sudachi-0.8.2-SNAPSHOT.jar \
     com.worksap.nlp.sudachi.dictionary.DictionaryBuilder \
     -m matrix.def \
     -p ./src/main/resources/pos/csv \
-    -o core_20260116_v1.dict \
+    -o system_core_v1.dict \
     -d "sample system core dictionary" \
     small_lex.csv core_lex.csv
 ```
