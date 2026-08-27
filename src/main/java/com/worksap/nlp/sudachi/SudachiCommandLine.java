@@ -137,7 +137,7 @@ public class SudachiCommandLine {
      *
      * <p>
      * Usage:
-     * {@code SudachiCommandLine [-r file] [-m A|B|C] [-o file] [-d] [file ...]}
+     * {@code SudachiCommandLine [-r conf] [-s json] [-p directory] [-m mode] [-o output] [-t|-ts] [-a] [--print-reading] [-f] [-d] [--systemDict file] [--userDict file] [--format class] [file...]}
      * <p>
      * The following are the options.
      * <dl>
@@ -145,6 +145,8 @@ public class SudachiCommandLine {
      * <dd>the settings file in JSON format (overrides -s)</dd>
      * <dt>{@code -s string}</dt>
      * <dd>an additional settings string in JSON format (overrides -r)</dd>
+     * <dt>{@code -p directory}</dt>
+     * <dd>a root directory for the resource files</dd>
      * <dt>{@code -m {A|B|C}}</dt>
      * <dd>the mode of splitting</dd>
      * <dt>{@code -o file}</dt>
@@ -157,8 +159,16 @@ public class SudachiCommandLine {
      * <dd>show details</dd>
      * <dt>{@code --print-reading}</dt>
      * <dd>show the reading form in addition to the default fields</dd>
+     * <dt>{@code -f}</dt>
+     * <dd>ignore errors</dd>
      * <dt>{@code -d}</dt>
      * <dd>print the debug informations</dd>
+     * <dt>{@code --systemDict file}</dt>
+     * <dd>path to a system dictionary (overrides everything)</dd>
+     * <dt>{@code --userDict file}</dt>
+     * <dd>path to an additional user dictionary (appended to -s)</dd>
+     * <dt>{@code --format class}</dt>
+     * <dd>format class for output</dd>
      * <dt>{@code -h}</dt>
      * <dd>show the usage</dd>
      * </dl>
@@ -256,7 +266,8 @@ public class SudachiCommandLine {
                 isLineBreakAtEosInWordSegmentation = true;
             } else if (args[i].equals("-h")) {
                 PrintStream stderr = System.err;
-                stderr.print("usage: SudachiCommandLine [-r file] [-m A|B|C] [-o file] [file ...]\n");
+                stderr.print(
+                        "usage: SudachiCommandLine [-r conf] [-s json] [-p directory] [-m mode] [-o output] [-t|-ts] [-a] [--print-reading] [-f] [-d] [--systemDict file] [--userDict file] [--format class] [file...]\n");
                 stderr.print("\t-r file\tread settings from file (overrides -s)\n");
                 stderr.print("\t-s string\tadditional settings (overrides -r)\n");
                 stderr.print("\t-p directory\troot directory of resources\n");
@@ -266,10 +277,11 @@ public class SudachiCommandLine {
                 stderr.print("\t-ts\tseparate words with spaces, and break line for each sentence\n");
                 stderr.print("\t-a\tshow details\n");
                 stderr.print("\t--print-reading\tshow the reading form in addition to the default fields\n");
-                stderr.print("\t-f\tignore error\n");
+                stderr.print("\t-f\tignore errors\n");
                 stderr.print("\t-d\tdebug mode\n");
                 stderr.print("\t--systemDict file\tpath to a system dictionary (overrides everything)\n");
                 stderr.print("\t--userDict file\tpath to an additional user dictionary (appended to -s)\n");
+                stderr.print("\t--format class\tformat class for output\n");
                 return;
             } else if (args[i].equals("--userDict")) {
                 Path resolved = anchor.resolve(args[++i]);
