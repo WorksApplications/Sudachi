@@ -65,7 +65,7 @@ $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ## Use on the command line
 
 ```
-$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [--print-reading] [-d] [-f] [-o output] [file...]
 ```
 
 ### Options
@@ -75,6 +75,7 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - `-p directory` root directory of resources
 - `-m {A|B|C}` specifies the mode of splitting
 - `-a` outputs the dictionary form, the reading form, the dictionary id, the synonym group id list, and OOV flag.
+- `--print-reading` outputs the reading form. If combined with `-a`, `-a` takes precedence.
 - `-d` dump the debug outputs
 - `-o file` specifies output file (default: the standard output)
 - `-t` separate words with spaces
@@ -96,6 +97,12 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
     へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar --print-reading
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  トウキョウト
+    へ      助詞,格助詞,*,*,*,*     へ      ヘ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    イク
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
@@ -400,7 +407,7 @@ $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ## コマンドラインツール
 
 ```
-$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [--print-reading] [-d] [-f] [-o output] [file...]
 ```
 
 ### オプション
@@ -410,6 +417,7 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - -p directory リソースの起点となるディレクトリを指定
 - -m {A|B|C} 分割モード
 - -a 追加で辞書形、読み、辞書ID、同義語グループID、OOV フラグを出力
+- --print-reading 表層形、品詞、正規化表記、読みを出力。辞書更新による解析結果の比較に適した形式。-a と同時に指定した場合は -a を優先
 - -d デバッグ情報の出力
 - -o 出力ファイル (指定がない場合は標準出力)
 - -t 単語をスペース区切りで出力
@@ -428,6 +436,12 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
     へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar --print-reading
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  トウキョウト
+    へ      助詞,格助詞,*,*,*,*     へ      ヘ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    イク
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A

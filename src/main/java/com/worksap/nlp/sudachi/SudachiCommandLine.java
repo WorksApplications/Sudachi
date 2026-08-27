@@ -155,6 +155,8 @@ public class SudachiCommandLine {
      * <dd>separate words with spaces, and break line for each sentence</dd>
      * <dt>{@code -a}</dt>
      * <dd>show details</dd>
+     * <dt>{@code --print-reading}</dt>
+     * <dd>show the reading form in addition to the default fields</dd>
      * <dt>{@code -d}</dt>
      * <dd>print the debug informations</dd>
      * <dt>{@code -h}</dt>
@@ -200,6 +202,7 @@ public class SudachiCommandLine {
         String outputFileName = null;
         boolean isEnableDump = false;
         boolean showDetails = false;
+        boolean printReading = false;
         boolean ignoreError = false;
         boolean isWordSegmentation = false;
         boolean isLineBreakAtEosInWordSegmentation = true;
@@ -239,6 +242,8 @@ public class SudachiCommandLine {
                 outputFileName = args[++i];
             } else if (args[i].equals("-a")) {
                 showDetails = true;
+            } else if (args[i].equals("--print-reading")) {
+                printReading = true;
             } else if (args[i].equals("-d")) {
                 isEnableDump = true;
             } else if (args[i].equals("-f")) {
@@ -260,6 +265,7 @@ public class SudachiCommandLine {
                 stderr.print("\t-t\tseparate words with spaces\n");
                 stderr.print("\t-ts\tseparate words with spaces, and break line for each sentence\n");
                 stderr.print("\t-a\tshow details\n");
+                stderr.print("\t--print-reading\tshow the reading form in addition to the default fields\n");
                 stderr.print("\t-f\tignore error\n");
                 stderr.print("\t-d\tdebug mode\n");
                 stderr.print("\t--systemDict file\tpath to a system dictionary (overrides everything)\n");
@@ -286,6 +292,8 @@ public class SudachiCommandLine {
                 formatterKind, current);
         if (showDetails) {
             formatter.showDetails();
+        } else if (printReading && formatter instanceof SimpleMorphemeFormatter) {
+            ((SimpleMorphemeFormatter) formatter).setPrintReading(true);
         }
 
         try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
