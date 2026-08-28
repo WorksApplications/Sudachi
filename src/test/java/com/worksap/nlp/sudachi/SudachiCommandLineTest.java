@@ -128,6 +128,39 @@ public class SudachiCommandLineTest {
     }
 
     @Test
+    public void commandLineWithPrintReadingOption() throws IOException {
+        SudachiCommandLine.main(
+                new String[] { "-p", temporaryFolderName, "-o", outputFileName, "--print-reading", inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            Optional<String> first = lines.filter(l -> !l.equals("EOS")).findFirst();
+            assertTrue(first.isPresent());
+            assertThat(first.get().split("\\t"), is(new String[] { "東京都", "名詞,固有名詞,地名,一般,*,*", "東京都", "トウキョウト" }));
+        }
+    }
+
+    @Test
+    public void commandLineWithAOptionBeforePrintReadingOption() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-a", "--print-reading",
+                inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            Optional<String> first = lines.filter(l -> !l.equals("EOS")).findFirst();
+            assertTrue(first.isPresent());
+            assertThat(first.get().split("\\t").length, is(7));
+        }
+    }
+
+    @Test
+    public void commandLineWithPrintReadingOptionBeforeAOption() throws IOException {
+        SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "--print-reading", "-a",
+                inputFileName });
+        try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {
+            Optional<String> first = lines.filter(l -> !l.equals("EOS")).findFirst();
+            assertTrue(first.isPresent());
+            assertThat(first.get().split("\\t").length, is(7));
+        }
+    }
+
+    @Test
     public void commandLineWithDOption() throws IOException {
         SudachiCommandLine.main(new String[] { "-p", temporaryFolderName, "-o", outputFileName, "-d", inputFileName });
         try (Stream<String> lines = Files.lines(Paths.get(outputFileName))) {

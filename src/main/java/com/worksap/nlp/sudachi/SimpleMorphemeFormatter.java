@@ -43,11 +43,13 @@ import java.util.Arrays;
 public class SimpleMorphemeFormatter extends MorphemeFormatterPlugin {
 
     protected String columnDelimiter;
+    private boolean printReading;
 
     @Override
     public void setUp() throws IOException {
         super.setUp();
         columnDelimiter = settings.getString("columnDelimiter", "\t");
+        printReading = false;
     }
 
     @Override
@@ -59,7 +61,13 @@ public class SimpleMorphemeFormatter extends MorphemeFormatterPlugin {
                     + columnDelimiter + morpheme.getDictionaryId() + columnDelimiter
                     + Arrays.toString(morpheme.getSynonymGroupIds()) + columnDelimiter
                     + ((morpheme.isOOV()) ? "(OOV)" : "");
+        } else if (printReading) {
+            output += columnDelimiter + morpheme.readingForm();
         }
         return output;
+    }
+
+    public void setPrintReading(boolean printReading) {
+        this.printReading = printReading;
     }
 }
