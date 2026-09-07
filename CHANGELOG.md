@@ -4,6 +4,16 @@
 
 -
 
+## [v0.8.1](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.1)
+
+### Added
+
+- Added new CLI option `--print-reading` (#366)
+  - With this, the reading form is printed in addition to the default output fields (surface, pos, normalized form).
+  - `-a` will override this.
+- Update github workflows (#363, #364, #367)
+  - Includes test with JDK 21
+
 ## [v0.8.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.0)
 
 > **CAUTION**
