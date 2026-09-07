@@ -17,6 +17,9 @@ mainly of the following tasks.
 - Part-of-speech tagging
 - Normalization
 
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+
 ## Tutorial
 
 For a tutorial on installation, please refer to the [tutorial page](/docs/tutorial.md).
@@ -62,7 +65,7 @@ $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ## Use on the command line
 
 ```
-$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-p directory] [-m mode] [-o output] [-t|-ts] [-a] [--print-reading] [-f] [-d] [--systemDict file] [--userDict file] [--format class] [file...]
 ```
 
 ### Options
@@ -71,12 +74,13 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
 - `-s json` additional settings (overrides -r)
 - `-p directory` root directory of resources
 - `-m {A|B|C}` specifies the mode of splitting
-- `-a` outputs the dictionary form, the reading form, the dictionary id, the synonym group id list, and OOV flag.
-- `-d` dump the debug outputs
 - `-o file` specifies output file (default: the standard output)
 - `-t` separate words with spaces
 - `-ts` separate words with spaces, and break line for each sentence
+- `-a` outputs the dictionary form, the reading form, the dictionary id, the synonym group id list, and OOV flag.
+- `--print-reading` outputs the reading form. If combined with `-a`, `-a` takes precedence.
 - `-f` ignore errors
+- `-d` dump the debug outputs
 - `--systemDict file` specify path to the system dictionary. Will override other settings.
 - `--userDict file` add a user dictionary. Will not override other settings, but add another user dictionary.
 - `--format class` use the provided class for formatting output instead of default configuration
@@ -93,6 +97,12 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
     へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar --print-reading
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  トウキョウト
+    へ      助詞,格助詞,*,*,*,*     へ      ヘ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    イク
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
@@ -314,7 +324,7 @@ An implementation of Sudachi in Python and Rust
 We have a Slack workspace for developers and users to ask questions and discuss a variety of topics.
 
 - https://sudachi-dev.slack.com/
-- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU))
+- (Please get an invitation from [here](https://join.slack.com/t/sudachi-dev/shared_invite/zt-39n46itp3-oypQk1THbvb_wYW~MNI6yA))
 
 
 ## Citing Sudachi
@@ -397,21 +407,25 @@ $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
 ## コマンドラインツール
 
 ```
-$ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o output] [file...]
+$ java -jar sudachi-XX.jar [-r conf] [-s json] [-p directory] [-m mode] [-o output] [-t|-ts] [-a] [--print-reading] [-f] [-d] [--systemDict file] [--userDict file] [--format class] [file...]
 ```
 
 ### オプション
 
-- -r conf 設定ファイルを指定 (-s と排他)
-- -s json デフォルト設定の上書き (-r と排他)
-- -p directory リソースの起点となるディレクトリを指定
-- -m {A|B|C} 分割モード
-- -a 追加で辞書形、読み、辞書ID、同義語グループID、OOV フラグを出力
-- -d デバッグ情報の出力
-- -o 出力ファイル (指定がない場合は標準出力)
-- -t 単語をスペース区切りで出力
-- -ts 単語をスペース区切りで出力、文末で改行を出力
-- -f エラーを無視して処理を続行する
+- `-r conf` 設定ファイルを指定 (-s と排他)
+- `-s json` デフォルト設定の上書き (-r と排他)
+- `-p directory` リソースの起点となるディレクトリを指定
+- `-m {A|B|C}` 分割モード
+- `-o` 出力ファイル (指定がない場合は標準出力)
+- `-t` 単語をスペース区切りで出力
+- `-ts` 単語をスペース区切りで出力、文末で改行を出力
+- `-a` 追加で辞書形、読み、辞書ID、同義語グループID、OOV フラグを出力
+- `--print-reading` 追加で読みを出力。-a と同時に指定した場合は -a を優先
+- `-f` エラーを無視して処理を続行する
+- `-d` デバッグ情報の出力
+- `--systemDict file` システム辞書バイナリを指定。他のオプションを上書きする
+- `--userDict file` ユーザ辞書バイナリを追加する。他のオプションでの指定に対して追加される
+- `--format class` 出力のフォーマットに使用する Java クラスを指定する
 
 ### 出力例
 
@@ -425,6 +439,12 @@ $ java -jar sudachi-XX.jar [-r conf] [-s json] [-m mode] [-a] [-d] [-f] [-o outp
     東京都  名詞,固有名詞,地名,一般,*,*     東京都  東京都  トウキョウト    0       []
     へ      助詞,格助詞,*,*,*,*     へ      へ      ヘ      0       []
     行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    行く    イク    0       []
+    EOS
+
+    $ echo 東京都へ行く | java -jar target/sudachi.jar --print-reading
+    東京都  名詞,固有名詞,地名,一般,*,*     東京都  トウキョウト
+    へ      助詞,格助詞,*,*,*,*     へ      ヘ
+    行く    動詞,非自立可能,*,*,五段-カ行,終止形-一般       行く    イク
     EOS
 
     $ echo 東京都へ行く | java -jar target/sudachi.jar -m A
@@ -622,7 +642,7 @@ Python 版および Rust 版も公開しています。
 開発者やユーザーの方々が質問したり議論するためのSlackワークスペースを用意しています。
 
 - https://sudachi-dev.slack.com/
-- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/enQtMzg2NTI2NjYxNTUyLTMyYmNkZWQ0Y2E5NmQxMTI3ZGM3NDU0NzU4NGE1Y2UwYTVmNTViYjJmNDI0MWZiYTg4ODNmMzgxYTQ3ZmI2OWU)から招待を受けてください)
+- ([こちら](https://join.slack.com/t/sudachi-dev/shared_invite/zt-39n46itp3-oypQk1THbvb_wYW~MNI6yA)から招待を受けてください)
 
 
 ## Sudachiの引用

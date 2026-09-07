@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class DictionaryFactory {
     @Deprecated()
     public Dictionary create(String settings) throws IOException {
         Config defaults = Config.defaultConfig();
-        Config passed = Config.fromJsonString(settings, PathAnchor.classpath().andThen(PathAnchor.none()));
+        Config passed = Config.fromJsonString(settings, PathAnchor.classpath().andThen(PathAnchor.filesystem()));
         Config merged = passed.withFallback(defaults);
         return create(merged);
     }

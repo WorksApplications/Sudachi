@@ -4,7 +4,10 @@
 
 -
 
-## [v0.8.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.0)
+## [v0.8.2](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.2)
+
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
 
 ### Breaking changes
 
@@ -45,6 +48,33 @@ See [migration guide](./docs/migration_guide.md) for details.
 - `SentenceSplittingAnalysis` is removed (#254)
 - `DictionaryFactory` is deprecated and will be removed in v1.0 (#259)
   - use `Dictionary.load(Config)` instead.
+
+## [v0.8.1](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.1)
+
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+
+### Added
+
+- Added new CLI option `--print-reading` (#366)
+  - With this, the reading form is printed in addition to the default output fields (surface, pos, normalized form).
+  - `-a` will override this.
+- Update github workflows (#363, #364, #367)
+  - Includes test with JDK 21
+
+## [v0.8.0](https://github.com/WorksApplications/Sudachi/releases/tag/v0.8.0)
+
+> **CAUTION**
+> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+
+### Changed
+
+- `PathAnchor.None` does NOT resolve now (#361).
+- 0-th column of DictionaryPrinter output become normalized (#242).
+
+### Added
+
+- Add TextNormalizer (#242)
 
 ## [v0.7.5](https://github.com/WorksApplications/Sudachi/releases/tag/v0.7.5)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -242,7 +241,10 @@ public class Config {
      */
     public static <T> Config fromResource(Resource<T> resource, PathAnchor anchor) throws IOException {
         if (resource instanceof Resource.Classpath) {
-            return fromClasspath((URL) resource.repr(), anchor);
+            try (InputStream stream = resource.asInputStream()) {
+                String data = StringUtil.readFully(stream);
+                return fromSettings(Settings.parse(data, anchor));
+            }
         }
         if (resource instanceof Resource.Filesystem) {
             return fromFile((Path) resource.repr(), anchor);
@@ -945,13 +947,28 @@ public class Config {
          */
         public static class Classpath<T> extends Resource<T> {
             private final URL url;
+            private final ClassLoader loader;
+            private final String resourceName;
 
             Classpath(URL url) {
+                this(url, null, null);
+            }
+
+            Classpath(URL url, ClassLoader loader, String resourceName) {
                 this.url = url;
+                this.loader = loader;
+                this.resourceName = resourceName;
             }
 
             @Override
             public InputStream asInputStream() throws IOException {
+                if (loader != null && resourceName != null) {
+                    InputStream stream = loader.getResourceAsStream(resourceName);
+                    if (stream == null) {
+                        throw new FileNotFoundException(resourceName);
+                    }
+                    return stream;
+                }
                 return url.openStream();
             }
 
@@ -960,7 +977,9 @@ public class Config {
                 if (Objects.equals(url.getProtocol(), "file")) {
                     return MMap.map(url.getPath());
                 }
-                return StringUtil.readAllBytes(url);
+                try (InputStream stream = asInputStream()) {
+                    return StringUtil.readAllBytes(stream);
+                }
             }
 
             @Override
@@ -980,12 +999,13 @@ public class Config {
                 if (o == null || getClass() != o.getClass())
                     return false;
                 Classpath<?> classpath = (Classpath<?>) o;
-                return Objects.equals(url, classpath.url);
+                return Objects.equals(url, classpath.url) && Objects.equals(loader, classpath.loader)
+                        && Objects.equals(resourceName, classpath.resourceName);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(url);
+                return Objects.hash(url, loader, resourceName);
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class Settings {
      */
     @Deprecated
     public static Settings parseSettings(String path, String json) {
-        PathAnchor anchor = path == null ? PathAnchor.none() : PathAnchor.filesystem(Paths.get(path));
+        PathAnchor anchor = path == null ? PathAnchor.filesystem() : PathAnchor.filesystem(Paths.get(path));
         anchor = anchor.andThen(PathAnchor.classpath());
         return parse(json, anchor);
     }
@@ -192,7 +192,7 @@ public class Settings {
                     }
                     return new Settings(root, resolver);
                 } else {
-                    PathAnchor pathResolver = PathAnchor.filesystem(Paths.get(basePath));
+                    PathAnchor pathResolver = PathAnchor.filesystem(basePath);
                     if (resolver != null) {
                         pathResolver = pathResolver.andThen(resolver);
                     }
@@ -460,8 +460,7 @@ public class Settings {
     }
 
     private <T> Config.Resource<T> extractResource(String path) {
-        Path obj = base.resolve(path);
-        return base.toResource(obj);
+        return base.resource(path);
     }
 
     /**

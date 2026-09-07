@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class DefaultInputTextPluginTest {
         plugin = new DefaultInputTextPlugin();
         try {
             PathAnchor anchor = PathAnchor.classpath();
-            plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite.def"));
+            plugin.rewriteDef = anchor.resource("rewrite.def");
             plugin.setUp(new MockGrammar());
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -112,7 +112,7 @@ public class DefaultInputTextPluginTest {
     public void invalidFormatOfIgnoreList() throws IOException {
         plugin = new DefaultInputTextPlugin();
         PathAnchor anchor = PathAnchor.classpath();
-        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_ignorelist.def"));
+        plugin.rewriteDef = anchor.resource("rewrite_error_ignorelist.def");
         plugin.setUp(new MockGrammar());
     }
 
@@ -120,7 +120,7 @@ public class DefaultInputTextPluginTest {
     public void invalidFormatOfReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
         PathAnchor anchor = PathAnchor.classpath();
-        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_replacelist.def"));
+        plugin.rewriteDef = anchor.resource("rewrite_error_replacelist.def");
         plugin.setUp(new MockGrammar());
     }
 
@@ -128,7 +128,7 @@ public class DefaultInputTextPluginTest {
     public void duplicatedLinesInReplaceList() throws IOException {
         plugin = new DefaultInputTextPlugin();
         PathAnchor anchor = PathAnchor.classpath();
-        plugin.rewriteDef = anchor.toResource(anchor.resolve("rewrite_error_dup.def"));
+        plugin.rewriteDef = anchor.resource("rewrite_error_dup.def");
         plugin.setUp(new MockGrammar());
     }
 }
