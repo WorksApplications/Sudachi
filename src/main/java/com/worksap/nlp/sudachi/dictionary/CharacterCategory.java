@@ -60,7 +60,7 @@ public class CharacterCategory {
      * Returns the set of the category types of the character (Unicode code point).
      *
      * @param codePoint
-     *                  the code point value of the character
+     *            the code point value of the character
      * @return the set of the category types of the character
      */
     public EnumSet<CategoryType> getCategoryTypes(int codePoint) {
@@ -96,9 +96,9 @@ public class CharacterCategory {
      * Lines that do not start with "0x" are ignored.
      *
      * @param charDef
-     *                the file of the definitions of character categories.
+     *            the file of the definitions of character categories.
      * @throws IOException
-     *                     if the definition file is not available.
+     *             if the definition file is not available.
      * @deprecated use {@link #load(Config.Resource)} instead. Will be removed with
      *             1.0 release.
      */
