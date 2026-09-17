@@ -14,7 +14,7 @@ lang: en
 
 # WAP Tokushima NLP Resources
 
-Natural language processing software and language resources provided by [WAP Tokushima Laboratory of AI and NLP](https://www.worksap.co.jp/about/csr/nlp/).
+Natural language processing software and language resources provided by WAP Tokushima Laboratory of AI and NLP.
 
 
 ## Software
