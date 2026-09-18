@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/WorksApplications/Sudachi/releases/tag/v)
+## [Unreleased](https://github.com/WorksApplications/Sudachi/compare/v0.8.1...HEAD)
 
 -
 

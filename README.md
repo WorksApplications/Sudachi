@@ -45,7 +45,7 @@ Sudachi has the following features.
 - Plugins
     + You can change the behavior of processings
 - Work closely with the synonym dictionary
-    + We will release the sysnonym dictionary at a later date
+    + The synonym dictionary is available at http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachisynonym/
 
 
 ## Dictionaries
@@ -282,7 +282,7 @@ To create and use your own dictionaries, please refer to [V1 user dictionary gui
 - Adding more split informations
 - Adding more normalized forms
 - Fix reading forms (pronunciation -> Furigana)
-- Coodinating segmentations with the synonym dictionary
+- Coordinating segmentations with the synonym dictionary
 
 
 ## Licenses
