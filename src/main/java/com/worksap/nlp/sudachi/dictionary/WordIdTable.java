@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +19,40 @@ package com.worksap.nlp.sudachi.dictionary;
 import com.worksap.nlp.sudachi.WordId;
 
 import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
+import java.util.NoSuchElementException;
+import java.util.Iterator;
 
-class WordIdTable {
+/**
+ * Lexicon parts that contains the list of (internal) word ids that have the
+ * same index form.
+ * 
+ * DoubleArray has mapping from indexForm to offset in this table, and
+ * {@link WordInfoList} has actual data for each words.
+ * 
+ * In V1 format, each word ids in a list in this table are sorted (and
+ * compressed using varint-32), but they are not sorted between lists.
+ */
+public class WordIdTable {
     private final ByteBuffer bytes;
-    private final int size;
-    private final int offset;
-    private int dicIdMask = 0;
 
-    WordIdTable(ByteBuffer bytes, int offset) {
+    WordIdTable(ByteBuffer bytes) {
         this.bytes = bytes;
-        size = bytes.getInt(offset);
-        this.offset = offset + 4;
     }
 
-    int storageSize() {
-        return 4 + size;
-    }
-
-    Integer[] get(int index) {
-        int length = Byte.toUnsignedInt(bytes.get(offset + index++));
-        Integer[] result = new Integer[length];
-        for (int i = 0; i < length; i++) {
-            result[i] = bytes.getInt(offset + index);
-            index += 4;
-        }
+    int[] get(int index) {
+        ByteBuffer dup = bytes.duplicate();
+        dup.position(index);
+        BufReader reader = new BufReader(dup);
+        int length = reader.readVarint32();
+        int[] result = new int[length];
+        readDeltaCompressed(result, length, reader);
         return result;
     }
 
     /**
      * Reads the word IDs to the passed WordLookup object
-     * 
+     *
      * @param index
      *            index in the word array
      * @param lookup
@@ -56,21 +60,57 @@ class WordIdTable {
      * @return number of read IDs
      */
     int readWordIds(int index, WordLookup lookup) {
-        int offset = this.offset + index;
-        ByteBuffer bytes = this.bytes;
-        int length = Byte.toUnsignedInt(bytes.get(offset));
-        offset += 1;
+        ByteBuffer dup = bytes.duplicate();
+        dup.position(index);
+        BufReader reader = new BufReader(dup);
+        int length = reader.readVarint32();
         int[] result = lookup.outputBuffer(length);
-        int dicIdMask = this.dicIdMask;
-        for (int i = 0; i < length; i++) {
-            int wordId = bytes.getInt(offset);
-            result[i] = WordId.applyMask(wordId, dicIdMask);
-            offset += 4;
-        }
+        readDeltaCompressed(result, length, reader);
         return length;
     }
 
-    void setDictionaryId(int id) {
-        dicIdMask = WordId.dicIdMask(id);
+    private static void readDeltaCompressed(int[] result, int count, BufReader reader) {
+        int sum = 0;
+        for (int i = 0; i < count; ++i) {
+            int v = reader.readVarint32();
+            result[i] = v + sum;
+            sum += v;
+        }
+    }
+
+    /**
+     * Iterates over all valid word ids in the dictionary. Iteration order is not
+     * the same as the original dictionary order, but dictionary ids, when sorted,
+     * form the correct order. <br>
+     * The returned Ints object will be the same for each invocation of
+     * {@code next()}.
+     * 
+     * @return iterator object
+     */
+    public Iterator<Ints> wordIds() {
+        return new Iterator<Ints>() {
+            private final BufReader buf = new BufReader((ByteBuffer) bytes.duplicate().position(0));
+            private final Ints ints = new Ints(16);
+
+            @Override
+            public boolean hasNext() {
+                return buf.remaining() > 0;
+            }
+
+            @Override
+            public Ints next() {
+                BufReader r = buf;
+                int size;
+                try {
+                    size = r.readVarint32();
+                } catch (BufferUnderflowException e) {
+                    throw new NoSuchElementException();
+                }
+                ints.clear();
+                int[] data = ints.prepare(size);
+                readDeltaCompressed(data, size, r);
+                return ints;
+            }
+        };
     }
 }

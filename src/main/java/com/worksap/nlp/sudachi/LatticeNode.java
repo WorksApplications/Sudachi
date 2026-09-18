@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import com.worksap.nlp.sudachi.dictionary.WordInfo;
  * and the information of morpheme as {@link WordInfo}
  *
  * <p>
- * Allocation of a node in the plugins must be done through
- * {@link Lattice#createNode}.
+ * Node should be creadted via {@link LatticeNodeImpl#makeOov} or
+ * {@link LatticeNodeImpl.OOVFactory} in the plugins.
  *
  * @see Lattice
  * @see WordInfo
@@ -83,7 +83,11 @@ public interface LatticeNode {
 
     /**
      * Makes the node out of vocabulary.
+     * 
+     * @deprecated OOV node should be created via {@link LatticeNodeImpl#makeOov} or
+     *             {@link LatticeNodeImpl.OOVFactory}.
      */
+    @Deprecated
     public void setOOV();
 
     /**
@@ -93,6 +97,42 @@ public interface LatticeNode {
      * @see WordInfo
      */
     public WordInfo getWordInfo();
+
+    /**
+     * Returns the string information of the node.
+     * 
+     * @return the string information of the node.
+     * @see StringsCache
+     */
+    public StringsCache getStrings();
+
+    /**
+     * @return the text of node.
+     */
+    public default String getSurface() {
+        return getStrings().getSurface();
+    }
+
+    /**
+     * @return the reading form of node.
+     */
+    public default String getReading() {
+        return getStrings().getReading();
+    }
+
+    /**
+     * @return the normalized form of node.
+     */
+    public default String getNormalizedForm() {
+        return getStrings().getNormalizedForm();
+    }
+
+    /**
+     * @return the dictionary form of node.
+     */
+    public default String getDictionaryForm() {
+        return getStrings().getDictionaryForm();
+    }
 
     /**
      * Sets the morpheme information to the node.

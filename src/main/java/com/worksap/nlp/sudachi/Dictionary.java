@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.worksap.nlp.sudachi;
 
-import com.worksap.nlp.sudachi.dictionary.POS;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import com.worksap.nlp.sudachi.dictionary.POS;
 
 /**
  * A lexicon and a grammar for morphological analysis.
@@ -37,14 +38,115 @@ import java.util.function.Predicate;
 public interface Dictionary extends AutoCloseable {
 
     /**
+     * Creates {@code Dictionary} from configuration.
+     *
+     * @param config
+     *            configuration of the dictionary to create
+     * @return {@link Dictionary}
+     * @throws IOException
+     *             if reading a file is failed
+     */
+    public static Dictionary load(Config config) throws IOException {
+        return new JapaneseDictionary(config);
+    }
+
+    /**
      * Creates a tokenizer instance.
      *
      * @return a tokenizer
      */
+    public Tokenizer tokenizer();
+
+    /**
+     * Creates a tokenizer instance.
+     *
+     * @return a tokenizer
+     * 
+     * @deprecated renamed to {@link tokenizer()}
+     */
+    @Deprecated
     public Tokenizer create();
 
     @Override
     public void close() throws IOException;
+
+    /**
+     * Create a parallel stream of all words in the dictionary as morphemes.
+     *
+     * Corresponds to the lines in the lexicon csv, i.e. it includes entries that
+     * appear only when referred from other words (e.g. as constitution) during an
+     * analysis and excludes entries that automatically added to store a
+     * normalization form of another word. Entries in the stream are not sorted.
+     *
+     * @return a parallel stream of morphemes.
+     */
+    public Stream<Morpheme> entries();
+
+    /**
+     * Lookup entries in the dictionary without performing an analysis.
+     * 
+     * Specified surface will be normalized. This works like performing analysis on
+     * the given headword and find paths with a single morpheme, but returns all
+     * paths instead of the lowest cost one.
+     * 
+     * @param surface
+     *            surface to lookup. Will be normalized beforehand.
+     * @return a list of morphemes that match the surface. Their begin/end will be
+     *         0/length of their headword.
+     */
+    public List<Morpheme> lookup(CharSequence surface);
+
+    /**
+     * Lookup from all entries in the dictionary.
+     * 
+     * Specified surface will be normalized. This can find entries that are not
+     * indexed and appear only when referred from other words (e.g. constitution),
+     * but is VERY slow instead. {@link Dictionary#lookup(CharSequence)} should be
+     * used for most cases.
+     * 
+     * @param surface
+     *            surface to lookup. Will be normalized beforehand.
+     * @return a list of morphemes that match the surface. Their begin/end will be
+     *         0/length of their headword.
+     * @see Dictionary#lookup(CharSequence)
+     */
+    public List<Morpheme> lookupAllEntries(CharSequence surface);
+
+    /**
+     * Create an out-of-vocabulary morpheme from the pos id and string forms.
+     * 
+     * Begin/end will be set based on the surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @param reading
+     *            reading form of the morpheme
+     * @param normalizedForm
+     *            normalized form of the morpheme
+     * @param dictionaryForm
+     *            dictionary form of the morpheme
+     * @return an oov morpheme with given information
+     */
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm);
+
+    /**
+     * Create an out-of-vocabulary morpheme from the pos id and the surface.
+     * 
+     * Use the surface to for other string forms. Begin/end will be set based on the
+     * surface.
+     * 
+     * @param posId
+     *            part-of-speech id of the morpheme
+     * @param surface
+     *            surface of the morpheme
+     * @return an oov morpheme with given information
+     */
+    public default Morpheme oovMorpheme(short posId, String surface) {
+        return oovMorpheme(posId, surface, surface, surface, surface);
+    }
 
     /**
      * Returns the number of types of part-of-speech.
@@ -112,4 +214,12 @@ public interface Dictionary extends AutoCloseable {
     default PosMatcher posMatcher(PartialPOS... posList) {
         return posMatcher(Arrays.asList(posList));
     }
+
+    /**
+     * Create a TextNormalizer that works based on the grammar and InputTextPlugins
+     * of this dictionary
+     * 
+     * @return TextNormalizer based on this dictionary.
+     */
+    TextNormalizer textNormalizer();
 }

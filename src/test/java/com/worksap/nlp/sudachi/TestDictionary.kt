@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2025 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,34 @@ package com.worksap.nlp.sudachi
 import com.worksap.nlp.sudachi.dictionary.BinaryDictionary
 import com.worksap.nlp.sudachi.dictionary.build.DicBuilder
 import com.worksap.nlp.sudachi.dictionary.build.MemChannel
-import com.worksap.nlp.sudachi.dictionary.build.res
+import java.net.URL
 
 /** Utility for lazily creating binary dictionaries for test */
 object TestDictionary {
-  val systemDictData: MemChannel by lazy {
-    val result = MemChannel()
+  fun buildSystemDictData(comment: String): MemChannel {
+    val chan = MemChannel()
     DicBuilder.system()
         .matrix(res("/dict/matrix.def"))
         .lexicon(res("/dict/lex.csv"))
-        .description("the system dictionary for the unit tests")
-        .build(result)
-    result
+        .comment(comment)
+        .signature(null)
+        .build(chan)
+    return chan
   }
 
-  val userDict1Data: MemChannel by lazy {
+  fun buildUserDictData(system: BinaryDictionary, url: URL): MemChannel {
     val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user.csv")).build(chan)
-    chan
+    DicBuilder.user().system(system).lexicon(url).build(chan)
+    return chan
   }
+
+  val systemDictData: MemChannel by lazy {
+    buildSystemDictData("the system dictionary for the unit tests")
+  }
+
+  val userDict1Data: MemChannel by lazy { buildUserDictData(systemDict, res("/dict/user.csv")) }
+
+  val userDict2Data: MemChannel by lazy { buildUserDictData(systemDict, res("/dict/user2.csv")) }
 
   val systemDict: BinaryDictionary
     get() = BinaryDictionary.loadSystem(systemDictData.buffer())
@@ -45,11 +54,8 @@ object TestDictionary {
   val userDict1: BinaryDictionary
     get() = BinaryDictionary.loadUser(userDict1Data.buffer())
 
-  val userDict2: BinaryDictionary by lazy {
-    val chan = MemChannel()
-    DicBuilder.user(systemDict).lexicon(res("/dict/user2.csv")).build(chan)
-    BinaryDictionary.loadUser(chan.buffer())
-  }
+  val userDict2: BinaryDictionary
+    get() = BinaryDictionary.loadUser(userDict2Data.buffer())
 
   fun user0Cfg(): Config {
     return Config.defaultConfig().clearUserDictionaries().systemDictionary(systemDict)
@@ -65,11 +71,11 @@ object TestDictionary {
 
   /** System only */
   fun user0(): JapaneseDictionary {
-    return DictionaryFactory().create(user0Cfg()) as JapaneseDictionary
+    return Dictionary.load(user0Cfg()) as JapaneseDictionary
   }
 
   /** System + One User dictionary */
   fun user1(): JapaneseDictionary {
-    return DictionaryFactory().create(user1Cfg()) as JapaneseDictionary
+    return Dictionary.load(user1Cfg()) as JapaneseDictionary
   }
 }

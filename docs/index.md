@@ -20,7 +20,7 @@ lang: ja
 ## ソフトウェア
 
 - [Sudachi](https://github.com/WorksApplications/Sudachi): 日本語形態素解析器
-- [SudachiPy](https://github.com/WorksApplications/SudachiPy): Python版Sudachi
+- [sudachi.rs / SudachiPy](https://github.com/WorksApplications/sudachi.rs): rust / Python版Sudachi
 - [elasticsearch-sudachi](https://github.com/WorksApplications/elasticsearch-sudachi): Elasticsearch用Sudachiプラグイン
 - [Kintoki](https://github.com/WorksApplications/kintoki): 係り受け解析器
 - [jdartsclone](https://github.com/WorksApplications/jdartsclone): ダブル配列によるTrieデータ構造
@@ -52,7 +52,16 @@ SudachiDictとchiVe、chiTraのデータは、AWSの[Oepn Data Sponsorship Progr
 
 日本語形態素解析辞書です。詳細は [SudachiDict](https://github.com/WorksApplications/SudachiDict) を参照してください。
 
-ビルド済みの辞書ファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) からダウンロードできます。
+Sudachi 辞書には V0/V1 の二つの形式があります。
+
+- V1
+  - Sudachi v0.8.2, sudachi.rs/SudachiPy v0.7 以降ではこの形式の辞書が必要です。
+  - ビルド済みの辞書ファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v1) からダウンロードできます。
+  - ソースファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v1) からダウンロードできます。
+- V0
+  - Sudachi v0.8.1, sudachi.rs/SudachiPy v0.6 以前ではこの形式の辞書が必要です。
+  - ビルド済みの辞書ファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v0) からダウンロードできます。
+  - ソースファイルは [こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/v0) からダウンロードできます。
 
 
 ### chiVe

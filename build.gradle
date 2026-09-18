@@ -27,7 +27,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-library:3.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.openjdk.jmh:jmh-core:1.37'
-    testImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
     testImplementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.10'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:2.4.10'
 }

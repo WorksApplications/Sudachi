@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.worksap.nlp.sudachi;
+
+import com.worksap.nlp.sudachi.dictionary.POS;
 
 import java.util.List;
 
@@ -55,7 +57,7 @@ public interface Morpheme {
      *
      * @return the part of speech of the morpheme
      */
-    public List<String> partOfSpeech();
+    public POS partOfSpeech();
 
     /**
      * Returns the ID of part of speech of the morpheme.
@@ -74,6 +76,24 @@ public interface Morpheme {
     public String dictionaryForm();
 
     /**
+     * Returns the morpheme of the dictionary entry referenced by the dictionary
+     * form.
+     *
+     * Unlike {@link #dictionaryForm()}, the returned morpheme exposes the
+     * referenced entry itself, including its part-of-speech, reading form, user
+     * data, etc.
+     *
+     * If the morpheme is OOV, this method returns {@code this}.
+     *
+     * The returned referenced morpheme is independent from the original analysis,
+     * so its offsets are standalone values in the range
+     * {@code 0..surface().length()}.
+     *
+     * @return the dictionary form morpheme
+     */
+    public Morpheme dictionaryFormMorpheme();
+
+    /**
      * Returns the normalized form of morpheme.
      *
      * This method returns the form normalizing inconsistent spellings and inflected
@@ -82,6 +102,24 @@ public interface Morpheme {
      * @return the normalized form of morpheme
      */
     public String normalizedForm();
+
+    /**
+     * Returns the morpheme of the dictionary entry referenced by the normalized
+     * form.
+     *
+     * Unlike {@link #normalizedForm()}, the returned morpheme exposes the
+     * referenced entry itself, including its part-of-speech, reading form, user
+     * data, etc.
+     *
+     * If the morpheme is OOV, this method returns {@code this}.
+     *
+     * The returned referenced morpheme is independent from the original analysis,
+     * so its offsets are standalone values in the range
+     * {@code 0..surface().length()}.
+     *
+     * @return the normalized form morpheme
+     */
+    public Morpheme normalizedFormMorpheme();
 
     /**
      * Returns the reading form of morpheme.
@@ -121,9 +159,10 @@ public interface Morpheme {
      * The IDs change when the dictionaries are updated or the combination of
      * dictionaries changes.
      *
-     * If the morpheme is OOV, it returns an undefined value.
+     * If the morpheme is OOV, it returns an id consist of OOV flag and pos id.
      *
      * @return the word ID
+     * @see WordId
      */
     public int getWordId();
 
@@ -145,4 +184,14 @@ public interface Morpheme {
      * @return the array of synonym group IDs
      */
     public int[] getSynonymGroupIds();
+
+    /**
+     * Returns the user custamized data of the morpheme.
+     * 
+     * If the morpheme is in the system dictionary, is an oov, or user data is not
+     * set, returns a empty string.
+     * 
+     * @return the user data String
+     */
+    public String getUserData();
 }

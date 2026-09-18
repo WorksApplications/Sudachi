@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,14 +135,14 @@ public class CharacterCategory {
                     if (cols[i].startsWith("#")) {
                         break;
                     }
-                    CategoryType type;
+                    EnumSet<CategoryType> types;
                     try {
-                        type = CategoryType.valueOf(cols[i]);
+                        types = CategoryType.parse(cols[i]);
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException(
                                 cols[i] + " is invalid type at line " + reader.getLineNumber(), e);
                     }
-                    range.categories.add(type);
+                    range.categories.addAll(types);
                 }
                 rangeList.add(range);
             }

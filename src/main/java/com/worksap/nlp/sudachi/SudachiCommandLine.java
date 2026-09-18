@@ -285,11 +285,11 @@ public class SudachiCommandLine {
                 return;
             } else if (args[i].equals("--userDict")) {
                 Path resolved = anchor.resolve(args[++i]);
-                logger.fine(() -> "using system dict: " + resolved);
+                logger.fine(() -> "using user dict: " + resolved);
                 additional = additional.addUserDictionary(resolved);
             } else if (args[i].equals("--systemDict")) {
                 Path resolved = anchor.resolve(args[++i]);
-                logger.fine(() -> "using user dict: " + resolved);
+                logger.fine(() -> "using system dict: " + resolved);
                 additional = additional.systemDictionary(resolved);
             } else if (args[i].equals("--format")) {
                 formatterKind = args[++i];
@@ -311,7 +311,7 @@ public class SudachiCommandLine {
         try (PrintStream output = outputFileName == null ? new FileOrStdoutPrintStream()
                 : new FileOrStdoutPrintStream(outputFileName);
                 Dictionary dict = new DictionaryFactory().create(config)) {
-            Tokenizer tokenizer = dict.create();
+            Tokenizer tokenizer = dict.tokenizer();
             if (isEnableDump) {
                 tokenizer.setDumpOutput(output);
             }

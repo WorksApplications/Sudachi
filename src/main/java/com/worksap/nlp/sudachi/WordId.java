@@ -16,20 +16,45 @@
 
 package com.worksap.nlp.sudachi;
 
+/**
+ * Utility to handle combined word id.
+ * 
+ * Combined word id (32 bits) consists of two parts, dictionary id (top 4 bit)
+ * and dictionary-internal word id (rest bits).
+ */
 public class WordId {
     private WordId() {
     }
 
     /**
-     * Internal word ids can't be larger than this number
+     * Internal word ids can't be larger than this number.
      */
-    public static final int MAX_WORD_ID = 0x0fffffff;
+    public static final int MAX_WORD_ID = 0x0fff_ffff;
 
     /**
-     * Dictionary ids can't be larger than this number
+     * Dictionary ids can't be larger than this number.
+     * 
+     * Dictionary id 0x0 is reserved for the system dictionary and 0xf is reserved
+     * for oov and special words.
      */
     public static final int MAX_DIC_ID = 0xe;
 
+    // ids for special tokens.
+    public static final int ID_BOS = 0xffff_fff0;
+    public static final int ID_EOS = 0xffff_fff1;
+    // id for oov without pos information
+    public static final int ID_OOV_NOPOS = 0xf000_ffff;
+
+    /**
+     * Make combined WordId from dictionary and internal parts, without checking
+     * bound.
+     *
+     * @param dic
+     *            dictionary id. 0 is system, 1 and above are user.
+     * @param word
+     *            word id inside the dictionary.
+     * @return combined word id.
+     */
     public static int makeUnchecked(int dic, int word) {
         int dicPart = dicIdMask(dic);
         return dicPart | word;
@@ -55,8 +80,13 @@ public class WordId {
         return makeUnchecked(dic, word);
     }
 
+    /** Make OOV WordId from provided pos id. */
+    public static int makeOov(short posId) {
+        return 0xf000_0000 | posId;
+    }
+
     /**
-     * Extract dictionary number from the combined word id
+     * Extract dictionary id from the combined word id
      * 
      * @param wordId
      *            combined word id
@@ -77,11 +107,47 @@ public class WordId {
         return wordId & MAX_WORD_ID;
     }
 
+    /**
+     * Encode dictionary id as a part of combined word id.
+     */
     public static int dicIdMask(int dicId) {
         return dicId << 28;
     }
 
+    /**
+     * Override dictionary part of the word id using given dicIdMask.
+     */
     public static int applyMask(int wordId, int dicIdMask) {
         return (wordId & MAX_WORD_ID) | dicIdMask;
+    }
+
+    /**
+     * Resolve dic id that the wordRef points to.
+     * 
+     * Dict part of WordRef only contains a flag whether if it points to system or
+     * user dict.
+     * 
+     * @param wordRef
+     *            word ref taken from word entry.
+     * @param actualDicId
+     *            dic id of the dict which the word entry comes from.
+     * @return dic id that the wordref refers to.
+     */
+    public static int refDic(int wordRef, int actualDicId) {
+        // dic(wordRef) == 1 if wordref refers to the entry inside same dict, 0
+        // otherwise (i.e. refers to system dict entry)
+        return dic(wordRef) * actualDicId;
+    }
+
+    /** @return if given word id represents OOV. */
+    public static boolean isOov(int wordId) {
+        // low 16 bits are OOV POS, top 4 are 1s
+        return (wordId & 0xffff_0000) == 0xf000_0000;
+    }
+
+    /** @return if given word id represents special words. */
+    public static boolean isSpecial(int wordId) {
+        // top 5 bits should be filled
+        return (wordId & 0xf800_0000) == 0xf800_0000;
     }
 }

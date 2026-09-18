@@ -90,4 +90,96 @@ public class StringUtil {
         bbuf.order(order);
         return bbuf;
     }
+
+    public static int count(CharSequence sequence, char toFind) {
+        return count(sequence, 0, sequence.length(), toFind);
+    }
+
+    public static int count(CharSequence sequence, int start, int end, char toFind) {
+        int count = 0;
+        for (int i = start; i < end; i++) {
+            char c = sequence.charAt(i);
+            if (c == toFind) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Read string encoded by length in short + chars format
+     * (BufWriter.putShortString).
+     * 
+     * @param buffer
+     * @param offset
+     * @return string read
+     */
+    public static String readLengthPrefixed(ByteBuffer buffer, int offset) {
+        // implementation: use the fact that CharBuffers are CharSequences
+        // and the fact that ByteBuffer can be used as CharBuffer
+        // remember buffer state
+        int limit = buffer.limit();
+        int position = buffer.position();
+        // read length
+        short length = buffer.getShort(offset);
+        // compute new buffer state
+        int newPosition = offset + 2;
+        buffer.position(newPosition);
+        buffer.limit(newPosition + length * 2);
+        // use CharBuffer API
+        String result = buffer.asCharBuffer().toString();
+        // restore previous state
+        buffer.position(position);
+        buffer.limit(limit);
+        return result;
+    }
+
+    /**
+     * Read string encoded by length in short + chars format
+     * (BufWriter.putShortString).
+     * 
+     * @param buffer
+     * @return string read
+     */
+    public static String readLengthPrefixed(ByteBuffer buffer) {
+        return readLengthPrefixed(buffer, buffer.position());
+    }
+
+    public static int countUtf8Bytes(CharSequence seq) {
+        return countUtf8Bytes(seq, 0, seq.length());
+    }
+
+    public static int countUtf8Bytes(CharSequence seq, int start, int end) {
+        if (start < 0) {
+            throw new IllegalArgumentException("start < 0, was " + start);
+        }
+        if (start > seq.length()) {
+            throw new IllegalArgumentException(String.format("start > length(): %d length()=%d", start, seq.length()));
+        }
+        if (end > seq.length()) {
+            throw new IllegalArgumentException(String.format("end > length(): %d length()=%d", start, seq.length()));
+        }
+
+        int result = 0;
+        int idx = start;
+        while (idx < end) {
+            int cpt = Character.codePointAt(seq, idx);
+            result += utf8Length(cpt);
+            idx += Character.charCount(cpt);
+        }
+        return result;
+    }
+
+    private static int utf8Length(int codepoint) {
+        // https://en.wikipedia.org/wiki/UTF-8#Encoding
+        if (codepoint < 0x80) {
+            return 1;
+        } else if (codepoint < 0x800) {
+            return 2;
+        } else if (codepoint < 0x10000) {
+            return 3;
+        } else {
+            return 4;
+        }
+    }
 }

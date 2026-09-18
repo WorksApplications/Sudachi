@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import kotlin.test.*
 class TextNormalizerTest {
 
   private val dic =
-      DictionaryFactory()
-          .create(TestDictionary.user2Cfg().characterDefinition(CharacterCategory.loadDefault()))
+      Dictionary.load(
+          TestDictionary.user2Cfg().characterDefinition(CharacterCategory.loadDefault()))
           as JapaneseDictionary
 
   @Test
   fun instantiation() {
-    TextNormalizer.fromDictionary(dic)
+    dic.textNormalizer()
     TextNormalizer(dic.getGrammar())
     TextNormalizer(dic.getGrammar(), dic.inputTextPlugins)
     TextNormalizer.defaultTextNormalizer()
@@ -53,8 +53,7 @@ class TextNormalizerTest {
   fun normalizeTextWithDefaultConfig() {
     // will use default config, which has InputTextPlugins of
     // [Default, ProlongedSoundMark, IgnoreYomigana]
-    val tn = TextNormalizer.fromDictionary(dic)
-    print(dic.inputTextPlugins)
+    val tn = dic.textNormalizer()
 
     assertEquals("âbγд(株)ガヴ⼼ⅲ", tn.normalize("ÂＢΓД㈱ｶﾞウ゛⼼Ⅲ")) // default
     assertEquals("うわーい", tn.normalize("うわーーーい")) // prolonged sound mark

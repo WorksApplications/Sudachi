@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
     final InputText inputText;
     final Grammar grammar;
     final Lexicon lexicon;
-    final List<LatticeNode> path;
+    final List<LatticeNodeImpl> path;
     final boolean allowEmptyMorpheme;
 
     final Tokenizer.SplitMode mode;
@@ -37,8 +37,8 @@ public class MorphemeList extends AbstractList<Morpheme> {
     public final static MorphemeList EMPTY = new MorphemeList(null, null, null, Collections.emptyList(), true,
             Tokenizer.SplitMode.C);
 
-    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNode> path, boolean allowEmptyMorpheme,
-            Tokenizer.SplitMode mode) {
+    MorphemeList(InputText input, Grammar grammar, Lexicon lexicon, List<LatticeNodeImpl> path,
+            boolean allowEmptyMorpheme, Tokenizer.SplitMode mode) {
         this.inputText = input;
         this.grammar = grammar;
         this.lexicon = lexicon;
@@ -48,8 +48,8 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     @Override
-    public Morpheme get(int index) {
-        return new MorphemeImpl(this, index);
+    public MorphemeListItem get(int index) {
+        return new MorphemeListItem(this, index);
     }
 
     @Override
@@ -57,6 +57,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.size();
     }
 
+    /** Returns the begin index of the specified morpheme in the input text. */
     int getBegin(int index) {
         int begin = inputText.getOriginalIndex(path.get(index).getBegin());
         if (!allowEmptyMorpheme) {
@@ -68,6 +69,7 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return begin;
     }
 
+    /** Returns the end index of the specified morpheme in the input text. */
     int getEnd(int index) {
         int end = inputText.getOriginalIndex(path.get(index).getEnd());
         if (!allowEmptyMorpheme) {
@@ -89,9 +91,9 @@ public class MorphemeList extends AbstractList<Morpheme> {
         return path.get(index).getWordInfo();
     }
 
-    List<Morpheme> split(Tokenizer.SplitMode mode, int index) {
-        List<LatticeNode> nodes = new ArrayList<>();
-        LatticeNodeImpl node = (LatticeNodeImpl) path.get(index);
+    MorphemeList split(Tokenizer.SplitMode mode, int index) {
+        List<LatticeNodeImpl> nodes = new ArrayList<>();
+        LatticeNodeImpl node = path.get(index);
         node.appendSplitsTo(nodes, mode);
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
     }
@@ -104,19 +106,19 @@ public class MorphemeList extends AbstractList<Morpheme> {
      * @param mode
      *            requested split mode
      * @return current list or a new list in the requested split mode.
+     * 
+     * @deprecated will be internal only. use {@link Tokenizer#split} instead.
      */
+    @Deprecated
     public MorphemeList split(Tokenizer.SplitMode mode) {
         if (mode.compareTo(this.mode) >= 0) {
             return this;
         }
 
-        List<LatticeNode> nodes = new ArrayList<>();
-
-        for (LatticeNode node : path) {
-            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitsTo(nodes, mode);
+        List<LatticeNodeImpl> nodes = new ArrayList<>();
+        for (LatticeNodeImpl node : path) {
+            node.appendSplitsTo(nodes, mode);
         }
-
         return new MorphemeList(inputText, grammar, lexicon, nodes, allowEmptyMorpheme, mode);
     }
 
@@ -133,6 +135,11 @@ public class MorphemeList extends AbstractList<Morpheme> {
     }
 
     public int getInternalCost() {
-        return path.get(path.size() - 1).getPathCost() - path.get(0).getPathCost();
+        List<LatticeNodeImpl> p = path;
+        return p.get(p.size() - 1).getPathCost() - p.get(0).getPathCost();
+    }
+
+    /* internal */ LatticeNodeImpl node(int index) {
+        return path.get(index);
     }
 }

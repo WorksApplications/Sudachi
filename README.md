@@ -17,14 +17,19 @@ mainly of the following tasks.
 - Part-of-speech tagging
 - Normalization
 
+> **IMPORTANT**
+> v0.8.2 introduces a new dictionary binary format (V1). When upgrading from v0.8.1, you need to update the system dictionary and rebuild all user dictionaries against the exact system dictionary that will be used at runtime. The URL of the dictionary distribution page is also changed. See the [migration guide](docs/migration_guide.md).
+
 > **CAUTION**
-> This release is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
+> Release v0.8.* is unstable. It may include breaking changes even between patch versions, so please pin the exact version and review release notes carefully before upgrading.
 
 ## Tutorial
 
 For a tutorial on installation, please refer to the [tutorial page](/docs/tutorial.md).
 
 For a tutorial on the plugin, please refer to the [plugin tutorial page](/docs/tutorial_plugin.md).
+
+For information on using an user dictionary, please refer to the [user dictionary page](/docs/user_dict_v1.md)
 
 For information on building Sudachi from source or development see [Development page](/docs/development.md).
 
@@ -51,7 +56,7 @@ Sudachi has three types of dictionaries.
 - Core: includes basic vocabulary (default)
 - Full: includes miscellaneous proper nouns
 
-Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/) for pre-built dictionaries.
+Click [here](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v1) for pre-built dictionaries.
 For more details, see [SudachiDict](https://github.com/WorksApplications/SudachiDict).
 
 ### How to use the small / full dictionary
@@ -60,6 +65,9 @@ Run the command line tool with the configuration string
 
 ```
 $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
+
+# or
+$ java -jar sudachi-XX.jar --systemDict system_small.dic
 ```
 
 ## Use on the command line
@@ -247,7 +255,7 @@ If the number of characters increases as a result of character normalization, Su
 
 ## User Dictionary
 
-To create and use your own dictionaries, please refer to [docs/user_dict.md](/docs/user_dict.md).
+To create and use your own dictionaries, please refer to [V1 user dictionary guide](/docs/user_dict_v1.md). To rebuild a dictionary created for v0.8.1 or earlier, follow the [user dictionary migration guide](/docs/migrate_user_dictionary.md).
 
 ## Comparison with MeCab and Kuromoji
 
@@ -363,12 +371,20 @@ Sudachi は日本語形態素解析器です。形態素解析はおもに以下
 - 品詞付与
 - 正規化処理
 
+> **IMPORTANT**
+> v0.8.2 では辞書のバイナリ形式が更新されました（V1）。v0.8.1 以前からアップデートする際は、システム辞書を再取得し、すべてのユーザー辞書を実行時に使用するものと同じシステム辞書を指定して再ビルドしてください。URL を指定して辞書をダウンロードしている場合は、その URL を更新してください。詳細は[バージョン移行ガイド](/docs/migration_guide.md)を参照してください。
+
+> **CAUTION**
+> v0.8.* ではSudachi v1のリリース準備が行われます。パッチバージョン間でもAPIや挙動の破壊的変更が行われる可能性があるため、利用時には完全なバージョンを指定するようにしてください。
+
 ## チュートリアル
 
-インストールのチュートリアルは、[インストールのチュートリアル](/docs/tutorial.md)を参照ください。
+インストールのチュートリアルは、[チュートリアル](/docs/tutorial.md)を参照ください。
 
-プラグインのチュートリアルは、[プラグインのチュートリアル](/docs/tutorial_plugin.md)を参照ください。<br>
+プラグインのチュートリアルは、[プラグインのチュートリアル](/docs/tutorial_plugin.md)を参照ください。
 プラグイン機構を用いて、分かち書きを実現しています。
+
+ユーザ辞書の使用については、[ユーザ辞書（V1 形式）](/docs/user_dict_v1.md)を参照ください。
 
 ## Sudachi の特長
 
@@ -393,7 +409,7 @@ Sudachi には3種類の辞書があります。
 - Core: 基本的な語彙を収録 (デフォルト)
 - Full: 雑多な固有名詞まで収録
 
-ビルド済みの辞書は[こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/)で配布しています。
+ビルド済みの辞書は[こちら](http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict/v1)で配布しています。
 くわしくは [SudachiDict](https://github.com/WorksApplications/SudachiDict) をごらんください。
 
 ### スモール/フル辞書の利用方法
@@ -402,6 +418,9 @@ Sudachi には3種類の辞書があります。
 
 ```
 $ java -jar sudachi-XX.jar -s '{"systemDict":"system_small.dic"}'
+
+# もしくは
+$ java -jar sudachi-XX.jar --systemDict system_small.dic
 ```
 
 ## コマンドラインツール
@@ -595,7 +614,7 @@ A' Ā
 
 ## ユーザー辞書
 
-ユーザー辞書の作成と利用方法については、[docs/user_dict.md](/docs/user_dict.md)をご覧ください。
+ユーザー辞書の作成と利用方法については、[ユーザー辞書（V1 形式）](/docs/user_dict_v1.md)をご覧ください。v0.8.1 以前向けに作成した辞書（V0 形式）を再ビルドする場合は、[ユーザー辞書の移行手順](/docs/migrate_user_dictionary.md)を参照してください。
 
 ## MeCab / kuromoji との比較
 

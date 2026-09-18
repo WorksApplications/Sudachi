@@ -100,7 +100,7 @@ import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
     }
 
     @Override
-    public MorphemeList next() {
+    public List<Morpheme> next() {
         int length = detector.getEos(normalized, this);
         if (length > 0) { // sentence found
             int eos = bos + length;

@@ -22,42 +22,43 @@ import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.math.max
 
-class MemChannel : SeekableByteChannel {
-  private var buffer: ByteBuffer = ByteBuffer.allocate(1024 * 1024)
-  private var size = 0L
+class MemChannel(bufSize: Int = 1024 * 1024) : SeekableByteChannel {
+  private var buffer: ByteBuffer = ByteBuffer.allocate(bufSize)
 
   init {
     buffer.order(ByteOrder.LITTLE_ENDIAN)
   }
 
+  // always open
   override fun close() {}
 
   override fun isOpen(): Boolean {
     return true
   }
 
-  override fun read(p0: ByteBuffer?): Int {
-    throw UnsupportedOperationException()
+  override fun read(dst: ByteBuffer?): Int {
+    val src = buffer
+    val position = src.position()
+    dst!!.put(src)
+    val newPosition = src.position()
+    return newPosition - position
   }
 
-  override fun write(p0: ByteBuffer?): Int {
-    val remaining = p0!!.remaining()
+  override fun write(src: ByteBuffer?): Int {
+    val remaining = src!!.remaining()
     reserve(remaining)
-    buffer.put(p0)
-    val pos = buffer.position().toLong()
-    if (pos > size) {
-      size = pos
-    }
+    buffer.put(src)
     return remaining
   }
 
   private fun reserve(additional: Int) {
-    val remaining = buffer.remaining()
+    val remaining = buffer.capacity() - buffer.position()
     if (additional <= remaining) {
       return
     }
-    val newSize = buffer.capacity() * 2
+    val newSize = max(buffer.capacity() * 2, additional + buffer.position())
     val newBuf = ByteBuffer.allocate(newSize)
     newBuf.order(ByteOrder.LITTLE_ENDIAN)
     buffer.flip()
@@ -75,11 +76,12 @@ class MemChannel : SeekableByteChannel {
   }
 
   override fun size(): Long {
-    return this.size
+    return this.buffer.limit().toLong()
   }
 
   override fun truncate(p0: Long): SeekableByteChannel {
-    throw UnsupportedOperationException()
+    this.buffer.limit(p0.toInt())
+    return this
   }
 
   fun buffer(): ByteBuffer {

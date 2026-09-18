@@ -146,7 +146,6 @@ public class Settings {
 
     /**
      * Read a settings from a JSON string.
-     * <p>
      *
      * @param path
      *            will add additional {@link PathAnchor} to this path if not

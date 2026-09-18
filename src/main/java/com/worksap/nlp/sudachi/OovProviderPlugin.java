@@ -62,8 +62,6 @@ public abstract class OovProviderPlugin extends Plugin {
     /**
      * Provides the nodes of OOV morphemes.
      *
-     * To create the new node you can use {@link #createNode}.
-     *
      * @param inputText
      *            the input text
      * @param offset
@@ -75,32 +73,21 @@ public abstract class OovProviderPlugin extends Plugin {
      *            bit is set, it means that a node of length of 64 <b>or greater</b>
      *            was created.
      * @param result
-     *            OOV provider plugins need to add nodes here
+     *            OOV provider plugins need to add nodes here.
      * @return the number of created nodes. Values outside that range will be
      *         ignored.
      */
     public abstract int provideOOV(InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result);
 
-    int getOOV(UTF8InputText inputText, int offset, long otherWords, List<LatticeNodeImpl> result) {
-        int oldSize = result.size();
-        int numCreated = provideOOV(inputText, offset, otherWords, result);
-        for (int i = 0; i < numCreated; i++) {
-            LatticeNodeImpl n = result.get(oldSize + i);
-            n.begin = offset;
-            n.end = offset + n.getWordInfo().getLength();
-        }
-        return numCreated;
-    }
-
     /**
-     * Returns a new node which represents an OOV word.
-     *
-     * @return a new OOV node
+     * @return throws an exception
+     * @deprecated Use
+     *             {@link LatticeNodeImpl#oovFactory(short, short, short, short)}
+     *             instead.
      */
+    @Deprecated
     protected LatticeNodeImpl createNode() {
-        LatticeNodeImpl node = new LatticeNodeImpl();
-        node.setOOV();
-        return node;
+        throw new IllegalStateException("use LatticeNodeImpl.oovFactory()");
     }
 
     /**

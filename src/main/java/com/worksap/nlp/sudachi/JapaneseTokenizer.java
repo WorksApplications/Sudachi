@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package com.worksap.nlp.sudachi;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -32,7 +30,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
 import com.worksap.nlp.sudachi.dictionary.*;
-import com.worksap.nlp.sudachi.sentdetect.SentenceDetector;
 
 class JapaneseTokenizer implements Tokenizer {
 
@@ -65,8 +62,9 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public MorphemeList tokenize(Tokenizer.SplitMode mode, String text) {
+    public List<Morpheme> tokenize(Tokenizer.SplitMode mode, String text) {
         if (text.isEmpty()) {
+            // return MorphemeList instance for the case internalCost is required.
             return MorphemeList.EMPTY;
         }
         UTF8InputText input = buildInputText(text);
@@ -74,56 +72,45 @@ class JapaneseTokenizer implements Tokenizer {
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, String text) {
+    public Iterable<List<Morpheme>> tokenizeSentences(SplitMode mode, String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
 
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-        int length = analysis.tokenizeBuffer(text);
-        ArrayList<MorphemeList> result = analysis.result;
-        int bos = analysis.bos;
-        if (length < 0) {
-            // treat remaining thing as a single sentence
-            int eos = analysis.input.getText().length();
-            if (bos != eos) {
-                UTF8InputText slice = analysis.input;
-                if (bos != 0) {
-                    slice = slice.slice(bos, eos);
-                }
-                result.add(tokenizeSentence(mode, slice));
-            }
-        }
+        StringReader input = new StringReader(text);
+        SentenceSplittingLazyAnalysis analysis = new SentenceSplittingLazyAnalysis(mode, this, input);
+        List<List<Morpheme>> result = new ArrayList<>();
+        analysis.forEachRemaining(result::add);
         return result;
     }
 
     @Override
-    public Iterable<MorphemeList> tokenizeSentences(SplitMode mode, Reader reader) throws IOException {
-        IOTools.SurrogateAwareReadable wrappedReader = new IOTools.SurrogateAwareReadable(reader);
-        CharBuffer buffer = CharBuffer.allocate(SentenceDetector.DEFAULT_LIMIT);
-        SentenceSplittingAnalysis analysis = new SentenceSplittingAnalysis(mode, this);
-
-        while (wrappedReader.read(buffer) > 0) {
-            buffer.flip();
-            int length = analysis.tokenizeBuffer(buffer);
-            if (length < 0) {
-                buffer.position(analysis.bosPosition());
-                buffer.compact();
-            }
-        }
-        buffer.flip();
-        ArrayList<MorphemeList> sentences = analysis.result;
-
-        if (buffer.hasRemaining()) {
-            sentences.add(tokenizeSentence(mode, buildInputText(buffer)));
-        }
-
-        return sentences;
+    public Iterator<List<Morpheme>> tokenizeSentences(SplitMode mode, Readable input) {
+        return new SentenceSplittingLazyAnalysis(mode, this, input);
     }
 
     @Override
-    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable readable) {
-        return new SentenceSplittingLazyAnalysis(mode, this, readable);
+    public Iterator<List<Morpheme>> lazyTokenizeSentences(SplitMode mode, Readable input) {
+        return tokenizeSentences(mode, input);
+    }
+
+    @Override
+    public List<Morpheme> split(List<Morpheme> morphemes, SplitMode mode) {
+        if (morphemes instanceof MorphemeList) {
+            return ((MorphemeList) morphemes).split(mode);
+        }
+
+        List<Morpheme> result = new ArrayList<>();
+        for (Morpheme m : morphemes) {
+            if (m instanceof SingleMorphemeImpl) {
+                ((SingleMorphemeImpl) m).appendSplitsTo(result, mode);
+            } else {
+                for (Morpheme subsplit : m.split(mode)) {
+                    result.add(subsplit);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -161,7 +148,7 @@ class JapaneseTokenizer implements Tokenizer {
         return input;
     }
 
-    MorphemeList tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
+    List<Morpheme> tokenizeSentence(Tokenizer.SplitMode mode, UTF8InputText input) {
         checkIfAlive();
         buildLattice(input);
 
@@ -173,7 +160,7 @@ class JapaneseTokenizer implements Tokenizer {
             jsonBuilder.add("lattice", lattice.toJson());
         }
 
-        List<LatticeNode> path = lattice.getBestPath();
+        List<LatticeNodeImpl> path = lattice.getBestPath();
 
         if (dumpOutput != null) {
             dumpOutput.println("=== Before rewriting:");
@@ -188,9 +175,7 @@ class JapaneseTokenizer implements Tokenizer {
         }
         lattice.clear();
 
-        if (mode != Tokenizer.SplitMode.C) {
-            path = splitPath(path, mode);
-        }
+        path = splitPath(path, mode);
 
         if (dumpOutput != null) {
             dumpOutput.println("=== After rewriting:");
@@ -207,12 +192,13 @@ class JapaneseTokenizer implements Tokenizer {
     LatticeImpl buildLattice(UTF8InputText input) {
         byte[] bytes = input.getByteText();
         lattice.resize(bytes.length);
-        ArrayList<LatticeNodeImpl> unkNodes = new ArrayList<>(64);
+        ArrayList<LatticeNodeImpl> crrNodes = new ArrayList<>(64);
         WordLookup wordLookup = lexicon.makeLookup();
         for (int byteBoundary = 0; byteBoundary < bytes.length; byteBoundary++) {
             if (!input.canBow(byteBoundary) || !lattice.hasPreviousNode(byteBoundary)) {
                 continue;
             }
+            crrNodes.clear();
             wordLookup.reset(bytes, byteBoundary, bytes.length);
             long wordMask = 0L;
             while (wordLookup.next()) {
@@ -224,23 +210,22 @@ class JapaneseTokenizer implements Tokenizer {
                 int[] wordIds = wordLookup.getWordsIds();
                 for (int word = 0; word < numWords; ++word) {
                     int wordId = wordIds[word];
-                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.getLeftId(wordId),
-                            lexicon.getRightId(wordId), lexicon.getCost(wordId), wordId);
+                    LatticeNodeImpl n = new LatticeNodeImpl(lexicon, lexicon.parameters(wordId), wordId);
                     lattice.insert(byteBoundary, end, n);
-                    unkNodes.add(n);
+                    crrNodes.add(n);
                     wordMask = WordMask.addNth(wordMask, end - byteBoundary);
                 }
             }
             long wordMaskWithOov = wordMask;
 
             // OOV
-            if (!input.getCharCategoryTypes(byteBoundary).contains(CategoryType.NOOOVBOW)) {
+            if (input.canOovBow(byteBoundary)) {
                 for (OovProviderPlugin plugin : oovProviderPlugins) {
-                    wordMaskWithOov = provideOovs(plugin, input, unkNodes, byteBoundary, wordMaskWithOov);
+                    wordMaskWithOov = provideOovs(plugin, input, byteBoundary, wordMaskWithOov, crrNodes);
                 }
             }
             if (wordMaskWithOov == 0 && defaultOovProvider != null) {
-                wordMaskWithOov = provideOovs(defaultOovProvider, input, unkNodes, byteBoundary, wordMaskWithOov);
+                wordMaskWithOov = provideOovs(defaultOovProvider, input, byteBoundary, wordMaskWithOov, crrNodes);
             }
             if (wordMaskWithOov == 0) {
                 throw new IllegalStateException("failed to found any morpheme candidate at boundary " + byteBoundary);
@@ -251,31 +236,47 @@ class JapaneseTokenizer implements Tokenizer {
         return lattice;
     }
 
-    private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, ArrayList<LatticeNodeImpl> unkNodes,
-            int boundary, long wordMask) {
-        int initialSize = unkNodes.size();
-        int created = plugin.getOOV(input, boundary, wordMask, unkNodes);
+    /**
+     * Create OOV nodes using plugin at the given position and update crrNodes and
+     * wordMask.
+     * 
+     * @param plugin
+     *            OOVProviderPlugin to use
+     * @param input
+     *            Full inputText
+     * @param boundary
+     *            Byte index of inputText where OOV nodes should start from
+     * @param crrNodes
+     *            Nodes already provided by dict or other plugins. Provided nodes
+     *            should be appended to this
+     * @param wordMask
+     *            Word mask based on crrNodes
+     * @return wordMask updated based on created OOV nodes.
+     */
+    private long provideOovs(OovProviderPlugin plugin, UTF8InputText input, int boundary, long wordMask,
+            ArrayList<LatticeNodeImpl> crrNodes) {
+        int initialSize = crrNodes.size();
+        int created = plugin.provideOOV(input, boundary, wordMask, crrNodes);
         if (created == 0) {
             return wordMask;
         }
         for (int i = initialSize; i < initialSize + created; ++i) {
-            LatticeNodeImpl node = unkNodes.get(i);
+            LatticeNodeImpl node = crrNodes.get(i);
             lattice.insert(node.getBegin(), node.getEnd(), node);
             wordMask = WordMask.addNth(wordMask, node.getEnd() - node.getBegin());
         }
         return wordMask;
     }
 
-    private List<LatticeNode> splitPath(List<LatticeNode> path, SplitMode mode) {
-        List<LatticeNode> newPath = new ArrayList<>();
-        for (LatticeNode node : path) {
-            LatticeNodeImpl nodeImpl = (LatticeNodeImpl) node;
-            nodeImpl.appendSplitsTo(newPath, mode);
+    private List<LatticeNodeImpl> splitPath(List<LatticeNodeImpl> path, SplitMode mode) {
+        List<LatticeNodeImpl> newPath = new ArrayList<>();
+        for (LatticeNodeImpl node : path) {
+            node.appendSplitsTo(newPath, mode);
         }
         return newPath;
     }
 
-    void dumpPath(List<LatticeNode> path) {
+    void dumpPath(List<? extends LatticeNode> path) {
         int i = 0;
         for (LatticeNode node : path) {
             dumpOutput.printf("%d: %s\n", i, node.toString());
@@ -283,7 +284,7 @@ class JapaneseTokenizer implements Tokenizer {
         }
     }
 
-    JsonArrayBuilder pathToJson(List<LatticeNode> path, LatticeImpl lattice) {
+    JsonArrayBuilder pathToJson(List<? extends LatticeNode> path, LatticeImpl lattice) {
         JsonArrayBuilder builder = Json.createArrayBuilder();
         for (LatticeNode node : path) {
             builder.add(lattice.nodeToJson((LatticeNodeImpl) node));

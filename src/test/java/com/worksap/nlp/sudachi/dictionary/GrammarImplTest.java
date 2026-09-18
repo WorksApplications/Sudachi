@@ -98,10 +98,7 @@ public class GrammarImplTest {
 
     @Test
     public void readBytes() {
-        ByteBuffer bytes = TestDictionary.INSTANCE.getSystemDictData().buffer();
-        DictionaryHeader header = new DictionaryHeader(bytes, 0);
-
-        grammar = new GrammarImpl(bytes, header.storageSize());
+        grammar = TestDictionary.INSTANCE.getSystemDict().getGrammar();
 
         assertEquals(8, grammar.getPartOfSpeechSize());
 
@@ -110,7 +107,6 @@ public class GrammarImplTest {
         assertEquals(126, grammar.getConnectCost((short) 3, (short) 6));
         assertEquals(1180, grammar.getConnectCost((short) 7, (short) 2));
         assertEquals(3319, grammar.getConnectCost((short) 5, (short) 7));
-        assertEquals(470, grammar.storageSize());
     }
 
     void buildPartOfSpeech() {

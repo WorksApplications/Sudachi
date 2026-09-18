@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class JapaneseDictionary implements Dictionary, DictionaryAccess {
 
@@ -82,9 +90,16 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
     }
 
     void setupUserDictionaries(Config config) throws IOException {
+        BinaryDictionary systemDict = dictionaries.get(0);
+        int i = 0;
         for (Config.Resource<BinaryDictionary> userDic : config.getUserDictionaries()) {
             BinaryDictionary instance = BinaryDictionary.loadUser(userDic);
+            if (!systemDict.isCompatibleWith(instance)) {
+                throw new IllegalArgumentException(
+                        String.format("%d-th user dictionary is not compatible with the system dictionary", i));
+            }
             addUserDictionary(instance);
+            i++;
         }
     }
 
@@ -98,7 +113,7 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         DoubleArrayLexicon userLexicon = dictionary.getLexicon();
         Tokenizer tokenizer = new JapaneseTokenizer(grammar, lexicon, inputTextPlugins, oovProviderPlugins,
                 Collections.emptyList());
-        userLexicon.calculateCost(tokenizer);
+        userLexicon.calculateDynamicCosts(tokenizer);
 
         lexicon.add(userLexicon, (short) grammar.getPartOfSpeechSize());
         grammar.addPosList(dictionary.getGrammar());
@@ -127,8 +142,87 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
     }
 
+    /**
+     * Iterator of morphemes in the dictionary.
+     */
+    private class EntryItr implements Iterator<Morpheme> {
+        private final GrammarImpl grammar;
+        private final LexiconSet lexicon;
+        private Iterator<Integer> wordIdItr;
+
+        EntryItr() {
+            this.grammar = getGrammar();
+            this.lexicon = getLexicon();
+            this.wordIdItr = this.lexicon.wordIds();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return wordIdItr.hasNext();
+        }
+
+        @Override
+        public Morpheme next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return new SingleMorphemeImpl(this.grammar, this.lexicon, wordIdItr.next());
+        }
+    }
+
     @Override
-    public Tokenizer create() {
+    public Stream<Morpheme> entries() {
+        Iterator<Morpheme> iterator = new EntryItr();
+        int size = getLexicon().size();
+        int characteristics = Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.SIZED;
+        boolean parallel = true;
+
+        Spliterator<Morpheme> spliterator = Spliterators.spliterator(iterator, size, characteristics);
+        return StreamSupport.stream(spliterator, parallel);
+    }
+
+    @Override
+    public List<Morpheme> lookup(CharSequence surface) {
+        TextNormalizer textNormalizer = textNormalizer();
+        byte[] bytes = textNormalizer.normalizedInputText(surface).getByteText();
+
+        List<Morpheme> morphemes = new ArrayList<>();
+        WordLookup wordLookup = lexicon.makeLookup();
+        wordLookup.reset(bytes, 0, bytes.length);
+        while (wordLookup.next()) {
+            int end = wordLookup.getEndOffset();
+            if (end != bytes.length) {
+                continue;
+            }
+            int numWords = wordLookup.getNumWords();
+            int[] wordIds = wordLookup.getWordsIds();
+            for (int word = 0; word < numWords; ++word) {
+                int wordId = wordIds[word];
+                Morpheme morpheme = new SingleMorphemeImpl(getGrammar(), getLexicon(), wordId);
+                morphemes.add(morpheme);
+            }
+        }
+        return morphemes;
+    }
+
+    @Override
+    public List<Morpheme> lookupAllEntries(CharSequence surface) {
+        TextNormalizer textNormalizer = textNormalizer();
+        byte[] bytes = textNormalizer.normalizedInputText(surface).getByteText();
+
+        return entries()
+                .filter(m -> Arrays.equals(bytes, textNormalizer.normalizedInputText(m.surface()).getByteText()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Morpheme oovMorpheme(short posId, String surface, String reading, String normalizedForm,
+            String dictionaryForm) {
+        return new SingleMorphemeImpl(getGrammar(), posId, surface, reading, normalizedForm, dictionaryForm);
+    }
+
+    @Override
+    public Tokenizer tokenizer() {
         if (grammar == null || lexicon == null) {
             throw new IllegalStateException("trying to use closed dictionary");
         }
@@ -138,6 +232,11 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
             tokenizer.disableEmptyMorpheme();
         }
         return tokenizer;
+    }
+
+    @Override
+    public Tokenizer create() {
+        return tokenizer();
     }
 
     @Override
@@ -165,10 +264,12 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         }
     }
 
+    @Override
     public GrammarImpl getGrammar() {
         return grammar;
     }
 
+    @Override
     public LexiconSet getLexicon() {
         return lexicon;
     }
@@ -180,5 +281,10 @@ public class JapaneseDictionary implements Dictionary, DictionaryAccess {
         int[] ids = IntStream.range(0, numPos).filter(id -> predicate.test(grammar.getPartOfSpeechString((short) id)))
                 .toArray();
         return new PosMatcher(ids, this);
+    }
+
+    @Override
+    public TextNormalizer textNormalizer() {
+        return new TextNormalizer(grammar, inputTextPlugins);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Works Applications Co., Ltd.
+ * Copyright (c) 2017-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,14 @@ import com.worksap.nlp.sudachi.WordId;
 
 import java.util.*;
 
+/**
+ * A lexicon that contains multiple lexicons inside.
+ * 
+ * It only accepts {@link DoubleArrayLexicon} now. This lexicon cannot be
+ * nested.
+ * 
+ * Handles dictionary part of the word id.
+ */
 public class LexiconSet implements Lexicon {
     static final int MAX_DICTIONARIES = 15;
 
@@ -33,9 +41,7 @@ public class LexiconSet implements Lexicon {
     }
 
     public void add(Lexicon lexicon, short posOffset) {
-        DoubleArrayLexicon daLexicon = (DoubleArrayLexicon) lexicon;
-        daLexicon.setDictionaryId(lexicons.size());
-        lexicons.add(daLexicon);
+        lexicons.add((DoubleArrayLexicon) lexicon);
         posOffsets.add(posOffset);
     }
 
@@ -51,7 +57,7 @@ public class LexiconSet implements Lexicon {
         if (lexicons.size() == 1) {
             return lexicons.get(0).lookup(text, offset);
         }
-        return new Itr(text, offset, lexicons.size() - 1);
+        return new LookupItr(text, offset, lexicons.size() - 1);
     }
 
     /**
@@ -63,16 +69,18 @@ public class LexiconSet implements Lexicon {
      *
      * Dictionaries have their word weights prioritized in the same manner
      */
-    private class Itr implements Iterator<int[]> {
+    private class LookupItr implements Iterator<int[]> {
         byte[] text;
         int offset;
         int dictId;
+        int dictMask;
         Iterator<int[]> iterator;
 
-        Itr(byte[] text, int offset, int start) {
+        LookupItr(byte[] text, int offset, int start) {
             this.text = text;
             this.offset = offset;
             dictId = start;
+            dictMask = WordId.dicIdMask(start);
             iterator = lexicons.get(dictId).lookup(text, offset);
         }
 
@@ -85,6 +93,7 @@ public class LexiconSet implements Lexicon {
                 }
                 iterator = lexicons.get(nextId).lookup(text, offset);
                 dictId = nextId;
+                dictMask = WordId.dicIdMask(nextId);
             }
             return true;
         }
@@ -93,7 +102,7 @@ public class LexiconSet implements Lexicon {
         public int[] next() {
             if (hasNext()) {
                 int[] r = iterator.next();
-                r[0] = buildWordId(dictId, r[0]);
+                r[0] = WordId.applyMask(r[0], dictMask);
                 return r;
             }
             throw new NoSuchElementException();
@@ -101,42 +110,19 @@ public class LexiconSet implements Lexicon {
     }
 
     @Override
-    public int getWordId(String headword, short posId, String readingForm) {
-        for (int dictId = 1; dictId < lexicons.size(); dictId++) {
-            int wid = lexicons.get(dictId).getWordId(headword, posId, readingForm);
-            if (wid >= 0) {
-                return buildWordId(dictId, wid);
-            }
-        }
-        return lexicons.get(0).getWordId(headword, posId, readingForm);
-    }
-
-    @Override
-    public short getLeftId(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getLeftId(getWordId(wordId));
-    }
-
-    @Override
-    public short getRightId(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getRightId(getWordId(wordId));
-    }
-
-    @Override
-    public short getCost(int wordId) {
-        return lexicons.get(WordId.dic(wordId)).getCost(getWordId(wordId));
-    }
-
-    @Override
     public WordInfo getWordInfo(int wordId) {
         int dictionaryId = WordId.dic(wordId);
         int internalId = WordId.word(wordId);
         WordInfo wordInfo = lexicons.get(dictionaryId).getWordInfo(internalId);
+
+        // resolve wordinfo internal data
         short posId = wordInfo.getPOSId();
         if (dictionaryId > 0 && posId >= systemPartOfSpeechSize) { // user defined part-of-speech
             wordInfo.setPOSId((short) (wordInfo.getPOSId() - systemPartOfSpeechSize + posOffsets.get(dictionaryId)));
         }
         convertSplit(wordInfo.getAunitSplit(), dictionaryId);
         convertSplit(wordInfo.getBunitSplit(), dictionaryId);
+        convertSplit(wordInfo.getCunitSplit(), dictionaryId);
         convertSplit(wordInfo.getWordStructure(), dictionaryId);
         return wordInfo;
     }
@@ -175,5 +161,60 @@ public class LexiconSet implements Lexicon {
 
     public void invalidate() {
         lexicons = null;
+    }
+
+    @Override
+    public long parameters(int wordId) {
+        int dic = WordId.dic(wordId);
+        return lexicons.get(dic).parameters(wordId);
+    }
+
+    @Override
+    public String string(int dic, int stringPtr) {
+        return lexicons.get(dic).string(dic, stringPtr);
+    }
+
+    @Override
+    public WordInfoList wordInfos(int dic) {
+        return lexicons.get(dic).wordInfos(dic);
+    }
+
+    @Override
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        private int dictId;
+        private int dictMask;
+        private Iterator<Integer> iterator;
+
+        WordIdItr() {
+            this.dictId = 0;
+            this.dictMask = WordId.dicIdMask(dictId);
+            this.iterator = lexicons.get(dictId).wordIds();
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (!iterator.hasNext()) {
+                int nextDictId = dictId + 1;
+                if (nextDictId >= lexicons.size()) {
+                    return false;
+                }
+                dictId = nextDictId;
+                dictMask = WordId.dicIdMask(nextDictId);
+                iterator = lexicons.get(nextDictId).wordIds();
+            }
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return WordId.applyMask(iterator.next(), dictMask);
+        }
     }
 }

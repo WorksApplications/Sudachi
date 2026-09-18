@@ -18,7 +18,6 @@ package com.worksap.nlp.sudachi;
 
 import com.worksap.nlp.sudachi.dictionary.Grammar;
 import com.worksap.nlp.sudachi.dictionary.POS;
-import com.worksap.nlp.sudachi.dictionary.WordInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
  * 
  * <pre>
  * {@code
- *  {
+ *   {
  *      "class": "com.worksap.nlp.sudachi.RegexOovProvider",
  *      "regex": "[0-9a-z-]+",
  *      "oovPOS": [ "補助記号", "一般", "*", "*", "*", "*" ],
@@ -44,7 +43,7 @@ import java.util.regex.Pattern;
  *      "cost": 5000,
  *      "maxLength": 32,
  *      "boundaries": "relaxed"
- *  }
+ *   }
  * }
  * </pre>
  *
@@ -58,12 +57,9 @@ import java.util.regex.Pattern;
  */
 public class RegexOovProvider extends OovProviderPlugin {
     private Pattern pattern;
-    private short posId = -1;
-    private short cost = Short.MIN_VALUE;
-    private short leftId = Short.MIN_VALUE;
-    private short rightId = Short.MIN_VALUE;
     private int maxLength = 32;
     private boolean strictBoundaries = true;
+    private LatticeNodeImpl.OOVFactory factory;
 
     @Override
     public void setUp(Grammar grammar) throws IOException {
@@ -74,16 +70,17 @@ public class RegexOovProvider extends OovProviderPlugin {
         }
         POS stringPos = new POS(oovPOS);
         String userPosMode = settings.getString(USER_POS, USER_POS_FORBID);
-        posId = posIdOf(grammar, stringPos, userPosMode);
+        short posId = posIdOf(grammar, stringPos, userPosMode);
         if (posId == -1) {
             throw new IllegalArgumentException("POS " + stringPos + " was not present in the dictionary");
         }
-        cost = checkedShort(settings, "cost");
-        leftId = checkedShort(settings, "leftId");
-        rightId = checkedShort(settings, "rightId");
+        short cost = checkedShort(settings, "cost");
+        short leftId = checkedShort(settings, "leftId");
+        short rightId = checkedShort(settings, "rightId");
         pattern = checkPattern(settings.getString("regex"));
         maxLength = settings.getInt("maxLength", 32);
         strictBoundaries = isStrictContinuity(settings);
+        factory = LatticeNodeImpl.oovFactory(leftId, rightId, cost, posId);
     }
 
     @Override
@@ -124,11 +121,9 @@ public class RegexOovProvider extends OovProviderPlugin {
                 }
             }
 
-            LatticeNodeImpl node = new LatticeNodeImpl(null, leftId, rightId, cost, -1);
-            node.setOOV();
-            String oov = text.substring(matcher.start(), matcher.end());
-            WordInfo info = new WordInfo(oov, (short) oovLength, posId, oov, oov, "");
-            node.setWordInfo(info);
+            int beginChar = matcher.start();
+            String s = text.substring(beginChar, endChar);
+            LatticeNodeImpl node = factory.make(offset, offset + oovLength, s);
             nodes.add(node);
             return 1;
         } else {

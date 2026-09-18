@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Works Applications Co., Ltd.
+ * Copyright (c) 2022-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public final class WordLookup {
     private int numWords;
     private final List<DoubleArrayLexicon> lexicons;
     private int currentLexicon = -1;
+    private int dictMask;
 
     public WordLookup(List<DoubleArrayLexicon> lexicons) {
         this.lexicons = lexicons;
@@ -48,7 +49,7 @@ public final class WordLookup {
 
     /**
      * Start the search for new key
-     * 
+     *
      * @param key
      *            utf-8 bytes corresponding to the trie key
      * @param offset
@@ -58,6 +59,7 @@ public final class WordLookup {
      */
     public void reset(byte[] key, int offset, int limit) {
         currentLexicon = lexicons.size() - 1;
+        dictMask = WordId.dicIdMask(currentLexicon);
         rebind(lexicons.get(currentLexicon));
         lookup.reset(key, offset, limit);
     }
@@ -65,7 +67,7 @@ public final class WordLookup {
     /**
      * This is not public API. Returns the array for wordIds with the length at
      * least equal to the passed parameter
-     * 
+     *
      * @param length
      *            minimum requested length
      * @return WordId array
@@ -78,8 +80,8 @@ public final class WordLookup {
     }
 
     /**
-     * Sets the wordIds, numWords, endOffset to the
-     * 
+     * Sets the wordIds, numWords, endOffset to the next value.
+     *
      * @return true if there was an entry in any of binary dictionaries
      */
     public boolean next() {
@@ -90,15 +92,20 @@ public final class WordLookup {
             }
             rebind(lexicons.get(nextLexicon));
             currentLexicon = nextLexicon;
+            dictMask = WordId.dicIdMask(nextLexicon);
         }
         int wordGroupId = lookup.getValue();
         numWords = words.readWordIds(wordGroupId, this);
+        for (int i = 0; i < numWords; ++i) {
+            int internalId = wordIds[i];
+            wordIds[i] = WordId.applyMask(internalId, dictMask);
+        }
         return true;
     }
 
     /**
      * Returns trie key end offset
-     * 
+     *
      * @return number of utf-8 bytes corresponding to the end of key
      */
     public int getEndOffset() {
@@ -116,7 +123,7 @@ public final class WordLookup {
     /**
      * Returns array of word ids. Number of correct entries is specified by
      * {@link #getNumWords()}. WordIds have their dictionary part set.
-     * 
+     *
      * @return array consisting word ids for the current index entry
      * @see WordId
      */

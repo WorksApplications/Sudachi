@@ -25,7 +25,10 @@ import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
-public class ConnectionMatrix implements WriteDictionary {
+/**
+ * Dictionary parts: left/right id connection cost matrix.
+ */
+public class ConnectionMatrix {
     private short numLeft;
     private short numRight;
     private ByteBuffer compiled;
@@ -96,18 +99,15 @@ public class ConnectionMatrix implements WriteDictionary {
 
         long numLines = 0;
 
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) {
-                break;
-            }
+        String line;
+        while ((line = reader.readLine()) != null) {
             if (OPT_WHITESPACE.matcher(line).matches()) {
                 continue;
             }
             String[] cols = WHITESPACE.split(line);
             if (cols.length < 3) {
-                throw new InputFileException(reader.getLineNumber(), line,
-                        new IllegalArgumentException("not enough entries"));
+                throw new InputFileException(reader.getLineNumber(),
+                        new IllegalArgumentException(String.format("not enough entries: %s", line)));
             }
 
             try {
@@ -116,7 +116,7 @@ public class ConnectionMatrix implements WriteDictionary {
                 short cost = Short.parseShort(cols[2]);
                 conn.setCost(left, right, cost);
             } catch (NumberFormatException e) {
-                throw new InputFileException(reader.getLineNumber(), "", e);
+                throw new InputFileException(reader.getLineNumber(), e);
             }
 
             numLines += 1;
@@ -126,6 +126,7 @@ public class ConnectionMatrix implements WriteDictionary {
         return numLines;
     }
 
+    /** Clear this ConnectionMatrix */
     public void makeEmpty() {
         ByteBuffer data = ByteBuffer.allocate(4);
         data.order(ByteOrder.LITTLE_ENDIAN);
@@ -135,16 +136,32 @@ public class ConnectionMatrix implements WriteDictionary {
         compiled = data;
     }
 
-    @Override
-    public void writeTo(ModelOutput output) throws IOException {
-        output.write(compiled);
-    }
-
+    /** @return number of left id */
     public short getNumLeft() {
         return numLeft;
     }
 
+    /** @return number of right id */
     public short getNumRight() {
         return numRight;
+    }
+
+    /** @return if this is empty */
+    public boolean nonEmpty() {
+        return numLeft > 0 || numRight > 0;
+    }
+
+    /**
+     * Write connection matrix to the provided block output.
+     * 
+     * @param out
+     * @return
+     * @throws IOException
+     */
+    public Void compile(BlockOutput out) throws IOException {
+        return out.measured("Connection Matrix", p -> {
+            out.getChannel().write(compiled.duplicate());
+            return null;
+        });
     }
 }

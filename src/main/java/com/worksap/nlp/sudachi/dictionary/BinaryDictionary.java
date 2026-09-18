@@ -19,40 +19,36 @@ package com.worksap.nlp.sudachi.dictionary;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.worksap.nlp.sudachi.Config;
 import com.worksap.nlp.sudachi.MMap;
 
 public class BinaryDictionary implements Closeable, DictionaryAccess {
-
     private final ByteBuffer bytes;
-    private final DictionaryHeader header;
+    private final Description header;
     private final GrammarImpl grammar;
     private final DoubleArrayLexicon lexicon;
+    private Map<Integer, String> referenceIdMap;
 
     public BinaryDictionary(String fileName) throws IOException {
-        this(MMap.map(fileName));
+        this(Paths.get(fileName));
     }
 
-    public BinaryDictionary(ByteBuffer dictionary) throws IOException {
-        int offset = 0;
+    public BinaryDictionary(Path filename) throws IOException {
+        this(MMap.map(filename));
+    }
+
+    public BinaryDictionary(ByteBuffer dictionary) {
         bytes = dictionary;
 
-        header = new DictionaryHeader(bytes, offset);
-        offset += header.storageSize();
-
-        long version = header.getVersion();
-        if (DictionaryVersion.hasGrammar(version)) {
-            grammar = new GrammarImpl(bytes, offset);
-            offset += grammar.storageSize();
-        } else if (header.isUserDictionary()) {
-            grammar = new GrammarImpl();
-        } else {
-            MMap.unmap(bytes);
-            throw new IOException("invalid dictionary");
-        }
-
-        lexicon = new DoubleArrayLexicon(bytes, offset, DictionaryVersion.hasSynonymGroupIds(version));
+        header = Description.load(dictionary);
+        grammar = GrammarImpl.load(bytes, header);
+        lexicon = DoubleArrayLexicon.load(bytes, header);
     }
 
     public static BinaryDictionary loadSystem(String fileName) throws IOException {
@@ -94,7 +90,7 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
         MMap.unmap(bytes);
     }
 
-    public DictionaryHeader getDictionaryHeader() {
+    public Description getDictionaryHeader() {
         return header;
     }
 
@@ -104,5 +100,64 @@ public class BinaryDictionary implements Closeable, DictionaryAccess {
 
     public DoubleArrayLexicon getLexicon() {
         return lexicon;
+    }
+
+    /**
+     * Build-time helper data for dictionary compilation. Runtime tokenization does
+     * not use this map.
+     */
+    public Map<Integer, String> getReferenceIdMap() {
+        if (referenceIdMap != null) {
+            return referenceIdMap;
+        }
+
+        ByteBuffer slice = header.sliceOrNull(bytes, Block.REFERENCE_ID_TABLE);
+        if (slice == null) {
+            referenceIdMap = Collections.emptyMap();
+            return referenceIdMap;
+        }
+
+        BufReader reader = new BufReader(slice);
+        int length = reader.readVarint32();
+        HashMap<Integer, String> map = new HashMap<>(Math.max(1, length / 10 + 1));
+        for (int i = 0; i < length; ++i) {
+            map.put(reader.readVarint32(), reader.readUtf8String());
+        }
+        referenceIdMap = Collections.unmodifiableMap(map);
+        return referenceIdMap;
+    }
+
+    /**
+     * Check if two dictionaries are built on a same system dictionary.
+     * 
+     * User dictionary stores the signature of the system dictionary which it is
+     * built on as Desctiption.reference
+     * ({@link com.worksap.nlp.sudachi.dictionary.build.DicBuilder.User#system}).
+     * 
+     * @param other
+     *            dictionary to check with
+     * @return true if and only if two dictionaries have matching signature or
+     *         reference.
+     */
+    public boolean isCompatibleWith(BinaryDictionary other) {
+        String thisSignature;
+        if (this.header.isSystemDictionary()) {
+            thisSignature = this.header.getSignature();
+        } else if (this.header.isUserDictionary()) {
+            thisSignature = this.header.getReference();
+        } else {
+            throw new IllegalStateException("Invalid dictionary");
+        }
+
+        String otherSignature;
+        if (other.header.isSystemDictionary()) {
+            otherSignature = other.header.getSignature();
+        } else if (other.header.isUserDictionary()) {
+            otherSignature = other.header.getReference();
+        } else {
+            throw new IllegalStateException("Invalid dictionary");
+        }
+
+        return thisSignature.equals(otherSignature);
     }
 }

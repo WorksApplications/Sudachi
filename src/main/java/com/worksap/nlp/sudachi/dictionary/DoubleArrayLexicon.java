@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2024 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,64 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.worksap.nlp.dartsclone.DoubleArray;
 import com.worksap.nlp.sudachi.MorphemeList;
 import com.worksap.nlp.sudachi.Tokenizer;
 
+/**
+ * The main lexicon implementation.
+ * 
+ * In V1 format, it consists of followings. {@link DoubleArray} (TRIE): Mapping
+ * from index form to WordIdTable offset. {@link WordIdTable}: Table of list of
+ * word ids that have same index form.
+ * {@link WordParameters}/{@link WordInfoList}: List of word information, for
+ * analysis/non-analysis respectively. Word id represents offset in them.
+ * {@link CompactedStrings}: Storage of strings such as headword, reading form,
+ * etc.
+ */
 public class DoubleArrayLexicon implements Lexicon {
-
     static final int USER_DICT_COST_PAR_MORPH = -20;
 
-    private final WordIdTable wordIdTable;
-    private final WordParameterList wordParams;
-    private final WordInfoList wordInfos;
+    private final Description description;
     private final DoubleArray trie;
+    private final WordInfoList wordInfos;
+    private final WordParameters parameters;
+    private final WordIdTable wordIdTable;
+    private final CompactedStrings strings;
 
-    public DoubleArrayLexicon(ByteBuffer bytes, int offset, boolean hasSynonymGid) {
-        trie = new DoubleArray();
-        int size = bytes.getInt(offset);
-        offset += 4;
-        ((Buffer) bytes).position(offset); // a kludge for Java 9
-        IntBuffer array = bytes.asIntBuffer();
-        trie.setArray(array, size);
-        offset += trie.totalSize();
+    public DoubleArrayLexicon(Description description, WordIdTable wordIdTable, WordParameters wordParams,
+            WordInfoList wordInfos, DoubleArray trie, CompactedStrings strings) {
+        this.description = description;
+        this.trie = trie;
+        this.wordIdTable = wordIdTable;
+        this.parameters = wordParams;
+        this.wordInfos = wordInfos;
+        this.strings = strings;
+    }
 
-        wordIdTable = new WordIdTable(bytes, offset);
-        offset += wordIdTable.storageSize();
+    public static DoubleArrayLexicon load(ByteBuffer bytes, Description header) {
+        ByteBuffer trieBuf = header.slice(bytes, Block.TRIE_INDEX);
+        DoubleArray da = new DoubleArray();
+        IntBuffer array = trieBuf.asIntBuffer();
+        da.setArray(array, array.limit());
 
-        wordParams = new WordParameterList(bytes, offset);
-        offset += wordParams.storageSize();
+        WordParameters parms;
+        if (header.isRuntimeCosts()) {
+            parms = WordParameters.readWrite(header.slice(bytes, Block.ENTRIES));
+        } else {
+            parms = WordParameters.readOnly(header.slice(bytes, Block.ENTRIES));
+        }
 
-        wordInfos = new WordInfoList(bytes, offset, wordParams.size(), hasSynonymGid);
+        WordIdTable idTable = new WordIdTable(header.slice(bytes, Block.WORD_POINTERS));
+        WordInfoList infos = new WordInfoList(header.slice(bytes, Block.ENTRIES));
+        CompactedStrings strings = new CompactedStrings(header.slice(bytes, Block.STRINGS).asCharBuffer());
+
+        return new DoubleArrayLexicon(header, idTable, parms, infos, da, strings);
     }
 
     /**
@@ -74,24 +98,16 @@ public class DoubleArrayLexicon implements Lexicon {
         if (!iterator.hasNext()) {
             return iterator;
         }
-        return new Itr(iterator);
+        return new LookupItr(iterator);
     }
 
-    public IntBuffer getTrieArray() {
-        return trie.array();
-    }
-
-    public WordIdTable getWordIdTable() {
-        return wordIdTable;
-    }
-
-    private class Itr implements Iterator<int[]> {
+    private class LookupItr implements Iterator<int[]> {
         private final Iterator<int[]> iterator;
-        private Integer[] wordIds;
+        private int[] wordIds;
         private int length;
         private int index;
 
-        Itr(Iterator<int[]> iterator) {
+        LookupItr(Iterator<int[]> iterator) {
             this.iterator = iterator;
             index = -1;
         }
@@ -117,31 +133,22 @@ public class DoubleArrayLexicon implements Lexicon {
         }
     }
 
-    @Override
-    public int getWordId(String headword, short posId, String readingForm) {
-        for (int wid = 0; wid < wordInfos.size(); wid++) {
-            WordInfo info = wordInfos.getWordInfo(wid);
-            if (info.getSurface().equals(headword) && info.getPOSId() == posId
-                    && info.getReadingForm().equals(readingForm)) {
-                return wid;
-            }
-        }
-        return -1;
+    public IntBuffer getTrieArray() {
+        return trie.array();
+    }
+
+    public WordIdTable getWordIdTable() {
+        return wordIdTable;
     }
 
     @Override
-    public short getLeftId(int wordId) {
-        return wordParams.getLeftId(wordId);
+    public long parameters(int wordId) {
+        return parameters.loadParams(wordId);
     }
 
     @Override
-    public short getRightId(int wordId) {
-        return wordParams.getRightId(wordId);
-    }
-
-    @Override
-    public short getCost(int wordId) {
-        return wordParams.getCost(wordId);
+    public String string(int dic, int stringPtr) {
+        return strings.string(stringPtr);
     }
 
     @Override
@@ -151,28 +158,82 @@ public class DoubleArrayLexicon implements Lexicon {
 
     @Override
     public int size() {
-        return wordParams.size();
+        return description.getNumTotalEntries();
     }
 
-    public void calculateCost(Tokenizer tokenizer) {
-        for (int wordId = 0; wordId < wordParams.size(); wordId++) {
-            if (getCost(wordId) != Short.MIN_VALUE) {
-                continue;
+    public Iterator<Integer> wordIds() {
+        return new WordIdItr();
+    }
+
+    private class WordIdItr implements Iterator<Integer> {
+        private final Iterator<Ints> iterator;
+        private Ints ints;
+        private int index;
+
+        WordIdItr() {
+            this.iterator = getWordIdTable().wordIds();
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (ints == null || index >= ints.length()) {
+                if (!iterator.hasNext()) {
+                    return false;
+                }
+                ints = iterator.next();
+                index = 0;
             }
-            String surface = getWordInfo(wordId).getSurface();
-            MorphemeList ms = tokenizer.tokenize(surface);
-            int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
-            if (cost > Short.MAX_VALUE) {
-                cost = Short.MAX_VALUE;
-            } else if (cost < Short.MIN_VALUE) {
-                cost = Short.MIN_VALUE;
+            return true;
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
             }
-            wordParams.setCost(wordId, (short) cost);
+            return ints.get(index++);
         }
     }
 
-    public void setDictionaryId(int id) {
-        wordIdTable.setDictionaryId(id);
+    /**
+     * Returns true if the cost value is a normal value which can be used as is.
+     * Otherwise, it is a placeholder which needs to be recalculated based on the
+     * content of the dictionary.
+     * 
+     * @param cost
+     *            raw cost value
+     * @return true a normal cost value
+     */
+    public static boolean isNormalCost(short cost) {
+        return cost != Short.MIN_VALUE;
     }
 
+    public void calculateDynamicCosts(Tokenizer tokenizer) {
+        Iterator<Ints> outer = wordIdTable.wordIds();
+        while (outer.hasNext()) {
+            Ints values = outer.next();
+            for (int i = 0; i < values.length(); ++i) {
+                int wordId = values.get(i);
+                if (isNormalCost(WordParameters.cost(parameters(wordId)))) {
+                    continue;
+                }
+                int headwordPtr = wordInfos.headwordPtr(wordId);
+                String headword = strings.string(headwordPtr);
+                MorphemeList ms = (MorphemeList) tokenizer.tokenize(headword);
+                int cost = ms.getInternalCost() + USER_DICT_COST_PAR_MORPH * ms.size();
+                if (cost > Short.MAX_VALUE) {
+                    cost = Short.MAX_VALUE;
+                } else if (cost < Short.MIN_VALUE) {
+                    cost = Short.MIN_VALUE;
+                }
+                parameters.setCost(wordId, (short) cost);
+            }
+        }
+    }
+
+    @Override
+    public WordInfoList wordInfos(int dic) {
+        return wordInfos;
+    }
 }

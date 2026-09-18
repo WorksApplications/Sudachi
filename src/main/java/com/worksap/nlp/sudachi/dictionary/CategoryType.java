@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Works Applications Co., Ltd.
+ * Copyright (c) 2021-2026 Works Applications Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@
 
 package com.worksap.nlp.sudachi.dictionary;
 
+import java.util.EnumSet;
+
 /**
- * Categories of characters.
- *
- * These categories are used in the
+ * Categories of characters. These categories are used in the
  * {@link com.worksap.nlp.sudachi.OovProviderPlugin} and
  * {@link com.worksap.nlp.sudachi.PathRewritePlugin}.
  *
  * <p>
- * You can defined the range of each category in the file which specified
+ * You can define the range of each category in the file which specified
  * "characterDefinitionFile" of the settings.
  */
 public enum CategoryType {
-    /** The fall back category. */
-    DEFAULT(1),
+    /** The fallback category. */
+    DEFAULT(1 << 0),
     /** White spaces. */
     SPACE(1 << 1),
     /** CJKV ideographic characters. */
@@ -58,8 +58,14 @@ public enum CategoryType {
     USER3(1 << 13),
     /** User defined category. */
     USER4(1 << 14),
-    /** Characters that cannot be the beginning of word */
-    NOOOVBOW(1 << 15);
+    /** Characters that cannot be the beginning of an OOV word */
+    NOOOVBOW(1 << 30),
+    /** Characters that cannot be the end of an OOV word */
+    NOOOVEOW(1 << 31);
+
+    /** All categories at once except NOOOVBOW/EOW */
+    public static final EnumSet<CategoryType> ALL = EnumSet
+            .complementOf(EnumSet.of(CategoryType.NOOOVBOW, CategoryType.NOOOVEOW));
 
     private final int id;
 
@@ -74,6 +80,27 @@ public enum CategoryType {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Parses a category name used in {@code char.def}.
+     *
+     * <p>
+     * The special value {@code ALL} is expanded to {@link #ALL}; any other value
+     * must be the exact enum constant name of a single category.
+     *
+     * @param value
+     *            category name to parse
+     * @return parsed categories
+     * @throws IllegalArgumentException
+     *             if {@code value} is not {@code ALL} and does not match a category
+     *             name
+     */
+    public static EnumSet<CategoryType> parse(String value) {
+        if (value.equals("ALL")) {
+            return ALL;
+        }
+        return EnumSet.of(CategoryType.valueOf(value));
     }
 
     /**
