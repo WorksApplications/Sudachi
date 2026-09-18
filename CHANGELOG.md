@@ -1,5 +1,7 @@
 # Changelog
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
 ## [Unreleased](https://github.com/WorksApplications/Sudachi/releases/tag/v)
 
 -
@@ -13,36 +15,46 @@
 
 See [migration guide](./docs/migration_guide.md) for details.
 
-- Binary dictionary format changed
-- Signatures of many methods changed
+- Binary dictionary format is changed
+  - You CANNOT use old (V0) format dictionary binary.
+- Signatures of many methods are changed
 
 ### Added
 
-- Add `Stream<Morpheme> Dictionary.entries()` (#248)
-  - Stream all morphemes in the dictionary.
-  - use `Stream.iterator()` or `Stream.spliterator()` if necessary.
 - Add `List<Morpheme> Dictionary.lookup(CharSequence)` (#245)
   - List up morphemes that match the given text (after normalization).
   - If you need to search entries with -1 conjugation cost, use `lookupAllEntries`.
 - Add `Morpheme Dictionary.oovMorpheme(posId, surface, ...)` (#245)
   - Create an OOV morpheme with a POS in the dictionary.
+- Add `Stream<Morpheme> Dictionary.entries()` (#248)
+  - Stream all morphemes in the dictionary.
+  - use `Stream.iterator()` or `Stream.spliterator()` if necessary.
+- Generate `TextNormalizer` from dictionary (`Dictionary.textNormalizer()`) (#249)
+- Add `Dictionary.lookupAllEntries(CharSequence)` method that works like `Dictionary.lookup` but can find entries with conjugation cost -1. (#257)
 - Add `Morphme.normalizedFormMorpheme` and `Morphme.dictionaryFormMorpheme` (#359)
   - Get the normalized form and dictionary form of the morphme as a morpheme instead of a string.
   - We can use this e.g. `Morpheme.normalizedFormMorpheme().readingForm()`.
 
 ### Changed
 
-- `Tokenizer` methods now returns `List<Morpheme>` instead of `MorphemeList` (#254)
-  - use `Tokenizer.split(List<Morphemes>, SplitMode)` instead of `MorphemeList.split(SplitMode)`.
-    - providing null as a split mode now errors.
-- `Tokenizer Dictionary.create()` is deprecated (#246)
-  - use `Tokenizer Dictionary.tokenizer()` instead.
 - `Lexicon.wordIds()` behaviour is changed (#248)
   - dictionary id argument is removed.
   - iterates `Integer` instead of `Ints`.
+- `Tokenizer` methods now returns `List<Morpheme>` instead of `MorphemeList` (#254)
+  - use `Tokenizer.split(List<Morphemes>, SplitMode)` instead of `MorphemeList.split(SplitMode)`.
+    - providing null as a split mode now errors.
+- Abort when the user dict and the system dict do not match (#262)
+- Update `char.def` syncronizing with rust/python version. (#358)
+- `DictionaryPrinter` writes normalized_form in entry-key format (headword-pos-reading tuple). (#360)
+
+### Fixed
+
+- Find proper POS for katakana OOV (#351)
 
 ### Deprecated
 
+- `Tokenizer Dictionary.create()` is deprecated (#246)
+  - use `Tokenizer Dictionary.tokenizer()` instead.
 - `Iterable<MorphemeList> Tokenizer.tokenizeSentences(Reader)` is removed and `lazyTokenizeSentences` replaced it (#254)
   - `Tokenizer.lazyTokenizeSentences` is deprecated.
 - `SentenceSplittingAnalysis` is removed (#254)
